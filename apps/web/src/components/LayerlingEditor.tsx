@@ -74,6 +74,9 @@ import {
 import { WorkplaneViewport, type LayFlatPick, type ViewportToolMemory } from "./WorkplaneViewport";
 import { layFlatRotation } from "@/lib/layFlat";
 import { SketchWorkspace, type SketchMeasurement, type SketchPrimitive, type SketchSelection, type SketchTool } from "./SketchWorkspace";
+import { TechnicWorkspace } from "./TechnicWorkspace";
+import { initialTechnicRecipe, type TechnicRecipe } from "@/lib/technicRecipe";
+import { buildTechnicShape, canEditTechnic, replaceTechnicShape } from "@/lib/technicBuilder";
 import { EdgeModifierPanel } from "./workplane/EdgeModifierPanel";
 import { ShellPanel } from "./workplane/ShellPanel";
 import { MateFacesPanel } from "./workplane/MateFacesPanel";
@@ -2395,6 +2398,9 @@ export function LayerlingEditor({
     );
   }
   const [shapes, setShapes] = useState<WorkplaneShape[]>(() => initialSceneRef.current as WorkplaneShape[]);
+  const [technicSession, setTechnicSession] = useState<{ initial: TechnicRecipe; source?: WorkplaneShape; fingerprint: string; projectId: string | null | undefined } | null>(null);
+  const technicSessionRef = useRef(technicSession);
+  technicSessionRef.current = technicSession;
   // Die Notizen reisen im Verlauf mit, also kommen sie auch von dort - der
   // Stand, auf den der Verlauf zeigt, ist der Stand, den der Editor zeigt.
   const [notes, setNotes] = useState<WorkplaneNote[]>(() => notesForHistoryIndex(initialHistory, initialHistoryIndex));
@@ -6931,6 +6937,41 @@ export function LayerlingEditor({
     setWorkplaneMode(active);
   }, []);
 
+  const cancelTechnic = useCallback(() => {
+    technicSessionRef.current = null;
+    setTechnicSession(null);
+  }, []);
+
+  const startTechnic = useCallback((source?: WorkplaneShape) => {
+    if (historyViewStateRef.current || openGroupsRef.current.length || sketchActive || splitSession) {
+      setNotice(t("technic.error.finishTool"));
+      return;
+    }
+    if (source && !canEditTechnic(source)) { setNotice(t("technic.error.modified")); return; }
+    setArrayTool(null); setScalePercentTool(null); setHolePatternTool(null); setMateTool(null);
+    setShellTool(null); setEdgeModifier(null); setTopPanel(null); setShapeContextMenu(null);
+    setSimplifyToolId(null); setAlignMode(false); setMirrorMode(false); setWorkplaneMode(false);
+    setCruiseAsset(null); setCarryIds(null); setNoteMode(false); setPivotPickMode(false); setLayFlatPickMode(false);
+    const session = { initial: source?.technicRecipe ?? initialTechnicRecipe(), source,
+      fingerprint: projectShapesFingerprint(shapesRef.current), projectId: projectInfoRef.current.projectId };
+    technicSessionRef.current = session; setTechnicSession(session);
+  }, [sketchActive, splitSession]);
+
+  const applyTechnic = useCallback(async (recipe: TechnicRecipe) => {
+    const session = technicSessionRef.current;
+    if (!session) return;
+    let generated: WorkplaneShape;
+    try { generated = await buildTechnicShape(recipe, workspaceSettingsRef.current.booleanTriangleLimit); }
+    catch (error) { throw new Error(t(error instanceof Error && error.message === "technic.error.recipe" ? "technic.error.recipe" : "technic.error.geometry")); }
+    if (technicSessionRef.current !== session) return;
+    if (historyViewStateRef.current || openGroupsRef.current.length || projectInfoRef.current.projectId !== session.projectId || projectShapesFingerprint(shapesRef.current) !== session.fingerprint) {
+      throw new Error(t("technic.error.changed"));
+    }
+    const next = session.source ? replaceTechnicShape(session.source, generated) : generated;
+    commitShapes(session.source ? shapesRef.current.map(shape => shape.id === next.id ? next : shape) : [...shapesRef.current, next], next.id, t("technic.created"));
+    cancelTechnic();
+  }, [cancelTechnic, commitShapes]);
+
   const groupSelected = useCallback(async () => {
     if (selectedShapes.length < 2) {
       setNotice(t("status.selectTwoToGroup"));
@@ -10237,6 +10278,7 @@ export function LayerlingEditor({
       (target instanceof HTMLInputElement && ["range", "checkbox", "radio", "color", "button"].includes(target.type));
 
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (technicSessionRef.current) return;
       const key = event.key.toLowerCase();
       const shortcut = event.ctrlKey || event.metaKey;
 
@@ -10664,6 +10706,7 @@ export function LayerlingEditor({
     ];
     if (selectedShapes.length >= 2) items.push({ key: "group", label: t("contextMenu.group"), shortcut: "Ctrl+G", onSelect: () => void groupSelected() });
     if (single?.groupedShapes?.length) items.push({ key: "ungroup", label: t("contextMenu.ungroup"), shortcut: "Ctrl+Shift+G", onSelect: ungroupSelected });
+    if (single?.technicRecipe) items.push({ key: "technic-edit", label: t("technic.edit"), onSelect: () => startTechnic(single) });
     if (single) {
       items.push(
         { key: "chamfer", label: t("editor.tool.chamfer"), separated: true, onSelect: () => startEdgeModifier("chamfer") },
@@ -10700,6 +10743,10 @@ export function LayerlingEditor({
   return (
     <div className={`layerling-editor ${historyViewState ? "history-view-active" : ""}`}>
       <SecondaryToolbar
+        inert={Boolean(technicSession)}
+        onTechnic={() => startTechnic()}
+        onEditTechnic={selectedShapes.length === 1 && selectedShapes[0].technicRecipe ? () => startTechnic(selectedShapes[0]) : undefined}
+        technicEditable={selectedShapes.length === 1 && canEditTechnic(selectedShapes[0])}
         toolbarMode={toolbarMode}
         projectName={projectName}
         onProjectNameChange={onProjectNameChange}
@@ -10859,7 +10906,7 @@ export function LayerlingEditor({
         }}
       />
       <div className="editor-body">
-        {outlinerOpen ? (
+        {outlinerOpen && !technicSession ? (
           <ObjectListPanel
             inert={historyViewState !== null}
             shapes={historyViewState?.shapes ?? shapes}
@@ -10873,7 +10920,9 @@ export function LayerlingEditor({
             onClose={() => setOutlinerOpen(false)}
           />
         ) : null}
-        {toolbarMode === "sketch" && sketchActive ? (
+        {technicSession ? (
+          <TechnicWorkspace initial={technicSession.initial} workspace={workspaceSettings} onApply={applyTechnic} onCancel={cancelTechnic} />
+        ) : toolbarMode === "sketch" && sketchActive ? (
           <SketchWorkspace
             profile={sketchProfile}
             operation={sketchOperation}
@@ -11491,6 +11540,10 @@ const SKETCH_PALETTE_ICONS = {
 };
 
 function SecondaryToolbar({
+  inert,
+  onTechnic,
+  onEditTechnic,
+  technicEditable,
   toolbarMode,
   projectName,
   onProjectNameChange,
@@ -11599,6 +11652,10 @@ function SecondaryToolbar({
   objects,
   onSelectObject,
 }: {
+  inert?: boolean;
+  onTechnic: () => void;
+  onEditTechnic?: () => void;
+  technicEditable: boolean;
   toolbarMode: ToolbarMode;
   projectName: string;
   onProjectNameChange?: (name: string) => void;
@@ -12065,6 +12122,8 @@ function SecondaryToolbar({
     return [
       ...leftTools.slice(0, 4).map((tool) => fromTool(tool, t("editor.group.clipboard"))),
       ...leftTools.slice(4).map((tool) => fromTool(tool, t("editor.group.history"))),
+      plain("technic-new", t("technic.new"), "Lego Compatible", true, onTechnic, { keywords: ["lego", "technic", "dílek", "stavebnice"] }),
+      ...(onEditTechnic ? [plain("technic-edit", t("technic.edit"), "Lego Compatible", technicEditable, onEditTechnic, { keywords: ["lego", "technic"] })] : []),
       ...libraryShapeAssets.map((shape) => plain(
         `shape-${shape.id}`,
         t("palette.addShape", { shape: shapeAssetMenuLabel(shape) }),
@@ -12106,7 +12165,7 @@ function SecondaryToolbar({
   };
 
   return (
-    <div className="secondary-toolbar">
+    <div className="secondary-toolbar" inert={inert}>
       {paletteOpen ? <CommandPalette commands={buildPaletteCommands()} onClose={() => setPaletteOpen(false)} /> : null}
       <div ref={toolbarContentRef} className={`toolbar-mode-content ${toolbarMode}`}>
         {toolbarMode === "geometry" ? (
@@ -12154,6 +12213,15 @@ function SecondaryToolbar({
                 <GuideHelpLink section="addShape" />
               </div>
               <div className="shape-menu-body">
+              <div className="shape-menu-subtitle">Lego Compatible</div>
+              <div className="shape-menu-list">
+                <button className="shape-menu-item" type="button" onClick={() => { setShapesOpen(false); onTechnic(); }}>
+                  <span aria-hidden="true">⊞</span><span>{t("technic.new")}</span>
+                </button>
+                {onEditTechnic ? <button className="shape-menu-item" type="button" disabled={!technicEditable}
+                  title={technicEditable ? t("technic.edit") : t("technic.error.modified")}
+                  onClick={() => { setShapesOpen(false); onEditTechnic(); }}><span aria-hidden="true">✎</span><span>{t("technic.edit")}</span></button> : null}
+              </div>
               {renderMyShapes ? (
                 <>
                   {renderMyShapes(() => setShapesOpen(false))}

@@ -1,3 +1,4 @@
+import { validTechnicRecipe } from "@/lib/technicRecipe";
 import { checkedTypefaceData, customFontName, isCustomFontId, textCharacters, typefaceSubset } from "@/lib/customFonts";
 import { customFontEntry, registerCustomFont } from "@/lib/textFonts";
 import { strFromU8, strToU8, unzip, zip, type AsyncZippable } from "fflate";
@@ -1222,6 +1223,9 @@ function validateBentTubeDefinition(definition: Record<string, unknown>, label: 
 
 function validateShapeDefinition(definition: Record<string, unknown>, label: string) {
   const id = stringValue(definition.id, `${label}.id`);
+  if (definition.technicRecipe !== undefined && !validTechnicRecipe(definition.technicRecipe)) {
+    throw new Error(`${label} has an invalid Lego Compatible recipe`);
+  }
   stringValue(definition.name, `${label}.name`);
   const kind = stringValue(definition.kind, `${label}.kind`);
   if (!SHAPE_KINDS.has(kind)) throw new Error(`${label} has unknown shape type '${kind}'`);

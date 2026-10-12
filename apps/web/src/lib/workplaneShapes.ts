@@ -611,6 +611,7 @@ export function workplaneShapesEqual(a: WorkplaneShape, b: WorkplaneShape) {
     JSON.stringify(a.textEdge ?? null) === JSON.stringify(b.textEdge ?? null) &&
     a.importedMesh === b.importedMesh &&
     a.imagePlate === b.imagePlate &&
+    a.technicRecipe === b.technicRecipe &&
     a.sketchProfile === b.sketchProfile &&
     a.sketchOperation === b.sketchOperation &&
     a.sketchRevolve === b.sketchRevolve &&

@@ -733,6 +733,8 @@ export type WorkplaneShape = {
     pixelWidth: number;
     pixelHeight: number;
   };
+  /** Optional editable 8 mm construction recipe; the mesh remains readable by older versions. */
+  technicRecipe?: import("@/lib/technicRecipe").TechnicRecipe;
   parametricSource?: ParametricSource;
   sketchProfile?: SketchProfile;
   sketchOperation?: SketchOperation;

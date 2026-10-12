@@ -1,0 +1,56 @@
+.technic-workspace {
+  display: flex;
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  color: var(--foreground);
+  background: var(--background);
+  font-family: var(--font-ui);
+  outline: none;
+}
+.technic-drawing { display: flex; flex: 1; flex-direction: column; min-width: 0; min-height: 0; }
+.technic-view-tools { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; padding: 12px; border-bottom: 1px solid var(--border); }
+.technic-view-tools strong { margin-right: 8px; font-size: 13px; }
+.technic-view-tools > span { margin-right: auto; font-size: 12px; color: var(--muted-strong); }
+.technic-workspace button { cursor: pointer; border: 1px solid var(--border-strong); border-radius: 7px; color: var(--foreground); background: var(--tile); font: inherit; }
+.technic-workspace button:hover { background: var(--tile-hover); }
+.technic-workspace button:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.technic-workspace button:disabled { cursor: default; opacity: .45; }
+.technic-workspace button[aria-pressed="true"] { border-color: var(--primary); box-shadow: inset 0 0 0 1px var(--primary); }
+.technic-view-tools button, .technic-panel header button { display: grid; place-items: center; min-width: 32px; min-height: 32px; }
+.technic-canvas { flex: 1; min-height: 180px; overflow: auto; padding: 8px; }
+.technic-grid { display: grid; width: max-content; border-top: 1px solid var(--border-strong); border-left: 1px solid var(--border-strong); user-select: none; touch-action: manipulation; }
+.technic-grid .technic-cell { position: relative; display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; border-right: 1px solid var(--border-strong); border-bottom: 1px solid var(--border-strong); border-radius: 0; background: var(--panel); }
+.technic-grid .technic-cell.filled { background: var(--workplane); color: var(--foreground); }
+.technic-grid .technic-cell.selected { z-index: 1; outline: 2px solid var(--primary); outline-offset: -2px; }
+.technic-grid .technic-cell:hover { box-shadow: inset 0 0 0 2px var(--primary); }
+.technic-cell .technic-symbol { font-family: Arial, sans-serif; font-size: 36px; line-height: 1; }
+.technic-cell .technic-symbol.rolled { transform: rotate(45deg); }
+.technic-cell small { position: absolute; bottom: 1px; right: 3px; font-size: 9px; }
+.technic-caption { padding: 8px 12px; margin: 0; font-size: 12px; border-top: 1px solid var(--border); }
+.technic-panel { display: flex; flex-direction: column; width: 320px; flex-shrink: 0; min-height: 0; background: var(--panel); border-left: 1px solid var(--border-strong); }
+.technic-panel header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+.technic-panel-content { flex: 1; overflow: auto; padding: 14px 16px; }
+.technic-panel-content label { display: block; font-size: 12px; margin: 12px 0 6px; }
+.technic-mode-buttons { display: flex; gap: 5px; }
+.technic-mode-buttons button { flex: 1; padding: 8px 4px; font-size: 12px; }
+.technic-muted { font-size: 12px; line-height: 1.45; color: var(--muted-strong); margin: 10px 0; }
+.technic-module-list { display: grid; gap: 5px; }
+.technic-module-list button { display: flex; align-items: center; gap: 10px; padding: 8px 10px; text-align: left; font-size: 13px; }
+.technic-module-icon { width: 28px; text-align: center; font: 24px Arial, sans-serif; }
+.technic-panel details { margin-top: 10px; border-top: 1px solid var(--border); padding-top: 10px; }
+.technic-panel summary { cursor: pointer; font-size: 13px; }
+.technic-panel textarea { width: 100%; color: var(--foreground); background: var(--background); border: 1px solid var(--border-strong); border-radius: 6px; padding: 8px; }
+.technic-panel textarea { height: 130px; resize: vertical; font: 13px monospace; }
+.technic-panel details > button { padding: 7px 12px; margin-top: 6px; font-size: 12px; }
+.technic-panel footer { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--border); }
+.technic-panel footer button { flex: 1; padding: 9px; font-size: 13px; }
+.technic-panel .technic-done { background: var(--primary); color: #fff; border-color: var(--primary); }
+.technic-error { color: #d33b36; font-size: 12px; line-height: 1.5; }
+@media (max-width: 720px) {
+  .technic-workspace { flex-direction: column; overflow: auto; }
+  .technic-drawing { flex: none; height: 390px; }
+  .technic-panel { width: 100%; min-height: 430px; border-left: 0; border-top: 1px solid var(--border-strong); }
+  .technic-panel-content { overflow: visible; }
+}
