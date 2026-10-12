@@ -862,9 +862,9 @@ button {
   top: 0;
   z-index: 8;
   display: grid;
-  /* The brand track is never squeezed below its content: the search field
-     gives up width first, so the lockup cannot be clipped. */
-  grid-template-columns: minmax(max-content, 1fr) minmax(280px, 620px) minmax(0, 1fr);
+  /* Reserve the controls' full width; the search field shrinks before
+     either the brand or the language/theme controls can overlap it. */
+  grid-template-columns: minmax(max-content, 1fr) minmax(0, 620px) max-content;
   gap: 28px;
   align-items: center;
   width: 100%;
@@ -13757,12 +13757,42 @@ html[data-theme="dark"] .grid-settings {
   color: #b39b83;
 }
 
-/* Explicit grid areas keep Create beside the brand instead of on a third row. */
+/* Keep the brand and controls together, with search on its own row. */
 @media (max-width: 860px) {
   .dashboard-topbar {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) auto;
     height: auto;
     padding-block: 9px;
+  }
+
+  .dashboard-brand {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .dashboard-topbar-actions {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .dashboard-search {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}
+
+@media (max-width: 420px) {
+  .dashboard-topbar {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dashboard-topbar-actions {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .dashboard-search {
+    grid-row: 3;
   }
 }
 
