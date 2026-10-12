@@ -4,7 +4,7 @@ import { MESSAGES_EN, type MessageKey } from "@/lib/messages.en";
 
 export const LANGUAGES = ["en", "de", "cs"] as const;
 export type Language = (typeof LANGUAGES)[number];
-export const DEFAULT_LANGUAGE: Language = "en";
+export const DEFAULT_LANGUAGE: Language = "cs";
 export const LANGUAGE_STORAGE_KEY = "layerling.language";
 
 const CATALOGUE: Record<Language, Record<MessageKey, string>> = {
@@ -32,7 +32,7 @@ export function isLanguage(value: unknown): value is Language {
 
 /**
  * The language a browser asks for, as far as we can serve it. `de-AT` and plain
- * `de` both mean German; `cs-CZ` means Czech. Unsupported tags fall back to English.
+ * `de` both mean German; `cs-CZ` means Czech. Unsupported tags return null.
  */
 export function languageFromTag(tag: string | undefined | null): Language | null {
   const primary = tag?.trim().toLowerCase().split("-")[0];
@@ -74,7 +74,7 @@ export function setLanguage(language: Language, persist = true) {
     }
   }
   // Screen readers and hyphenation read this, not just the eye - and the
-  // server always renders "en", so a stored German choice has to correct it
+  // server renders the default language, so a stored choice has to correct it
   // here, once, on the one path every language change already takes.
   if (typeof document !== "undefined") {
     document.documentElement.lang = language;
@@ -82,18 +82,14 @@ export function setLanguage(language: Language, persist = true) {
   listeners.forEach((listener) => listener());
 }
 
-/** Stored choice first, then what the browser asks for, then English. */
+/** Stored choices win; first-time visitors use this installation's default. */
 export function detectLanguage(): Language {
   if (typeof window === "undefined") return DEFAULT_LANGUAGE;
   try {
     const stored = window.localStorage.getItem(LANGUAGE_STORAGE_KEY);
     if (isLanguage(stored)) return stored;
   } catch {
-    // Fall through to the browser's own preference.
-  }
-  for (const tag of window.navigator.languages ?? [window.navigator.language]) {
-    const language = languageFromTag(tag);
-    if (language) return language;
+    // A browser that refuses storage still receives the installation default.
   }
   return DEFAULT_LANGUAGE;
 }

@@ -15,7 +15,7 @@ describe("application theme preference", () => {
   it("normalizes stored values and resolves the system theme", () => {
     expect(normalizeAppThemePreference("light")).toBe("light");
     expect(normalizeAppThemePreference("dark")).toBe("dark");
-    expect(normalizeAppThemePreference("unexpected")).toBe("system");
+    expect(normalizeAppThemePreference("unexpected")).toBe("graphite");
     expect(resolveAppTheme("system", true)).toBe("dark");
     expect(resolveAppTheme("system", false)).toBe("light");
     expect(resolveAppTheme("light", true)).toBe("light");
@@ -32,6 +32,12 @@ describe("application theme preference", () => {
     expect(values.get(APP_THEME_STORAGE_KEY)).toBe("dark");
     expect(readStoredAppTheme(storage)).toBe("dark");
     values.set(APP_THEME_STORAGE_KEY, "neon");
+    expect(readStoredAppTheme(storage)).toBe("graphite");
+    values.delete(APP_THEME_STORAGE_KEY);
+    expect(readStoredAppTheme(storage)).toBe("graphite");
+    expect(readStoredAppTheme(null)).toBe("graphite");
+    expect(readStoredAppTheme({ getItem: () => { throw new Error("Storage denied"); } })).toBe("graphite");
+    values.set(APP_THEME_STORAGE_KEY, "system");
     expect(readStoredAppTheme(storage)).toBe("system");
   });
 

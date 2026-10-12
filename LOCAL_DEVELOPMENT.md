@@ -4,6 +4,11 @@ Tento adresar je samostatny Git repozitar s uplnou historii puvodniho projektu.
 Remote `upstream` smeruje na https://github.com/henmedia/layerling.git.
 Vlastni upravy patri do vetve `codex/customizations`; `main` je vychozi upstream.
 
+Tato instalace pouziva pri prvni navsteve cestinu a motiv Graphite.
+Drive ulozena volba jazyka nebo motivu zustava platna.
+Po kazdem merge doplnte do `messages.cs.ts` nove klice a do `whatsNew.json`
+ceske texty novych vydani. Kontrolujte uplnost katalogu pomoci i18n testu.
+
 ## Lokalni spusteni
 
 Na tomto pocitaci spustte `start-local.cmd`. Pouzije Node.js 24.21.0 z NVM,

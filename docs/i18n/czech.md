@@ -3,8 +3,10 @@
 The Czech catalogue is `apps/web/src/lib/messages.cs.ts`. It is a complete
 `Record<MessageKey, string>` alongside English and German. The language code
 is `cs` (BCP 47 `cs-CZ`); `cz` is a country code, not a language code.
-The language switch, browser detection, persisted preference and HTML `lang`
-attribute use the same path as the other languages.
+The language switch, persisted preference and HTML `lang` attribute use the
+same path as the other languages. This installation starts in Czech with the
+Graphite theme when no valid preference is stored. Explicit saved language
+and theme choices take precedence; browser locale does not override Czech.
 
 ## CAD terminology
 

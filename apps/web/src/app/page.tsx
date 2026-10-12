@@ -12,9 +12,9 @@ import dynamic from "next/dynamic";
 import { importFailureSummary, importModelFiles } from "@/lib/modelImport";
 import { loadTextFonts } from "@/lib/textFonts";
 import { loadStoredCustomFonts } from "@/lib/customFontStore";
-import { applyAppTheme, getAppThemePreference, readStoredAppTheme, resolveAppTheme, setAppTheme, storeAppTheme, subscribeToAppTheme, type AppThemePreference, type ResolvedAppTheme } from "@/lib/appTheme";
+import { DEFAULT_APP_THEME, applyAppTheme, getAppThemePreference, readStoredAppTheme, resolveAppTheme, setAppTheme, storeAppTheme, subscribeToAppTheme, type AppThemePreference, type ResolvedAppTheme } from "@/lib/appTheme";
 import { hydrateEditorHistoryState, notesForHistoryIndex, type EditorHistoryEntry } from "@/lib/editorHistory";
-import { detectLanguage, setLanguage, t, translate, type Language } from "@/lib/i18n";
+import { DEFAULT_LANGUAGE, detectLanguage, setLanguage, t, translate, type Language } from "@/lib/i18n";
 import { localizedError } from "@/lib/userErrors";
 import { WelcomeGuideBody } from "@/components/WelcomeGuide";
 import { InstallAppHint } from "@/components/InstallAppHint";
@@ -726,8 +726,8 @@ export default function Home() {
   const [query, setQuery] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [sortMode, setSortMode] = useState("recent");
-  const [themePreference, setThemePreference] = useState<AppThemePreference>("system");
-  const [resolvedTheme, setResolvedTheme] = useState<ResolvedAppTheme>("light");
+  const [themePreference, setThemePreference] = useState<AppThemePreference>(DEFAULT_APP_THEME);
+  const [resolvedTheme, setResolvedTheme] = useState<ResolvedAppTheme>(resolveAppTheme(DEFAULT_APP_THEME, false));
   const [dashboardNotice, setDashboardNotice] = useState("");
   // A design left with nothing in it, waiting for an answer on whether it stays.
   const [emptyProjectPromptId, setEmptyProjectPromptId] = useState<string | null>(null);
@@ -3231,10 +3231,10 @@ function StaticIntro() {
     // half sits in <noscript>: crawlers and link previews without JavaScript read it as text, a
     // browser never draws it and Chrome's guess no longer sees it.
     <main className="visually-hidden notranslate" translate="no">
-      <h1>layerling - Free 3D CAD for 3D printing in your browser</h1>
-      <section lang="en">
-        <h2>{translate("en", "welcome.teaserTitle")}</h2>
-        <WelcomeGuideBody tr={(key) => translate("en", key)} />
+      <h1>layerling – bezplatné 3D modelování pro 3D tisk v prohlížeči</h1>
+      <section lang={DEFAULT_LANGUAGE}>
+        <h2>{translate(DEFAULT_LANGUAGE, "welcome.teaserTitle")}</h2>
+        <WelcomeGuideBody tr={(key) => translate(DEFAULT_LANGUAGE, key)} />
       </section>
       <noscript>
         <section lang="de">

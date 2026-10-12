@@ -4,10 +4,12 @@ import { NewVersionNotice } from "@/components/NewVersionNotice";
 import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistration";
 import { DOM_MUTATION_GUARD_SCRIPT } from "@/lib/domMutationGuard";
 import { TOOLBAR_SIZE_BOOT_SCRIPT } from "@/lib/toolbarSize";
+import { DEFAULT_LANGUAGE } from "@/lib/i18n";
+import { GRAPHITE_STYLESHEET_HREF, GRAPHITE_STYLESHEET_ID } from "@/lib/appTheme";
 
 const NAME = "layerling";
-const TITLE = "layerling - Free 3D CAD for 3D printing in your browser";
-const DESCRIPTION = "Free 3D CAD in your browser, no account: a Tinkercad alternative with fillets, chamfers, hollowing and threads. Export to STL, 3MF and STEP.";
+const TITLE = "layerling – bezplatné 3D modelování pro 3D tisk v prohlížeči";
+const DESCRIPTION = "Bezplatný 3D CAD v prohlížeči bez účtu: alternativa k Tinkercadu se zaoblením, zkosením, dutinami a závity. Export do STL, 3MF a STEP.";
 
 // Tells search engines what layerling is: a free web application, not an
 // article about one.
@@ -58,7 +60,7 @@ export const metadata: Metadata = {
     title: TITLE,
     description: DESCRIPTION,
     url: "/",
-    locale: "en",
+    locale: "cs_CZ",
     images: [{ url: SOCIAL_CARD, width: 1280, height: 640, type: "image/png", alt: TITLE }],
   },
   twitter: {
@@ -85,8 +87,9 @@ export default function RootLayout({
 }>) {
   return (
     // Translate tools add classes such as translated-ltr to <html>; that must not end in a hydration error (#191).
-    <html lang="en" style={{ colorScheme: "light" }} suppressHydrationWarning>
+    <html lang={DEFAULT_LANGUAGE} data-theme="dark" data-palette="graphite" style={{ colorScheme: "dark" }} suppressHydrationWarning>
       <head>
+        <link id={GRAPHITE_STYLESHEET_ID} rel="stylesheet" href={GRAPHITE_STYLESHEET_HREF} />
         {/* Before any of React's scripts: a page rearranged by Translate must not crash it (#186). */}
         <script dangerouslySetInnerHTML={{ __html: DOM_MUTATION_GUARD_SCRIPT }} />
         <script dangerouslySetInnerHTML={{ __html: TOOLBAR_SIZE_BOOT_SCRIPT }} />

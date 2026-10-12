@@ -8,6 +8,7 @@ export const APP_THEME_OPTIONS = [
 ] as const;
 
 export type AppThemePreference = (typeof APP_THEME_OPTIONS)[number]["value"];
+export const DEFAULT_APP_THEME: AppThemePreference = "graphite";
 /**
  * Graphite is the dark theme with neutral grey surfaces instead of the warm
  * brown ones. It resolves to "dark", so everything that only asks light or
@@ -21,7 +22,7 @@ export function appThemePalette(preference: AppThemePreference): AppThemePalette
 }
 
 export function normalizeAppThemePreference(value: unknown): AppThemePreference {
-  return value === "light" || value === "dark" || value === "graphite" || value === "system" ? value : "system";
+  return value === "light" || value === "dark" || value === "graphite" || value === "system" ? value : DEFAULT_APP_THEME;
 }
 
 export function resolveAppTheme(preference: AppThemePreference, prefersDark: boolean): ResolvedAppTheme {
@@ -30,11 +31,11 @@ export function resolveAppTheme(preference: AppThemePreference, prefersDark: boo
 }
 
 export function readStoredAppTheme(storage: Pick<Storage, "getItem"> | null | undefined): AppThemePreference {
-  if (!storage) return "system";
+  if (!storage) return DEFAULT_APP_THEME;
   try {
     return normalizeAppThemePreference(storage.getItem(APP_THEME_STORAGE_KEY));
   } catch {
-    return "system";
+    return DEFAULT_APP_THEME;
   }
 }
 
@@ -91,7 +92,7 @@ function ensureGraphiteStylesheet() {
 
 const themeListeners = new Set<() => void>();
 let currentThemePreference: AppThemePreference =
-  typeof window !== "undefined" ? readStoredAppTheme(window.localStorage) : "system";
+  typeof window !== "undefined" ? readStoredAppTheme(window.localStorage) : DEFAULT_APP_THEME;
 
 if (typeof window !== "undefined" && typeof window.matchMedia === "function") {
   const media = window.matchMedia("(prefers-color-scheme: dark)");
