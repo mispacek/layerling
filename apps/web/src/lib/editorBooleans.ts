@@ -14,7 +14,7 @@ import { closedMeshVolume } from "@/lib/cadProfileExtrusion";
 import { createLocalId, derivedLocalId } from "@/lib/localIds";
 import { boundsOverlap, exportColorGroups, meshBounds, overlappingExportClusters } from "@/lib/exportUnion";
 import type { WorkplaneShape } from "@/types/layerling";
-import { type Vec3, type MeshData, type Cuboid, type ShapeUpdatePatch, type ManifoldSolid, CUTTER_PADDING, POINT_TOLERANCE, CUTTER_RESIDUAL_INSET, MIN_SHAPE_DIMENSION, IMPORTED_FALLBACK_BOOLEAN_TRIANGLE_LIMIT, COPLANAR_BOOLEAN_RESCUE_DEGREES, cleanModelDimension, getManifoldRuntime, transformMesh, meshForShape, appendMeshData, formatTriangleCount, shapeAabb, boundsForShapes, boundsForCuboids, meshAabb, geometryFromMeshData, positionsFromGeometryDrawRange, boundsForPositions, positionsDifferFromMeshData, geometryDiffersFromMeshData, positionsBoundaryEdges, meshDataPositions, midpoint, localGroupBounds } from "@/lib/editorMeshCore";
+import { type Vec3, type MeshData, type Cuboid, type ShapeUpdatePatch, type ManifoldSolid, CUTTER_PADDING, CUTTER_LATERAL_PADDING, POINT_TOLERANCE, CUTTER_RESIDUAL_INSET, MIN_SHAPE_DIMENSION, IMPORTED_FALLBACK_BOOLEAN_TRIANGLE_LIMIT, COPLANAR_BOOLEAN_RESCUE_DEGREES, cleanModelDimension, getManifoldRuntime, transformMesh, meshForShape, appendMeshData, formatTriangleCount, shapeAabb, boundsForShapes, boundsForCuboids, meshAabb, geometryFromMeshData, positionsFromGeometryDrawRange, boundsForPositions, positionsDifferFromMeshData, geometryDiffersFromMeshData, positionsBoundaryEdges, meshDataPositions, midpoint, localGroupBounds } from "@/lib/editorMeshCore";
 
 export type GroupBuildResult = {
   group: WorkplaneShape | null;
@@ -55,9 +55,13 @@ function introducesOpenCutBoundary(resultPositions: number[], sourceMesh: MeshDa
 }
 
 function paddedCutterShape(shape: WorkplaneShape): WorkplaneShape {
-  const width = shapeWidth(shape) + CUTTER_PADDING * 2;
-  const depth = shapeDepth(shape) + CUTTER_PADDING * 2;
+  // The hole sticks out a hair at both ends, so one that ends flush with a face leaves no skin.
   const height = shape.height + CUTTER_PADDING * 2;
+  // Its width and depth stay as typed but for a thousandth of a millimetre: padding them by 0.05 cut a
+  // 7.9 mm hole at 8.0 (#254), none at all left a hole that touches a wall along a line cutting a slab
+  // out of it. A thousandth keeps the size and breaks that touch.
+  const width = shapeWidth(shape) + CUTTER_LATERAL_PADDING * 2;
+  const depth = shapeDepth(shape) + CUTTER_LATERAL_PADDING * 2;
   return {
     ...shape,
     width,
@@ -65,7 +69,7 @@ function paddedCutterShape(shape: WorkplaneShape): WorkplaneShape {
     height,
     size: Math.max(width, depth),
     elevation: (shape.elevation ?? 0) - CUTTER_PADDING,
-    baseRadius: shape.baseRadius ? shape.baseRadius + CUTTER_PADDING : shape.baseRadius,
+    baseRadius: shape.baseRadius ? shape.baseRadius + CUTTER_LATERAL_PADDING : shape.baseRadius,
   };
 }
 

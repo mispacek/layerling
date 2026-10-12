@@ -44,6 +44,9 @@ export type ManifoldSolid = ReturnType<ManifoldToplevel["Manifold"]["cube"]>;
 
 export const CUTTER_PADDING = 0.05;
 
+/** What a hole is wider than typed, on each side: the size stays, an exact touch with a wall does not. */
+export const CUTTER_LATERAL_PADDING = 0.001;
+
 export const POINT_TOLERANCE = 0.0001;
 
 export const CUTTER_RESIDUAL_INSET = CUTTER_PADDING * 0.4;

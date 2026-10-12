@@ -1,5 +1,20 @@
 [
   {
+    "version": "1.66.3",
+    "items": [
+      {
+        "title": {
+          "de": "Löcher in genau der eingestellten Größe",
+          "en": "Holes in exactly the size you set"
+        },
+        "body": {
+          "de": "Ein Loch wurde bisher etwa 0,1 mm weiter geschnitten, als sein Maß sagte: ein Loch mit 7,9 mm kam mit 8,0 mm heraus. Jetzt stimmt der Durchmesser, damit Passungen, etwa für eine 8-mm-Stange, so sitzen, wie du sie eingegeben hast.",
+          "en": "A hole used to be cut about 0.1 mm wider than its size said: a 7.9 mm hole came out at 8.0 mm. Now the diameter is right, so a press fit, say for an 8 mm rod, sits the way you entered it."
+        }
+      }
+    ]
+  },
+  {
     "version": "1.66.2",
     "items": [
       {

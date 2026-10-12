@@ -6,6 +6,10 @@ code still carries it - so a lower number further down is older, not newer.
 
 ## Unreleased
 
+## 1.66.3
+
+- **Holes have the size you typed (#254):** A hole cut 0.1 mm wider than its set size (a 7.9 mm hole came out at 8.0 mm, a 6.0 mm one at 6.1 mm), because the cutter was padded by 0.05 mm on every side to keep thin skins away. The padding now stays only at the two ends of the hole, where it keeps a hole that ends flush with a face from leaving a skin; width and depth are as typed, to within a thousandth of a millimetre, which also keeps a hole that touches a wall along a line from taking a slab out of it. Press fits work with the size you enter. Reported by Mondo-chumstyle.
+
 ## 1.66.2
 
 - **Thread chamfers (#269):** A nut or tapped hole now has its chamfer cone run on, at 45 degrees, down to the thread core: before, it ended on a ledge at the outer diameter, below which the thread stood at full height. The chamfer still means the room the mouth opens beyond the outer diameter, so existing mouths keep their size. Every end of a rod, nut or tapped hole also has a chamfer of its own now (**Chamfer, top end** and **Chamfer, bottom end**; a screw keeps its one at the tip), and `threadChamferBottom` is there for an AI client. Switching a thread between **Threaded rod** and **Tapped hole** keeps its length instead of going back to the standard height. Reported by DrJones in the forum.
