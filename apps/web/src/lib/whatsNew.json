@@ -5,21 +5,25 @@
       {
         "title": {
           "de": "Überhänge: eine 45°-Fase wird nicht mehr markiert",
-          "en": "Overhangs: a 45 degree chamfer is no longer marked"
+          "en": "Overhangs: a 45 degree chamfer is no longer marked",
+          "cs": "Převisy: zkosení pod úhlem 45° se již neoznačuje"
         },
         "body": {
           "de": "Eine Fläche genau auf dem eingestellten Überhangwinkel, etwa eine 45°-Fase bei der Voreinstellung, war je nach Rechenrauschen mal markiert und mal nicht. Jetzt bleibt sie unmarkiert; was steiler ist, wird weiter markiert.",
-          "en": "A face exactly on the set overhang angle, say a 45 degree chamfer at the default, was marked or not by chance. Now it stays unmarked; anything steeper is still marked."
+          "en": "A face exactly on the set overhang angle, say a 45 degree chamfer at the default, was marked or not by chance. Now it stays unmarked; anything steeper is still marked.",
+          "cs": "Plocha přesně na nastaveném mezním úhlu převisu, například zkosení pod úhlem 45° při výchozím nastavení, se kvůli zaokrouhlování při výpočtech označovala nahodile. Nyní zůstává neoznačená; plochy s větším převisem se označují dál."
         }
       },
       {
         "title": {
           "de": "STL in den eigenen Ordner",
-          "en": "STL into your own folder"
+          "en": "STL into your own folder",
+          "cs": "Ukládání STL do vlastní složky"
         },
         "body": {
           "de": "In Chrome und Edge öffnet der erste STL-Export eines Entwurfs jetzt den Speichern-Dialog deines Systems: Du wählst Ordner und Namen. Weitere STL-Exporte schreiben ohne Rückfrage in dieselbe Datei; „Speichern unter …“ im Export-Fenster wählt eine andere. Andere Browser laden die Datei wie bisher herunter.",
-          "en": "In Chrome and Edge, the first STL export of a design now opens your system's save dialog: you choose the folder and name. Later STL exports write into that same file without asking; Save as… in the export window picks another. Other browsers download the file as before."
+          "en": "In Chrome and Edge, the first STL export of a design now opens your system's save dialog: you choose the folder and name. Later STL exports write into that same file without asking; Save as… in the export window picks another. Other browsers download the file as before.",
+          "cs": "V prohlížečích Chrome a Edge nyní první export STL projektu otevře systémové okno pro uložení: vyberete složku a název. Další exporty STL přepíší stejný soubor bez dalšího dotazu; jiný vyberete pomocí „Uložit jako…“ v okně exportu. V ostatních prohlížečích se soubor stáhne jako dříve."
         }
       }
     ]
