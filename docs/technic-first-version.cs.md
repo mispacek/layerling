@@ -7,6 +7,7 @@ Dosavadní modelovací nástroje fungují dál. Editor dílku využívá aktuál
 
 1. Otevřete **Sestavit dílek**. Výchozí předloha je rám 7 × 5 s prázdným středem 5 × 3; není to přesná kopie dílu 64179.
 2. **Vybrat** pouze vybírá buňku. V pravém panelu změňte její typ, směr otvoru X/Y/Z nebo natočení kříže 0°/45°.
+   Náhled Z ukazuje profil otvoru shora; vodorovné otvory X/Y jsou vyznačeny čárkovaným průchodem a dvojicí směrových šipek. U křížového otvoru je vidět také natočení profilu. Písmeno osy je jen doplňkový popisek.
 3. **Přidat** kreslí zvolenou buňku kliknutím nebo tažením, i v prázdném prostoru za obrysem. **Odebrat** odstraní materiál v buňce.
 4. Šipky posouvají viditelnou část rastru; při přidání na jeho hranici se okno po uvolnění tlačítka posune o jednu buňku. Velikost buněk se nemění.
 5. **Vytvořit těleso** vytvoří skutečnou uzavřenou polygonovou síť a vloží ji do projektu v jednom kroku historie. **Zrušit** nechá původní projekt beze změny.

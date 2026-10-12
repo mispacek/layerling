@@ -11,6 +11,7 @@ export const MESSAGES_DE: Record<MessageKey, string> = {
   "technic.canvas": "Konstruktionsraster für Bauteile",
   "technic.topView": "Draufsicht",
   "technic.pitch": "Raster 8 mm · Höhe 8 mm",
+  "technic.holeLegend": "Z: Lochprofil von oben · X/Y: verdeckte Bohrung gestrichelt, Pfeile zeigen die Richtung",
   "technic.panLeft": "Raster nach links verschieben",
   "technic.panRight": "Raster nach rechts verschieben",
   "technic.panUp": "Raster nach oben verschieben",

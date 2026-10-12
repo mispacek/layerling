@@ -25,10 +25,14 @@
 .technic-grid .technic-cell.filled { background: var(--workplane); color: var(--foreground); }
 .technic-grid .technic-cell.selected { z-index: 1; outline: 2px solid var(--primary); outline-offset: -2px; }
 .technic-grid .technic-cell:hover { box-shadow: inset 0 0 0 2px var(--primary); }
-.technic-cell .technic-symbol { font-family: Arial, sans-serif; font-size: 36px; line-height: 1; }
-.technic-cell .technic-symbol.rolled { transform: rotate(45deg); }
+.technic-hole-preview { width: 40px; height: 40px; pointer-events: none; overflow: hidden; }
+.technic-open-bore { fill: var(--panel); stroke: currentColor; stroke-width: 1.2; }
+.technic-recess { fill: none; stroke: currentColor; stroke-width: 1; opacity: .65; }
+.technic-hidden-bore { fill: var(--panel); fill-opacity: .15; stroke: currentColor; stroke-width: 1; stroke-dasharray: 3 2; }
+.technic-bore-direction { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .technic-cell small { position: absolute; bottom: 1px; right: 3px; font-size: 9px; }
 .technic-caption { padding: 8px 12px; margin: 0; font-size: 12px; border-top: 1px solid var(--border); }
+.technic-preview-legend { display: block; margin-top: 3px; color: var(--foreground); opacity: .75; font-size: 11px; }
 .technic-panel { display: flex; flex-direction: column; width: 320px; flex-shrink: 0; min-height: 0; background: var(--panel); border-left: 1px solid var(--border-strong); }
 .technic-panel header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--border); }
 .technic-panel-content { flex: 1; overflow: auto; padding: 14px 16px; }

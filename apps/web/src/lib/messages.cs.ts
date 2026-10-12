@@ -8,6 +8,7 @@ export const MESSAGES_CS: Record<MessageKey, string> = {
   "technic.canvas": "Rastr pro sestavení dílku",
   "technic.topView": "Pohled shora",
   "technic.pitch": "Rastr 8 mm · výška 8 mm",
+  "technic.holeLegend": "Z: profil otvoru shora · X/Y: skrytý průchod čárkovaně, šipky ukazují jeho směr",
   "technic.panLeft": "Posunout rastr doleva",
   "technic.panRight": "Posunout rastr doprava",
   "technic.panUp": "Posunout rastr nahoru",

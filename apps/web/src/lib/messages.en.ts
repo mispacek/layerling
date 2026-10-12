@@ -12,6 +12,7 @@ export const MESSAGES_EN = {
   "technic.canvas": "Part construction grid",
   "technic.topView": "Top view",
   "technic.pitch": "Grid 8 mm · height 8 mm",
+  "technic.holeLegend": "Z: hole profile from above · X/Y: dashed hidden bore, arrows show its direction",
   "technic.panLeft": "Move grid left",
   "technic.panRight": "Move grid right",
   "technic.panUp": "Move grid up",

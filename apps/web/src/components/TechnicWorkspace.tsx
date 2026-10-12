@@ -9,6 +9,31 @@ import type { WorkplaneWorkspaceSettings } from "@/types/layerling";
 import { TECHNIC_CELL_LIMIT, parseTechnicPattern, technicBounds, technicCellKey, technicPattern, type TechnicCell, type TechnicRecipe } from "@/lib/technicRecipe";
 
 type Mode = "select" | "add" | "remove";
+
+/** Top-view convention: a Z bore exposes its profile; horizontal bores are hidden lines with direction arrows. */
+function TechnicHolePreview({ cell, adjustment }: { cell: TechnicCell; adjustment: number }) {
+  const radius = (4.95 + adjustment) * 2.5;
+  const arm = (2.02 + adjustment) * 2.5;
+  const end = Math.sqrt(radius * radius - arm * arm);
+  // Rounded cross ends follow the same circle/strip intersection as the body builder.
+  const cross = `M ${end} ${-arm} A ${radius} ${radius} 0 0 1 ${end} ${arm} L ${arm} ${arm} L ${arm} ${end} A ${radius} ${radius} 0 0 1 ${-arm} ${end} L ${-arm} ${arm} L ${-end} ${arm} A ${radius} ${radius} 0 0 1 ${-end} ${-arm} L ${-arm} ${-arm} L ${-arm} ${-end} A ${radius} ${radius} 0 0 1 ${arm} ${-end} L ${arm} ${-arm} Z`;
+  const horizontal = cell.axis !== "Z";
+  const extent = cell.kind === "axle" && cell.roll === 45 ? (end + arm) / Math.sqrt(2) : radius;
+  return <svg className="technic-hole-preview" viewBox="0 0 40 40" aria-hidden="true"
+    data-axis={cell.axis} data-profile={cell.kind} data-roll={cell.kind === "axle" ? cell.roll : 0}>
+    {horizontal ? <g transform={cell.axis === "Y" ? "rotate(-90 20 20)" : undefined}>
+      <rect className="technic-hidden-bore" x="0" y={20 - extent} width="40" height={extent * 2} />
+      <path className="technic-bore-direction" d="M 3 20 H 37 M 8 15 L 3 20 L 8 25 M 32 15 L 37 20 L 32 25" />
+    </g> : cell.kind === "pin" ? <>
+      <circle className="technic-recess" cx="20" cy="20" r={(6.4 + adjustment) * 2.5} />
+      <circle className="technic-open-bore" cx="20" cy="20" r={radius} />
+    </> : null}
+    {cell.kind === "axle" ? <g transform={`translate(20 20) rotate(${-cell.roll})${horizontal ? " scale(0.45)" : ""}`}>
+      <path className="technic-open-bore" d={cross} />
+    </g> : null}
+  </svg>;
+}
+
 export function TechnicWorkspace({ initial, workspace = DEFAULT_WORKPLANE_WORKSPACE, onApply, onCancel }: {
   initial: TechnicRecipe; workspace?: WorkplaneWorkspaceSettings; onApply: (recipe: TechnicRecipe) => Promise<void>; onCancel: () => void;
 }) {
@@ -131,17 +156,18 @@ export function TechnicWorkspace({ initial, workspace = DEFAULT_WORKPLANE_WORKSP
             return <button type="button" key={key} disabled={busy || Math.abs(x) > 128 || Math.abs(y) > 128} data-cell={key}
               className={`technic-cell ${c ? `filled ${c.kind}` : ""} ${selected === key ? "selected" : ""}`}
               title={`X ${x * 8} mm, Y ${y * 8} mm${c ? ` · ${t(`technic.${c.kind}`)} · ${c.axis}` : ""}`}
-              aria-label={`X ${x * 8}, Y ${y * 8}: ${c ? t(`technic.${c.kind}`) : t("technic.empty")}`}
+              aria-label={`X ${x * 8}, Y ${y * 8}: ${c ? t(`technic.${c.kind}`) : t("technic.empty")}${c && c.kind !== "solid" ? ` · ${t("technic.axis")}: ${c.axis}${c.kind === "axle" ? ` · ${c.roll}°` : ""}` : ""}`}
               onPointerDown={e => { if (e.button === 0) { e.preventDefault(); paint(x, y); } }}
               onPointerEnter={e => { if (e.buttons === 1 && mode !== "select") paint(x, y); }}
               onClick={e => { if (e.detail === 0) paint(x, y); }}>
-              {c ? <><span className={`technic-symbol ${c.roll === 45 ? "rolled" : ""}`}>{c.kind === "solid" ? "" : c.kind === "pin" ? "○" : "+"}</span>
+              {c ? <>{c.kind !== "solid" ? <TechnicHolePreview cell={c} adjustment={recipe.holeAdjustment} /> : null}
                 {c.kind !== "solid" ? <small>{c.axis}</small> : null}</> : x === 0 && y === 0 ? <small>0,0</small> : null}
             </button>;
           })}
         </div>
       </div>
-      <p className="technic-caption">{t(`technic.hint.${mode}`)} · X → · Y ↑ · Z ⊙</p>
+      <p className="technic-caption">{t(`technic.hint.${mode}`)} · X → · Y ↑ · Z ⊙
+        <span className="technic-preview-legend">{t("technic.holeLegend")}</span></p>
     </section>
     <aside className="technic-panel" aria-label="Lego Compatible">
       <header><div><strong>Lego Compatible</strong><p className="technic-muted">{t("technic.stats", { count: recipe.cells.length, width: bounds?.width ?? 0, depth: bounds?.depth ?? 0 })}</p></div><button aria-label={t("common.cancel")} onClick={onCancel}><X size={18} /></button></header>
