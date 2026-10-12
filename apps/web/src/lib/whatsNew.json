@@ -1,5 +1,20 @@
 [
   {
+    "version": "1.66.4",
+    "items": [
+      {
+        "title": {
+          "de": "Anklicken in der Seitenansicht",
+          "en": "Selecting in the side view"
+        },
+        "body": {
+          "de": "Schaust du flach von der Seite auf die Arbeitsebene, lässt sich ein Körper jetzt überall anklicken, nicht nur unterhalb der Horizontlinie.",
+          "en": "Looking flat at the plate from the side, you can now select a body anywhere on it, not only below the horizon line."
+        }
+      }
+    ]
+  },
+  {
     "version": "1.66.3",
     "items": [
       {

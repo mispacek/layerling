@@ -6485,7 +6485,15 @@ export function WorkplaneViewport({
       const dragPlaneY = shape ? shape.elevation ?? 0 : 0;
       const activeWorkplane = placementWorkplaneRef.current;
       const point = toPlacementWorkplanePoint(event.clientX, event.clientY, activeWorkplane);
-      if (!point || !shape) {
+      if (!shape) {
+        return;
+      }
+      if (!point) {
+        // A ray that never reaches the workplane - seen flat from the side, above the horizon - still
+        // picks the shape: it is selected, though there is no point to drag it from (#269).
+        event.preventDefault();
+        if (additive) onSelectShape(id, "toggle");
+        else if (!selectedIdsSnapshot.includes(id)) onSelectShape(id);
         return;
       }
 

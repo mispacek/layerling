@@ -111,13 +111,15 @@ function inside(tris: number[][], p: Vec3) {
   return hits % 2 === 1;
 }
 
+// The long rods of the slow profiles are cut to a few dozen turns: the test looks at the middle, and the
+// whole file waits for its slowest test.
 describe("the thread's exact body", () => {
   const cases: Array<[string, Partial<WorkplaneShape>]> = [
     ["an M6 rod, V profile", {}],
     ["a left-hand M6 rod", { threadHand: "left" }],
-    ["a trapezoidal rod", { threadProfile: "trapezoidal", threadDiameter: 10, threadPitch: 2 }],
-    ["a round-profile rod", { threadProfile: "round", threadDiameter: 10, threadPitch: 2 }],
-    ["a Whitworth G1/2 rod", { threadProfile: "whitworth", threadDiameter: 20.955, threadPitch: 25.4 / 14 }],
+    ["a trapezoidal rod", { threadProfile: "trapezoidal", threadDiameter: 10, threadPitch: 2, height: 24 }],
+    ["a round-profile rod", { threadProfile: "round", threadDiameter: 10, threadPitch: 2, height: 24 }],
+    ["a Whitworth G1/2 rod", { threadProfile: "whitworth", threadDiameter: 20.955, threadPitch: 25.4 / 14, height: 30 }],
     ["an M6 rod with 0.3 mm bolt clearance", { threadBoltClearance: 0.3 }],
     ["a screw with 0.25 mm bolt clearance", { threadRole: "screw", threadBoltClearance: 0.25 }],
     ["a screw with a cylinder head", { threadRole: "screw" }],
@@ -181,9 +183,9 @@ describe("the thread's exact body", () => {
   const profileCases: Array<[string, Partial<WorkplaneShape>]> = [
     ["V", {}],
     ["V, left hand", { threadHand: "left" }],
-    ["trapezoidal", { threadProfile: "trapezoidal", threadDiameter: 10, threadPitch: 2 }],
-    ["round", { threadProfile: "round", threadDiameter: 10, threadPitch: 2 }],
-    ["Whitworth", { threadProfile: "whitworth", threadDiameter: 20.955, threadPitch: 25.4 / 14 }],
+    ["trapezoidal", { threadProfile: "trapezoidal", threadDiameter: 10, threadPitch: 2, height: 24 }],
+    ["round", { threadProfile: "round", threadDiameter: 10, threadPitch: 2, height: 24 }],
+    ["Whitworth", { threadProfile: "whitworth", threadDiameter: 20.955, threadPitch: 25.4 / 14, height: 30 }],
   ];
 
   it.each(profileCases)("follows the %s profile within 0.002 pitch", (_name, extra) => {

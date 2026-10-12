@@ -6,6 +6,10 @@ code still carries it - so a lower number further down is older, not newer.
 
 ## Unreleased
 
+## 1.66.4
+
+- **Selecting a body above the horizon (#269):** Looking at the plate flat from the side, a body could only be selected by clicking its lowest part, below the horizon line. Above it the click ray never reaches the workplane, and the code that starts a drag gave up before it had selected the body. A click on the body now selects it wherever it is; there is just nothing to drag from when the ray misses the workplane. Reported by DrJones in the forum.
+
 ## 1.66.3
 
 - **Holes have the size you typed (#254):** A hole cut 0.1 mm wider than its set size (a 7.9 mm hole came out at 8.0 mm, a 6.0 mm one at 6.1 mm), because the cutter was padded by 0.05 mm on every side to keep thin skins away. The padding now stays only at the two ends of the hole, where it keeps a hole that ends flush with a face from leaving a skin; width and depth are as typed, to within a thousandth of a millimetre, which also keeps a hole that touches a wall along a line from taking a slab out of it. Press fits work with the size you enter. Reported by Mondo-chumstyle.
