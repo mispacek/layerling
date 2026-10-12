@@ -2073,6 +2073,8 @@ export const MESSAGES_CS: Record<MessageKey, string> = {
   "edge.tangentImpliedOne": "CAD jádro rozšíří úpravu na 1 další plynule navazující hranu.",
   "edge.tangentImpliedMany": "CAD jádro rozšíří úpravu na další plynule navazující hrany (počet: {count}).",
   "edge.keepSize": "Zachovat rozměr úpravy hran při změně velikosti",
+  "edge.onlyVisibleEdges": "Pouze viditelné hrany",
+  "edge.onlyVisibleEdgesHint": "Skryje hrany za tělesem v aktuálním pohledu, takže uvidíte a můžete vybrat pouze hrany na viditelné straně.",
   "edge.previewQuality": "Kvalita náhledu",
   "edge.draft": "Hrubý",
   "edge.standard": "Standardní",

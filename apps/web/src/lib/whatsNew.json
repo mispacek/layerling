@@ -5,21 +5,25 @@
       {
         "title": {
           "de": "Fase und Verrundung zeigen die störende Kante",
-          "en": "Chamfer and fillet show the edge that does not fit"
+          "en": "Chamfer and fillet show the edge that does not fit",
+          "cs": "Zkosení a zaoblení označí problematickou hranu"
         },
         "body": {
           "de": "Lässt sich eine Auswahl bei diesem Maß nicht zusammen fasen oder verrunden, wird die Kante, mit der es nicht mehr ging, rot und breiter gezeichnet. So weißt du, welche du wieder herausnimmst.",
-          "en": "When the selected edges cannot be chamfered or filleted together at this size, the edge that broke it is drawn in red and wider, so you know which one to take out."
+          "en": "When the selected edges cannot be chamfered or filleted together at this size, the edge that broke it is drawn in red and wider, so you know which one to take out.",
+          "cs": "Pokud vybrané hrany nelze při zadaném rozměru společně zkosit nebo zaoblit, problematická hrana se zvýrazní silnější červenou čarou. Snáze tak poznáte, kterou hranu z výběru odebrat."
         }
       },
       {
         "title": {
           "de": "Nur sichtbare Kanten",
-          "en": "Only visible edges"
+          "en": "Only visible edges",
+          "cs": "Pouze viditelné hrany"
         },
         "body": {
           "de": "Ein neuer Schalter im Fasen- und Verrunden-Fenster blendet die Kanten hinter dem Körper aus. Dann siehst und wählst du nur die Kanten, die dir zugewandt sind, statt alle wie mit Röntgenblick.",
-          "en": "A new switch in the chamfer and fillet panel hides the edges behind the body, so you see and pick only the ones facing you instead of all of them at once like an X-ray."
+          "en": "A new switch in the chamfer and fillet panel hides the edges behind the body, so you see and pick only the ones facing you instead of all of them at once like an X-ray.",
+          "cs": "Nový přepínač v panelu zkosení a zaoblení skryje hrany za tělesem. Uvidíte a můžete vybrat pouze hrany na viditelné straně tělesa, místo aby se zobrazovaly i hrany zakryté."
         }
       }
     ]
