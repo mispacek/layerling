@@ -5,6 +5,9 @@ Remote `upstream` smeruje na https://github.com/henmedia/layerling.git.
 Vlastni upravy patri do vetve `codex/customizations`; `main` je vychozi upstream.
 
 Tato instalace pouziva pri prvni navsteve cestinu a motiv Graphite.
+Verejna adresa je `https://3d.espide.eu/`. Metadata v `layout.tsx`, konstanta
+`SITE` v `scripts/build-guide.mjs` a odkaz Sitemap v `robots.txt` musi
+pri presunu na jinou domenu souhlasit. `sitemap.xml` generuje sestaveni prirucky.
 Drive ulozena volba jazyka nebo motivu zustava platna.
 Po kazdem merge doplnte do `messages.cs.ts` nove klice a do `whatsNew.json`
 ceske texty novych vydani. Kontrolujte uplnost katalogu pomoci i18n testu.

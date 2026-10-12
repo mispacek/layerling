@@ -17,14 +17,14 @@ const STRUCTURED_DATA = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
   name: NAME,
-  url: "https://layerling.com/",
+  url: "https://3d.espide.eu/",
   description: DESCRIPTION,
   applicationCategory: "DesignApplication",
   operatingSystem: "Any (web browser)",
   inLanguage: ["en", "de", "cs"],
   isAccessibleForFree: true,
   offers: { "@type": "Offer", price: "0", priceCurrency: "EUR" },
-  image: "https://layerling.com/assets/layerling/layerling-social.png",
+  image: "https://3d.espide.eu/assets/layerling/layerling-social.png",
   sameAs: ["https://github.com/henmedia/layerling"],
 };
 const SOCIAL_CARD = "/assets/layerling/layerling-social.png";
@@ -37,7 +37,7 @@ const INSTALL_PROMPT_SCRIPT = `window.addEventListener("beforeinstallprompt",fun
 export const metadata: Metadata = {
   // Damit die Bilder fuer Linkvorschauen als volle Adresse im Kopf stehen -
   // relative Angaben liest kein Forum und kein Messenger aus.
-  metadataBase: new URL("https://layerling.com"),
+  metadataBase: new URL("https://3d.espide.eu"),
   alternates: { canonical: "/" },
   title: TITLE,
   description: DESCRIPTION,

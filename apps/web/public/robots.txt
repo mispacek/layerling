@@ -3,4 +3,4 @@ Allow: /
 Disallow: /store.php
 Disallow: /kontakt.php
 
-Sitemap: https://layerling.com/sitemap.xml
+Sitemap: https://3d.espide.eu/sitemap.xml

@@ -15,7 +15,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const guideSource = join(root, "docs", "guide");
 const publicDirectory = join(root, "apps", "web", "public");
-const SITE = "https://layerling.com";
+const SITE = "https://3d.espide.eu";
 
 export const GUIDE_LANGUAGES = {
   de: {
