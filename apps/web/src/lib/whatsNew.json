@@ -5,11 +5,13 @@
       {
         "title": {
           "de": "Anklicken in der Seitenansicht",
-          "en": "Selecting in the side view"
+          "en": "Selecting in the side view",
+          "cs": "Výběr těles v bočním pohledu"
         },
         "body": {
           "de": "Schaust du flach von der Seite auf die Arbeitsebene, lässt sich ein Körper jetzt überall anklicken, nicht nur unterhalb der Horizontlinie.",
-          "en": "Looking flat at the plate from the side, you can now select a body anywhere on it, not only below the horizon line."
+          "en": "Looking flat at the plate from the side, you can now select a body anywhere on it, not only below the horizon line.",
+          "cs": "Při pohledu na podložku přímo ze strany lze těleso vybrat kliknutím kdekoliv na jeho povrchu, nejen pod čárou horizontu."
         }
       }
     ]
