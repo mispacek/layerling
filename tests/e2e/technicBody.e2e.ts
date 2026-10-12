@@ -29,6 +29,27 @@ async function bodyFor(r: TechnicRecipe) {
   return { shape, body, dispose: () => [...new Set([...created, body])].reverse().forEach(disposeManifold) };
 }
 describe("real Lego Compatible bodies", () => {
+  it.each([1, 4])("rounds real outline corners at radius %s without changing dimensions", async radius => {
+    const { body, shape, dispose } = await bodyFor({ ...recipe([{ ...cell("solid"), rounded: true }]), cornerRadius: radius });
+    try {
+      expect(body.status()).toBe("NoError");
+      expect(body.volume()).toBeCloseTo(512 - 4 * (radius ** 2 - circleArea(radius * 2) / 4) * 8, 3);
+      expect(shape).toMatchObject({ width: 8, depth: 8, height: 8 });
+      expect(body.rayCast([-3.95, -1, -3.95], [-3.95, 9, -3.95])).toHaveLength(0);
+    } finally { dispose(); }
+  });
+  it("rounds inner corners and keeps horizontal holes through added fillet material open", async () => {
+    const r = initialTechnicRecipe();
+    r.cornerRadius = 4;
+    r.cells = r.cells.map(c => ({ ...c, rounded: true, axis: c.x === 1 && c.y === 0 ? "Y" : c.axis }));
+    const { body, shape, dispose } = await bodyFor(r);
+    try {
+      expect(body.status()).toBe("NoError");
+      expect(shape).toMatchObject({ width: 56, depth: 40, height: 8 });
+      expect(body.rayCast([-19.8, -1, 11.8], [-19.8, 9, 11.8]).length).toBeGreaterThan(0);
+      expect(body.rayCast([-17.5, 4, 24], [-17.5, 4, 6])).toHaveLength(0);
+    } finally { dispose(); }
+  });
   it("unites touching material without gaps or internal walls", async () => {
     const { body, shape, dispose } = await bodyFor(recipe([cell("solid"), cell("solid", "Z", 1)]));
     try {
@@ -85,7 +106,8 @@ describe("real Lego Compatible bodies", () => {
     await expect(buildTechnicShape(r, 10)).rejects.toThrow("technic.error.geometry");
   });
   it("round-trips real geometry, recipe and history in .lyl and rejects malformed metadata", async () => {
-    const shape = await buildTechnicShape(recipe([cell("pin", "X", -1), cell("axle", "Y", 0, 0, 45)]), 300_000);
+    const shape = await buildTechnicShape({ ...recipe([cell("pin", "X", -1), cell("axle", "Y", 0, 0, 45)]), cornerRadius: 2,
+      cells: [cell("pin", "X", -1), { ...cell("axle", "Y", 0, 0, 45), rounded: true }] }, 300_000);
     const bytes = await exportLylProject({ projectName: "Technic", createdAt: 1_700_000_000_000, modifiedAt: 1_700_000_000_000,
       shapes: [shape], history: [editorHistoryEntry([], []), editorHistoryEntry([shape], [shape.id])], historyIndex: 1,
       assets: [], workspace: DEFAULT_WORKPLANE_WORKSPACE, snapGrid: DEFAULT_SNAP_GRID, placementElevation: 0 });

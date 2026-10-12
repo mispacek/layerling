@@ -2398,7 +2398,7 @@ export function LayerlingEditor({
     );
   }
   const [shapes, setShapes] = useState<WorkplaneShape[]>(() => initialSceneRef.current as WorkplaneShape[]);
-  const [technicSession, setTechnicSession] = useState<{ initial: TechnicRecipe; source?: WorkplaneShape; fingerprint: string; projectId: string | null | undefined } | null>(null);
+  const [technicSession, setTechnicSession] = useState<{ initial: TechnicRecipe; source?: WorkplaneShape; fingerprint: string; projectId: string | null | undefined; rounding: boolean } | null>(null);
   const technicSessionRef = useRef(technicSession);
   technicSessionRef.current = technicSession;
   // Die Notizen reisen im Verlauf mit, also kommen sie auch von dort - der
@@ -5727,7 +5727,33 @@ export function LayerlingEditor({
     setNotice(t("status.edgeCancelled"));
   }, [invalidateCadModifierSession]);
 
+  const cancelTechnic = useCallback(() => {
+    technicSessionRef.current = null;
+    setTechnicSession(null);
+  }, []);
+
+  const startTechnic = useCallback((source?: WorkplaneShape, rounding = false) => {
+    if (historyViewStateRef.current || openGroupsRef.current.length || sketchActive || splitSession) {
+      setNotice(t("technic.error.finishTool"));
+      return;
+    }
+    if (source && !canEditTechnic(source)) { setNotice(t("technic.error.modified")); return; }
+    invalidateCadModifierSession();
+    setArrayTool(null); setScalePercentTool(null); setHolePatternTool(null); setMateTool(null);
+    setShellTool(null); setEdgeModifier(null); setTopPanel(null); setShapeContextMenu(null);
+    setSimplifyToolId(null); setAlignMode(false); setMirrorMode(false); setWorkplaneMode(false);
+    setCruiseAsset(null); setCarryIds(null); setNoteMode(false); setPivotPickMode(false); setLayFlatPickMode(false);
+    const session = { initial: source?.technicRecipe ?? initialTechnicRecipe(), source, rounding,
+      fingerprint: projectShapesFingerprint(shapesRef.current), projectId: projectInfoRef.current.projectId };
+    technicSessionRef.current = session; setTechnicSession(session);
+  }, [invalidateCadModifierSession, sketchActive, splitSession]);
+
   const startEdgeModifier = useCallback((kind: CadModifierKind) => {
+    // Editable Lego bodies round their parametric outline, without converting thousands of mesh faces to CAD.
+    if (kind === "fillet" && selectedShapes.length === 1 && selectedShape && canEditTechnic(selectedShape)) {
+      startTechnic(selectedShape, true);
+      return;
+    }
     setShellTool(null);
     if (selectedShapes.length !== 1 || !selectedShape || selectedShape.locked || selectedShape.hole || isNonSolidShapeKind(selectedShape.kind)) {
       setNotice(t("status.selectOneUnlocked", { kind }));
@@ -5853,7 +5879,7 @@ export function LayerlingEditor({
     }
     cadModifierPrepareRef.current = prepareRequestId;
     armCadModifierWatchdog(prepareRequestId, "prepare", prepareTimeoutMs);
-  }, [armCadModifierWatchdog, invalidateCadModifierSession, postCadModifierRequest, selectedShape, selectedShapes.length, stopCruise]);
+  }, [armCadModifierWatchdog, invalidateCadModifierSession, postCadModifierRequest, selectedShape, selectedShapes.length, startTechnic, stopCruise]);
 
   // The body is back after an "Edit" (#227): open the tool on it with the value and the edges it had.
   useEffect(() => {
@@ -6936,26 +6962,6 @@ export function LayerlingEditor({
   const closeViewportWorkplaneMode = useCallback((active: boolean) => {
     setWorkplaneMode(active);
   }, []);
-
-  const cancelTechnic = useCallback(() => {
-    technicSessionRef.current = null;
-    setTechnicSession(null);
-  }, []);
-
-  const startTechnic = useCallback((source?: WorkplaneShape) => {
-    if (historyViewStateRef.current || openGroupsRef.current.length || sketchActive || splitSession) {
-      setNotice(t("technic.error.finishTool"));
-      return;
-    }
-    if (source && !canEditTechnic(source)) { setNotice(t("technic.error.modified")); return; }
-    setArrayTool(null); setScalePercentTool(null); setHolePatternTool(null); setMateTool(null);
-    setShellTool(null); setEdgeModifier(null); setTopPanel(null); setShapeContextMenu(null);
-    setSimplifyToolId(null); setAlignMode(false); setMirrorMode(false); setWorkplaneMode(false);
-    setCruiseAsset(null); setCarryIds(null); setNoteMode(false); setPivotPickMode(false); setLayFlatPickMode(false);
-    const session = { initial: source?.technicRecipe ?? initialTechnicRecipe(), source,
-      fingerprint: projectShapesFingerprint(shapesRef.current), projectId: projectInfoRef.current.projectId };
-    technicSessionRef.current = session; setTechnicSession(session);
-  }, [sketchActive, splitSession]);
 
   const applyTechnic = useCallback(async (recipe: TechnicRecipe) => {
     const session = technicSessionRef.current;
@@ -10921,7 +10927,7 @@ export function LayerlingEditor({
           />
         ) : null}
         {technicSession ? (
-          <TechnicWorkspace initial={technicSession.initial} workspace={workspaceSettings} onApply={applyTechnic} onCancel={cancelTechnic} />
+          <TechnicWorkspace initial={technicSession.initial} initialRoundingOpen={technicSession.rounding} workspace={workspaceSettings} onApply={applyTechnic} onCancel={cancelTechnic} />
         ) : toolbarMode === "sketch" && sketchActive ? (
           <SketchWorkspace
             profile={sketchProfile}

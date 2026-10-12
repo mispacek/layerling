@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Redo2, Undo2, X } from "lucide-react";
 import { t } from "@/lib/i18n";
 import { EdgeModifierSlider } from "@/components/workplane/EdgeModifierPanel";
 import { DEFAULT_WORKPLANE_WORKSPACE } from "@/lib/workplaneSettings";
 import type { WorkplaneWorkspaceSettings } from "@/types/layerling";
-import { TECHNIC_CELL_LIMIT, parseTechnicPattern, technicBounds, technicCellKey, technicPattern, type TechnicCell, type TechnicRecipe } from "@/lib/technicRecipe";
+import { DEFAULT_TECHNIC_CORNER_RADIUS, TECHNIC_CELL_LIMIT, parseTechnicPattern, technicBounds, technicCellKey, technicCorners, technicPattern, type TechnicCell, type TechnicRecipe } from "@/lib/technicRecipe";
 
-type Mode = "select" | "add" | "remove";
+type Mode = "select" | "add" | "remove" | "set";
 
 /** Top-view convention: a Z bore exposes its profile; horizontal bores are hidden lines with direction arrows. */
 function TechnicHolePreview({ cell, adjustment }: { cell: TechnicCell; adjustment: number }) {
@@ -34,14 +34,15 @@ function TechnicHolePreview({ cell, adjustment }: { cell: TechnicCell; adjustmen
   </svg>;
 }
 
-export function TechnicWorkspace({ initial, workspace = DEFAULT_WORKPLANE_WORKSPACE, onApply, onCancel }: {
-  initial: TechnicRecipe; workspace?: WorkplaneWorkspaceSettings; onApply: (recipe: TechnicRecipe) => Promise<void>; onCancel: () => void;
+export function TechnicWorkspace({ initial, initialRoundingOpen = false, workspace = DEFAULT_WORKPLANE_WORKSPACE, onApply, onCancel }: {
+  initial: TechnicRecipe; initialRoundingOpen?: boolean; workspace?: WorkplaneWorkspaceSettings; onApply: (recipe: TechnicRecipe) => Promise<void>; onCancel: () => void;
 }) {
   const [recipe, setRecipe] = useState(() => structuredClone(initial));
   const recipeRef = useRef(recipe);
   const [past, setPast] = useState<TechnicRecipe[]>([]);
   const [future, setFuture] = useState<TechnicRecipe[]>([]);
   const [mode, setMode] = useState<Mode>("select");
+  const [roundingOpen, setRoundingOpen] = useState(initialRoundingOpen);
   const [brush, setBrush] = useState<Omit<TechnicCell, "x" | "y">>({ kind: "pin", axis: "Z", roll: 0 });
   const [selected, setSelected] = useState<string | null>(null);
   const [view, setView] = useState(() => { const b = technicBounds(initial); return { x: b.minX - 2, y: b.maxY + 2 }; });
@@ -55,6 +56,9 @@ export function TechnicWorkspace({ initial, workspace = DEFAULT_WORKPLANE_WORKSP
   const cell = recipe.cells.find(c => technicCellKey(c.x, c.y) === selected);
   const settings = mode === "select" && cell ? cell : brush;
   const bounds = recipe.cells.length ? technicBounds(recipe) : null;
+  const corners = useMemo(() => technicCorners(recipe), [recipe]);
+  const radius = recipe.cornerRadius ?? DEFAULT_TECHNIC_CORNER_RADIUS;
+  const allRounded = recipe.cells.length > 0 && recipe.cells.every(c => c.rounded);
 
   useEffect(() => { root.current?.focus(); }, []);
   useEffect(() => {
@@ -97,9 +101,20 @@ export function TechnicWorkspace({ initial, workspace = DEFAULT_WORKPLANE_WORKSP
     if (busy) return;
     if (Math.abs(x) > 128 || Math.abs(y) > 128) { setError(t("technic.error.recipe")); return; }
     const key = technicCellKey(x, y);
-    setSelected(key);
-    if (mode === "select") return;
     const current = recipeRef.current;
+    const target = current.cells.find(c => technicCellKey(c.x, c.y) === key);
+    if (mode === "set" && !target) return;
+    setSelected(key);
+    if (mode === "select") {
+      if (target) { const { x: _x, y: _y, ...sample } = target; setBrush(sample); }
+      return;
+    }
+    if (mode === "set") {
+      commit({ ...current, cells: current.cells.map(c => c === target ? { ...c, axis: brush.axis, roll: brush.roll,
+        ...(brush.rounded !== undefined || c.rounded !== undefined ? { rounded: brush.rounded ?? false } : {}) } : c) });
+      pendingPan.current = { x: 0, y: 0 };
+      return;
+    }
     const remaining = current.cells.filter(c => technicCellKey(c.x, c.y) !== key);
     if (mode === "add") {
       if (remaining.length >= TECHNIC_CELL_LIMIT) { setError(t("technic.error.limit")); return; }
@@ -164,6 +179,15 @@ export function TechnicWorkspace({ initial, workspace = DEFAULT_WORKPLANE_WORKSP
                 {c.kind !== "solid" ? <small>{c.axis}</small> : null}</> : x === 0 && y === 0 ? <small>0,0</small> : null}
             </button>;
           })}
+          <svg className="technic-corner-overlay" aria-hidden="true" viewBox={`0 0 ${size.columns * 44} ${size.rows * 44}`}>
+            {corners.map((corner, index) => {
+              const px = (corner.x / 8 - view.x + 0.5) * 44, py = (view.y - corner.y / 8 + 0.5) * 44;
+              const r = radius * 44 / 8, convex = corner.kind === "convex";
+              return <path key={index} className={convex ? "technic-corner-cut" : "technic-corner-fill"}
+                transform={`translate(${px} ${py}) scale(${convex ? -corner.sx : corner.sx} ${convex ? corner.sy : -corner.sy})`}
+                d={`M 0 0 H ${r} A ${r} ${r} 0 0 0 0 ${r} Z`} />;
+            })}
+          </svg>
         </div>
       </div>
       <p className="technic-caption">{t(`technic.hint.${mode}`)} · X → · Y ↑ · Z ⊙
@@ -172,11 +196,12 @@ export function TechnicWorkspace({ initial, workspace = DEFAULT_WORKPLANE_WORKSP
     <aside className="technic-panel" aria-label="Lego Compatible">
       <header><div><strong>Lego Compatible</strong><p className="technic-muted">{t("technic.stats", { count: recipe.cells.length, width: bounds?.width ?? 0, depth: bounds?.depth ?? 0 })}</p></div><button aria-label={t("common.cancel")} onClick={onCancel}><X size={18} /></button></header>
       <div className="technic-panel-content">
-        <div className="technic-mode-buttons">{(["select", "add", "remove"] as const).map(value =>
+        <div className="technic-mode-buttons technic-edit-modes">{(["select", "add", "remove", "set"] as const).map(value =>
           <button key={value} disabled={busy} aria-pressed={mode === value} onClick={() => setMode(value)}>{t(`technic.mode.${value}`)}</button>)}</div>
-        <p className="technic-muted">{mode === "select" && cell ? t("technic.selection", { x: cell.x, y: cell.y }) : t("technic.brush")}</p>
+        <p className="technic-muted">{mode === "select" && cell ? t("technic.selection", { x: cell.x, y: cell.y }) : t(mode === "set" ? "technic.stampSettings" : "technic.brush")}</p>
+        {mode === "set" ? <p className="technic-muted">{t("technic.stampHelp")}</p> : null}
         <div className="technic-module-list">{(["solid", "pin", "axle"] as const).map(kind =>
-          <button key={kind} disabled={busy || mode === "remove"} aria-pressed={settings.kind === kind} onClick={() => change({ kind })}>
+          <button key={kind} disabled={busy || mode === "remove" || mode === "set"} aria-pressed={settings.kind === kind} onClick={() => change({ kind })}>
             <span className="technic-module-icon" aria-hidden="true">{kind === "solid" ? "■" : kind === "pin" ? "⊙" : "⊞"}</span>{t(`technic.${kind}`)}</button>)}</div>
         <label>{t("technic.axis")}</label>
         <div className="technic-mode-buttons">{(["X", "Y", "Z"] as const).map(axis =>
@@ -184,6 +209,18 @@ export function TechnicWorkspace({ initial, workspace = DEFAULT_WORKPLANE_WORKSP
         <label>{t("technic.roll")}</label>
         <div className="technic-mode-buttons">{([0, 45] as const).map(roll =>
           <button key={roll} disabled={busy || settings.kind !== "axle" || mode === "remove"} aria-pressed={settings.roll === roll} onClick={() => change({ roll })}>{roll}°</button>)}</div>
+        <details className="technic-rounding" open={roundingOpen} onToggle={e => setRoundingOpen(e.currentTarget.open)}>
+          <summary>{t("technic.rounding")}</summary>
+          <label className="technic-check"><input type="checkbox" checked={Boolean(settings.rounded)} disabled={busy || mode === "remove"}
+            onChange={e => change({ rounded: e.target.checked })} />{t("technic.roundCell")}</label>
+          <EdgeModifierSlider label={t("technic.cornerRadius")} value={radius} min={0.2} max={4} step={0.1}
+            workspace={workspace} disabled={busy} onChange={value => commit({ ...recipe, cornerRadius: value })} />
+          <button disabled={busy || !recipe.cells.length} onClick={() => {
+            setBrush(b => ({ ...b, rounded: !allRounded }));
+            commit({ ...recipe, cells: recipe.cells.map(c => ({ ...c, rounded: !allRounded })) });
+          }}>{t(allRounded ? "technic.unroundAll" : "technic.roundAll")}</button>
+          <p className="technic-muted">{t("technic.roundHelp")}</p>
+        </details>
         <details><summary>{t("technic.pattern")}</summary>
           <p className="technic-muted">{t("technic.patternHelp")}</p>
           <textarea aria-label={t("technic.pattern")} value={pattern} disabled={busy} spellCheck={false} onChange={e => setPattern(e.target.value)} />
@@ -191,7 +228,8 @@ export function TechnicWorkspace({ initial, workspace = DEFAULT_WORKPLANE_WORKSP
             const cells = parseTechnicPattern(pattern, brush.axis, brush.roll);
             if (!cells) { setError(t("technic.error.pattern")); return; }
             const b = recipe.cells.length ? technicBounds(recipe) : { minX: 0, minY: 0 };
-            const shifted = cells.map(c => ({ ...c, x: c.x + b.minX, y: c.y + b.minY }));
+            const shifted = cells.map(c => ({ ...c, x: c.x + b.minX, y: c.y + b.minY,
+              ...(brush.rounded ? { rounded: true } : {}) }));
             if (shifted.some(c => Math.abs(c.x) > 128 || Math.abs(c.y) > 128)) { setError(t("technic.error.recipe")); return; }
             commit({ ...recipe, cells: shifted }); setSelected(null); setView({ x: b.minX - 2, y: b.minY + cells.reduce((max, c) => Math.max(max, c.y), 0) + 2 });
           }}>{t("technic.applyPattern")}</button>

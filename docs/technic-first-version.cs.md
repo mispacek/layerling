@@ -46,7 +46,15 @@ Více výškových vrstev, tenké buňky, piny, výstupky, kulové čepy, polovi
 
 Pokud se dílek běžným editorem roztáhne, zúží, upraví jeho síť nebo použijí úpravy hran/BRep, editor předlohy se zablokuje.
 Tím se již provedené úpravy neztratí regenerováním původní předlohy. Běžné modelování zůstává dostupné; Zpět vrátí předchozí upravitelný stav.
-Zaoblení parametrických dílků a jeho zachování při změně předlohy bude samostatná další etapa.
+Zaoblení rohů obrysu nyní zůstává v předloze a při její změně se přepočítá podle sousedních buněk. Horní a spodní hrany se tímto nástrojem nezaoblují.
+
+## Nastavit a zaoblení rohů
+
+V režimu **Vybrat** zvolte vzorovou buňku a upravte její směr, natočení a zaoblení. Přepněte na **Nastavit** a klikáním nebo tažením přenášejte tato nastavení na další obsazené buňky. Typ buňky zůstává zachovaný, prázdné buňky se nepřidávají.
+
+V části **Zaoblení rohů** lze zaoblit vybranou buňku nebo celý dílek. Poloměr 0,2–4 mm je společný. Zaoblení se počítá na sjednoceném obrysu: vnější rohy se oříznou, vnitřní rohy se vyplní obloukem, společné rovné stěny zůstanou spojené. Průchozí otvory pokračují přes materiál přidaný vnitřním zaoblením.
+
+Tlačítko **Zaoblení** v běžném 3D editoru u upravitelného Lego dílku otevře tuto část generátoru, takže jej neblokuje limit CAD úprav polygonových sítí 4 000 trojúhelníků. Parametry zaoblení se ukládají do `.lyl`; staré předlohy se načítají bez zaoblení.
 
 ## Vývoj a ověření
 

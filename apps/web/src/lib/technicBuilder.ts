@@ -4,7 +4,7 @@ import { createLocalId } from "@/lib/localIds";
 import { getManifoldRuntime, type ManifoldSolid } from "@/lib/editorMeshCore";
 import { disposeManifold, quaternionForShape } from "@/lib/editorBooleans";
 import { shapeHasShapeDeform } from "@/lib/workplaneShapes";
-import { technicBounds, technicCellKey, technicMeshFingerprint, validTechnicRecipe, type TechnicRecipe } from "@/lib/technicRecipe";
+import { DEFAULT_TECHNIC_CORNER_RADIUS, technicBounds, technicCellKey, technicCorners, technicMeshFingerprint, validTechnicRecipe, type TechnicRecipe } from "@/lib/technicRecipe";
 
 // Reference dimensions: marian42/partdesigner/src/measurements.ts (MIT).
 // These are modelling defaults, not a guarantee of a particular printer's fit.
@@ -34,20 +34,45 @@ export async function buildTechnicShape(recipe: TechnicRecipe, triangleLimit: nu
     const blocks = recipe.cells.map(c => keep(keep(runtime.Manifold.cube([8, 8, 8], true)).translate([c.x * 8, 4, -c.y * 8])));
     let body = keep(runtime.Manifold.union(blocks));
     const cutters: ManifoldSolid[] = [];
+    const additions: ManifoldSolid[] = [];
+    const corners = technicCorners(recipe);
+    const radius = recipe.cornerRadius ?? DEFAULT_TECHNIC_CORNER_RADIUS;
+    for (const corner of corners) {
+      const direction = corner.kind === "convex" ? -1 : 1;
+      const dx = corner.sx * direction, dy = corner.sy * direction;
+      // A square minus a quarter cylinder removes a convex tip or fills a concave pocket.
+      // Convex cutters overrun vertically; added material has exactly the body's height.
+      const height = corner.kind === "convex" ? 8.04 : 8;
+      const square = keep(keep(runtime.Manifold.cube([radius, height, radius], true))
+        .translate([corner.x + dx * radius / 2, 4, -(corner.y + dy * radius / 2)]));
+      const circle = keep(keep(keep(runtime.Manifold.cylinder(8.08, radius, radius, SIDES, true))
+        .rotate([-90, 0, 0])).translate([corner.x + dx * radius, 4, -(corner.y + dy * radius)]));
+      const wedge = keep(square.subtract(circle));
+      (corner.kind === "convex" ? cutters : additions).push(wedge);
+    }
+    if (additions.length) body = keep(runtime.Manifold.union([body, ...additions]));
+    const hasConcaveCorners = additions.length > 0;
     for (const c of recipe.cells) {
       if (c.kind === "solid") continue;
       const diameter = PIN_DIAMETER + recipe.holeAdjustment;
       // The kernel's cylinder axis is local Z. Only axial overrun avoids thin skins;
       // cross-section dimensions are never padded.
-      let bore = keep(runtime.Manifold.cylinder(8.04, diameter / 2, diameter / 2, SIDES, true));
+      // Inner fillets can add material just outside an exposed cell face. Continue the
+      // bore through that pocket, but never drill into a neighbouring solid cell.
+      const axisStep = c.axis === "X" ? [1, 0] : [0, 1];
+      const extension = (sign: number) => c.axis !== "Z" && hasConcaveCorners
+        && !occupied.has(technicCellKey(c.x + axisStep[0] * sign, c.y + axisStep[1] * sign)) ? radius : 0;
+      const before = extension(-1), after = extension(1), length = 8.04 + before + after;
+      let bore = keep(runtime.Manifold.cylinder(length, diameter / 2, diameter / 2, SIDES, true));
       if (c.kind === "axle") {
         const arm = AXLE_ARM_WIDTH + recipe.holeAdjustment;
-        const a = keep(runtime.Manifold.cube([diameter, arm, 8.04], true));
-        const b = keep(runtime.Manifold.cube([arm, diameter, 8.04], true));
+        const a = keep(runtime.Manifold.cube([diameter, arm, length], true));
+        const b = keep(runtime.Manifold.cube([arm, diameter, length], true));
         const cross = keep(runtime.Manifold.union([a, b]));
         bore = keep(bore.intersect(cross));
         if (c.roll) bore = keep(bore.rotate([0, 0, c.roll]));
       }
+      if (before !== after) bore = keep(bore.translate([0, 0, (after - before) / 2]));
       const orient = (s: ManifoldSolid) => keep(keep(s.rotate(c.axis === "X" ? [0, 90, 0] : c.axis === "Y" ? [0, 180, 0] : [-90, 0, 0])).translate([c.x * 8, 4, -c.y * 8]));
       cutters.push(orient(bore));
       if (c.kind === "pin") {

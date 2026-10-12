@@ -31,7 +31,8 @@ describe("optional Lego Compatible recipes", () => {
   });
   it("rejects duplicate cells, unsupported versions, nonfinite and oversized input", () => {
     const r = initialTechnicRecipe();
-    for (const changed of [{ ...r, version: 2 }, { ...r, pitch: 4 }, { ...r, holeAdjustment: NaN }, { ...r, holeAdjustment: 0.5 },
+    for (const changed of [{ ...r, cornerRadius: NaN }, { ...r, cornerRadius: 4.1 }, { ...r, cells: [{ ...r.cells[0], rounded: "yes" }] },
+      { ...r, version: 2 }, { ...r, pitch: 4 }, { ...r, holeAdjustment: NaN }, { ...r, holeAdjustment: 0.5 },
       { ...r, cells: [...r.cells, r.cells[0]] }, { ...r, cells: [{ ...r.cells[0], x: 129 }] }, { ...r, cells: [] }]) {
       expect(validTechnicRecipe(changed)).toBe(false);
     }
