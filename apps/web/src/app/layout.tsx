@@ -19,7 +19,7 @@ const STRUCTURED_DATA = {
   description: DESCRIPTION,
   applicationCategory: "DesignApplication",
   operatingSystem: "Any (web browser)",
-  inLanguage: ["en", "de"],
+  inLanguage: ["en", "de", "cs"],
   isAccessibleForFree: true,
   offers: { "@type": "Offer", price: "0", priceCurrency: "EUR" },
   image: "https://layerling.com/assets/layerling/layerling-social.png",

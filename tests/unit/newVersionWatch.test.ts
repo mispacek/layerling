@@ -21,6 +21,10 @@ const info = (build: string, version = "1.67.0"): VersionInfo => ({
 });
 
 describe("an open page noticing an update (#update-notice)", () => {
+  it("preserves Czech highlights from an updated installation", () => {
+    const title = { en: "New", de: "Neu", cs: "Nové" };
+    expect(parseVersionInfo({ version: "1.66.2", build: "cs", highlights: [{ version: "1.66.2", title }] })?.highlights[0].title.cs).toBe("Nové");
+  });
   it("reads what the export writes and ignores what is not that", () => {
     expect(parseVersionInfo(JSON.parse(versionFileSource("1.67.0", "abc", [{ version: "1.67.0", items: [{ title: title("A"), body: title("b") }] }])))).toEqual({
       version: "1.67.0",

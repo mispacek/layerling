@@ -229,6 +229,9 @@ describe("guide content", () => {
   it("opens the chapter that fits a shape", () => {
     expect(guideHref("de", "solids")).toBe("/anleitung/koerper-und-aussparungen.html");
     expect(guideHref("en")).toBe("/guide/index.html");
+    expect(guideHref("cs")).toBe("/guide/index.html");
+    expect(guideHref("cs", "solids")).toBe(guideHref("en", "solids"));
+    expect(guideHref("cs", undefined, "hollowing")).toBe(guideHref("en", undefined, "hollowing"));
     expect(guideChapterForShape({ kind: "text" })).toBe("text");
     expect(guideChapterForShape({ kind: "thread" })).toBe("threads");
     expect(guideChapterForShape({ kind: "box", groupedShapes: [{}] })).toBe("solids");

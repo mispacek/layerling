@@ -6,7 +6,7 @@ import { GuideHelpLink } from "@/components/GuideHelpLink";
 import { t } from "@/lib/i18n";
 import { useLanguage } from "@/lib/useLanguage";
 import type { WhatsNewView } from "@/lib/useWhatsNew";
-import { whatsNewBefore, type WhatsNewEntry } from "@/lib/whatsNew";
+import { whatsNewBefore, whatsNewText, type WhatsNewEntry } from "@/lib/whatsNew";
 
 /** The versions with their highlights, in the interface language. */
 export function WhatsNewList({ entries }: { entries: readonly WhatsNewEntry[] }) {
@@ -19,8 +19,8 @@ export function WhatsNewList({ entries }: { entries: readonly WhatsNewEntry[] })
           <ul>
             {entry.items.map((item) => (
               <li key={item.title.en}>
-                <strong>{item.title[language]}</strong>
-                <span>{item.body[language]}</span>
+                <strong>{whatsNewText(item.title, language)}</strong>
+                <span>{whatsNewText(item.body, language)}</span>
               </li>
             ))}
           </ul>

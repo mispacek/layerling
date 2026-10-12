@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import {
   detectLanguage,
   getLanguage,
+  getLocale,
   isLanguage,
   languageFromTag,
   LANGUAGES,
@@ -11,9 +12,10 @@ import {
   translate,
 } from "@/lib/i18n";
 import { MESSAGES_DE } from "@/lib/messages.de";
+import { MESSAGES_CS } from "@/lib/messages.cs";
 import { MESSAGES_EN } from "@/lib/messages.en";
 
-const CATALOGUES = { en: MESSAGES_EN, de: MESSAGES_DE } as const;
+const CATALOGUES = { en: MESSAGES_EN, de: MESSAGES_DE, cs: MESSAGES_CS } as const;
 
 function placeholders(value: string) {
   return [...value.matchAll(/\{(\w+)\}/g)].map((match) => match[1]).sort();
@@ -59,6 +61,10 @@ describe("message catalogues", () => {
       (key) => MESSAGES_DE[key as keyof typeof MESSAGES_EN] === MESSAGES_EN[key as keyof typeof MESSAGES_EN],
     );
     expect(identical.length).toBeLessThan(Object.keys(MESSAGES_EN).length * 0.1);
+    const identicalCzech = Object.keys(MESSAGES_EN).filter(
+      (key) => MESSAGES_CS[key as keyof typeof MESSAGES_EN] === MESSAGES_EN[key as keyof typeof MESSAGES_EN],
+    );
+    expect(identicalCzech.length).toBeLessThan(Object.keys(MESSAGES_EN).length * 0.1);
   });
 });
 
@@ -66,6 +72,7 @@ describe("translation", () => {
   it("fills placeholders", () => {
     expect(translate("en", "dashboard.projectsVisibleMany", { count: 3 })).toBe("3 in this browser");
     expect(translate("de", "dashboard.projectsVisibleMany", { count: 3 })).toBe("3 in diesem Browser");
+    expect(translate("cs", "dashboard.projectsVisibleMany", { count: 3 })).toBe("3 v tomto prohlížeči");
   });
 
   it("leaves an unknown placeholder untouched instead of printing undefined", () => {
@@ -85,12 +92,15 @@ describe("language detection", () => {
     expect(languageFromTag("de-AT")).toBe("de");
     expect(languageFromTag("DE")).toBe("de");
     expect(languageFromTag("en-GB")).toBe("en");
+    expect(languageFromTag("cs-CZ")).toBe("cs");
+    expect(languageFromTag("CS")).toBe("cs");
     expect(languageFromTag("fr-FR")).toBe(null);
     expect(languageFromTag(undefined)).toBe(null);
   });
 
   it("recognises only the languages it can serve", () => {
     expect(isLanguage("de")).toBe(true);
+    expect(isLanguage("cs")).toBe(true);
     expect(isLanguage("fr")).toBe(false);
     expect(isLanguage(null)).toBe(false);
   });
@@ -121,6 +131,8 @@ describe("language detection", () => {
     expect(withBrowser(["en-US"])).toBe("en");
     expect(withBrowser(["de-AT", "de"])).toBe("de");
     expect(withBrowser(["de"])).toBe("de");
+    expect(withBrowser(["cs-CZ", "en"])).toBe("cs");
+    expect(withBrowser(["en-US"], "cs")).toBe("cs");
     // A language we do not serve falls back to English rather than to nothing.
     expect(withBrowser(["fr-FR", "es"])).toBe("en");
     // The first tag we can serve wins, even behind one we cannot.
@@ -131,6 +143,10 @@ describe("language detection", () => {
   });
 
   it("switches and reports the new language", () => {
+    setLanguage("cs", false);
+    expect(getLanguage()).toBe("cs");
+    expect(getLocale()).toBe("cs-CZ");
+    expect((1234.5).toLocaleString(getLocale())).toBe("1\u00a0234,5");
     setLanguage("de", false);
     expect(getLanguage()).toBe("de");
     setLanguage("en", false);

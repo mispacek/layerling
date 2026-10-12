@@ -1,4 +1,5 @@
 import whatsNewData from "./whatsNew.json";
+import type { Language } from "@/lib/i18n";
 
 /**
  * "What is new since your last visit": the highlights of each release, written
@@ -8,7 +9,12 @@ import whatsNewData from "./whatsNew.json";
  * lines for what a user can do now that they could not before, and only rarely
  * for a fix.
  */
-export type WhatsNewText = { de: string; en: string };
+// Older releases fetched from upstream may not yet include Czech.
+export type WhatsNewText = { de: string; en: string; cs?: string };
+
+export function whatsNewText(text: WhatsNewText, language: Language): string {
+  return text[language] || text.en;
+}
 export type WhatsNewItem = { title: WhatsNewText; body: WhatsNewText };
 export type WhatsNewEntry = { version: string; items: WhatsNewItem[] };
 
@@ -112,7 +118,10 @@ export function parseWhatsNewEntries(value: unknown, limit = 200): WhatsNewEntry
     const valid = items
       .slice(0, 20)
       .filter((item): item is WhatsNewItem => Boolean(item) && typeof item === "object" && isText((item as WhatsNewItem).title) && isText((item as WhatsNewItem).body))
-      .map((item) => ({ title: { de: item.title.de, en: item.title.en }, body: { de: item.body.de, en: item.body.en } }));
+      .map((item) => ({
+        title: { de: item.title.de, en: item.title.en, ...(typeof item.title.cs === "string" && item.title.cs.trim() ? { cs: item.title.cs } : {}) },
+        body: { de: item.body.de, en: item.body.en, ...(typeof item.body.cs === "string" && item.body.cs.trim() ? { cs: item.body.cs } : {}) },
+      }));
     if (valid.length > 0) entries.push({ version, items: valid });
   }
   return entries;

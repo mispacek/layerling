@@ -1,7 +1,8 @@
+import { MESSAGES_CS } from "@/lib/messages.cs";
 import { MESSAGES_DE } from "@/lib/messages.de";
 import { MESSAGES_EN, type MessageKey } from "@/lib/messages.en";
 
-export const LANGUAGES = ["en", "de"] as const;
+export const LANGUAGES = ["en", "de", "cs"] as const;
 export type Language = (typeof LANGUAGES)[number];
 export const DEFAULT_LANGUAGE: Language = "en";
 export const LANGUAGE_STORAGE_KEY = "layerling.language";
@@ -9,12 +10,21 @@ export const LANGUAGE_STORAGE_KEY = "layerling.language";
 const CATALOGUE: Record<Language, Record<MessageKey, string>> = {
   en: MESSAGES_EN,
   de: MESSAGES_DE,
+  cs: MESSAGES_CS,
 };
 
 export const LANGUAGE_NAMES: Record<Language, string> = {
   en: "English",
   de: "Deutsch",
+  cs: "Čeština",
 };
+
+const LANGUAGE_LOCALES: Record<Language, string> = { en: "en-US", de: "de-DE", cs: "cs-CZ" };
+
+/** Locale for displayed numbers; stored geometry and file formats stay unchanged. */
+export function getLocale(): string {
+  return LANGUAGE_LOCALES[current];
+}
 
 export function isLanguage(value: unknown): value is Language {
   return typeof value === "string" && (LANGUAGES as readonly string[]).includes(value);
@@ -22,7 +32,7 @@ export function isLanguage(value: unknown): value is Language {
 
 /**
  * The language a browser asks for, as far as we can serve it. `de-AT` and plain
- * `de` both mean German; anything else falls back to English.
+ * `de` both mean German; `cs-CZ` means Czech. Unsupported tags fall back to English.
  */
 export function languageFromTag(tag: string | undefined | null): Language | null {
   const primary = tag?.trim().toLowerCase().split("-")[0];

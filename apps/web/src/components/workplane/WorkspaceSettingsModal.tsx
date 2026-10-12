@@ -63,7 +63,7 @@ import {
   MIN_BENT_TUBE_SIZE,
   MIN_BENT_TUBE_WALL,
 } from "@/lib/bentTubeGeometry";
-import { getLanguage, t, type MessageKey } from "@/lib/i18n";
+import { getLocale, t, type MessageKey } from "@/lib/i18n";
 import { useLanguage } from "@/lib/useLanguage";
 import { measurementOptionLabel, normalizeScaleForUnits, parseMeasurementInput, scaleOptionsForUnits, WORKSPACE_UNIT_OPTIONS } from "@/lib/measurementUnits";
 import { shapeAssetDefaultDimensions, shapeAssetLabel, shapeAssetSpecialDefaults, toolbarShapeAssets } from "@/lib/shapeCatalog";
@@ -448,7 +448,7 @@ export function WorkspaceSettingsModal({
   // "Custom" stays chosen while the field is open, even when the typed value happens to equal a preset.
   const [booleanLimitCustomOpen, setBooleanLimitCustomOpen] = useState(() => booleanTriangleLimitPreset(workspace.booleanTriangleLimit) === null);
   const booleanLimitMode: BooleanTriangleLimitPreset | "custom" = booleanLimitCustomOpen ? "custom" : booleanTriangleLimitPreset(workspace.booleanTriangleLimit) ?? "custom";
-  const formatSettingCount = (value: number) => value.toLocaleString(getLanguage() === "de" ? "de-DE" : "en-US");
+  const formatSettingCount = (value: number) => value.toLocaleString(getLocale());
   const scaleOptions = scaleOptionsForUnits(workspace.units);
   const scaleValue = normalizeScaleForUnits(workspace.units, workspace.scale);
   const gridColor = /^#[0-9a-f]{6}$/i.test(workspace.gridColor)

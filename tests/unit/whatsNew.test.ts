@@ -5,6 +5,8 @@ import {
   lastSeenVersion,
   latestWhatsNew,
   parseVersion,
+  parseWhatsNewEntries,
+  whatsNewText,
   WHATS_NEW,
   WHATS_NEW_BASELINE,
   WHATS_NEW_MANUAL_VERSIONS,
@@ -17,6 +19,16 @@ import {
 const entry = (version: string): WhatsNewEntry => ({
   version,
   items: [{ title: { de: "Titel", en: "Title" }, body: { de: "Text", en: "Text" } }],
+});
+
+describe("Czech release highlights", () => {
+  it("preserves Czech from the network and falls back for older upstream releases", () => {
+    const text = { de: "Titel", en: "Title", cs: "Název" };
+    const parsed = parseWhatsNewEntries([{ version: "1.66.2", items: [{ title: text, body: text }] }]);
+    expect(parsed[0].items[0].title.cs).toBe("Název");
+    expect(whatsNewText(text, "cs")).toBe("Název");
+    expect(whatsNewText({ de: "Titel", en: "Title" }, "cs")).toBe("Title");
+  });
 });
 const ENTRIES = ["1.38.0", "1.40.0", "1.41.0", "1.42.0", "1.43.0"].map(entry);
 
@@ -105,9 +117,9 @@ describe("the written list", () => {
     for (const { version, items } of WHATS_NEW) {
       expect(items.length, version).toBeGreaterThan(0);
       for (const item of items) {
-        for (const language of ["de", "en"] as const) {
-          expect(item.title[language].trim(), `${version} title ${language}`).not.toBe("");
-          expect(item.body[language].trim(), `${version} text ${language}`).not.toBe("");
+        for (const language of ["de", "en", "cs"] as const) {
+          expect(item.title[language]?.trim(), `${version} title ${language}`).toBeTruthy();
+          expect(item.body[language]?.trim(), `${version} text ${language}`).toBeTruthy();
         }
         // A title doubles as the key of its row, so it must be unique within a version.
         expect(new Set(items.map((entryItem) => entryItem.title.en)).size, version).toBe(items.length);

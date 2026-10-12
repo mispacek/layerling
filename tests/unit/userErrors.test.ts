@@ -3,9 +3,17 @@ import { setLanguage } from "@/lib/i18n";
 import { ERROR_RULES, localizedError } from "@/lib/userErrors";
 import { MESSAGES_DE } from "@/lib/messages.de";
 import { MESSAGES_EN } from "@/lib/messages.en";
+import { MESSAGES_CS } from "@/lib/messages.cs";
 
 describe("error messages for people", () => {
   afterEach(() => setLanguage("en"));
+
+  it("shows CAD errors and wraps unknown English errors in Czech", () => {
+    setLanguage("cs");
+    expect(localizedError("The stored CAD feature could not be restored as a valid solid")).toBe(MESSAGES_CS["error.storedBodyRestore"]);
+    expect(localizedError("Something unexpected could not be written")).toBe("Došlo k chybě: Something unexpected could not be written");
+    expect(localizedError("Soubor se nepodařilo načíst")).toBe("Soubor se nepodařilo načíst");
+  });
 
   it("shows known English error texts in German", () => {
     setLanguage("de");

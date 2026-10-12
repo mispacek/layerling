@@ -2,7 +2,7 @@
 import type { ManifoldToplevel } from "manifold-3d";
 import { ADDITION, Brush, Evaluator, HOLLOW_INTERSECTION, HOLLOW_SUBTRACTION, INTERSECTION, SUBTRACTION, type CSGOperation } from "three-bvh-csg";
 import * as THREE from "three";
-import { getLanguage, t } from "@/lib/i18n";
+import { getLocale, t } from "@/lib/i18n";
 import { sphereTessellation } from "@/lib/sphereTessellation";
 import { groupShowsPartColors } from "@/lib/groupColors";
 import { acceleratedRaycast, computeBoundsTree } from "three-mesh-bvh";
@@ -1078,7 +1078,7 @@ export type ExportSolidVolume = Awaited<ReturnType<typeof exportSolidVolume>>;
 export const PRINT_MATERIAL_STORAGE_KEY = "layerling.printMaterial";
 
 export function formatEstimateNumber(value: number, digits: number) {
-  return value.toLocaleString(getLanguage() === "de" ? "de-DE" : "en-US", { minimumFractionDigits: digits, maximumFractionDigits: digits });
+  return value.toLocaleString(getLocale(), { minimumFractionDigits: digits, maximumFractionDigits: digits });
 }
 
 /**

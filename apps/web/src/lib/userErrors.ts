@@ -134,7 +134,11 @@ export function localizedError(raw: string): string {
     const match = text.match(rule.pattern);
     if (match) return t(rule.key, rule.values?.(match));
   }
-  if (getLanguage() === "de" && ENGLISH_HINT.test(text) && !GERMAN_HINT.test(text)) {
+  const language = getLanguage();
+  const nativeHint = language === "cs"
+    ? /[áčďéěíňóřšťúůýž]|\b(nelze|chyba|není|soubor|se|nebo|pro)\b/i
+    : GERMAN_HINT;
+  if (language !== "en" && ENGLISH_HINT.test(text) && !nativeHint.test(text)) {
     return t("error.unknown", { detail: text });
   }
   return text;

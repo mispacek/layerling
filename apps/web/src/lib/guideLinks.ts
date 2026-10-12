@@ -1,6 +1,9 @@
 import type { Language } from "@/lib/i18n";
 import type { ShapeKind } from "@/types/layerling";
 
+// The full illustrated manual currently has English and German editions.
+type GuideLanguage = "en" | "de";
+
 /**
  * The chapters of the user guide (docs/guide) by what they are about, with the
  * file name each language gave them. The pages are static files next to the
@@ -24,7 +27,7 @@ export const GUIDE_CHAPTERS = {
   shortcuts: { de: "tastenkuerzel", en: "shortcuts" },
   ai: { de: "ki-mit-mcp", en: "ai-with-mcp" },
   offline: { de: "offline-und-installieren", en: "offline-and-install" },
-} as const satisfies Record<string, Record<Language, string>>;
+} as const satisfies Record<string, Record<GuideLanguage, string>>;
 
 export type GuideChapter = keyof typeof GUIDE_CHAPTERS;
 
@@ -87,17 +90,18 @@ export const GUIDE_SECTIONS = {
   sketchCurve: { chapter: "sketches", de: "eine-gerade-seite-kruemmen", en: "curving-a-straight-side" },
   commandSearch: { chapter: "shortcuts", de: "befehlssuche", en: "command-search" },
   whatsNew: { chapter: "start", de: "neu-seit-deinem-letzten-besuch", en: "new-since-your-last-visit" },
-} as const satisfies Record<string, { chapter: GuideChapter } & Record<Language, string>>;
+} as const satisfies Record<string, { chapter: GuideChapter } & Record<GuideLanguage, string>>;
 
 export type GuideSection = keyof typeof GUIDE_SECTIONS;
 
 /** The address of a chapter or one of its sections, or of the guide's overview when neither is named. */
 export function guideHref(language: Language, chapter?: GuideChapter, section?: GuideSection): string {
+  const guideLanguage: GuideLanguage = language === "de" ? "de" : "en";
   const directory = language === "de" ? "anleitung" : "guide";
   const target = section ? GUIDE_SECTIONS[section] : null;
   const page = target?.chapter ?? chapter;
   if (!page) return `/${directory}/index.html`;
-  return `/${directory}/${GUIDE_CHAPTERS[page][language]}.html${target ? `#${target[language]}` : ""}`;
+  return `/${directory}/${GUIDE_CHAPTERS[page][guideLanguage]}.html${target ? `#${target[guideLanguage]}` : ""}`;
 }
 
 /**

@@ -9,6 +9,15 @@ import { useLanguage } from "@/lib/useLanguage";
  * sehen sie überall gleich aus und lassen sich auf Pixelgrößen bringen.
  */
 function LanguageFlag({ language }: { language: Language }) {
+  if (language === "cs") {
+    return (
+      <svg viewBox="0 0 6 4" aria-hidden="true">
+        <rect width="6" height="2" fill="#ffffff" />
+        <rect width="6" height="2" y="2" fill="#d7141a" />
+        <path d="M0 0 3 2 0 4Z" fill="#11457e" />
+      </svg>
+    );
+  }
   if (language === "de") {
     return (
       <svg viewBox="0 0 5 3" aria-hidden="true">
@@ -31,8 +40,8 @@ function LanguageFlag({ language }: { language: Language }) {
 
 /**
  * Die Sprachwahl sitzt oben rechts, wo man sie auf Webseiten sucht - auf der
- * Startseite wie im Editor. Zwei Sprachen brauchen keine Liste, die man erst
- * aufklappt: beide stehen nebeneinander, die gewählte ist hervorgehoben.
+ * Startseite wie im Editor. Die Sprachen stehen nebeneinander;
+ * die gewählte ist hervorgehoben.
  */
 export function LanguageSwitch() {
   const language = useLanguage();
