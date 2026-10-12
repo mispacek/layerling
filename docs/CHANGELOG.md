@@ -6,6 +6,19 @@ code still carries it - so a lower number further down is older, not newer.
 
 ## Unreleased
 
+## 1.66.6
+
+- **Mirror in the right-click menu:** Right-click a selection and choose **Mirror**, as well as pressing M or using the ribbon: the three arrows for left-right, front-back and top-bottom appear. Asked for in a discussion by someone who could not find the tool.
+- **See-through bodies no longer fade away behind the plate's middle:** A body shown see-through that stood in the back half of the plate, seen from the camera, could turn into a faint ghost, depending on the camera's height and while it was moved. The plate is see-through too, and the view draws such surfaces by the distance of their centres; behind the plate's centre the body came first and the plate was laid over it. The plate is now always drawn first, and the section plane always after the bodies, so neither changes with the view. Reported by DrJones in the forum.
+- **Chamfer, bottom end shows up (#269):** 1.66.2 gave every end of a rod, nut or tapped hole a chamfer of its own, but the field for the bottom end never appeared in the thread's settings, because the list of fields shown for a thread did not know it. It is there now, as **Chamfer, bottom end**. A screw still has its one chamfer at the tip. Reported by DrJones and PePa in the forum.
+- **Torus symbol:** the picture of the torus in the shapes menu showed SketchForge's flat ring with a square profile. It is now rendered from the real geometry, a donut with a round profile. Reported by DrJones in the forum.
+
+- **Chamfer and fillet show the edge that does not fit:** When a selection fails with "The selected edges cannot be filleted (chamfered) together at this size", the edge you clicked that broke a selection that worked is now drawn in red and twice as wide, so you know which one to take out. It stays the one shown while you click more edges on top. Without an earlier selection that worked - the first click, Select all, or a size you raised - the worker tries each selected edge of the failing body on its own and marks those that fail alone, or all of them when only their combination fails. That search stops after 1.5 s and then marks all of them: on a dense mesh one edge alone takes about half a second, and a refusal must not hold up the next value while the size is dragged. On a short screen the panel scrolls down to the message, which sat under its buttons before. A chamfer at an angle other than 45° now gets the same message instead of the kernel's raw error.
+
+- **Only visible edges:** The chamfer and fillet panel has a new switch, **Only visible edges**, off by default. Until now every edge was drawn through the body, like an X-ray, which made a busy part hard to read. With the switch on, the edges behind the body from the current view are hidden and cannot be clicked; turning the view brings them back. An edge marked red always shows.
+
+- **The edge under the pointer is drawn wider:** In the chamfer and fillet tool, the edge a click would pick is now drawn twice as wide as the others, besides its lighter colour.
+
 ## 1.66.5
 
 - **A size typed for several bodies changes all of them (#259):** With two or more bodies selected, a number typed into the width, depth or height label (or the pair of a corner) only changed the first body, and a typed height above the plate only the last one. The label shows the size of the whole selection, so the number now sets that: every body is scaled with it and moved with it, as when the handle is dragged. Reported on GitHub.

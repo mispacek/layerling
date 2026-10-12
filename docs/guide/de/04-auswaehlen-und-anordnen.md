@@ -52,7 +52,7 @@ Die Taste dafür ist [[L]]. [[Esc]] bricht ab.
 
 ## Spiegeln
 
-{{ui:editor.tool.mirror}} ([[M]]) kippt die Auswahl an einer Ebene: {{ui:mirror.leftRight}}, {{ui:mirror.frontBack}} oder {{ui:mirror.topBottom}}. Klicke dazu auf den passenden Achsenpfeil. Das ist praktisch für symmetrische Teile: Baue eine Hälfte, kopiere sie und spiegele die Kopie.
+{{ui:editor.tool.mirror}} ([[M]], oder per Rechtsklick auf die Auswahl) kippt die Auswahl an einer Ebene: {{ui:mirror.leftRight}}, {{ui:mirror.frontBack}} oder {{ui:mirror.topBottom}}. Klicke dazu auf den passenden Achsenpfeil. Das ist praktisch für symmetrische Teile: Baue eine Hälfte, kopiere sie und spiegele die Kopie.
 
 ## Drehen und den Drehpunkt setzen
 

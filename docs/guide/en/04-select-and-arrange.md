@@ -52,7 +52,7 @@ The key is [[L]]. [[Esc]] cancels.
 
 ## Mirroring
 
-{{ui:editor.tool.mirror}} ([[M]]) flips the selection across a plane: {{ui:mirror.leftRight}}, {{ui:mirror.frontBack}} or {{ui:mirror.topBottom}}. Click the matching axis arrow. That is handy for symmetric parts: build one half, copy it and mirror the copy.
+{{ui:editor.tool.mirror}} ([[M]], or right-click the selection and choose it) flips the selection across a plane: {{ui:mirror.leftRight}}, {{ui:mirror.frontBack}} or {{ui:mirror.topBottom}}. Click the matching axis arrow. That is handy for symmetric parts: build one half, copy it and mirror the copy.
 
 ## Rotating and setting the pivot
 

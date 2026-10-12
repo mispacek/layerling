@@ -24,13 +24,18 @@ Im Fenster findest du:
 - **{{ui:edge.radius}}** bei der Verrundung. Bei der Fase stellst du {{ui:edge.distance}} oder {{ui:edge.angle}} ein.
 - {{ui:edge.sharpThreshold}} legt fest, welche Kanten überhaupt als scharf gelten. Ein Wert von 25° behandelt nur deutliche Knicke als Kante und lässt flache Übergänge in Ruhe.
 - {{ui:edge.topEdges}} wählt nur die Kanten ganz oben am Körper. Das ist der schnelle Weg für eine Ausstechform: Umriss in der Skizze als Kontur bauen, dann die oberen Kanten fasen. Wie steil die Fase wird, stellst du mit {{ui:edge.angle}} ein; länger als die Wand dick ist, kann sie nicht werden.
+- {{ui:edge.onlyVisibleEdges}} blendet die Kanten aus, die von deinem Blickwinkel aus hinter dem Körper liegen. Ohne den Schalter scheinen alle Kanten durch den Körper hindurch, was bei einem vielteiligen Körper verwirrt; mit ihm siehst du nur die dir zugewandten Kanten und kannst nur diese anklicken. Für die anderen drehst du die Ansicht. Eine rot gezeichnete Kante (siehe unten) bleibt immer sichtbar.
 - {{ui:edge.tangentChains}}: Ein Klick wählt dann auch die Kanten, die sanft ineinander übergehen, zum Beispiel alle Kanten rund um eine Fläche mit gerundeten Ecken. Der Schalter bestimmt nur, was ein Klick auswählt: Der CAD-Kern führt eine Fase oder Rundung immer an solchen glatt anschließenden Kanten weiter. Die Tafel sagt dir dann, an wie vielen weiteren Kanten das geschieht.
 - {{ui:edge.keepSize}} hält Fase oder Rundung so groß, wie sie sind, auch wenn du den Körper später skalierst.
 - {{ui:edge.previewQuality}} ({{ui:edge.draft}}, {{ui:edge.standard}} oder {{ui:edge.fine}}) bestimmt, wie fein die Vorschau gerechnet wird. Bei schwierigen Teilen ist {{ui:edge.draft}} schneller.
 
 Während du am Maß drehst, rechnet layerling die Vorschau nach. Sie kann einen Moment brauchen. Du darfst weiter einstellen, gerechnet wird immer der zuletzt gewählte Wert.
 
-Wenn das Maß zu groß für die Kante ist, sagt layerling das und schlägt einen kleineren Wert vor. Meist genügt es, ein bis zwei Millimeter weniger zu nehmen. An spitzen Winkeln braucht eine Verrundung mehr Platz, als der Radius vermuten lässt.
+Wenn das Maß zu groß für die Kante ist, sagt layerling das und schlägt einen kleineren Wert vor. Meist genügt es, ein bis zwei Millimeter weniger zu nehmen. An spitzen Winkeln braucht eine Verrundung mehr Platz, als der Radius vermuten lässt. Auf einem kleinen Bildschirm rollt das Fenster von selbst nach unten, damit die Meldung zu sehen ist.
+
+Scheitert eine Auswahl, die eben noch ging, nachdem du eine weitere Kante angeklickt hast, wird diese Kante rot und breiter gezeichnet: Sie ist die, die sich bei diesem Maß nicht zusammen mit den anderen bearbeiten lässt. Klicke sie noch einmal an, um sie herauszunehmen, oder nimm ein kleineres Maß. Klickst du weitere Kanten an, solange die Meldung steht, bleibt die erste rot. Gibt es keine frühere Auswahl, die ging - beim allerersten Klick oder nach einem größeren Maß -, werden die Kanten rot, die schon allein scheitern, oder alle, wenn nur ihr Zusammenspiel scheitert.
+
+Auch die Kante unter dem Mauszeiger wird breiter gezeichnet, damit du siehst, welche ein Klick wählt.
 
 ### Eine Kantenbearbeitung zurücknehmen
 

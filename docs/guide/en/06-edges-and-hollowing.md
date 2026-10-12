@@ -24,13 +24,18 @@ In the panel you find:
 - **{{ui:edge.radius}}** for the fillet. For the chamfer you set {{ui:edge.distance}} or {{ui:edge.angle}}.
 - {{ui:edge.sharpThreshold}} decides which edges count as sharp at all. A value of 25° treats only clear kinks as edges and leaves flat transitions alone.
 - {{ui:edge.topEdges}} picks only the edges along the very top of the body. It is the quick way for a cookie cutter: build the outline in a sketch as a stroke, then chamfer the top edges. {{ui:edge.angle}} sets how steep the chamfer is; it cannot reach further than the wall is thick.
+- {{ui:edge.onlyVisibleEdges}} hides the edges that lie behind the body from where you look. By default every edge shows through the body, which gets confusing on a busy part; with the switch on you see, and can click, only the edges facing you. Turn the view to reach the others. An edge drawn in red (see below) always shows.
 - {{ui:edge.tangentChains}}: a click then also picks edges that flow smoothly into each other, for example all edges around a face with rounded corners. The switch only decides what a click picks: the CAD kernel always carries a chamfer or fillet on along such smoothly continuing edges. The panel tells you along how many more edges that happens.
 - {{ui:edge.keepSize}} keeps the chamfer or fillet as large as it is, even if you scale the body later.
 - {{ui:edge.previewQuality}} ({{ui:edge.draft}}, {{ui:edge.standard}} or {{ui:edge.fine}}) decides how finely the preview is calculated. For difficult parts {{ui:edge.draft}} is faster.
 
 While you adjust the size, layerling recalculates the preview. It can take a moment. You may keep adjusting; the last value you chose is what gets calculated.
 
-If the size is too large for the edge, layerling says so and suggests a smaller value. Often one or two millimetres less will do. At sharp angles a fillet needs more room than its radius suggests.
+If the size is too large for the edge, layerling says so and suggests a smaller value. Often one or two millimetres less will do. At sharp angles a fillet needs more room than its radius suggests. On a small screen the panel scrolls down by itself so the message is in view.
+
+When a selection that worked fails after you click one more edge, that edge turns red and is drawn wider: it is the one that cannot be treated together with the others at this size. Click it again to take it out, or make the size smaller. If you click more edges while the message stands, the first one stays red. When there is no earlier selection that worked - the very first click, or a size you just raised - the edges that fail even on their own turn red, or all of them if it is only their combination.
+
+The edge under the pointer is drawn wider too, so you can see which one a click will pick.
 
 ### Taking an edge treatment back
 

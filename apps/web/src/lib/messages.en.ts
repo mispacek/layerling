@@ -2077,6 +2077,8 @@ export const MESSAGES_EN = {
   "edge.tangentImpliedOne": "The CAD kernel carries this on along 1 more edge that continues smoothly.",
   "edge.tangentImpliedMany": "The CAD kernel carries this on along {count} more edges that continue smoothly.",
   "edge.keepSize": "Keep edge size when resizing",
+  "edge.onlyVisibleEdges": "Only visible edges",
+  "edge.onlyVisibleEdgesHint": "Hides the edges behind the body from this view, so only the ones facing you can be seen and picked.",
   "edge.previewQuality": "Preview quality",
   "edge.draft": "Draft",
   "edge.standard": "Standard",

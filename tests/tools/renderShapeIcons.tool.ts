@@ -2,7 +2,7 @@ import { describe, it } from "vitest";
 import { writeFileSync } from "node:fs";
 import { encodePng } from "./png";
 import type * as THREE from "three";
-import { BoxGeometry } from "three";
+import { BoxGeometry, TorusGeometry } from "three";
 import { regularPolygonAspect } from "@/lib/regularPolygonFootprint";
 import { createPrismGeometry } from "@/lib/prismGeometry";
 import { createSpringGeometry } from "@/lib/springGeometry";
@@ -583,6 +583,26 @@ describe("palette icon of the icon tag", () => {
       azimuth: 30,
       elevation: 42,
       build: () => stack,
+    });
+  });
+});
+
+describe("palette icon of the torus", () => {
+  it("renders a donut with a round profile, as the editor builds it", () => {
+    // The old picture was SketchForge's flat ring with a square profile (reported by DrJones).
+    const tube = 4.5;
+    render({
+      name: "apps/web/public/assets/editor/shape-icons-gray/torus.png",
+      height: tube * 2,
+      lay: false,
+      azimuth: 35,
+      elevation: 34,
+      build: () => {
+        const geometry = new TorusGeometry(12, tube, 36, 144);
+        geometry.rotateX(Math.PI / 2);
+        geometry.translate(0, tube, 0);
+        return geometry.toNonIndexed();
+      },
     });
   });
 });

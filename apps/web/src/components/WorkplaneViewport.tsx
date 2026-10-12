@@ -14,6 +14,8 @@ import { triangleTouchesRect, type ScreenRect } from "@/lib/screenRectHit";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 import { LineMaterial } from "three/examples/jsm/lines/LineMaterial.js";
+import { LineSegments2 } from "three/examples/jsm/lines/LineSegments2.js";
+import { LineSegmentsGeometry } from "three/examples/jsm/lines/LineSegmentsGeometry.js";
 import { FramingSquareIcon } from "@/components/FramingSquareIcon";
 import { GridEyeIcon } from "@/components/GridEyeIcon";
 import { AlignOverlay, MirrorOverlay, type AlignOverlayState, type MirrorOverlayState } from "@/components/workplane/ActionOverlays";
@@ -269,6 +271,10 @@ function setEdgeLineStyle(enabled: boolean, color: string) {
 }
 const NORMAL_IMPORTED_SELECTION_EDGE_ANGLE = 60;
 const MODIFIER_EDGE_PICK_RADIUS_PX = 14;
+// "Only visible edges": an edge lies on the body's own faces, so its line is
+// moved this fraction of the way toward the camera before the depth test,
+// or it would flicker in and out of the faces it borders.
+const MODIFIER_EDGE_DEPTH_PULL = 0.997;
 
 type WorkplaneViewportProps = {
   shapes: WorkplaneShape[];
@@ -380,6 +386,10 @@ type WorkplaneViewportProps = {
   modifierEdges?: CadModifierEdge[];
   modifierHighlightedEdgeIds?: number[];
   selectedModifierEdgeIds?: number[];
+  /** Selected edges the kernel could not treat: drawn red instead of the selection colour. */
+  failedModifierEdgeIds?: number[];
+  /** Draw and pick only the edges the body does not hide from this view. */
+  modifierOnlyVisibleEdges?: boolean;
   onModifierEdgeToggle?: (id: number, singleEdge: boolean) => void;
   themePreference?: AppThemePreference;
   resolvedTheme?: ResolvedAppTheme;
@@ -1487,16 +1497,43 @@ function projectCadPointToCanvas(point: THREE.Vector3, state: ThreeState, rect: 
   };
 }
 
-function pickModifierEdgeFromScreen(state: ThreeState, edges: CadModifierEdge[], clientX: number, clientY: number) {
+/**
+ * Whether the body covers this point from the camera. The slack matches the
+ * pull toward the camera the drawn edges get, so what can be picked is what
+ * is drawn.
+ */
+function modifierEdgePointHidden(state: ThreeState, point: THREE.Vector3) {
+  const ndc = point.clone().project(state.camera);
+  state.pointer.set(ndc.x, ndc.y);
+  state.raycaster.setFromCamera(state.pointer, state.camera);
+  state.raycaster.layers.set(RENDER_LAYER_SHAPES);
+  const ray = state.raycaster.ray;
+  const pointDistance = point.clone().sub(ray.origin).dot(ray.direction);
+  const slack = Math.max(0.01, state.camera.position.distanceTo(point) * (1 - MODIFIER_EDGE_DEPTH_PULL));
+  const hit = state.raycaster.intersectObjects(state.shapeLayer.children, true).find((entry) => {
+    if (!(entry.object instanceof THREE.Mesh)) return false;
+    if (state.sectionPlane && state.sectionPlane.distanceToPoint(entry.point) < -0.001) return false;
+    let object: THREE.Object3D | null = entry.object;
+    while (object) {
+      if (!object.visible) return false;
+      object = object.parent;
+    }
+    return true;
+  });
+  return hit !== undefined && hit.distance < pointDistance - slack;
+}
+
+/** `visibleOnly`: skip edges the body hides, except the ids in the set. */
+function pickModifierEdgeFromScreen(state: ThreeState, edges: CadModifierEdge[], clientX: number, clientY: number, visibleOnly: ReadonlySet<number> | null = null) {
   const rect = state.renderer.domElement.getBoundingClientRect();
   const pointerX = clientX - rect.left;
   const pointerY = clientY - rect.top;
   const pointA = new THREE.Vector3();
   const pointB = new THREE.Vector3();
-  let nearestId: number | null = null;
-  let nearestDistance = MODIFIER_EDGE_PICK_RADIUS_PX;
+  const candidates: Array<{ id: number; distance: number; point: THREE.Vector3 }> = [];
   state.camera.updateMatrixWorld();
   edges.forEach((edge) => {
+    let best: { id: number; distance: number; point: THREE.Vector3 } | null = null;
     for (let index = 0; index + 5 < edge.points.length; index += 3) {
       pointA.set(edge.points[index], edge.points[index + 1], edge.points[index + 2]);
       pointB.set(edge.points[index + 3], edge.points[index + 4], edge.points[index + 5]);
@@ -1504,13 +1541,21 @@ function pickModifierEdgeFromScreen(state: ThreeState, edges: CadModifierEdge[],
       const b = projectCadPointToCanvas(pointB, state, rect);
       if (!a || !b) continue;
       const distance = distanceToScreenSegment(pointerX, pointerY, a.x, a.y, b.x, b.y);
-      if (distance < nearestDistance) {
-        nearestDistance = distance;
-        nearestId = edge.id;
+      if (distance < MODIFIER_EDGE_PICK_RADIUS_PX && (!best || distance < best.distance)) {
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        const lengthSq = dx * dx + dy * dy;
+        const amount = lengthSq > 0.0001 ? clamp(((pointerX - a.x) * dx + (pointerY - a.y) * dy) / lengthSq, 0, 1) : 0;
+        best = { id: edge.id, distance, point: pointA.clone().lerp(pointB, amount) };
       }
     }
+    if (best) candidates.push(best);
   });
-  return nearestId;
+  candidates.sort((a, b) => a.distance - b.distance);
+  const picked = visibleOnly
+    ? candidates.find((candidate) => visibleOnly.has(candidate.id) || !modifierEdgePointHidden(state, candidate.point))
+    : candidates[0];
+  return picked?.id ?? null;
 }
 
 
@@ -2814,6 +2859,8 @@ export function WorkplaneViewport({
   modifierEdges = [],
   modifierHighlightedEdgeIds = [],
   selectedModifierEdgeIds = [],
+  failedModifierEdgeIds = [],
+  modifierOnlyVisibleEdges = false,
   onModifierEdgeToggle,
   themePreference = "system",
   resolvedTheme = "light",
@@ -3021,6 +3068,8 @@ export function WorkplaneViewport({
   const modifierActiveRef = useRef(modifierActive);
   const modifierPreviewActiveRef = useRef(modifierPreviewActive);
   const modifierEdgesRef = useRef(modifierEdges);
+  const modifierEdgePickOptionsRef = useRef({ onlyVisible: modifierOnlyVisibleEdges, alwaysIds: failedModifierEdgeIds });
+  modifierEdgePickOptionsRef.current = { onlyVisible: modifierOnlyVisibleEdges, alwaysIds: failedModifierEdgeIds };
   const [hoverModifierEdgeId, setHoverModifierEdgeId] = useState<number | null>(null);
   const selectedIdsKeyRef = useRef(selectedIds.join("|"));
   const placementWorkplaneRef = useRef(placementWorkplane);
@@ -3105,8 +3154,8 @@ export function WorkplaneViewport({
 
   useEffect(() => {
     modifierEdgesRef.current = modifierEdges;
-    rebuildModifierEdges(threeRef.current, modifierEdges, selectedModifierEdgeIds, modifierPreviewActive, hoverModifierEdgeId, modifierHighlightedEdgeIds);
-  }, [hoverModifierEdgeId, modifierEdges, modifierHighlightedEdgeIds, modifierPreviewActive, selectedModifierEdgeIds]);
+    rebuildModifierEdges(threeRef.current, modifierEdges, selectedModifierEdgeIds, modifierPreviewActive, hoverModifierEdgeId, modifierHighlightedEdgeIds, failedModifierEdgeIds, modifierOnlyVisibleEdges);
+  }, [failedModifierEdgeIds, hoverModifierEdgeId, modifierEdges, modifierHighlightedEdgeIds, modifierOnlyVisibleEdges, modifierPreviewActive, selectedModifierEdgeIds]);
 
   const resolvedThemeRef = useRef(resolvedTheme);
   resolvedThemeRef.current = resolvedTheme;
@@ -6195,7 +6244,8 @@ export function WorkplaneViewport({
   const pickModifierEdge = useCallback((clientX: number, clientY: number) => {
     const state = threeRef.current;
     if (!state) return null;
-    return pickModifierEdgeFromScreen(state, modifierEdgesRef.current, clientX, clientY);
+    const options = modifierEdgePickOptionsRef.current;
+    return pickModifierEdgeFromScreen(state, modifierEdgesRef.current, clientX, clientY, options.onlyVisible ? new Set(options.alwaysIds) : null);
   }, []);
 
   const updateModifierEdgeHover = useCallback((clientX: number, clientY: number) => {
@@ -8598,7 +8648,7 @@ function createThreeScene(host: HTMLDivElement): ThreeState {
     const height = Math.max(1, host.clientHeight);
     renderer.setSize(width, height);
     updateCameraViewport(state.camera, width, height);
-    [state.transformGuideLayer, state.moveDimensionLayer, state.originDimensionLayer].forEach((layer) => {
+    [state.transformGuideLayer, state.moveDimensionLayer, state.originDimensionLayer, state.modifierLayer].forEach((layer) => {
       layer.traverse((child) => {
         const material = (child as THREE.Mesh).material;
         const materials = Array.isArray(material) ? material : material ? [material] : [];
@@ -8992,6 +9042,10 @@ function rebuildWorkplane(
       }),
     );
     surface.name = muted ? "WorkplaneBaseReference" : "WorkplaneBase";
+    // The plate is see-through too, and three.js draws those by the distance of their centres. A body
+    // standing behind the plate's centre was then drawn first and the plate laid over it, so it
+    // faded to a ghost, depending on the view. The plate always goes first.
+    surface.renderOrder = -10;
     surface.rotation.x = -Math.PI / 2;
     surface.receiveShadow = view.showShadows && !muted;
     group.add(surface);
@@ -9913,6 +9967,8 @@ function updateSectionPlaneHelper(
     });
     const quad = new THREE.Mesh(quadGeom, quadMat);
     quad.name = "SectionPlaneQuad";
+    // Always after the see-through bodies, so its tint does not change with the view.
+    quad.renderOrder = 2;
 
     const borderGeom = new THREE.BufferGeometry().setFromPoints([
       new THREE.Vector3(-0.5, -0.5, 0),
@@ -9928,6 +9984,7 @@ function updateSectionPlaneHelper(
       depthWrite: false,
     });
     const border = new THREE.LineLoop(borderGeom, borderMat);
+    border.renderOrder = 3;
     border.name = "SectionPlaneBorder";
 
     helper.add(quad);
@@ -10062,13 +10119,59 @@ function rebuildShapes(
   state.needsRender = true;
 }
 
-function modifierEdgeMaterialStyle(active: boolean, hovered: boolean, previewActive: boolean, belowThreshold = false) {
+function modifierEdgeMaterialStyle(active: boolean, hovered: boolean, previewActive: boolean, belowThreshold = false, failed = false) {
   const subduedSelectedPreviewEdge = previewActive && active && !hovered;
   return {
-    color: active ? (hovered ? "#ffbf45" : "#ff8a1d") : hovered ? "#84edff" : belowThreshold ? "#4d7f91" : "#17b7e5",
+    color: active ? (failed ? (hovered ? "#ff6b6b" : "#e5242a") : hovered ? "#ffbf45" : "#ff8a1d") : hovered ? "#84edff" : belowThreshold ? "#4d7f91" : "#17b7e5",
     opacity: subduedSelectedPreviewEdge ? 0.18 : active || hovered ? 1 : belowThreshold ? 0.35 : 0.72,
     linewidth: active || hovered ? 3 : 1,
   };
+}
+
+// Scaling a view-space point about the camera keeps it on the same pixel; in
+// an orthographic view only its depth may change.
+function pullModifierEdgeTowardCamera(material: THREE.LineBasicMaterial) {
+  const pull = MODIFIER_EDGE_DEPTH_PULL.toFixed(4);
+  material.onBeforeCompile = (shader) => {
+    shader.vertexShader = shader.vertexShader.replace(
+      "#include <project_vertex>",
+      `#include <project_vertex>
+      mvPosition.xyz *= isOrthographic ? vec3(1.0, 1.0, ${pull}) : vec3(${pull});
+      gl_Position = projectionMatrix * mvPosition;`,
+    );
+  };
+  material.customProgramCacheKey = () => "modifier-edge-depth-pull";
+}
+
+// Browsers draw a plain WebGL line 1px wide whatever its linewidth says, so the
+// hovered edge and the edge to unselect get a screen-space wide line at twice that.
+const WIDE_MODIFIER_EDGE_PX = 2;
+
+function wideModifierEdgeLine(state: ThreeState, points: number[], color: string, renderOrder: number) {
+  const segments: number[] = [];
+  for (let index = 3; index + 2 < points.length; index += 3) {
+    segments.push(points[index - 3], points[index - 2], points[index - 1], points[index], points[index + 1], points[index + 2]);
+  }
+  const geometry = new LineSegmentsGeometry();
+  geometry.setPositions(segments);
+  const material = new LineMaterial({
+    color,
+    linewidth: WIDE_MODIFIER_EDGE_PX,
+    worldUnits: false,
+    transparent: true,
+    opacity: 1,
+    depthTest: false,
+    depthWrite: false,
+    alphaToCoverage: false,
+  });
+  material.toneMapped = false;
+  const rect = state.renderer.domElement.getBoundingClientRect();
+  material.resolution.set(Math.max(1, rect.width), Math.max(1, rect.height));
+  const line = new LineSegments2(geometry, material);
+  line.renderOrder = renderOrder;
+  line.frustumCulled = false;
+  setObjectRenderLayer(line, RENDER_LAYER_MODIFIERS);
+  return line;
 }
 
 function rebuildModifierEdges(
@@ -10078,27 +10181,35 @@ function rebuildModifierEdges(
   previewActive = false,
   hoverId: number | null = null,
   highlightedIds: number[] = [],
+  failedIds: number[] = [],
+  onlyVisible = false,
 ) {
   if (!state) return;
   disposeChildren(state.modifierLayer);
   const selected = new Set(selectedIds);
   const highlighted = new Set(highlightedIds);
+  const failed = new Set(failedIds);
   edges.forEach((edge) => {
     if (edge.points.length < 6) return;
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute("position", new THREE.Float32BufferAttribute(edge.points, 3));
     const active = selected.has(edge.id);
     const hovered = hoverId === edge.id;
     const belowThreshold = !active && !hovered && !highlighted.has(edge.id);
-    const style = modifierEdgeMaterialStyle(active, hovered, previewActive, belowThreshold);
+    const style = modifierEdgeMaterialStyle(active, hovered, previewActive, belowThreshold, failed.has(edge.id));
+    if (hovered || (active && failed.has(edge.id))) {
+      state.modifierLayer.add(wideModifierEdgeLine(state, edge.points, style.color, hovered ? 1003 : 1002));
+      return;
+    }
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute("position", new THREE.Float32BufferAttribute(edge.points, 3));
     const material = new THREE.LineBasicMaterial({
       color: style.color,
-      depthTest: false,
+      depthTest: onlyVisible,
       depthWrite: false,
       transparent: true,
       opacity: style.opacity,
       linewidth: style.linewidth,
     });
+    if (onlyVisible) pullModifierEdgeTowardCamera(material);
     const line = new THREE.Line(geometry, material);
     line.userData.modifierEdgeId = edge.id;
     line.renderOrder = hovered ? 1003 : active ? 1002 : 1001;

@@ -2076,6 +2076,8 @@ export const MESSAGES_DE: Record<MessageKey, string> = {
   "edge.tangentImpliedOne": "Der CAD-Kern führt die Kante an 1 weiteren, glatt anschließenden Kante weiter.",
   "edge.tangentImpliedMany": "Der CAD-Kern führt die Kante an {count} weiteren, glatt anschließenden Kanten weiter.",
   "edge.keepSize": "Kantengröße beim Skalieren beibehalten",
+  "edge.onlyVisibleEdges": "Nur sichtbare Kanten",
+  "edge.onlyVisibleEdgesHint": "Blendet die Kanten hinter dem Körper aus dieser Ansicht aus, sodass nur die zugewandten zu sehen und wählbar sind.",
   "edge.previewQuality": "Qualität der Vorschau",
   "edge.draft": "Grob",
   "edge.standard": "Standard",

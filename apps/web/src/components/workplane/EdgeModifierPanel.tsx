@@ -2,7 +2,7 @@
 
 import { GuideHelpLink } from "@/components/GuideHelpLink";
 import { MovableToolPanel } from "@/components/workplane/MovableToolPanel";
-import { useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { Check, LoaderCircle, Minus, Pencil, Plus, RotateCcw, X } from "lucide-react";
 import { displayStepFromMillimeters, displayToMillimeters, formatMeasurementNumber, lengthDisplayUnit, millimetersToDisplay, parseMeasurementInput } from "@/lib/measurementUnits";
 import type { CadModifierKind, CadModifierQuality } from "@/lib/cadModifierTypes";
@@ -225,6 +225,7 @@ export function EdgeModifierPanel({
   sharpAngle,
   workspace,
   tangentChain,
+  onlyVisibleEdges,
   impliedEdgeCount = 0,
   preserveEdgeSize,
   targetName,
@@ -242,6 +243,7 @@ export function EdgeModifierPanel({
   onQualityChange,
   onSharpAngleChange,
   onTangentChainChange,
+  onOnlyVisibleEdgesChange,
   onPreserveEdgeSizeChange,
   onSelectAll,
   onSelectTop,
@@ -259,6 +261,8 @@ export function EdgeModifierPanel({
   sharpAngle: number;
   workspace: WorkplaneWorkspaceSettings;
   tangentChain: boolean;
+  /** Hide the edges the body covers from this view instead of drawing them through it. */
+  onlyVisibleEdges: boolean;
   /** Edges the kernel will treat as well, because they run on smoothly from a picked one (#161). */
   impliedEdgeCount?: number;
   preserveEdgeSize: boolean;
@@ -277,6 +281,7 @@ export function EdgeModifierPanel({
   onQualityChange: (value: CadModifierQuality) => void;
   onSharpAngleChange: (value: number) => void;
   onTangentChainChange: (value: boolean) => void;
+  onOnlyVisibleEdgesChange: (value: boolean) => void;
   onPreserveEdgeSizeChange: (value: boolean) => void;
   onSelectAll: () => void;
   /** Picks only the edges along the very top, e.g. the rim of a cookie cutter (#154). */
@@ -292,6 +297,13 @@ export function EdgeModifierPanel({
   const title = kind === "fillet" ? t("edge.filletTitle") : t("edge.chamferTitle");
   const amountMin = Math.min(MIN_EDGE_MODIFIER_AMOUNT, Math.max(Number.EPSILON, maxAmount));
   const amountMax = Math.max(amountMin, maxAmount);
+  // On a short screen the panel scrolls, and the error sits at its foot under
+  // the buttons: bring the whole bottom into view whenever a message appears.
+  const errorRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const panel = errorRef.current?.closest<HTMLElement>(".edge-modifier-panel");
+    if (panel) panel.scrollTop = panel.scrollHeight;
+  }, [error]);
   return (
     <MovableToolPanel className="edge-modifier-panel" ariaLabel={title}>
       {(handleProps) => (<>
@@ -352,6 +364,11 @@ export function EdgeModifierPanel({
 
       <EdgeModifierSlider label={t("edge.sharpThreshold")} value={sharpAngle} min={1} max={CAD_MODIFIER_MAX_SHARP_ANGLE} step={1} unit="°" workspace={workspace} disabled={!prepared} onChange={onSharpAngleChange} />
 
+      <label className="edge-modifier-check" title={t("edge.onlyVisibleEdgesHint")}>
+        <input type="checkbox" checked={onlyVisibleEdges} disabled={!prepared} onChange={(event) => onOnlyVisibleEdgesChange(event.currentTarget.checked)} />
+        <span>{t("edge.onlyVisibleEdges")}</span>
+      </label>
+
       <label className="edge-modifier-check" title={t("edge.tangentChainsHint")}>
         <input type="checkbox" checked={tangentChain} disabled={!prepared} onChange={(event) => onTangentChainChange(event.currentTarget.checked)} />
         <span>{t("edge.tangentChains")}</span>
@@ -378,7 +395,7 @@ export function EdgeModifierPanel({
         </select>
       </label>
 
-      {error ? <div className="edge-modifier-error" role="alert">{cadModifierUserErrorMessage(error)}</div> : null}
+      {error ? <div ref={errorRef} className="edge-modifier-error" role="alert">{cadModifierUserErrorMessage(error)}</div> : null}
       <div className="edge-modifier-footer">
         <button type="button" className="secondary" onClick={onCancel}>{t("common.cancel")}</button>
         <button type="button" className="primary" disabled={!prepared || busy || selectedCount === 0 || Boolean(error)} onClick={onApply}>

@@ -316,6 +316,10 @@ export type CadModifierWorkerRequest =
       // The finest deflection the shape's edge-treatment history has needed
       // so far, if any - a floor beneath this operation's own deflection.
       minDeflection?: CadModifierDeflection;
+      // The edges picked since the last preview that worked. When there are
+      // any, the editor already knows which edge to blame on a refusal, and
+      // the worker does not search for one.
+      addedEdgeIds?: number[];
     }
   | { type: "dispose"; requestId: number };
 
@@ -336,4 +340,5 @@ export type CadModifierWorkerResponse =
       deflection: CadModifierDeflection;
     }
   | { type: "disposed"; requestId: number }
-  | { type: "error"; requestId: number; message: string; resetSession?: boolean };
+  // failedEdgeIds: the selected edges the kernel could not treat together.
+  | { type: "error"; requestId: number; message: string; resetSession?: boolean; failedEdgeIds?: number[] };

@@ -279,13 +279,39 @@ type EdgeModifierSession = {
   chamferAngle: number;
   quality: CadModifierQuality;
   tangentChain: boolean;
+  // Off: every edge shows through the body. On: only the ones facing the camera.
+  onlyVisibleEdges?: boolean;
   preserveEdgeSize: boolean;
   busy: boolean;
   prepared: boolean;
   error: string | null;
+  // The selection of the last preview that worked.
+  workingEdgeIds?: number[];
+  // The edge(s) whose selection broke a working treatment; drawn red while that error stands.
+  failedEdgeIds?: number[];
   preview: WorkplaneShape | null;
   componentPreviews: EdgeModifierComponentPreview[];
 };
+
+/**
+ * The edge to unselect: the one added when a working treatment broke. It
+ * stays the culprit while more edges are added on top. Without a working
+ * selection to compare to (the first pick, or the size was changed), the
+ * worker's own finding stands.
+ */
+function conflictEdgeIds(session: EdgeModifierSession, workerFailedEdgeIds: number[]) {
+  const added = edgesAddedSinceWorking(session);
+  const earlier = new Set(session.failedEdgeIds ?? []);
+  const stillSelected = added.filter((edgeId) => earlier.has(edgeId));
+  if (stillSelected.length) return stillSelected;
+  return added.length ? added : workerFailedEdgeIds;
+}
+
+/** The edges picked since the last preview that worked; none without one. */
+function edgesAddedSinceWorking(session: EdgeModifierSession) {
+  const working = new Set(session.workingEdgeIds ?? []);
+  return working.size ? session.selectedEdgeIds.filter((edgeId) => !working.has(edgeId)) : [];
+}
 
 type SplitSession = {
   targetIds: string[];
@@ -2799,6 +2825,8 @@ export function LayerlingEditor({
             prepared: true,
             preview: null,
             componentPreviews: [],
+            workingEdgeIds: [],
+            failedEdgeIds: [],
             error: message.selectableEdgeIds.length || gesenkteSchwelle ? null : t("edge.noManifoldEdges"),
           };
         });
@@ -2826,6 +2854,9 @@ export function LayerlingEditor({
           componentPreviews,
           busy: false,
           error: preview ? null : t("edge.emptyResult"),
+          // Edges cannot be toggled while a preview runs, so this is the selection it was made with.
+          workingEdgeIds: preview ? current.selectedEdgeIds : current.workingEdgeIds,
+          failedEdgeIds: [],
         } : current);
         // Ein neuerer Wert kann waehrend der Rechnung eingetroffen sein - der geht jetzt raus.
         const nachgeschoben = cadPreviewQueueRef.current.settle(message.requestId);
@@ -2850,7 +2881,13 @@ export function LayerlingEditor({
           setNotice(cadModifierUserErrorMessage(message.message) ?? message.message);
           return;
         }
-        setEdgeModifier((current) => current ? { ...current, busy: false, preview: null, error: cadModifierUserErrorMessage(message.message) ?? message.message } : current);
+        setEdgeModifier((current) => current ? {
+          ...current,
+          busy: false,
+          preview: null,
+          error: cadModifierUserErrorMessage(message.message) ?? message.message,
+          failedEdgeIds: message.failedEdgeIds ? conflictEdgeIds(current, message.failedEdgeIds) : [],
+        } : current);
         // Ein zu grosser Radius scheitert - der inzwischen gewaehlte kleinere darf es trotzdem versuchen.
         if (cadPreviewQueueRef.current.settle(message.requestId).status !== "sent") {
           setNotice(t("status.edgeNeedsAdjustment"), true);
@@ -6368,6 +6405,9 @@ export function LayerlingEditor({
       return;
     }
     const timer = window.setTimeout(() => {
+      // Read from the ref: the working selection moves with every preview and
+      // must not send a new one by itself.
+      const addedEdgeIds = edgeModifierRef.current ? edgesAddedSinceWorking(edgeModifierRef.current) : [];
       cadPreviewQueueRef.current.request({
         type: "preview",
         kind: edgeModifier.kind,
@@ -6376,6 +6416,7 @@ export function LayerlingEditor({
         quality: edgeModifier.quality,
         chamferAngle: edgeModifier.chamferAngle,
         minDeflection: cadModifierBaseShapeRef.current?.cadMeshDeflection,
+        ...(addedEdgeIds.length ? { addedEdgeIds } : {}),
       });
     }, 120);
     return () => window.clearTimeout(timer);
@@ -10633,7 +10674,12 @@ export function LayerlingEditor({
         items.push({ key: "holePattern", label: t("holePattern.title"), onSelect: toggleHolePattern });
       }
     }
-    if (!allLocked) items.push({ key: "scalePercent", label: t("scalePercent.title"), separated: true, onSelect: toggleScalePercentTool });
+    if (!allLocked) {
+      items.push(
+        { key: "mirror", label: t("editor.tool.mirror"), shortcut: "M", separated: true, onSelect: toggleMirrorMode },
+        { key: "scalePercent", label: t("scalePercent.title"), onSelect: toggleScalePercentTool },
+      );
+    }
     if (single && offersMeshSimplify(single) && !single.locked) items.push({ key: "simplify", label: t("contextMenu.simplify"), separated: true, onSelect: startSimplifyTool });
     if (!allHoles) {
       items.push(
@@ -10993,6 +11039,8 @@ export function LayerlingEditor({
           modifierEdges={edgeModifier?.edges.filter((edge) => modifierCandidateEdgeIds.includes(edge.id)) ?? []}
           modifierHighlightedEdgeIds={modifierAvailableEdgeIds}
           selectedModifierEdgeIds={edgeModifier?.selectedEdgeIds ?? []}
+          failedModifierEdgeIds={edgeModifier?.error ? edgeModifier.failedEdgeIds ?? [] : []}
+          modifierOnlyVisibleEdges={edgeModifier?.onlyVisibleEdges ?? false}
           onModifierEdgeToggle={toggleModifierEdge}
           themePreference={themePreference}
           resolvedTheme={resolvedTheme}
@@ -11188,6 +11236,7 @@ export function LayerlingEditor({
           sharpAngle={edgeModifier.sharpAngle}
           workspace={workspaceSettings}
           tangentChain={edgeModifier.tangentChain}
+          onlyVisibleEdges={edgeModifier.onlyVisibleEdges ?? false}
           impliedEdgeCount={edgeModifierImpliedEdges}
           preserveEdgeSize={edgeModifier.preserveEdgeSize}
           targetName={selectedShape?.name ?? "Object"}
@@ -11230,6 +11279,7 @@ export function LayerlingEditor({
             };
           })}
           onTangentChainChange={(tangentChain) => setEdgeModifier((current) => current?.prepared ? { ...current, tangentChain } : current)}
+          onOnlyVisibleEdgesChange={(onlyVisibleEdges) => setEdgeModifier((current) => current?.prepared ? { ...current, onlyVisibleEdges } : current)}
           onPreserveEdgeSizeChange={(preserveEdgeSize) => setEdgeModifier((current) => current?.prepared ? { ...current, preserveEdgeSize } : current)}
           onSelectAll={() => setEdgeModifier((current) => current?.prepared ? { ...current, selectedEdgeIds: modifierAvailableEdgeIds, preview: null, busy: modifierAvailableEdgeIds.length > 0, error: modifierAvailableEdgeIds.length ? null : current.error } : current)}
           onSelectTop={() => setEdgeModifier((current) => {
