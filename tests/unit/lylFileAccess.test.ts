@@ -3,11 +3,15 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   ensureLylFileWritable,
   forgetLylFile,
+  forgetStlFile,
   linkedLylFile,
+  linkedStlFile,
   lylFileAccessSupported,
   pickLylFileToOpen,
   pickLylFileToSave,
+  pickStlFileToSave,
   rememberLylFile,
+  rememberStlFile,
   writeLylFile,
   type LylFileHandle,
 } from "@/lib/lylFileAccess";
@@ -62,6 +66,20 @@ describe("saving into a file of the user's choosing (#251)", () => {
     expect(linkedLylFile("a")).toBeNull();
   });
 
+  it("keeps a design's STL apart from its design file", () => {
+    const design = fakeHandle({ name: "bracket.lyl" }).handle;
+    const stl = fakeHandle({ name: "bracket.stl" }).handle;
+    rememberLylFile("a", design);
+    rememberStlFile("a", stl);
+    expect(linkedLylFile("a")).toBe(design);
+    expect(linkedStlFile("a")).toBe(stl);
+    expect(linkedStlFile("b")).toBeNull();
+    forgetStlFile("a");
+    expect(linkedStlFile("a")).toBeNull();
+    expect(linkedLylFile("a")).toBe(design);
+    forgetLylFile("a");
+  });
+
   it("asks for a place with the suggested name and the same folder memory as the open dialog", async () => {
     const { handle } = fakeHandle();
     const save = vi.fn(async () => handle);
@@ -70,6 +88,22 @@ describe("saving into a file of the user's choosing (#251)", () => {
     const options = (save.mock.calls[0] as unknown as [Record<string, unknown>])[0];
     expect(options.suggestedName).toBe("bracket.lyl");
     expect(options.id).toBe("layerling-designs");
+  });
+
+  it("asks where an STL goes, in a folder of its own apart from the designs", async () => {
+    const { handle } = fakeHandle({ name: "bracket.stl" });
+    const save = vi.fn(async () => handle);
+    pickers().showSaveFilePicker = save;
+    expect(await pickStlFileToSave("bracket.stl")).toBe(handle);
+    const options = (save.mock.calls[0] as unknown as [Record<string, unknown>])[0];
+    expect(options.suggestedName).toBe("bracket.stl");
+    expect(options.id).toBe("layerling-exports");
+    expect(JSON.stringify(options.types)).toContain(".stl");
+
+    save.mockImplementationOnce(async () => {
+      throw new DOMException("closed", "AbortError");
+    });
+    expect(await pickStlFileToSave("bracket.stl")).toBeNull();
   });
 
   it("treats a closed dialog as no choice, not as an error", async () => {

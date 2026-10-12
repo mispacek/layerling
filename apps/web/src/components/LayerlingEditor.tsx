@@ -149,11 +149,15 @@ import { isBuildMessage, reportWorkerBuild } from "@/lib/buildStamp";
 import {
   ensureLylFileWritable,
   forgetLylFile,
+  forgetStlFile,
   linkedLylFile,
+  linkedStlFile,
   lylFileAccessSupported,
   pickLylFileToOpen,
   pickLylFileToSave,
+  pickStlFileToSave,
   rememberLylFile,
+  rememberStlFile,
   writeLylFile,
   type LylFileHandle,
 } from "@/lib/lylFileAccess";
@@ -9433,7 +9437,8 @@ export function LayerlingEditor({
     return { shapes: hasSelection ? selectedShapes : shapes, selection: hasSelection };
   }, [hasSelection, selectedShapes, shapes]);
 
-  const exportDesign = useCallback((format: DirectExportFormat, exportName: string) => {
+  /** `chooseFile` asks for a new STL even when the design already has one (Save as). */
+  const exportDesign = useCallback(async (format: DirectExportFormat, exportName: string, chooseFile = false) => {
     const source = exportSource();
     const selectionScoped = source.selection;
     // Ausgeblendetes bleibt draussen, wie bei Tinkercad: ein beiseitegelegtes
@@ -9486,6 +9491,27 @@ export function LayerlingEditor({
       });
       return colors;
     };
+    // Chrome and Edge ask once where an STL goes, then write into that file again, like a design
+    // (#251). The browser asks only in answer to the click, so this comes before the slow part;
+    // where it cannot ask, the download stays.
+    const designId = projectId ?? "";
+    let target: LylFileHandle | "download" = "download";
+    if (format === "stl" && lylFileAccessSupported()) {
+      try {
+        const linked = chooseFile ? null : linkedStlFile(designId);
+        if (linked && !(await ensureLylFileWritable(linked))) {
+          setNotice(t("status.fileNotWritable", { name: linked.name }), true);
+          return;
+        }
+        const picked = linked ?? await pickStlFileToSave(projectExportFileName(exportName, "stl"));
+        // Closed without a choice: nothing to do.
+        if (!picked) return;
+        target = picked;
+      } catch {
+        target = "download";
+      }
+    }
+    const savedFile = target === "download" ? null : target;
     void exportBodiesWithLooseHoles(sourceShapes)
       .then(async ({ solids: cutSolids, meshes, holeCutsFailed }) => {
         bodiesWritten = cutSolids;
@@ -9494,7 +9520,17 @@ export function LayerlingEditor({
       })
       .then(async ({ meshes: fertig, quellen, verschmolzen, gescheitert }) => {
         if (format === "stl") {
-          await downloadBlobFile(projectExportFileName(exportName, "stl"), new Blob([exportMeshesToStl(fertig)], { type: "model/stl" }));
+          const bytes = new Uint8Array(exportMeshesToStl(fertig));
+          if (target === "download") {
+            await downloadBlobFile(projectExportFileName(exportName, "stl"), new Blob([bytes], { type: "model/stl" }));
+          } else {
+            await writeLylFile(target, bytes).catch(() => {
+              // Gone, moved or locked: the next STL export asks for a file again.
+              forgetStlFile(designId);
+              throw new Error(t("status.exportFileFailed", { name: target.name }));
+            });
+            rememberStlFile(designId, target);
+          }
         } else if (format === "3mf") {
           const bodies = fertig.map((mesh, index) => {
             const source = bodiesWritten[quellen[index]];
@@ -9512,10 +9548,11 @@ export function LayerlingEditor({
         if (gescheitert > 0) setNotice(t("status.exportUnionFailed"), true);
         else if (bedPrinter && exportOverhangs.length > 0) setNotice(bedOverhangMessage(exportOverhangs, `${bedPrinter.vendor} ${bedPrinter.model}`), true);
         else if (verschmolzen > 0) setNotice(t("status.exportUnioned", { count: verschmolzen, label }) + hiddenNote);
+        else if (savedFile) setNotice(t("status.stlSavedToFile", { name: savedFile.name }) + hiddenNote);
         else finishNotice(label);
       })
       .catch((error: unknown) => failNotice(label, error));
-  }, [bedPrinter, exportSource, projectName]);
+  }, [bedPrinter, exportSource, projectId, projectName]);
 
   const exportStepDesign = useCallback(async (exportName: string) => {
     if (stepExporting) {
@@ -11223,7 +11260,8 @@ export function LayerlingEditor({
           estimateShapes={exportTargetShapes}
           onEstimatePrint={exportSolidVolume}
           onClose={() => setTopPanel(null)}
-          onExport={exportDesign}
+          onExport={(format, exportName, chooseFile) => void exportDesign(format, exportName, chooseFile)}
+          stlFileName={topPanel === "export" ? linkedStlFile(projectId ?? "")?.name ?? null : null}
           onExportLyl={exportLylDesign}
           onExportStep={exportStepDesign}
           onExportImage={exportViewImage}
@@ -12582,6 +12620,7 @@ function TopActionPanel({
   onEstimatePrint,
   onClose,
   onExport,
+  stlFileName = null,
   onExportLyl,
   onExportStep,
   onExportImage,
@@ -12608,7 +12647,9 @@ function TopActionPanel({
   estimateShapes: readonly WorkplaneShape[];
   onEstimatePrint: (shapes: readonly WorkplaneShape[]) => Promise<ExportSolidVolume>;
   onClose: () => void;
-  onExport: (format: DirectExportFormat, exportName: string) => void;
+  onExport: (format: DirectExportFormat, exportName: string, chooseFile?: boolean) => void;
+  /** The STL file this design exports into, once one was chosen (Chrome and Edge). */
+  stlFileName?: string | null;
   onExportLyl: (exportName: string, historyLimit: LylHistoryLimit, target?: LylExportTarget) => void;
   onExportStep: (exportName: string) => void;
   onExportImage: (exportName: string, options: ViewImageOptions) => void;
@@ -12957,7 +12998,15 @@ function TopActionPanel({
           </div>
 
           <footer className="export-dialog-footer">
+            {exportFormat === "stl" && stlFileName ? (
+              <span className="export-linked-file" title={stlFileName}>{t("export.stlLinkedFile", { name: stlFileName })}</span>
+            ) : null}
             <div>
+              {exportFormat === "stl" && stlFileName ? (
+                <button className="export-shared-button" type="button" onClick={() => onExport("stl", exportName, true)} disabled={shapeCount === 0}>
+                  <span>{t("export.stlSaveAs")}</span>
+                </button>
+              ) : null}
               {exportFormat === "lyl" && sharedProjectsEnabled ? (
                 <button
                   className="export-shared-button"

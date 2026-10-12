@@ -94,9 +94,10 @@ describe("tessellation of treated bodies with the real OCCT kernel", () => {
   }
 
   // At this size OCCT takes the fillet; at some others it reports the solid invalid (see #48).
+  // A small glyph: the test measures every triangle of the body, which took a minute on a big one.
   it("cuts the triangles of a 0.1 mm fillet round a glyph's top outline to a third, within the chord limit", () => {
     const glyph = textGlyphProfiles({
-      id: "t", name: "Text", kind: "text", x: 0, z: 0, elevation: 0, size: 30, width: 30, depth: 15, height: 5, rotation: 0, color: "#f80", text: "G", font: "Sans",
+      id: "t", name: "Text", kind: "text", x: 0, z: 0, elevation: 0, size: 12, width: 12, depth: 6, height: 5, rotation: 0, color: "#f80", text: "G", font: "Sans",
     } as WorkplaneShape)![0].profile!;
     const build = () => {
       const solid = profileExtrusionSolid(cad, glyph);

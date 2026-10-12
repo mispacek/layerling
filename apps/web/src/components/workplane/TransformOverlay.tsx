@@ -3,6 +3,8 @@ import { t } from "@/lib/i18n";
 import * as THREE from "three";
 import {
   measureKeyForHandle,
+  ROTATION_WHEEL_SHIFT_SNAP_DEGREES,
+  ROTATION_WHEEL_SNAP_DEGREES,
   type TransformOverlayProps,
   type TransformOverlayState,
 } from "@/components/workplane/transformOverlayTypes";
@@ -14,6 +16,7 @@ export {
   isPointInsideTransformBounds,
   measureKeyForHandle,
   normalizedRotationPlaneBasis,
+  rotateHandleArrow,
   rotationPlaneDirectionSign,
   transformBoundsIntersectClipVolume,
   transformOverlayScreenPoint,
@@ -94,15 +97,20 @@ export function TransformOverlay({
     : box.alwaysVisibleDimensionKeys.flatMap((key) => box.dimensions[key] ?? []);
   const visibleMarks = (hideDimensionMarks ? [] : marks).filter((mark) => mark.key !== editingDimension?.key && !editingCorner?.entries.some((entry) => entry.key === mark.key));
   const handleMeasureKey = (handle: TransformOverlayState["handles"][number]) => measureKeyForHandle(handle.kind, handle.key, box);
-  const protractorTicks = Array.from({ length: 16 }, (_, index) => {
-    const degrees = index * 22.5 - 90;
+  // A tick for every step the turn snaps to: 22.5°, and 11.25° while Shift is held inside the wheel.
+  const tickStep = rotationReadout?.fine ? ROTATION_WHEEL_SHIFT_SNAP_DEGREES : ROTATION_WHEEL_SNAP_DEGREES;
+  const protractorTicks = Array.from({ length: Math.round(360 / tickStep) }, (_, index) => {
+    const tickDegrees = index * tickStep;
+    const degrees = tickDegrees - 90;
     const radians = THREE.MathUtils.degToRad(degrees);
-    const major = index % 2 === 0;
+    const major = tickDegrees % 45 === 0;
+    const fine = tickDegrees % ROTATION_WHEEL_SNAP_DEGREES !== 0;
     const outer = 94;
-    const inner = major ? 80 : 86;
+    const inner = major ? 80 : fine ? 90 : 86;
     return {
       key: `tick-${index}`,
       major,
+      fine,
       x1: Math.cos(radians) * inner,
       y1: Math.sin(radians) * inner,
       x2: Math.cos(radians) * outer,
@@ -158,7 +166,7 @@ export function TransformOverlay({
             {protractorTicks.map((tick) => (
               <line
                 key={tick.key}
-                className={tick.major ? "rotation-tick major" : "rotation-tick"}
+                className={tick.major ? "rotation-tick major" : tick.fine ? "rotation-tick fine" : "rotation-tick"}
                 x1={tick.x1}
                 y1={tick.y1}
                 x2={tick.x2}
@@ -315,10 +323,6 @@ export function TransformOverlay({
           style={{
             "--overlay-x": `${handle.x}px`,
             "--overlay-y": `${handle.y}px`,
-            "--rotate-plane-a": handle.plane.a,
-            "--rotate-plane-b": handle.plane.b,
-            "--rotate-plane-c": handle.plane.c,
-            "--rotate-plane-d": handle.plane.d,
           } as CSSProperties}
           title={t("transform.rotateHandle")}
           onPointerDown={(event) => {
@@ -335,8 +339,9 @@ export function TransformOverlay({
           }}
         >
           <span className="rotate-handle-icon" aria-hidden="true">
-            <svg viewBox="0 0 150 150" focusable="false">
-              <path d="m145.4 67.6-12.1 7.7c-6.6-10.8-22.1-27.4-43.6-31.5-3.7-0.7-8-1.3-14.1-1.3-21.5 0-41.5 9.8-55.1 28.9l-3.3 4.1-12.4-7.9c-1.3-0.7-3 0.1-2.9 1.8l1.1 36.1c0.3 1.7 2 2.5 3.1 1.7l30.2-17.6c1.4-0.6 1.4-2.9 0-3.5l-12.1-6.7c9.7-14.8 26.4-28.5 51.2-28.6 20.5-0.1 37.4 9.8 50.7 28.6l-12 6.5c-1.6 0.6-1.5 3.3 0 3.8l30.2 17.4c1.4 0.7 3 0 3-1.7l0.8-36c0-1.5-1.5-2.6-2.7-1.8z" />
+            <svg viewBox="-15 -15 30 30" focusable="false">
+              <path className="rotate-arrow-arc" d={handle.arc} />
+              <path className="rotate-arrow-heads" d={handle.heads} />
             </svg>
           </span>
         </button>

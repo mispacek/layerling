@@ -5690,6 +5690,17 @@ html[data-toolbar-size="large"] .shape-menu-dropdown:not(.sketch-shape-menu-drop
   border-top: 1px solid #f0eae0;
 }
 
+.export-dialog-footer .export-linked-file {
+  min-width: 0;
+  margin-right: auto;
+  overflow: hidden;
+  color: #897662;
+  font-size: 11px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .export-dialog-footer > div {
   display: flex;
   justify-content: flex-end;
@@ -8657,6 +8668,11 @@ html[data-theme="dark"] .inspector-bundle-note {
   stroke-width: 1.6;
 }
 
+.rotation-tick.fine {
+  stroke: rgba(166, 86, 0, 0.55);
+  stroke-width: 0.8;
+}
+
 .rotation-zero-line {
   stroke: rgba(70, 59, 47, 0.38);
   stroke-width: 1.1;
@@ -8750,11 +8766,13 @@ html[data-theme="dark"] .inspector-bundle-note {
 
 .rotate-handle {
   z-index: 3;
-  /* Was 52px around a 26px glyph, so half the grab area was invisible and
-     reached over neighbouring controls. 40px still clears a finger. */
+  /* The grab area is 40px; the arrow drawn in it is smaller. */
   width: 40px;
   height: 40px;
-  color: rgba(70, 59, 47, 0.6);
+  --rotate-handle-ink: #433629;
+  --rotate-handle-axis: var(--rotate-handle-ink);
+  --rotate-handle-halo: rgba(255, 252, 247, 0.95);
+  color: var(--rotate-handle-axis);
   background: transparent;
   border: 0;
   border-radius: 0;
@@ -8763,15 +8781,21 @@ html[data-theme="dark"] .inspector-bundle-note {
   transform: translate3d(var(--overlay-x, 0), var(--overlay-y, 0), 0) translate(-50%, -50%);
 }
 
-.rotate-handle:hover {
-  color: var(--hover-accent-color);
+/* Each arrow carries the colour of the axis it turns about, as in the axis arrows on the plate. */
+.rotate-handle.axis-x { --rotate-handle-axis: #d6363c; }
+.rotate-handle.axis-y { --rotate-handle-axis: #2f9a4b; }
+.rotate-handle.axis-z { --rotate-handle-axis: #2f6fe0; }
+
+/* Hovered, the arrow gets heavier. */
+.rotate-handle.rotate-handle:hover .rotate-arrow-arc {
+  stroke-width: 3;
 }
 
 .rotate-handle-icon,
 .rotate-handle-icon svg {
   display: block;
-  width: 26px;
-  height: 26px;
+  width: 30px;
+  height: 30px;
 }
 
 .rotate-handle-icon {
@@ -8782,17 +8806,24 @@ html[data-theme="dark"] .inspector-bundle-note {
 }
 
 .rotate-handle-icon svg {
+  overflow: visible;
+  /* A light edge all round keeps the arrow readable on the grid and on the shape. */
+  filter: drop-shadow(0 0 1px var(--rotate-handle-halo)) drop-shadow(0 0 1.5px var(--rotate-handle-halo));
+}
+
+.rotate-arrow-arc {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.rotate-arrow-heads {
   fill: currentColor;
-  transform: matrix(
-    var(--rotate-plane-a, 1),
-    var(--rotate-plane-b, 0),
-    var(--rotate-plane-c, 0),
-    var(--rotate-plane-d, 1),
-    0,
-    0
-  );
-  transform-box: fill-box;
-  transform-origin: center;
+  stroke: currentColor;
+  stroke-width: 0.8;
+  stroke-linejoin: round;
 }
 
 .rotation-edit {
@@ -13179,12 +13210,13 @@ html[data-theme="dark"] .transform-guides #dimension-arrow path {
 }
 
 html[data-theme="dark"] .rotate-handle {
-  color: #ffffff;
+  --rotate-handle-ink: #ffffff;
+  --rotate-handle-halo: rgba(28, 24, 20, 0.9);
 }
 
-html[data-theme="dark"] .rotate-handle:hover {
-  color: var(--hover-accent-color);
-}
+html[data-theme="dark"] .rotate-handle.axis-x { --rotate-handle-axis: #ff6b70; }
+html[data-theme="dark"] .rotate-handle.axis-y { --rotate-handle-axis: #5fd47c; }
+html[data-theme="dark"] .rotate-handle.axis-z { --rotate-handle-axis: #6aa0ff; }
 
 html[data-theme="dark"] .transform-handle.height-lift {
   border-bottom-color: #ffffff;
@@ -13691,6 +13723,7 @@ html[data-theme="dark"] .print-estimate-note {
 html[data-theme="dark"] .export-file-input-wrap > span,
 html[data-theme="dark"] .export-section-heading > div > span,
 html[data-theme="dark"] .export-format-summary span,
+html[data-theme="dark"] .export-dialog-footer .export-linked-file,
 html[data-theme="dark"] .export-format-summary p {
   color: #9f866c;
 }

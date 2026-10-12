@@ -57,6 +57,28 @@ export async function pickLylFileToSave(suggestedName: string): Promise<LylFileH
   }
 }
 
+/** The STL a design was last exported to, per design: later STL exports write into it without asking. */
+const linkedStlFiles = new Map<string, LylFileHandle>();
+
+export const rememberStlFile = (projectId: string, handle: LylFileHandle) => void linkedStlFiles.set(projectId, handle);
+export const linkedStlFile = (projectId: string) => linkedStlFiles.get(projectId) ?? null;
+export const forgetStlFile = (projectId: string) => void linkedStlFiles.delete(projectId);
+
+/** Slicer files usually live apart from the designs, so their dialog remembers its own folder. */
+const EXPORT_PICKER_ID = "layerling-exports";
+
+/** Asks where an STL goes; null when the dialog is closed without a choice. */
+export async function pickStlFileToSave(suggestedName: string): Promise<LylFileHandle | null> {
+  const picker = filePickerWindow().showSaveFilePicker;
+  if (!picker) return null;
+  try {
+    return await picker({ id: EXPORT_PICKER_ID, suggestedName, types: [{ description: "STL mesh", accept: { "model/stl": [".stl"] } }] });
+  } catch (error) {
+    if (isPickerCancelled(error)) return null;
+    throw error;
+  }
+}
+
 /** Asks for one design file; null when the dialog is closed without a choice. */
 export async function pickLylFileToOpen(): Promise<{ file: File; handle: LylFileHandle } | null> {
   const picker = filePickerWindow().showOpenFilePicker;

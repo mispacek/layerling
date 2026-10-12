@@ -72,6 +72,24 @@ describe("overhangArea", () => {
     expect(overhangArea(steep.vertices, steep.faces, 65).areaMm2).toBe(0);
   });
 
+  it("does not mark a face that lies exactly on the angle, however the float noise of its mesh falls (#269)", () => {
+    // A 45 degree lean is a chamfer; its corners come from a float32 mesh, so each carries a little noise.
+    const rampAt = (degrees: number, wobble: number) => {
+      const ramp = overhangingRamp(10, 10 * Math.tan((degrees * Math.PI) / 180));
+      // Move one corner of the leaning side by the noise.
+      ramp.vertices[2][1] += wobble;
+      ramp.vertices[6][1] += wobble;
+      return ramp;
+    };
+    for (const wobble of [-2e-6, -1e-7, 0, 1e-7, 2e-6]) {
+      const exact = rampAt(45, wobble);
+      expect(overhangArea(exact.vertices, exact.faces, 45).areaMm2).toBe(0);
+    }
+    // A lean a degree steeper is still an overhang.
+    const steeper = overhangingRamp(10, 10 * Math.tan((46 * Math.PI) / 180));
+    expect(overhangArea(steeper.vertices, steeper.faces, 45).areaMm2).toBeGreaterThan(0);
+  });
+
   it("keeps the angle in its range", () => {
     expect(normalizeOverhangAngle(10)).toBe(30);
     expect(normalizeOverhangAngle(89)).toBe(70);

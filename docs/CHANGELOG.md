@@ -6,6 +6,14 @@ code still carries it - so a lower number further down is older, not newer.
 
 ## Unreleased
 
+## 1.66.5
+
+- **A size typed for several bodies changes all of them (#259):** With two or more bodies selected, a number typed into the width, depth or height label (or the pair of a corner) only changed the first body, and a typed height above the plate only the last one. The label shows the size of the whole selection, so the number now sets that: every body is scaled with it and moved with it, as when the handle is dragged. Reported on GitHub.
+- **Rotate handles in perspective:** the three curved arrows are now pieces of the circle their axis turns on, drawn in space like the arrows in Tinkercad: they sit on the selection in perspective and move with the view. Each carries the colour of its axis (X red, Y green, Z blue, as in the axis arrows on the plate), has a light edge so it reads on the grid, and gets heavier on hover.
+- **The rotation circle snaps to the ticks it shows:** the circle drew a tick every 22.5 degrees but only snapped every 45, so 22.5 needed Shift. Now it snaps to every tick; Shift adds finer ticks every 11.25 degrees. Outside the circle nothing changes (1 degree, Shift 45). The `R` key still turns by 45.
+- **A 45 degree chamfer is no overhang (#269):** *Show overhangs* marks faces that lean out further than the set angle. A face exactly on the angle, a 45 degree chamfer at the default, was marked or not marked at random, because the float noise of its mesh decided. The limit now lies a hair above the angle (about 0.4 degrees), so a face on the angle is left alone and anything steeper is still marked. Reported by DrJones in the forum.
+- **STL into your own folder:** In Chrome and Edge, the first STL export of a design now opens the system's save dialog, so you choose the folder and the name. Later STL exports of the design write into that same file without asking, and a message says so; **Save as…** in the export window picks another file. The dialog remembers its own folder, apart from the one for designs. Firefox and Safari still download the file.
+
 ## 1.66.4
 
 - **Selecting a body above the horizon (#269):** Looking at the plate flat from the side, a body could only be selected by clicking its lowest part, below the horizon line. Above it the click ray never reaches the workplane, and the code that starts a drag gave up before it had selected the body. A click on the body now selects it wherever it is; there is just nothing to drag from when the ray misses the workplane. Reported by DrJones in the forum.

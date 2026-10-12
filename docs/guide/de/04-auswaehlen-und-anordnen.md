@@ -56,7 +56,7 @@ Die Taste dafür ist [[L]]. [[Esc]] bricht ab.
 
 ## Drehen und den Drehpunkt setzen
 
-Gedreht wird mit den gebogenen Pfeilen an der Form, mit den Zahlen in den Einstellungen oder mit [[R]] in 45°-Schritten. Normalerweise dreht sich die Auswahl um ihre Mitte. Manchmal soll sie das nicht, etwa wenn ein gekipptes Rohr an seinem Ende weitergedreht werden soll. Dafür gibt es {{ui:editor.tool.rotationPivot}}: Klicke danach auf eine Fläche. Eine ebene Fläche gibt ihren Mittelpunkt vor, zum Beispiel die Achse eines Rohrendes. Die Auswahl dreht sich jetzt um diesen Punkt. Ein zweiter Klick auf das Werkzeug hebt ihn wieder auf.
+Gedreht wird mit den gebogenen Pfeilen an der Form, mit den Zahlen in den Einstellungen oder mit [[R]] in 45°-Schritten. Ziehst du am Drehkreis, rastet die Drehung auf jedem Strich ein, also alle 22,5°; mit der Umschalttaste ([[Shift]]) wird es feiner, dann gibt es zusätzliche Striche alle 11,25°. Ziehst du außerhalb des Kreises, drehst du frei in 1°-Schritten, mit [[Shift]] in 45°-Schritten. Normalerweise dreht sich die Auswahl um ihre Mitte. Manchmal soll sie das nicht, etwa wenn ein gekipptes Rohr an seinem Ende weitergedreht werden soll. Dafür gibt es {{ui:editor.tool.rotationPivot}}: Klicke danach auf eine Fläche. Eine ebene Fläche gibt ihren Mittelpunkt vor, zum Beispiel die Achse eines Rohrendes. Die Auswahl dreht sich jetzt um diesen Punkt. Ein zweiter Klick auf das Werkzeug hebt ihn wieder auf.
 
 Die Winkel bleiben am Körper. In seinen Einstellungen zeigt {{ui:inspector.rotation}} sie als {{ui:prop.rotateX}}, {{ui:prop.rotateY}} und {{ui:prop.rotateZ}}, benannt wie die Position: Y läuft quer über die Platte, Z nach oben. Tippst du dort einen Winkel ein, dreht sich der Körper darauf – um seine Mitte oder um seinen eigenen Drehpunkt, falls er einen hat. Solange ein gedrehter Körper ausgewählt ist, stehen seine Winkel auch unter ihm auf der Arbeitsfläche; {{ui:workspace.showRotationAngles}} in den Einstellungen schaltet das ab.
 
@@ -112,7 +112,7 @@ Eine KI kann dasselbe über die MCP-Schnittstelle tun, mit `layerling_perforate_
 
 ## Mehrere Teile auf einmal ändern
 
-Sind mehrere Teile ausgewählt, zeigt das Eigenschaften-Feld rechts, wie viele es sind, und bietet an, was für alle zugleich gilt: {{ui:inspector.solid}} oder {{ui:inspector.hole}}, eine Farbe für alle (ein Klick auf {{ui:inspector.solid}} öffnet die Farben) und das Schloss zum Sperren. Ist die Auswahl gemischt, macht ein Klick alle zu Körpern oder alle zu Aussparungen. Gesperrte Teile bleiben, wie sie sind. Maße änderst du an einem einzelnen Teil, mit den Griffen oder mit {{ui:scalePercent.title}}. Körper und Aussparung gehen auch per Rechtsklick oder mit [[S]] und [[H]].
+Sind mehrere Teile ausgewählt, zeigt das Eigenschaften-Feld rechts, wie viele es sind, und bietet an, was für alle zugleich gilt: {{ui:inspector.solid}} oder {{ui:inspector.hole}}, eine Farbe für alle (ein Klick auf {{ui:inspector.solid}} öffnet die Farben) und das Schloss zum Sperren. Ist die Auswahl gemischt, macht ein Klick alle zu Körpern oder alle zu Aussparungen. Gesperrte Teile bleiben, wie sie sind. Maße änderst du mit den Griffen, mit {{ui:scalePercent.title}} oder indem du eine Zahl in ein Maßschild tippst. Bei mehreren Teilen ist die Zahl das Maß der ganzen Auswahl: Alle Teile wachsen mit, samt den Abständen dazwischen, wie beim Ziehen am Griff. Körper und Aussparung gehen auch per Rechtsklick oder mit [[S]] und [[H]].
 
 ## Um Prozent skalieren
 

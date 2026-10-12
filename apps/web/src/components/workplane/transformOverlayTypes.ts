@@ -68,8 +68,11 @@ export function transformOverlayScreenPoint(
   };
 }
 
-export const ROTATION_WHEEL_SNAP_DEGREES = 45;
-export const ROTATION_WHEEL_SHIFT_SNAP_DEGREES = 22.5;
+/** Inside the wheel the turn snaps to the drawn ticks, one every 22.5°; Shift halves the step. */
+export const ROTATION_WHEEL_SNAP_DEGREES = 22.5;
+export const ROTATION_WHEEL_SHIFT_SNAP_DEGREES = 11.25;
+/** Outside the wheel the turn is free (1°); Shift snaps it to this step. */
+export const ROTATION_FREE_SHIFT_SNAP_DEGREES = 45;
 
 /**
  * Smallest screen distance between a measured edge and its dimension label.
@@ -117,8 +120,96 @@ export function rotationPlaneDirectionSign(
   return alignment < 0 ? -1 : 1;
 }
 
+export type RotateArrowVector = { x: number; y: number; z: number };
+
+const ROTATE_ARROW_HALF_SPAN = (58 * Math.PI) / 180;
+const ROTATE_ARROW_STEPS = 14;
+const ROTATE_ARROW_HEAD_LENGTH = 7;
+const ROTATE_ARROW_HEAD_HALF_WIDTH = 3.6;
+/** The curve is never flatter than this many pixels, so a plane seen edge-on is still an arrow, not a bar. */
+const ROTATE_ARROW_MIN_SAGITTA = 3;
+
+/**
+ * The arrow of a rotate handle, built in space like the circle it stands for: an arc in the plane
+ * perpendicular to `axis`, bulging away from the axis along `radial`, with `mid` as its middle, run
+ * through the camera by `project`. So it sits in perspective on the selection and turns with the view,
+ * as the arrows do in Tinkercad. Coordinates are relative to the projected `mid`, in pixels.
+ */
+export function rotateHandleArrow(
+  project: (point: RotateArrowVector) => TransformOverlayPoint,
+  mid: RotateArrowVector,
+  radial: RotateArrowVector,
+  axis: RotateArrowVector,
+  glyphRadius: number,
+) {
+  const tangent = {
+    x: axis.y * radial.z - axis.z * radial.y,
+    y: axis.z * radial.x - axis.x * radial.z,
+    z: axis.x * radial.y - axis.y * radial.x,
+  };
+  const centre = { x: mid.x - radial.x * glyphRadius, y: mid.y - radial.y * glyphRadius, z: mid.z - radial.z * glyphRadius };
+  const origin = project(mid);
+  const raw = Array.from({ length: ROTATE_ARROW_STEPS + 1 }, (_, index) => {
+    const angle = -ROTATE_ARROW_HALF_SPAN + (2 * ROTATE_ARROW_HALF_SPAN * index) / ROTATE_ARROW_STEPS;
+    const along = glyphRadius * Math.cos(angle);
+    const across = glyphRadius * Math.sin(angle);
+    const screen = project({
+      x: centre.x + radial.x * along + tangent.x * across,
+      y: centre.y + radial.y * along + tangent.y * across,
+      z: centre.z + radial.z * along + tangent.z * across,
+    });
+    return { x: screen.x - origin.x, y: screen.y - origin.y };
+  });
+  // Bow a nearly straight arc, away from the axis as seen on screen.
+  const first = raw[0];
+  const last = raw[ROTATE_ARROW_STEPS];
+  const chord = { x: last.x - first.x, y: last.y - first.y };
+  const tangentOnScreen = project({ x: mid.x + tangent.x, y: mid.y + tangent.y, z: mid.z + tangent.z });
+  // The way the arrow travels: its chord, or - when the arc folds back on itself - its projected tangent.
+  const travel = Math.hypot(chord.x, chord.y) >= 4
+    ? chord
+    : { x: tangentOnScreen.x - origin.x, y: tangentOnScreen.y - origin.y };
+  const travelLength = Math.hypot(travel.x, travel.y);
+  const along = travelLength > 1e-6 ? { x: travel.x / travelLength, y: travel.y / travelLength } : { x: 1, y: 0 };
+  const normal = { x: -along.y, y: along.x };
+  const sag = raw.map((p) => (p.x - first.x) * normal.x + (p.y - first.y) * normal.y);
+  const peak = sag.reduce((best, value) => (Math.abs(value) > Math.abs(best) ? value : best), 0);
+  const outward = project({ x: mid.x + radial.x, y: mid.y + radial.y, z: mid.z + radial.z });
+  const outwardSign = ((outward.x - origin.x) * normal.x + (outward.y - origin.y) * normal.y) >= 0 ? 1 : -1;
+  const bowSign = Math.abs(peak) > 0.3 ? Math.sign(peak) : outwardSign;
+  const bow = Math.max(0, ROTATE_ARROW_MIN_SAGITTA - Math.abs(peak));
+  const arc = raw.map((p, index) => {
+    const lift = bow * Math.sin((Math.PI * index) / ROTATE_ARROW_STEPS) * bowSign;
+    return { x: p.x + normal.x * lift, y: p.y + normal.y * lift };
+  });
+  const direction = (from: TransformOverlayPoint, to: TransformOverlayPoint) => {
+    const dx = to.x - from.x;
+    const dy = to.y - from.y;
+    const size = Math.hypot(dx, dy) || 1;
+    return { x: dx / size, y: dy / size };
+  };
+  const head = (base: TransformOverlayPoint, along: TransformOverlayPoint) => {
+    const tip = { x: base.x + along.x * ROTATE_ARROW_HEAD_LENGTH, y: base.y + along.y * ROTATE_ARROW_HEAD_LENGTH };
+    const side = { x: -along.y * ROTATE_ARROW_HEAD_HALF_WIDTH, y: along.x * ROTATE_ARROW_HEAD_HALF_WIDTH };
+    return [tip, { x: base.x + side.x, y: base.y + side.y }, { x: base.x - side.x, y: base.y - side.y }];
+  };
+  const heads = [
+    head(arc[0], direction(arc[1], arc[0])),
+    head(arc[ROTATE_ARROW_STEPS], direction(arc[ROTATE_ARROW_STEPS - 1], arc[ROTATE_ARROW_STEPS])),
+  ];
+  const fmt = (p: TransformOverlayPoint) => `${p.x.toFixed(2)} ${p.y.toFixed(2)}`;
+  return {
+    x: origin.x,
+    y: origin.y,
+    arc: `M${arc.map(fmt).join(" L")}`,
+    heads: heads.map((triangle) => `M${triangle.map(fmt).join(" L")}Z`).join(" "),
+  };
+}
+
 export function snappedRotationDelta(rawDelta: number, insideSnapWheel: boolean, shiftKey: boolean) {
-  const step = insideSnapWheel || shiftKey ? ROTATION_WHEEL_SNAP_DEGREES : 1;
+  const step = insideSnapWheel
+    ? (shiftKey ? ROTATION_WHEEL_SHIFT_SNAP_DEGREES : ROTATION_WHEEL_SNAP_DEGREES)
+    : (shiftKey ? ROTATION_FREE_SHIFT_SNAP_DEGREES : 1);
   return Math.round(rawDelta / step) * step;
 }
 
@@ -215,7 +306,8 @@ export type TransformOverlayState = {
   height: number;
   guides: Array<{ x1: number; y1: number; x2: number; y2: number }>;
   handles: Array<{ key: string; className: string; kind: TransformHandleKind; x: number; y: number; title: string; angle?: number }>;
-  rotateHandles: Array<{ key: string; className: string; x: number; y: number; plane: RotationPlaneBasis }>;
+  /** arc/heads: the arrow's SVG paths, relative to x/y (see rotateHandleArrow). */
+  rotateHandles: Array<{ key: string; className: string; x: number; y: number; arc: string; heads: string }>;
   dimensions: Record<string, DimensionMark[]>;
   /**
    * Handle keys whose dimension marks stay on screen for a single selected
@@ -239,6 +331,8 @@ export type RotationReadout = {
   text: string;
   angle?: number;
   pointerAngle?: number;
+  /** Shift is held inside the wheel: the finer ticks show. */
+  fine?: boolean;
 } | null;
 
 export type EditingDimension = {

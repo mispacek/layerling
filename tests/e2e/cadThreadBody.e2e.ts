@@ -10,109 +10,9 @@ import { cadTransformRequiresGeneralTransform } from "@/lib/cadModifierRuntime";
 import { threadPartSolid } from "@/lib/threadSolid";
 import { createThreadGeometry, threadNaturalFootprint, threadNaturalHeight, threadProfileShape, threadSettings, MIN_THREAD_QUALITY, WHITWORTH_PROFILE_CONSTANTS } from "@/lib/threadGeometry";
 import { meshYawDegrees, mirrorSign } from "@/lib/workplaneShapes";
+import { cad, thread, displayMesh, body, triangles, inside } from "./helpers/threadHarness";
+import type { Vec3 } from "./helpers/threadHarness";
 
-/*
- * The thread's exact body against its display mesh, built by the real
- * createThreadGeometry and placed as transformMesh places it (copied here,
- * as LayerlingEditor.tsx keeps it to itself; threads take no taper, twist or
- * lean). Bounds and volume cannot tell a left-hand thread from a right-hand
- * one, or a thread half a turn out of phase, so points just inside and just
- * outside the drawn flanks are also tested against the body.
- */
-
-type Vec3 = [number, number, number];
-
-let cad: OcctKernel;
-
-beforeAll(async () => {
-  const wasm = join(dirname(fileURLToPath(import.meta.resolve("occt-wasm"))), "occt-wasm.wasm");
-  cad = await OcctKernel.init({ wasm });
-});
-
-function thread(extra: Partial<WorkplaneShape> = {}): WorkplaneShape {
-  const fields = { threadDiameter: 6, threadPitch: 1, ...extra } as WorkplaneShape;
-  const settings = threadSettings(fields);
-  const footprint = threadNaturalFootprint(settings);
-  return {
-    id: "t", name: "Thread", kind: "thread", color: "#888888", x: 0, z: 0, elevation: 0, rotation: 0,
-    width: footprint.width, depth: footprint.depth, size: Math.max(footprint.width, footprint.depth), height: threadNaturalHeight(settings),
-    ...fields,
-  } as WorkplaneShape;
-}
-
-/** The display mesh in world space, with each vertex's normal. */
-function displayMesh(shape: WorkplaneShape) {
-  const geometry = createThreadGeometry({ ...shape, width: shape.width, depth: shape.depth ?? shape.width, height: shape.height });
-  const flat = geometry.index ? geometry.toNonIndexed() : geometry;
-  if (!flat.getAttribute("normal")) flat.computeVertexNormals();
-  const position = flat.getAttribute("position");
-  const normal = flat.getAttribute("normal");
-  const centerY = shape.height / 2;
-  const rotation = new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler(
-    THREE.MathUtils.degToRad(shape.rotationX ?? 0), THREE.MathUtils.degToRad(meshYawDegrees(shape)), THREE.MathUtils.degToRad(shape.rotationZ ?? 0), "XYZ"));
-  const mirror = new THREE.Vector3(mirrorSign(shape.mirrorX), mirrorSign(shape.mirrorY), mirrorSign(shape.mirrorZ));
-  const vertices: Vec3[] = [];
-  const normals: Vec3[] = [];
-  const local: Vec3[] = [];
-  for (let i = 0; i < position.count; i += 1) {
-    local.push([position.getX(i), position.getY(i), position.getZ(i)]);
-    const v = new THREE.Vector3(position.getX(i) * mirror.x, (position.getY(i) - centerY) * mirror.y, position.getZ(i) * mirror.z).applyMatrix4(rotation);
-    vertices.push([v.x + shape.x, v.y + (shape.elevation ?? 0) + centerY, v.z + shape.z]);
-    const n = new THREE.Vector3(normal.getX(i) * mirror.x, normal.getY(i) * mirror.y, normal.getZ(i) * mirror.z).applyMatrix4(rotation).normalize();
-    normals.push([n.x, n.y, n.z]);
-  }
-  const faces: Vec3[] = [];
-  const flip = [shape.mirrorX, shape.mirrorY, shape.mirrorZ].filter(Boolean).length % 2 === 1;
-  for (let i = 0; i + 2 < vertices.length; i += 3) faces.push(flip ? [i, i + 2, i + 1] : [i, i + 1, i + 2]);
-  return { vertices, normals, faces, local };
-}
-
-function body(shape: WorkplaneShape) {
-  const part = cadModifierThreadForShape(shape);
-  expect(part).not.toBeNull();
-  const local = threadPartSolid(cad, part!);
-  const t = part!.transform;
-  return !t ? local : cadTransformRequiresGeneralTransform(t) ? cad.generalTransform(local, t) : cad.transform(local, t);
-}
-
-/** The body as fine triangles, for point-in-body tests by ray parity (a boolean per point is far too slow). */
-function triangles(solid: ShapeHandle, deflection: number) {
-  const copy = cad.copy(solid);
-  const mesh = cad.tessellate(copy, { linearDeflection: deflection, angularDeflection: 0.5 });
-  cad.release(copy);
-  const tris: number[][] = [];
-  for (let i = 0; i + 2 < mesh.indices.length; i += 3) {
-    const t: number[] = [];
-    for (let k = 0; k < 3; k += 1) t.push(mesh.positions[mesh.indices[i + k] * 3], mesh.positions[mesh.indices[i + k] * 3 + 1], mesh.positions[mesh.indices[i + k] * 3 + 2]);
-    tris.push(t);
-  }
-  return tris;
-}
-
-/** Ray parity along a slightly skewed direction, so the ray does not graze edges. */
-function inside(tris: number[][], p: Vec3) {
-  const d = [1, 0.0137, 0.0071];
-  let hits = 0;
-  for (const t of tris) {
-    const e1 = [t[3] - t[0], t[4] - t[1], t[5] - t[2]];
-    const e2 = [t[6] - t[0], t[7] - t[1], t[8] - t[2]];
-    const h = [d[1] * e2[2] - d[2] * e2[1], d[2] * e2[0] - d[0] * e2[2], d[0] * e2[1] - d[1] * e2[0]];
-    const a = e1[0] * h[0] + e1[1] * h[1] + e1[2] * h[2];
-    if (Math.abs(a) < 1e-14) continue;
-    const f = 1 / a;
-    const sv = [p[0] - t[0], p[1] - t[1], p[2] - t[2]];
-    const u = f * (sv[0] * h[0] + sv[1] * h[1] + sv[2] * h[2]);
-    if (u < 0 || u > 1) continue;
-    const q = [sv[1] * e1[2] - sv[2] * e1[1], sv[2] * e1[0] - sv[0] * e1[2], sv[0] * e1[1] - sv[1] * e1[0]];
-    const v = f * (d[0] * q[0] + d[1] * q[1] + d[2] * q[2]);
-    if (v < 0 || u + v > 1) continue;
-    if (f * (e2[0] * q[0] + e2[1] * q[1] + e2[2] * q[2]) > 0) hits += 1;
-  }
-  return hits % 2 === 1;
-}
-
-// The long rods of the slow profiles are cut to a few dozen turns: the test looks at the middle, and the
-// whole file waits for its slowest test.
 describe("the thread's exact body", () => {
   const cases: Array<[string, Partial<WorkplaneShape>]> = [
     ["an M6 rod, V profile", {}],
@@ -171,75 +71,6 @@ describe("the thread's exact body", () => {
     expect(tested).toBeGreaterThan(8);
   });
 
-  /*
-   * The flank test above stands 0.06 pitch off the drawn surface, too far to
-   * see the profile's shape: a Whitworth arc of half again its radius passed
-   * it. Here the profile itself, in the half plane through +x where every
-   * rod has a crest at its shaft bottom, a pitch at a time: points 0.002
-   * pitch inside and outside it. The Whitworth body takes the true arcs, which
-   * the drawn chords stray from by 0.0013 pitch; the other profiles take the
-   * drawn points.
-   */
-  const profileCases: Array<[string, Partial<WorkplaneShape>]> = [
-    ["V", {}],
-    ["V, left hand", { threadHand: "left" }],
-    ["trapezoidal", { threadProfile: "trapezoidal", threadDiameter: 10, threadPitch: 2, height: 24 }],
-    ["round", { threadProfile: "round", threadDiameter: 10, threadPitch: 2, height: 24 }],
-    ["Whitworth", { threadProfile: "whitworth", threadDiameter: 20.955, threadPitch: 25.4 / 14, height: 30 }],
-  ];
-
-  it.each(profileCases)("follows the %s profile within 0.002 pitch", (_name, extra) => {
-    const shape = thread(extra);
-    const part = cadModifierThreadForShape(shape)!;
-    const solid = threadPartSolid(cad, part);
-    const { pitch, major, minor } = part;
-    const settings = threadSettings(shape);
-    // Pieces of one pitch from the crest, as (radius, height above it) at t in [0, 1], with the outward normal.
-    type Piece = (t: number) => { r: number; y: number; nr: number; ny: number };
-    const pieces: Piece[] = [];
-    const line = (a: [number, number], b: [number, number]): Piece => (t) => {
-      const dr = b[0] - a[0];
-      const dy = b[1] - a[1];
-      const length = Math.hypot(dr, dy);
-      return { r: a[0] + dr * t, y: a[1] + dy * t, nr: dy / length, ny: -dr / length };
-    };
-    expect(part.curve?.kind).toBe(settings.profile === "whitworth" ? "whitworth" : undefined);
-    if (settings.profile === "whitworth") {
-      const radius = WHITWORTH_PROFILE_CONSTANTS.radiusPerPitch * pitch;
-      const arcEnd = Math.PI / 2 - ((WHITWORTH_PROFILE_CONSTANTS.flankAngleDegrees / 2) * Math.PI) / 180;
-      // Crest arcs bulge outwards from their centre, the root arc inwards to its own.
-      const arc = (cr: number, cy: number, from: number, to: number, sign: 1 | -1): Piece => (t) => {
-        const angle = from + (to - from) * t;
-        return { r: cr + sign * radius * Math.cos(angle), y: cy + radius * Math.sin(angle), nr: sign * Math.cos(angle), ny: sign * Math.sin(angle) };
-      };
-      const root = (angle: number): [number, number] => [minor + radius - radius * Math.cos(angle), pitch / 2 + radius * Math.sin(angle)];
-      const crest = (cy: number, angle: number): [number, number] => [major - radius + radius * Math.cos(angle), cy + radius * Math.sin(angle)];
-      pieces.push(arc(major - radius, 0, 0, arcEnd, 1), line(crest(0, arcEnd), root(-arcEnd)));
-      const rootArc: Piece = (t) => {
-        const angle = -arcEnd + 2 * arcEnd * t;
-        return { r: minor + radius - radius * Math.cos(angle), y: pitch / 2 + radius * Math.sin(angle), nr: Math.cos(angle), ny: -Math.sin(angle) };
-      };
-      pieces.push(rootArc, line(root(arcEnd), crest(pitch, -arcEnd)), arc(major - radius, pitch, -arcEnd, 0, 1));
-    } else {
-      const points = threadProfileShape(settings.profile).points.map((point): [number, number] => [minor + (major - minor) * point.level, point.u * pitch]);
-      points.push([points[0][0], pitch]);
-      for (let index = 0; index + 1 < points.length; index += 1) pieces.push(line(points[index], points[index + 1]));
-    }
-    const offset = 0.002 * pitch;
-    const base = part.shaftBottom + Math.round((part.height - part.shaftBottom) / 2 / pitch) * pitch;
-    let tested = 0;
-    for (const piece of pieces) {
-      for (const t of [0.2, 0.5, 0.8]) {
-        const p = piece(t);
-        const at = (sign: number) => ({ x: p.r + sign * offset * p.nr, y: base + p.y + sign * offset * p.ny, z: 0 });
-        expect(cad.containsPoint(solid, at(-1), 1e-7)).toBe(true);
-        expect(cad.containsPoint(solid, at(1), 1e-7)).toBe(false);
-        tested += 1;
-      }
-    }
-    expect(tested).toBeGreaterThanOrEqual(9);
-  });
-
   it("builds the same exact body at any quality, which only sets how finely the mesh is drawn", () => {
     const fine = thread();
     const coarse = thread({ threadQuality: MIN_THREAD_QUALITY });
@@ -281,3 +112,4 @@ describe("the thread's exact body", () => {
     expect(cad.getVolume(rounded)).toBeLessThan(cad.getVolume(holed));
   });
 });
+

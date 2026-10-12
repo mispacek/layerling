@@ -37,6 +37,8 @@ At the top is the file name, below it you choose the format. With something sele
 | **PNG** | forum posts, print sites, questions | A picture of the view as it is, at twice the resolution and without handles, selection frames and dimensions. {{ui:export.png.plate}} and {{ui:export.png.transparent}} are chosen in the window. Turn and zoom first until the picture is right; the selection does not matter here. |
 | **LYL** | layerling itself | The editable design with everything that belongs to it. |
 
+**STL into your own folder (Chrome and Edge).** There the first STL export of a design opens your system's save dialog, so you pick the folder and the name yourself and can replace an existing file. After that every STL export of the design writes into that same file without a dialog; the export window shows which file, and **Save as…** next to the export button picks another. The dialog remembers its own folder, apart from the one for designs, so the slicer files can stay with the slicer. After the page is reloaded the design forgets its STL file and the next export asks again. Firefox and Safari download the file as before.
+
 A hole you have not grouped is taken out of every body it reaches when you export, as the view shows it. So there is no need to group before each export. With a selection, only the selected holes count. A hole cannot be exported on its own; layerling points that out.
 
 STEP only carries exact CAD bodies. What cannot be written exactly, such as a mesh imported as STL, is left out. The message after the export names those bodies and says why. For the printer, use STL or 3MF, which carry everything.

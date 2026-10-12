@@ -2259,6 +2259,10 @@ html:where([data-theme="dark"][data-palette="graphite"])[data-toolbar-size="larg
   border-top: 1px solid #e8e8e8;
 }
 
+:where(html[data-theme="dark"][data-palette="graphite"]) .export-dialog-footer .export-linked-file {
+  color: #676767;
+}
+
 :where(html[data-theme="dark"][data-palette="graphite"]) .export-dialog-footer .export-primary-button {
   color: #fff;
   background: linear-gradient(180deg, #dc7a14, #c06608);
@@ -3575,6 +3579,10 @@ html[data-theme="dark"]:where([data-palette="graphite"]) .inspector-bundle-note 
   stroke: rgba(115, 59, 0, 0.9);
 }
 
+:where(html[data-theme="dark"][data-palette="graphite"]) .rotation-tick.fine {
+  stroke: rgba(166, 86, 0, 0.55);
+}
+
 :where(html[data-theme="dark"][data-palette="graphite"]) .rotation-zero-line {
   stroke: rgba(62, 62, 62, 0.38);
 }
@@ -3635,18 +3643,39 @@ html[data-theme="dark"]:where([data-palette="graphite"]) .inspector-bundle-note 
 }
 
 :where(html[data-theme="dark"][data-palette="graphite"]) .rotate-handle {
-  color: rgba(62, 62, 62, 0.6);
+  --rotate-handle-ink: #3a3a3a;
+  --rotate-handle-axis: var(--rotate-handle-ink);
+  --rotate-handle-halo: rgba(251, 251, 251, 0.95);
+  color: var(--rotate-handle-axis);
   background: transparent;
   border: 0;
   box-shadow: none;
 }
 
-:where(html[data-theme="dark"][data-palette="graphite"]) .rotate-handle:hover {
-  color: var(--hover-accent-color);
+:where(html[data-theme="dark"][data-palette="graphite"]) .rotate-handle.axis-x {
+  --rotate-handle-axis: #d6363c;
+}
+
+:where(html[data-theme="dark"][data-palette="graphite"]) .rotate-handle.axis-y {
+  --rotate-handle-axis: #2f9a4b;
+}
+
+:where(html[data-theme="dark"][data-palette="graphite"]) .rotate-handle.axis-z {
+  --rotate-handle-axis: #2f6fe0;
 }
 
 :where(html[data-theme="dark"][data-palette="graphite"]) .rotate-handle-icon svg {
+  filter: drop-shadow(0 0 1px var(--rotate-handle-halo)) drop-shadow(0 0 1.5px var(--rotate-handle-halo));
+}
+
+:where(html[data-theme="dark"][data-palette="graphite"]) .rotate-arrow-arc {
+  fill: none;
+  stroke: currentColor;
+}
+
+:where(html[data-theme="dark"][data-palette="graphite"]) .rotate-arrow-heads {
   fill: currentColor;
+  stroke: currentColor;
 }
 
 :where(html[data-theme="dark"][data-palette="graphite"]) .rotation-edit {
@@ -5931,11 +5960,20 @@ html[data-theme="dark"]:where([data-palette="graphite"]) .transform-guides #dime
 }
 
 html[data-theme="dark"]:where([data-palette="graphite"]) .rotate-handle {
-  color: #ffffff;
+  --rotate-handle-ink: #ffffff;
+  --rotate-handle-halo: rgba(31, 31, 31, 0.9);
 }
 
-html[data-theme="dark"]:where([data-palette="graphite"]) .rotate-handle:hover {
-  color: var(--hover-accent-color);
+html[data-theme="dark"]:where([data-palette="graphite"]) .rotate-handle.axis-x {
+  --rotate-handle-axis: #ff6b70;
+}
+
+html[data-theme="dark"]:where([data-palette="graphite"]) .rotate-handle.axis-y {
+  --rotate-handle-axis: #5fd47c;
+}
+
+html[data-theme="dark"]:where([data-palette="graphite"]) .rotate-handle.axis-z {
+  --rotate-handle-axis: #6aa0ff;
 }
 
 html[data-theme="dark"]:where([data-palette="graphite"]) .transform-handle.height-lift {
@@ -6427,6 +6465,7 @@ html[data-theme="dark"]:where([data-palette="graphite"]) .print-estimate-note {
 html[data-theme="dark"]:where([data-palette="graphite"]) .export-file-input-wrap > span,
 html[data-theme="dark"]:where([data-palette="graphite"]) .export-section-heading > div > span,
 html[data-theme="dark"]:where([data-palette="graphite"]) .export-format-summary span,
+html[data-theme="dark"]:where([data-palette="graphite"]) .export-dialog-footer .export-linked-file,
 html[data-theme="dark"]:where([data-palette="graphite"]) .export-format-summary p {
   color: #757575;
 }

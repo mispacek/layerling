@@ -37,6 +37,8 @@ Oben steht der Dateiname, darunter wählst du das Format. Ist etwas markiert, wi
 | **PNG** | Forenbeiträge, Druckportale, Rückfragen | Ein Bild der Ansicht, wie sie gerade ist, in doppelter Auflösung und ohne Griffe, Auswahlrahmen und Maße. {{ui:export.png.plate}} und {{ui:export.png.transparent}} wählst du im Fenster. Drehe und zoome vorher, bis der Ausschnitt passt; die Auswahl spielt hier keine Rolle. |
 | **LYL** | layerling selbst | Der bearbeitbare Entwurf mit allem Drum und Dran. |
 
+**STL in den eigenen Ordner (Chrome und Edge).** Dort öffnet der erste STL-Export eines Entwurfs den Speichern-Dialog deines Systems: Ordner und Namen wählst du selbst, und eine vorhandene Datei lässt sich ersetzen. Danach schreibt jeder STL-Export des Entwurfs ohne Dialog in genau diese Datei; das Export-Fenster zeigt, in welche, und **Speichern unter …** neben dem Export-Knopf wählt eine andere. Der Dialog merkt sich seinen eigenen Ordner, getrennt von dem für Entwürfe, so bleiben die Slicer-Dateien beim Slicer. Nach dem Neuladen der Seite kennt der Entwurf seine STL-Datei nicht mehr, und der nächste Export fragt wieder. Firefox und Safari laden die Datei wie bisher herunter.
+
 Eine Aussparung, die du nicht gruppiert hast, zieht der Export von jedem Körper ab, den sie berührt, so wie die Ansicht es zeigt. Du musst also nicht vor jedem Export gruppieren. Mit einer Auswahl zählen nur die ausgewählten Aussparungen. Allein lässt sich eine Aussparung nicht exportieren; darauf weist dich layerling hin.
 
 STEP enthält nur exakte CAD-Körper. Was sich nicht exakt abbilden lässt, etwa ein als STL importiertes Netz, bleibt draußen. Die Meldung nach dem Export nennt diese Körper beim Namen und sagt, warum. Für den Drucker nimmst du dann STL oder 3MF, die tragen alles.
