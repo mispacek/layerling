@@ -24,7 +24,7 @@ import {
   SKETCH_CAD_DEFLECTION,
   cadModifierUserErrorMessage,
 } from "@/lib/cadModifierRuntime";
-import { setLanguage } from "@/lib/i18n";
+import { DEFAULT_LANGUAGE, setLanguage } from "@/lib/i18n";
 
 describe("CAD modifier runtime state", () => {
   it("uses the build-managed OCCT runtime", () => {
@@ -45,9 +45,14 @@ describe("CAD modifier runtime state", () => {
   });
 
   it("does not report zero edges before preparation finishes", () => {
-    expect(edgeModifierSelectionStatus(false, 0, 0)).toBe("Preparing edges\u2026");
-    expect(edgeModifierSelectionStatus(true, 0, 0)).toBe("0 of 0 sharp edges selected");
-    expect(edgeModifierSelectionStatus(true, 2, 12)).toBe("2 of 12 sharp edges selected");
+    setLanguage("en", false);
+    try {
+      expect(edgeModifierSelectionStatus(false, 0, 0)).toBe("Preparing edges\u2026");
+      expect(edgeModifierSelectionStatus(true, 0, 0)).toBe("0 of 0 sharp edges selected");
+      expect(edgeModifierSelectionStatus(true, 2, 12)).toBe("2 of 12 sharp edges selected");
+    } finally {
+      setLanguage(DEFAULT_LANGUAGE, false);
+    }
   });
 
   it("keeps exact CAD preparation short and gives imported meshes a bounded triangle-aware budget", () => {
