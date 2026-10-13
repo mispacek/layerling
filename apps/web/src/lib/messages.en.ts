@@ -2047,6 +2047,8 @@ export const MESSAGES_EN = {
   "workspace.width": "Width",
   "workspace.length": "Length",
   "workspace.gridBlockSize": "Grid block size",
+  "workspace.gridFollowSnap": "Grid follows snapping",
+  "workspace.gridFollowSnapHint": "Grid spacing follows the snap step, including Lego and custom measures. Fine lines thin out when zoomed out and return when zoomed in. With snapping off, the fixed grid is used.",
   "workspace.blockSize": "Block size",
   "workspace.booleanTriangleLimit": "Cut imported meshes up to",
   "workspace.booleanTriangleLimitOlder": "Older computer ({count} triangles)",

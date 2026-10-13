@@ -100,7 +100,8 @@ import { positionsForTwist, twistBandCount } from "@/lib/heightSlices";
 import { toCreasedNormals } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { canBeginShapeDrag, handleDimensionLimit, DEFAULT_SNAP_GRID, DEFAULT_WORKPLANE_WORKSPACE, effectiveViewSettings, viewPixelRatio, normalizeSnapGrid, normalizeWorkspaceSettings, orbitControlsZoomSpeed, readWorkspaceDefault, saveWorkspaceDefault, snapGridForUnits, snapGridStep as snapStep, workplaneSettingsFingerprint, workspaceHydrationSyncDecision, zoomDistanceScale } from "@/lib/workplaneSettings";
 import { withShapeDefaults } from "@/lib/shapeDefaults";
-import { workplaneGridBandWidths, AXIS_ARROW_COLORS, axisArrowLayout, DEFAULT_EDGE_LINE_COLOR, fillLightPosition, keyLightPosition, sceneLightLevels, shadowBlurRadius, workplaneGridLayout, workplaneGridLines, workplaneGridPalette, workplaneLabelLayout, workplaneThemePalette, WORKPLANE_LABEL_ASPECT, WORKPLANE_LINE_ELEVATION, type WorkplaneGridLayout } from "@/lib/workplaneGrid";
+import { workplaneGridBandWidths, workplaneGridDisplayLayout, AXIS_ARROW_COLORS, axisArrowLayout, DEFAULT_EDGE_LINE_COLOR, fillLightPosition, keyLightPosition, sceneLightLevels, shadowBlurRadius, workplaneGridLayout, workplaneGridLines, workplaneGridPalette, workplaneLabelLayout, workplaneThemePalette, WORKPLANE_LABEL_ASPECT, WORKPLANE_LINE_ELEVATION, type WorkplaneGridLayout } from "@/lib/workplaneGrid";
+import { visibleGridStep } from "@/lib/gridSnap";
 import { cleanNearZero, cleanRotationDegrees, isNonSolidShapeKind, mirroredAxisCount, mirrorSign, preservesEdgeTreatmentSize, proportionalResizeScale, resizedImportedCoordinates, resizedImportedMeshPositions, resizedShapeSize, shapeDepth, shapeExtrudeDeformAt, shapeHasExtrudeDeform, shapeHasShapeDeform, shapeHasTaper, shapeSupportsTaper, shapeTaperDimensions, shapeTaperScaleAt, shapeWidth, shapeWithParametricSource } from "@/lib/workplaneShapes";
 import { sphereTessellation } from "@/lib/sphereTessellation";
 import { torusTessellation } from "@/lib/torusTessellation";
@@ -3375,7 +3376,7 @@ export function WorkplaneViewport({
     workspaceRef.current = nextWorkspace;
     setMeasureUnit(nextWorkspace);
     if (threeRef.current) {
-      rebuildWorkplane(threeRef.current, nextWorkspace, resolvedThemeRef.current, drawnWorkplane(), projectNameRef.current);
+      rebuildWorkplane(threeRef.current, nextWorkspace, resolvedThemeRef.current, drawnWorkplane(), projectNameRef.current, nextSnap);
       constrainCamera(threeRef.current, nextWorkspace);
       threeRef.current.needsRender = true;
     }
@@ -3416,6 +3417,11 @@ export function WorkplaneViewport({
   const chooseSnapGrid = useCallback<Dispatch<SetStateAction<GridSize>>>((value) => {
     pendingWorkspaceHydrationFingerprintRef.current = null;
     setSnap(value);
+  }, []);
+  /** A settings-dialog choice must not be suppressed as a project hydration echo. */
+  const changeWorkspace = useCallback((value: WorkspaceSettings) => {
+    pendingWorkspaceHydrationFingerprintRef.current = null;
+    setWorkspace(value);
   }, []);
   /** Same as the grid: switched from the snap menu, so never a hydration echo. */
   const changeObjectSnap = useCallback((objectSnap: boolean) => {
@@ -3798,7 +3804,7 @@ export function WorkplaneViewport({
     if (setEdgeLineStyle(effectiveViewSettings(workspace).edgeLines, workspace.edgeColor)) {
       rebuildShapes(threeRef.current, shapesRef.current, renderSelectionIds(), modifierActiveRef.current, placementWorkplaneRef.current);
     }
-    rebuildWorkplane(threeRef.current, workspace, resolvedTheme, workplaneHidden ? horizontalPlacementWorkplane() : placementWorkplane, projectName);
+    rebuildWorkplane(threeRef.current, workspace, resolvedTheme, workplaneHidden ? horizontalPlacementWorkplane() : placementWorkplane, projectName, snap);
     rebuildSelectionHelpers(threeRef.current, shapesRef.current, renderSelectionIds(), placementWorkplane);
     if (threeRef.current) {
       syncTransformOverlay(
@@ -3821,7 +3827,7 @@ export function WorkplaneViewport({
       syncMoveDimensionWorldLines(threeRef.current, moveDimensionSessionRef.current, resolvedTheme);
       threeRef.current.needsRender = true;
     }
-  }, [language, placementWorkplane, projectName, resolvedTheme, themePreference, workplaneHidden, workspace]);
+  }, [language, placementWorkplane, projectName, resolvedTheme, snap, themePreference, workplaneHidden, workspace]);
 
   useEffect(() => {
     const state = threeRef.current;
@@ -3905,8 +3911,19 @@ export function WorkplaneViewport({
     const state = createThreeScene(host);
     state.palette = themePaletteRef.current;
     threeRef.current = state;
-    rebuildWorkplane(state, workspaceRef.current, resolvedThemeRef.current, drawnWorkplane(), projectNameRef.current);
+    rebuildWorkplane(state, workspaceRef.current, resolvedThemeRef.current, drawnWorkplane(), projectNameRef.current, snapRef.current);
     state.workplaneLayer.visible = !workplaneLayerHiddenRef.current;
+    const syncGridDensity = () => {
+      const settings = workspaceRef.current;
+      if (!settings.showGrid || settings.gridFollowSnap === false || snapRef.current === "Off") return;
+      const layout = viewportGridLayout(state, settings, snapRef.current);
+      if (state.workplaneLayer.userData.gridSignature !== `${layout.step}:${layout.majorInterval}`) {
+        rebuildWorkplane(state, settings, resolvedThemeRef.current, drawnWorkplane(), projectNameRef.current, snapRef.current);
+      }
+    };
+    state.controls.addEventListener("change", syncGridDensity);
+    const gridObserver = new ResizeObserver(syncGridDensity);
+    gridObserver.observe(state.renderer.domElement);
     window.layerlingCaptureCanvas = () => {
       state.camera.updateMatrixWorld();
       renderFrame(state);
@@ -4117,6 +4134,8 @@ export function WorkplaneViewport({
       rememberedCameraViews.set(projectIdRef.current ?? "", cameraViewOf(state));
       window.cancelAnimationFrame(state.animationId);
       window.removeEventListener("resize", state.resize);
+      state.controls.removeEventListener("change", syncGridDensity);
+      gridObserver.disconnect();
       state.disposeInteractionListeners();
       state.controls.dispose();
       disposeChildren(state.workplaneLayer);
@@ -8536,7 +8555,7 @@ export function WorkplaneViewport({
           moveDimensionsEnabled={moveDimensionsEnabled}
           originDimensionsEnabled={originDimensionsEnabled}
           startInPerspective={startInPerspective}
-          onWorkspaceChange={setWorkspace}
+          onWorkspaceChange={changeWorkspace}
           onSnapChange={chooseSnapGrid}
           onThemePreferenceChange={onThemePreferenceChange}
           onMoveDimensionsEnabledChange={changeMoveDimensionsEnabled}
@@ -9018,16 +9037,29 @@ function refreshFrozenObjectMatrix(object: THREE.Object3D) {
   object.updateMatrixWorld(true);
 }
 
+function viewportGridLayout(state: ThreeState, workspace: WorkspaceSettings, snap?: GridSize) {
+  const layout = workplaneGridLayout(workspace, visibleGridStep(workspace, snap));
+  if (workspace.gridFollowSnap === false || snap === undefined || snap === "Off") return layout;
+  const camera = state.camera;
+  const viewHeight = camera instanceof THREE.OrthographicCamera ? (camera.top - camera.bottom) / camera.zoom
+    : 2 * camera.position.distanceTo(state.controls.target) * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2) / camera.zoom;
+  return workplaneGridDisplayLayout(layout, viewHeight / Math.max(1, state.renderer.domElement.clientHeight), Math.max(workspace.width, workspace.depth));
+}
+
 function rebuildWorkplane(
   state: ThreeState | null,
   workspace: WorkspaceSettings,
   theme: ResolvedAppTheme = "light",
   placementWorkplane: PlacementWorkplane = horizontalPlacementWorkplane(),
   projectName = "",
+  snap?: GridSize,
 ) {
   if (!state) {
     return;
   }
+
+  const gridLayout = viewportGridLayout(state, workspace, snap);
+  state.workplaneLayer.userData.gridSignature = `${gridLayout.step}:${gridLayout.majorInterval}`;
 
   const palette = workplaneThemePalette(theme, workspace.background, workspace.gridColor, state.palette, workspace.surfaceColor);
   disposeChildren(state.workplaneLayer);
@@ -9092,7 +9124,7 @@ function rebuildWorkplane(
       group.add(createGridLines(
         workspace.width,
         workspace.depth,
-        workplaneGridLayout(workspace),
+        gridLayout,
         theme,
         lineColor,
         state.palette,
@@ -9104,7 +9136,7 @@ function rebuildWorkplane(
       group.add(createGridLines(
         workspace.width,
         workspace.depth,
-        workplaneGridLayout(workspace),
+        gridLayout,
         theme,
         lineColor,
         state.palette,
@@ -9486,7 +9518,7 @@ function createGridLines(
   group.add(linesFromPoints(borderPoints, border));
   // Switched off (#240), every line stays one pixel wide whatever the zoom, as in the sketch.
   if (!linesGrow) return group;
-  const gridBands = workplaneGridBandWidths(layout.step);
+  const gridBands = workplaneGridBandWidths(layout.step, layout.step < 1);
   // The darker lines first, so they stay whole where a fine line crosses them.
   if (majorBands.length) group.add(bandsFromSegments(majorBands, gridBands.major, palette.major, { order: 1 }));
   if (minorBands.length) group.add(bandsFromSegments(minorBands, gridBands.minor, palette.minor, { order: 1.5 }));

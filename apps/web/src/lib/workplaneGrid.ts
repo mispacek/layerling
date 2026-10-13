@@ -203,14 +203,24 @@ export type WorkplaneGridLayout = {
  * the stronger lines meet the axes whatever the plate measures. Millimetre
  * grids draw a stronger line every fifth, inch grids on every whole inch.
  */
-export function workplaneGridLayout(workspace: { gridBlockSize: number; gridBlockPreset?: string; units?: string; gridMajorInterval?: number }): WorkplaneGridLayout {
-  const step = Math.min(200, Math.max(1, workspace.gridBlockSize));
+export function workplaneGridLayout(workspace: { gridBlockSize: number; gridBlockPreset?: string; units?: string; gridMajorInterval?: number }, snapStep?: number): WorkplaneGridLayout {
+  const step = snapStep !== undefined && Number.isFinite(snapStep) && snapStep > 0 ? snapStep : Math.min(200, Math.max(1, workspace.gridBlockSize));
   const inches = inchGridPresetMm(workspace.gridBlockPreset ?? "") !== null || workspace.units === "Imperial";
   // A millimetre grid draws its darker line every fifth or, as similar tools, every tenth step (#143).
   if (!inches) return { step, majorInterval: workspace.gridMajorInterval === 10 ? 10 : WORKPLANE_MAJOR_GRID_INTERVAL };
   const perInch = Math.round(MM_PER_INCH / step);
   const majorInterval = Math.abs(perInch * step - MM_PER_INCH) < 1e-6 && perInch >= 2 ? perInch : step >= MM_PER_INCH - 1e-6 ? 12 : WORKPLANE_MAJOR_GRID_INTERVAL;
   return { step, majorInterval };
+}
+
+/** Thin dense grids by whole powers of two, preserving the origin and strong-line positions.
+ * The line cap also bounds geometry for quarter-custom steps as small as 0.0025 mm. */
+export function workplaneGridDisplayLayout(layout: WorkplaneGridLayout, worldUnitsPerPixel: number, span: number): WorkplaneGridLayout {
+  const minimum = Math.max(Number.isFinite(worldUnitsPerPixel) ? worldUnitsPerPixel * 4 : 0, span / 2000);
+  let multiplier = 1;
+  while (layout.step * multiplier < minimum && multiplier < 2 ** 30) multiplier *= 2;
+  const gcd = (a: number, b: number): number => b ? gcd(b, a % b) : a;
+  return { step: layout.step * multiplier, majorInterval: layout.majorInterval / gcd(layout.majorInterval, multiplier) };
 }
 
 /** Lines through the origin at whole steps, inside the plate; `index` counts from the origin (negative to the left). */
@@ -234,8 +244,8 @@ export function centeredWorkplaneGridCoordinates(span: number, step: number): Wo
  * keeps the grid visible from afar. A twentieth of the grid step for the fine lines, twice that for
  * the darker ones, so a 1 mm grid gets 0.05 and 0.1 mm.
  */
-export function workplaneGridBandWidths(step: number) {
-  const minor = Math.min(0.5, Math.max(0.02, (Number.isFinite(step) && step > 0 ? step : 1) * 0.05));
+export function workplaneGridBandWidths(step: number, subMillimeter = false) {
+  const minor = Math.min(0.5, Math.max(subMillimeter ? 0 : 0.02, (Number.isFinite(step) && step > 0 ? step : 1) * 0.05));
   return { minor, major: minor * 2 };
 }
 

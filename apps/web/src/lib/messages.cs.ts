@@ -2047,6 +2047,8 @@ export const MESSAGES_CS: Record<MessageKey, string> = {
   "workspace.width": "Šířka",
   "workspace.length": "Délka",
   "workspace.gridBlockSize": "Velikost buňky mřížky",
+  "workspace.gridFollowSnap": "Mřížka podle přichytávání",
+  "workspace.gridFollowSnapHint": "Rozteč mřížky se mění podle kroku přichytávání, včetně Lego a vlastních rozměrů. Jemné čáry se při oddálení zředí a při přiblížení obnoví. Při vypnutém přichytávání se použije pevná mřížka.",
   "workspace.blockSize": "Velikost buňky",
   "workspace.booleanTriangleLimit": "Řezat importované sítě nejvýše do",
   "workspace.booleanTriangleLimitOlder": "Starší počítač ({count} trojúhelníků)",

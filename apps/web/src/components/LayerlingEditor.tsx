@@ -6507,11 +6507,11 @@ export function LayerlingEditor({
       return;
     }
     const selected = new Set(selectedIds);
-    const grid = visibleGridStep(workspaceSettings);
+    const grid = visibleGridStep(workspaceSettings, snapGrid);
     commitShapes(
       shapes.map((shape) =>
         selected.has(shape.id) && !shape.locked
-          ? snapShapeFootprintToVisibleGrid(shape, meshAabb(shape), workspaceSettings)
+          ? snapShapeFootprintToVisibleGrid(shape, meshAabb(shape), workspaceSettings, snapGrid)
           : shape,
       ),
       selectedIds,
@@ -6519,7 +6519,7 @@ export function LayerlingEditor({
         ? t("status.snappedOne", { grid })
         : t("status.snappedMany", { count: selectedShapes.length, grid }),
     );
-  }, [commitShapes, hasSelection, selectedIds, selectedShapes.length, shapes, workspaceSettings]);
+  }, [commitShapes, hasSelection, selectedIds, selectedShapes.length, shapes, snapGrid, workspaceSettings]);
 
   const toggleHidden = useCallback(() => {
     if (!hasSelection) {

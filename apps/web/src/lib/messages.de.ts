@@ -2046,6 +2046,8 @@ export const MESSAGES_DE: Record<MessageKey, string> = {
   "workspace.width": "Breite",
   "workspace.length": "Länge",
   "workspace.gridBlockSize": "Rasterweite",
+  "workspace.gridFollowSnap": "Gitter folgt dem Fangraster",
+  "workspace.gridFollowSnapHint": "Der Gitterabstand folgt der Fangschrittweite, einschließlich Lego und eigener Maße. Feine Linien werden beim Herauszoomen ausgedünnt und beim Hineinzoomen wieder angezeigt. Ohne Fangraster gilt das feste Gitter.",
   "workspace.blockSize": "Kästchengröße",
   "workspace.booleanTriangleLimit": "Importierte Netze schneiden bis",
   "workspace.booleanTriangleLimitOlder": "Älterer Rechner ({count} Dreiecke)",

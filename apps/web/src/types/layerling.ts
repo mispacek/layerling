@@ -236,6 +236,8 @@ export type WorkplaneWorkspaceSettings = {
   printer: string;
   gridBlockSize: number;
   gridBlockPreset: string;
+  /** Follow the selected snap step; absent in older projects means enabled. */
+  gridFollowSnap?: boolean;
   gridColor: string;
   /** Every how many grid steps a darker line is drawn on a millimetre grid: 5 or 10 (#143). */
   gridMajorInterval: number;

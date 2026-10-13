@@ -1161,8 +1161,10 @@ export function WorkspaceSettingsModal({
                     checked={workspace.showGrid}
                     onChange={(showGrid) => patchWorkspace({ showGrid })}
                   />
-                  <WorkspaceSelect label={t("workspace.gridBlockSize")} value={workspace.gridBlockPreset} options={workspace.units === "Imperial" ? [...IMPERIAL_GRID_BLOCK_PRESETS, "Custom"] : GRID_BLOCK_PRESETS}
-                    optionLabel={gridBlockPresetLabel} onChange={setGridBlockPreset} />
+                  <WorkspaceToggle label={t("workspace.gridFollowSnap")} description={t("workspace.gridFollowSnapHint")}
+                    checked={workspace.gridFollowSnap !== false} onChange={(gridFollowSnap) => patchWorkspace({ gridFollowSnap })} />
+                  {workspace.gridFollowSnap === false || snap === "Off" ? <WorkspaceSelect label={t("workspace.gridBlockSize")} value={workspace.gridBlockPreset} options={workspace.units === "Imperial" ? [...IMPERIAL_GRID_BLOCK_PRESETS, "Custom"] : GRID_BLOCK_PRESETS}
+                    optionLabel={gridBlockPresetLabel} onChange={setGridBlockPreset} /> : null}
                   <ColorSettingControl
                     label={t("workspace.gridColor")}
                     color={gridColor}
@@ -1186,7 +1188,7 @@ export function WorkspaceSettingsModal({
                     presets={GRID_COLOR_PRESETS}
                     onChange={(nextColor) => patchWorkspace({ gridMajorColor: nextColor.toLowerCase() === derivedGridMajorColor.toLowerCase() ? "" : nextColor })}
                   />
-                  {workspace.gridBlockPreset === "Custom" ? (
+                  {workspace.gridBlockPreset === "Custom" && (workspace.gridFollowSnap === false || snap === "Off") ? (
                     <div className="workspace-dimensions workspace-grid-dimensions">
                       <label>
                         <span>{t("workspace.blockSize")}</span>

@@ -1,4 +1,5 @@
-import type { WorkplaneShape, WorkplaneWorkspaceSettings } from "@/types/layerling";
+import type { GridSize, WorkplaneShape, WorkplaneWorkspaceSettings } from "@/types/layerling";
+import { snapGridStep } from "@/lib/workplaneSettings";
 
 const MIN_VISIBLE_GRID_STEP = 1;
 const MAX_VISIBLE_GRID_STEP = 200;
@@ -12,7 +13,11 @@ function cleanCoordinate(value: number) {
   return Math.abs(rounded) < 1e-6 ? 0 : rounded;
 }
 
-export function visibleGridStep(workspace: WorkplaneWorkspaceSettings) {
+export function visibleGridStep(workspace: WorkplaneWorkspaceSettings, snap?: GridSize) {
+  if (workspace.gridFollowSnap !== false && snap !== undefined) {
+    const step = snapGridStep(snap);
+    if (Number.isFinite(step) && step > 0) return step;
+  }
   return clamp(workspace.gridBlockSize, MIN_VISIBLE_GRID_STEP, MAX_VISIBLE_GRID_STEP);
 }
 
@@ -32,8 +37,9 @@ export function snapShapeFootprintToVisibleGrid(
   shape: WorkplaneShape,
   bounds: GridFootprintBounds,
   workspace: WorkplaneWorkspaceSettings,
+  snap?: GridSize,
 ) {
-  const step = visibleGridStep(workspace);
+  const step = visibleGridStep(workspace, snap);
   const xOffsets = [bounds.minX, bounds.maxX].map((value) => nearestVisibleGridLine(value, step) - value);
   const zOffsets = [bounds.minZ, bounds.maxZ].map((value) => nearestVisibleGridLine(value, step) - value);
   const deltaX = xOffsets.reduce((best, value) => Math.abs(value) < Math.abs(best) ? value : best);
