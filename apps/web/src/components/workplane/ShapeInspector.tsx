@@ -3965,7 +3965,8 @@ function GearTypeSelector({ value, disabled, onChange }: { value: GearType; disa
 /**
  * The properties panel for several parts at once (#183), as in similar tools: how many are
  * selected, solid or hole and a colour for all of them, and locking. Sizes stay with a single
- * body, the handles and Scale by percent. Locked parts are left as they are.
+ * body, the handles and Scale by percent. One locked part holds the whole selection: the
+ * panel then only offers unlocking.
  */
 export function SelectionInspector({
   shapes,
@@ -3986,6 +3987,7 @@ export function SelectionInspector({
   const { colors: recentColors, remember: rememberColor } = useRecentColors(SOLID_COLORS);
   const solidKinds = shapes.filter((shape) => !isNonSolidShapeKind(shape.kind));
   const allLocked = shapes.length > 0 && shapes.every((shape) => shape.locked);
+  const anyLocked = shapes.some((shape) => shape.locked);
   const allHoles = solidKinds.length > 0 && solidKinds.every((shape) => shape.hole);
   const noHoles = solidKinds.every((shape) => !shape.hole);
   const solids = solidKinds.filter((shape) => !shape.hole);
@@ -4025,7 +4027,7 @@ export function SelectionInspector({
               if (noHoles) setColorOpen((open) => !open);
               else onSetHole(false);
             }}
-            disabled={allLocked}
+            disabled={anyLocked}
             aria-pressed={noHoles}
             aria-expanded={colorOpen}
           >
@@ -4038,7 +4040,7 @@ export function SelectionInspector({
               onSetHole(true);
               setColorOpen(false);
             }}
-            disabled={allLocked}
+            disabled={anyLocked}
             aria-pressed={allHoles}
           >
             <span className="large-hole-swatch" />
@@ -4062,12 +4064,12 @@ export function SelectionInspector({
                 style={{ "--shape-swatch": color } as CSSProperties}
                 title={color.toUpperCase()}
                 aria-label={t("aria.setColor", { color })}
-                disabled={allLocked}
+                disabled={anyLocked}
                 onClick={() => pick(color)}
               />
             ))}
-            <label className={allLocked ? "custom-color disabled" : "custom-color"} title={t("inspector.customColor")}>
-              <CustomColorInput color={swatch} disabled={allLocked} onCommit={pick} onInteractionActiveChange={onInteractionActiveChange} />
+            <label className={anyLocked ? "custom-color disabled" : "custom-color"} title={t("inspector.customColor")}>
+              <CustomColorInput color={swatch} disabled={anyLocked} onCommit={pick} onInteractionActiveChange={onInteractionActiveChange} />
               <span>{t("inspector.custom")}</span>
             </label>
           </div>
@@ -4083,7 +4085,7 @@ export function SelectionInspector({
                     style={{ "--shape-swatch": color } as CSSProperties}
                     title={color.toUpperCase()}
                     aria-label={t("aria.setColor", { color })}
-                    disabled={allLocked}
+                    disabled={anyLocked}
                     onClick={() => pick(color)}
                   />
                 ))}

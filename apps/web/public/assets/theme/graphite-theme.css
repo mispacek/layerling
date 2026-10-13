@@ -3685,6 +3685,42 @@ html[data-theme="dark"]:where([data-palette="graphite"]) .inspector-bundle-note 
   border-top-color: var(--hover-accent-color);
 }
 
+:where(html[data-theme="dark"][data-palette="graphite"]) .transform-overlay.locked {
+  --locked-handle-ink: #898989;
+  --locked-handle-fill: #dfdfdf;
+}
+
+:where(html[data-theme="dark"][data-palette="graphite"]) .transform-overlay.locked .transform-handle,
+:where(html[data-theme="dark"][data-palette="graphite"]) .transform-overlay.locked .transform-handle:hover {
+  background: var(--locked-handle-fill);
+  border-color: var(--locked-handle-ink);
+  box-shadow: none;
+}
+
+:where(html[data-theme="dark"][data-palette="graphite"]) .transform-overlay.locked .transform-handle.height-lift,
+:where(html[data-theme="dark"][data-palette="graphite"]) .transform-overlay.locked .transform-handle.height-lift:hover {
+  background: transparent;
+  border-color: transparent;
+  border-bottom-color: var(--locked-handle-ink);
+}
+
+:where(html[data-theme="dark"][data-palette="graphite"]) .transform-overlay.locked .transform-handle.height-lift.lower,
+:where(html[data-theme="dark"][data-palette="graphite"]) .transform-overlay.locked .transform-handle.height-lift.lower:hover {
+  border-bottom-color: transparent;
+  border-top-color: var(--locked-handle-ink);
+}
+
+:where(html[data-theme="dark"][data-palette="graphite"]) .transform-overlay.locked .rotate-handle {
+  color: var(--locked-handle-ink);
+}
+
+:where(html[data-theme="dark"][data-palette="graphite"]) .transform-lock-badge {
+  color: #595959;
+  background: rgba(251, 251, 251, 0.95);
+  border: 1px solid var(--locked-handle-ink);
+  box-shadow: 0 1px 2px rgba(36, 36, 36, 0.16);
+}
+
 :where(html[data-theme="dark"][data-palette="graphite"]) .rotate-handle {
   --rotate-handle-ink: #3a3a3a;
   --rotate-handle-axis: var(--rotate-handle-ink);
@@ -6034,6 +6070,16 @@ html[data-theme="dark"]:where([data-palette="graphite"]) .transform-handle.heigh
 html[data-theme="dark"]:where([data-palette="graphite"]) .transform-handle.height-lift.lower:hover {
   border-bottom-color: transparent;
   border-top-color: var(--hover-accent-color);
+}
+
+html[data-theme="dark"]:where([data-palette="graphite"]) .transform-overlay.locked {
+  --locked-handle-ink: #656565;
+  --locked-handle-fill: #434343;
+}
+
+html[data-theme="dark"]:where([data-palette="graphite"]) .transform-lock-badge {
+  color: #bebebe;
+  background: rgba(31, 31, 31, 0.9);
 }
 
 html[data-theme="dark"]:where([data-palette="graphite"]) .inspector-snap-dock {

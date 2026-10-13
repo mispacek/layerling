@@ -1,7 +1,7 @@
 "use client";
 
 import { AlignCenterHorizontal, AlignCenterVertical, Check, ChevronUp, CornerDownRight, Crop, Crosshair, Home, Link, Link2Off, LockKeyhole, LockKeyholeOpen, Minus, Plus, Ruler, RulerDimensionLine, Slash, Spline, Split, Trash2, Waves, X } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type FocusEvent as ReactFocusEvent, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent, type WheelEvent as ReactWheelEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type Dispatch, type SetStateAction, type FocusEvent as ReactFocusEvent, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent, type WheelEvent as ReactWheelEvent } from "react";
 import { SnapGridControl } from "@/components/workplane/ShapeInspector";
 import { SketchRevolvePreview } from "@/components/SketchRevolvePreview";
 import { ToolbarConstructionLineIcon } from "@/components/toolbarIcons";
@@ -48,6 +48,8 @@ type SketchWorkspaceProps = {
   measurement: SketchMeasurement;
   pendingMeasurementStart: SketchPoint | null;
   initialSnap?: GridSize;
+  /** The snap grid picked in the sketch; the editor keeps one grid for the sketch and the 3D view. */
+  onSnapChange?: (snap: GridSize) => void;
   initialWorkspace?: WorkplaneWorkspaceSettings;
   onPlanePoint: (point: { x: number; z: number }, handles?: { handleIn: { x: number; z: number }; handleOut: { x: number; z: number } }) => void;
   onAddPrimitive: (primitive: SketchPrimitive, center: { x: number; z: number }) => void;
@@ -499,6 +501,7 @@ export function SketchWorkspace({
   measurement,
   pendingMeasurementStart,
   initialSnap,
+  onSnapChange,
   initialWorkspace,
   onPlanePoint,
   onAddPrimitive,
@@ -536,6 +539,17 @@ export function SketchWorkspace({
   useLanguage();
   const workspace = useMemo(() => normalizeWorkspaceSettings(initialWorkspace, DEFAULT_WORKPLANE_WORKSPACE), [initialWorkspace]);
   const [snap, setSnap] = useState<GridSize>(() => normalizeSnapGrid(initialSnap, DEFAULT_SNAP_GRID));
+  // One grid for the sketch and the 3D view: what the editor holds wins, and a pick here goes back to it.
+  useEffect(() => {
+    setSnap(normalizeSnapGrid(initialSnap, DEFAULT_SNAP_GRID));
+  }, [initialSnap]);
+  const snapRef = useRef(snap);
+  snapRef.current = snap;
+  const chooseSnap = useCallback<Dispatch<SetStateAction<GridSize>>>((value) => {
+    const next = typeof value === "function" ? value(snapRef.current) : value;
+    setSnap(next);
+    onSnapChange?.(next);
+  }, [onSnapChange]);
   const [snapOpen, setSnapOpen] = useState(false);
   const [view, setView] = useState<SketchView>({ zoom: 1, pan: { x: 0, z: 0 } });
   const { zoom, pan } = view;
@@ -2455,7 +2469,7 @@ export function SketchWorkspace({
         </div>
       ) : null}
       <div className="grid-settings">
-        <SnapGridControl units={workspace.units} customGrids={workspace.customSnapGrids} snap={snap} snapOpen={snapOpen} onSnapChange={setSnap} onSnapOpenChange={setSnapOpen} />
+        <SnapGridControl units={workspace.units} customGrids={workspace.customSnapGrids} snap={snap} snapOpen={snapOpen} onSnapChange={chooseSnap} onSnapOpenChange={setSnapOpen} />
       </div>
     </main>
   );

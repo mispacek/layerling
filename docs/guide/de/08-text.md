@@ -27,6 +27,10 @@ Neben den sieben mitgelieferten Schriften kannst du jede eigene Schrift nehmen: 
 
 Ist gerade ein Text ausgewählt, bekommt er die neue Schrift sofort. Sonst steht sie danach unter {{ui:prop.font}} in der Gruppe {{ui:font.customGroup}}, und mit {{ui:font.use}} im Fenster setzt du sie auf die ausgewählten Texte. Eigene Schriften verhalten sich wie die mitgelieferten: Text auf dem Kreisbogen, Fasen und Rundungen an den Kanten und der STEP-Export gehen genauso. Buchstaben, die eine Schrift nicht hat, nimmt layerling aus Sans.
 
+### Arabisch und Hebräisch
+
+Arabisch, Persisch, Urdu und Hebräisch schreibt layerling von rechts nach links: Der erste Buchstabe steht rechts, und in einem gemischten Text wie „Name عربي“ läuft nur das arabische Wort rückwärts, Ziffern bleiben wie gewohnt. Arabische Buchstaben verbinden sich dabei mit ihren Nachbarn, so wie die Schrift es vorsieht, und Lam-Alif wird zur Ligatur. Dafür braucht es eine Schrift, die diese Buchstaben hat; die mitgelieferten haben sie nicht. Füge eine eigene hinzu, etwa Arial, Tahoma oder Segoe UI unter Windows oder eine freie wie Noto Naskh Arabic, Noto Sans Arabic oder Amiri. Vokalzeichen stehen auf dem Buchstaben, zu dem sie gehören. Text auf dem Kreisbogen, Kontur, Silhouette, Schichten und Namensschilder gehen damit wie mit jedem anderen Text.
+
 ### Was in welchem Browser geht
 
 | Browser | Schriftdatei wählen | Schrift vom Computer |

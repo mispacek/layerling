@@ -1,4 +1,5 @@
 import { useRef, type CSSProperties } from "react";
+import { Lock } from "lucide-react";
 import { t } from "@/lib/i18n";
 import * as THREE from "three";
 import {
@@ -60,6 +61,7 @@ export function TransformOverlay({
   editingRotation,
   rotationReadout,
   angleBadge = null,
+  locked = false,
   showRotationWheel,
   hideSelectionChrome,
   hideDimensionMarks,
@@ -128,10 +130,12 @@ export function TransformOverlay({
   const pinnedWheel = pinnedRotationWheelView?.axis === rotationWheelAxis ? pinnedRotationWheelView : null;
   const plane = pinnedWheel?.plane ?? box.rotationPlanes[rotationWheelAxis];
   const wheel = pinnedWheel?.wheel ?? box.rotationWheels[rotationWheelAxis] ?? box.rotationWheel;
+  // A locked selection wears a lock beside the arrow that lifts it.
+  const liftHandle = locked ? box.handles.find((handle) => handle.kind === "lift") : undefined;
   return (
     <div
       ref={rootRef}
-      className={`transform-overlay ${hideSelectionChrome ? "hide-selection-chrome" : ""}`}
+      className={`transform-overlay ${hideSelectionChrome ? "hide-selection-chrome" : ""} ${locked ? "locked" : ""}`}
       onPointerDownCapture={(event) => {
         if (event.button === 1 || event.button === 2) {
           onHoverMeasure(null);
@@ -204,6 +208,7 @@ export function TransformOverlay({
           className="dimension-label"
           type="button"
           style={overlayPoint(keepVisible, mark.labelX, mark.labelY)}
+          disabled={locked}
           onPointerDown={(event) => event.stopPropagation()}
           onClick={() => onBeginDimensionEdit(mark)}
         >
@@ -286,7 +291,7 @@ export function TransformOverlay({
             "--overlay-y": `${handle.y}px`,
             "--transform-handle-angle": `${handle.angle ?? 0}deg`,
           } as CSSProperties}
-          title={handle.title}
+          title={locked ? t("status.objectLocked") : handle.title}
           onPointerEnter={(event) => {
             if ((event.buttons & 4) !== 0) {
               onHoverMeasure(null);
@@ -296,7 +301,7 @@ export function TransformOverlay({
           }}
           onPointerLeave={() => onHoverMeasure(null)}
           onPointerDown={(event) => {
-            if (event.button !== 0) {
+            if (event.button !== 0 || locked) {
               return;
             }
             onPinMeasure(handleMeasureKey(handle));
@@ -306,7 +311,9 @@ export function TransformOverlay({
           onPointerUp={onFinishTransform}
           onPointerCancel={onFinishTransform}
           onClick={(event) => {
-            if (handle.kind === "lift") {
+            if (locked) {
+              event.stopPropagation();
+            } else if (handle.kind === "lift") {
               event.stopPropagation();
               onBeginLiftEdit(handle.key, handle.x + 42, handle.y - 32);
             } else if (handle.kind === "scale" && handle.className.startsWith("corner")) {
@@ -324,9 +331,9 @@ export function TransformOverlay({
             "--overlay-x": `${handle.x}px`,
             "--overlay-y": `${handle.y}px`,
           } as CSSProperties}
-          title={t("transform.rotateHandle")}
+          title={locked ? t("status.objectLocked") : t("transform.rotateHandle")}
           onPointerDown={(event) => {
-            if (event.button === 0) {
+            if (event.button === 0 && !locked) {
               onBeginTransform("rotate", handle.key, event);
             }
           }}
@@ -335,7 +342,9 @@ export function TransformOverlay({
           onPointerCancel={onFinishTransform}
           onClick={(event) => {
             event.stopPropagation();
-            onBeginRotationEdit(handle.key, handle.x + 34, handle.y - 28);
+            if (!locked) {
+              onBeginRotationEdit(handle.key, handle.x + 34, handle.y - 28);
+            }
           }}
         >
           <span className="rotate-handle-icon" aria-hidden="true">
@@ -346,6 +355,15 @@ export function TransformOverlay({
           </span>
         </button>
       ))}
+      {liftHandle ? (
+        <span
+          className="transform-lock-badge"
+          title={t("status.objectLocked")}
+          style={{ "--overlay-x": `${liftHandle.x + 18}px`, "--overlay-y": `${liftHandle.y}px` } as CSSProperties}
+        >
+          <Lock size={12} strokeWidth={2.4} aria-hidden="true" />
+        </span>
+      ) : null}
       {box.pivotMarker ? (
         <span
           className={`rotation-pivot-marker ${onBeginPivotDrag ? "draggable" : ""}`}

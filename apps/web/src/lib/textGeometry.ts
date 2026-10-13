@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import type { Font } from "three/examples/jsm/loaders/FontLoader.js";
+import { shapeText, textNeedsShaping } from "@/lib/arabicShaping";
 import { normalizeSketchStroke } from "@/lib/sketchStroke";
 import { customFontRevision, textFont } from "@/lib/textFonts";
 import { shapeDepth, shapeWidth } from "@/lib/workplaneShapes";
@@ -21,6 +22,17 @@ function clamp(value: number, min: number, max: number): number {
 
 function textOf(shape: Pick<WorkplaneShape, "text">) {
   return (shape.text ?? "TEXT").trim() || " ";
+}
+
+/**
+ * The characters the typeface draws for a text, left to right: Arabic and Hebrew shaped and
+ * turned round (#294) with the forms this typeface has, anything else as typed.
+ */
+export function displayTextOf(shape: Pick<WorkplaneShape, "text" | "font">) {
+  const text = textOf(shape);
+  if (!textNeedsShaping(text)) return text;
+  const glyphs = (textFont(shape.font ?? "Multilanguage").data as { glyphs?: Record<string, unknown> }).glyphs ?? {};
+  return shapeText(text, (char) => Boolean(glyphs[char]));
 }
 
 function textOptions(shape: WorkplaneShape, size: number) {
@@ -214,7 +226,7 @@ export function textFillPatch(shape: WorkplaneShape, patch: Partial<WorkplaneSha
  * the same matrices, so its CAD bodies land on the drawn letters.
  */
 export function curvedTextLayout(shape: WorkplaneShape) {
-  const text = textOf(shape);
+  const text = displayTextOf(shape);
   const radius = curvedRadius(shape);
   const font = textFont(shape.font ?? "Multilanguage");
   let size = curvedSize(shape);
@@ -326,7 +338,7 @@ export function curvedTextFootprint(shape: WorkplaneShape): { width: number; dep
 
 /** Width and depth of the straight line at layout size, before it is fitted into its box. */
 function straightTextExtent(shape: WorkplaneShape) {
-  const geometry = new TextGeometry(textOf(shape), textOptions({ ...shape, height: 1 }, LAYOUT_SIZE));
+  const geometry = new TextGeometry(displayTextOf(shape), textOptions({ ...shape, height: 1 }, LAYOUT_SIZE));
   geometry.computeBoundingBox();
   const box = geometry.boundingBox;
   const extent = box ? { width: Math.max(1, box.max.x - box.min.x), depth: Math.max(1, box.max.y - box.min.y) } : { width: LAYOUT_SIZE, depth: LAYOUT_SIZE };
@@ -422,7 +434,7 @@ export function textGlyphShapes(shape: WorkplaneShape): { glyphs: TextGlyphShape
       options.font.generateShapes(char, options.size).forEach((glyph) => glyphs.push({ glyph, map }));
     });
   } else {
-    const shapes = textFont(fontName).generateShapes(textOf(shape), LAYOUT_SIZE);
+    const shapes = textFont(fontName).generateShapes(displayTextOf(shape), LAYOUT_SIZE);
     let minX = Infinity;
     let maxX = -Infinity;
     let minY = Infinity;
@@ -461,7 +473,7 @@ export function createTextGeometry(shape: WorkplaneShape): THREE.BufferGeometry 
     return curved;
   }
 
-  const geometry = new TextGeometry(textOf(shape), textOptions(shape, LAYOUT_SIZE));
+  const geometry = new TextGeometry(displayTextOf(shape), textOptions(shape, LAYOUT_SIZE));
   geometry.computeBoundingBox();
   const box = geometry.boundingBox;
   if (box) {

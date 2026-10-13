@@ -1,5 +1,7 @@
 import type { ManifoldToplevel } from "manifold-3d";
+import type { Font as OpentypeFont, Glyph as OpentypeGlyph, GsubSubtable, GsubTable } from "opentype.js";
 import type { FontData } from "three/examples/jsm/loaders/FontLoader.js";
+import { arabicLetterForms, lamAlefLigatures, shapeText } from "@/lib/arabicShaping";
 import { sha256Hex } from "@/lib/projectAssets";
 
 /*
@@ -229,6 +231,100 @@ function contoursBounds(contours: Contour[]) {
 /** Explains why a file could not be read, in words the editor can show. */
 export class CustomFontError extends Error {}
 
+function coverageGlyphs(coverage: GsubSubtable["coverage"]): number[] {
+  if (!coverage) return [];
+  if (coverage.format === 1) return coverage.glyphs;
+  const glyphs: number[] = [];
+  coverage.ranges.forEach((range) => {
+    for (let glyph = range.start; glyph <= range.end; glyph += 1) glyphs.push(glyph);
+  });
+  return glyphs;
+}
+
+/** The GSUB subtables of one feature for Arabic, each with its real lookup type (an extension lookup unwrapped). */
+function arabicSubtables(gsub: GsubTable, tag: string): Array<{ type: number; table: GsubSubtable }> {
+  const script = gsub.scripts.find((entry) => entry.tag === "arab") ?? gsub.scripts.find((entry) => entry.tag === "DFLT");
+  const langSys = script?.script.defaultLangSys ?? script?.script.langSysRecords[0]?.langSys;
+  const subtables: Array<{ type: number; table: GsubSubtable }> = [];
+  for (const featureIndex of langSys?.featureIndexes ?? []) {
+    const feature = gsub.features[featureIndex];
+    if (!feature || feature.tag !== tag) continue;
+    for (const lookupIndex of feature.feature.lookupListIndexes) {
+      const lookup = gsub.lookups[lookupIndex];
+      lookup?.subtables.forEach((table) => {
+        if (lookup.lookupType === 7 && table.extension) subtables.push({ type: table.lookupType ?? 0, table: table.extension });
+        else subtables.push({ type: lookup.lookupType, table });
+      });
+    }
+  }
+  return subtables;
+}
+
+/** One glyph for another under a feature: single substitutions, and the one-glyph sequences some fonts write them as. */
+function singleSubstitutions(gsub: GsubTable, tag: string): Map<number, number> {
+  const map = new Map<number, number>();
+  for (const { type, table } of arabicSubtables(gsub, tag)) {
+    coverageGlyphs(table.coverage).forEach((glyph, index) => {
+      if (map.has(glyph)) return;
+      if (type === 1) map.set(glyph, table.substFormat === 1 ? glyph + (table.deltaGlyphId ?? 0) : table.substitute?.[index] ?? glyph);
+      else if (type === 2 && table.sequences?.[index]?.length === 1) map.set(glyph, table.sequences[index][0]);
+    });
+  }
+  return map;
+}
+
+/** Two glyphs as one under the given features, keyed "first,second". */
+function pairLigatures(gsub: GsubTable, tags: string[]): Map<string, number> {
+  const map = new Map<string, number>();
+  for (const tag of tags) {
+    for (const { type, table } of arabicSubtables(gsub, tag)) {
+      if (type !== 4) continue;
+      coverageGlyphs(table.coverage).forEach((first, index) => {
+        table.ligatureSets?.[index]?.forEach((ligature) => {
+          const key = `${first},${ligature.components[0]}`;
+          if (ligature.components.length === 1 && !map.has(key)) map.set(key, ligature.ligGlyph);
+        });
+      });
+    }
+  }
+  return map;
+}
+
+/**
+ * The shapes Arabic letters take beside their neighbours (#294), read from the font's shaping
+ * rules - GSUB init, medi and fina, and the lam-alef ligature under rlig or liga - and put into
+ * the character map under the presentation-form characters `shapeText` draws them by. A font
+ * that lists those characters itself is read as it is; the rules win where both exist, as they
+ * are what the font's designer meant for running text.
+ */
+function addArabicForms(font: OpentypeFont, byCharacter: Map<number, OpentypeGlyph>) {
+  const gsub = font.tables.gsub;
+  if (!gsub) return;
+  const byForm = [null, singleSubstitutions(gsub, "fina"), singleSubstitutions(gsub, "init"), singleSubstitutions(gsub, "medi")];
+  if (byForm.every((map) => !map?.size)) return;
+  const glyphIndex = (char: string) => font.charToGlyphIndex(char) || 0;
+  for (const { letter, forms } of arabicLetterForms()) {
+    const base = glyphIndex(letter);
+    if (!base) continue;
+    forms.forEach((code, formIndex) => {
+      const index = formIndex > 0 && code ? byForm[formIndex]?.get(base) : undefined;
+      if (index) byCharacter.set(code, font.glyphs.get(index));
+    });
+  }
+  const ligatures = pairLigatures(gsub, ["rlig", "liga", "calt"]);
+  const lam = glyphIndex("ل");
+  if (!lam || !ligatures.size) return;
+  const [fina, init, medi] = [byForm[1]!, byForm[2]!, byForm[3]!];
+  for (const { alef, forms } of lamAlefLigatures()) {
+    const alefIndex = glyphIndex(alef);
+    if (!alefIndex) continue;
+    const isolated = ligatures.get(`${init.get(lam)},${fina.get(alefIndex)}`) ?? ligatures.get(`${lam},${alefIndex}`);
+    const final = ligatures.get(`${medi.get(lam)},${fina.get(alefIndex)}`);
+    if (isolated) byCharacter.set(forms[0], font.glyphs.get(isolated));
+    if (final) byCharacter.set(forms[1], font.glyphs.get(final));
+  }
+}
+
 /**
  * A TrueType, OpenType or WOFF file as a typeface the text shape can use. WOFF2 needs a
  * decompressor this does not carry, and a collection (.ttc) holds several fonts; both are refused
@@ -256,6 +352,7 @@ export async function typefaceFromFontFile(bytes: ArrayBuffer, fileName: string,
       if (!byCharacter.has(code)) byCharacter.set(code, glyph);
     }
   }
+  addArabicForms(font, byCharacter);
   const codes = [...byCharacter.keys()].sort((a, b) => a - b).slice(0, MAX_CUSTOM_FONT_CHARACTERS);
   const glyphs: Record<string, TypefaceGlyph> = {};
   for (const code of codes) {
@@ -296,9 +393,13 @@ export function typefaceSubset(data: FontData, characters: Iterable<string>): Fo
   return { ...data, glyphs } as FontData;
 }
 
-/** The characters a text uses, each once, with the space a line needs. */
-export function textCharacters(text: string) {
-  return new Set([...text, " "]);
+/**
+ * The characters a text uses, each once, with the space a line needs - and, for Arabic, the
+ * presentation forms the typeface draws it by (#294), judged by the glyphs it has.
+ */
+export function textCharacters(text: string, glyphs?: Record<string, unknown>) {
+  const shaped = shapeText(text, glyphs ? (char) => Boolean(glyphs[char]) : undefined);
+  return new Set([...text, ...shaped, " "]);
 }
 
 /**

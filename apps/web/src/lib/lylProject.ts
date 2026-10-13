@@ -32,7 +32,7 @@ function knownSchema(schema: unknown) {
 export const LYL_FORMAT_VERSION = 2;
 export const LYL_MINIMUM_READER_VERSION = 2;
 export const LYL_OLDEST_READABLE_FORMAT_VERSION = 1;
-export const LYL_CREATED_WITH_VERSION = "1.67.5";
+export const LYL_CREATED_WITH_VERSION = "1.68.0";
 export const LYL_MEDIA_TYPE = "application/vnd.layerling.project+zip";
 
 export const LYL_LIMITS = {
@@ -138,7 +138,8 @@ function embeddedFonts(states: WorkplaneShape[][]): LylFontV1[] {
   const visit = (shape: WorkplaneShape) => {
     if (isCustomFontId(shape.font) && shape.kind === "text") {
       const used = characters.get(shape.font) ?? new Set<string>();
-      textCharacters((shape.text ?? "TEXT").trim() || " ").forEach((character) => used.add(character));
+      const glyphs = customFontEntry(shape.font)?.data.glyphs as Record<string, unknown> | undefined;
+      textCharacters((shape.text ?? "TEXT").trim() || " ", glyphs).forEach((character) => used.add(character));
       characters.set(shape.font, used);
     }
     shape.groupedShapes?.forEach(visit);

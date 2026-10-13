@@ -8826,6 +8826,69 @@ html[data-theme="dark"] .inspector-bundle-note {
   border-top-color: var(--hover-accent-color);
 }
 
+/* A locked selection: the handles turn grey and stay put, but hovering one still shows its dimensions. */
+.transform-overlay.locked {
+  --locked-handle-ink: #a59c92;
+  --locked-handle-fill: #e4e0da;
+}
+
+.transform-overlay.locked .transform-handle,
+.transform-overlay.locked .transform-handle:hover {
+  cursor: not-allowed;
+  background: var(--locked-handle-fill);
+  border-color: var(--locked-handle-ink);
+  box-shadow: none;
+}
+
+.transform-overlay.locked .transform-handle.height-lift,
+.transform-overlay.locked .transform-handle.height-lift:hover {
+  background: transparent;
+  border-color: transparent;
+  border-bottom-color: var(--locked-handle-ink);
+}
+
+.transform-overlay.locked .transform-handle.height-lift.lower,
+.transform-overlay.locked .transform-handle.height-lift.lower:hover {
+  border-bottom-color: transparent;
+  border-top-color: var(--locked-handle-ink);
+}
+
+/* The colour itself, not --rotate-handle-axis: the dark theme's axis colours outrank a variable set here. */
+.transform-overlay.locked .rotate-handle {
+  cursor: not-allowed;
+  color: var(--locked-handle-ink);
+}
+
+.transform-overlay.locked .rotate-handle:hover .rotate-arrow-arc {
+  stroke-width: 2.4;
+}
+
+.transform-overlay.locked .dimension-label:disabled {
+  cursor: default;
+}
+
+.transform-lock-badge {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  color: #6f655b;
+  background: rgba(255, 252, 247, 0.95);
+  border: 1px solid var(--locked-handle-ink);
+  box-shadow: 0 1px 2px rgba(40, 30, 20, 0.16);
+  pointer-events: auto;
+  transform: translate3d(var(--overlay-x, 0), var(--overlay-y, 0), 0) translate(-50%, -50%);
+}
+
+.transform-overlay.hide-selection-chrome .transform-lock-badge {
+  opacity: 0;
+}
+
 .rotate-handle {
   z-index: 3;
   /* The grab area is 40px; the arrow drawn in it is smaller. */
@@ -13295,6 +13358,16 @@ html[data-theme="dark"] .transform-handle.height-lift:hover {
 html[data-theme="dark"] .transform-handle.height-lift.lower:hover {
   border-bottom-color: transparent;
   border-top-color: var(--hover-accent-color);
+}
+
+html[data-theme="dark"] .transform-overlay.locked {
+  --locked-handle-ink: #7d7368;
+  --locked-handle-fill: #4a4037;
+}
+
+html[data-theme="dark"] .transform-lock-badge {
+  color: #c9bfb3;
+  background: rgba(28, 24, 20, 0.9);
 }
 
 html[data-theme="dark"] .inspector-snap-dock {

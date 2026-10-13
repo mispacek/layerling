@@ -2912,6 +2912,11 @@ export function WorkplaneViewport({
     if (angles.every((angle) => angle === 0)) return null;
     return ["X", "Y", "Z"].map((axis, index) => `${axis} ${angles[index]}°`).join(" · ");
   }, [selectedIds, shapes, workspace.showRotationAngles]);
+  // One locked shape holds the whole selection still, as beginTransform refuses it.
+  const selectionLocked = useMemo(
+    () => selectedIds.some((id) => shapes.find((shape) => shape.id === id)?.locked),
+    [selectedIds, shapes],
+  );
   const suppressNextRotationEditRef = useRef(false);
   const [activeRotationWheel, setActiveRotationWheel] = useState(false);
   const [activeTransformKind, setActiveTransformKind] = useState<TransformHandleKind | null>(null);
@@ -6507,7 +6512,8 @@ export function WorkplaneViewport({
           : undefined;
         const scaleStartPoint = scalePlane ? toRawPlanePoint(event.clientX, event.clientY, scalePlane) ?? undefined : undefined;
         const point = scalePlane ? scaleStartPoint : toPlanePoint(event.clientX, event.clientY);
-        if (!shape || !frame || shape.locked || (!point && handle.kind !== "height" && handle.kind !== "lift" && handle.kind !== "rotate")) {
+        const selectionHeld = selectedIdsRef.current.some((id) => shapesRef.current.find((entry) => entry.id === id)?.locked);
+        if (!shape || !frame || shape.locked || selectionHeld || (!point && handle.kind !== "height" && handle.kind !== "lift" && handle.kind !== "rotate")) {
           return;
         }
         const handlesLowerSide = handle.handleKey === "bottom-height" || handle.handleKey === "lower-shape";
@@ -6693,11 +6699,12 @@ export function WorkplaneViewport({
       if (!canBeginShapeDrag(workspaceRef.current.selectBeforeMove, alreadySelected)) {
         return;
       }
-      if (shape.locked) {
+      const dragIds = alreadySelected && selectedIdsSnapshot.length > 1 ? selectedIdsSnapshot : [id];
+      // One locked shape holds the whole selection still, as the handles and the arrow keys do.
+      if (dragIds.some((dragId) => shapesRef.current.find((entry) => entry.id === dragId)?.locked)) {
         return;
       }
       capturePointer(event.currentTarget, event.pointerId);
-      const dragIds = alreadySelected && selectedIdsSnapshot.length > 1 ? selectedIdsSnapshot : [id];
       const items = dragIds
         .map<DragItem | null>((dragId) => {
           const dragShape = shapesRef.current.find((entry) => entry.id === dragId);
@@ -8330,6 +8337,7 @@ export function WorkplaneViewport({
               editingRotation={editingRotation}
               rotationReadout={rotationReadout}
               angleBadge={angleBadge}
+              locked={selectionLocked}
               showRotationWheel={activeRotationWheel}
               hideSelectionChrome={activeTransformKind === "rotate"}
               hideDimensionMarks={false}

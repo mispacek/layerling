@@ -1,5 +1,51 @@
 [
   {
+    "version": "1.68.0",
+    "items": [
+      {
+        "title": {
+          "de": "Arabisch und Hebräisch von rechts nach links",
+          "en": "Arabic and Hebrew right to left",
+          "cs": "Arabský a hebrejský text zprava doleva"
+        },
+        "body": {
+          "de": "Text in Arabisch, Persisch, Urdu oder Hebräisch läuft jetzt von rechts nach links, und arabische Buchstaben verbinden sich mit ihren Nachbarn wie in der Schrift vorgesehen. Dafür braucht es eine eigene Schrift mit diesen Buchstaben, etwa Arial oder Noto Naskh Arabic.",
+          "en": "Text in Arabic, Persian, Urdu or Hebrew now runs right to left, and Arabic letters join their neighbours the way the script asks. This needs a font of your own with these letters, such as Arial or Noto Naskh Arabic.",
+          "cs": "Arabský, perský, urdský a hebrejský text se nyní skládá zprava doleva. Arabská písmena se správně spojují se sousedními písmeny. Je potřeba vlastní písmo, které tyto znaky obsahuje, například Arial nebo Noto Naskh Arabic."
+        }
+      }
+    ]
+  },
+  {
+    "version": "1.67.6",
+    "items": [
+      {
+        "title": {
+          "de": "Ein Raster für Skizze und 3D-Ansicht",
+          "en": "One snap grid for the sketch and the 3D view",
+          "cs": "Společné přichytávání v náčrtu a 3D editoru"
+        },
+        "body": {
+          "de": "Das Fangraster, das du in der Skizze wählst, gilt jetzt auch in der 3D-Ansicht, und umgekehrt. Bisher hatte die Skizze ein eigenes Raster, das beim Wechsel verloren ging. Es wird mit dem Entwurf gespeichert.",
+          "en": "The snap grid you pick in the sketch now holds in the 3D view too, and the other way round. Before, the sketch had a grid of its own that was lost when you switched. It is saved with the design.",
+          "cs": "Krok přichytávání zvolený v náčrtu platí také v 3D editoru a naopak. Dříve měl náčrt vlastní nastavení, které se při přepnutí ztratilo. Krok se nyní ukládá s projektem."
+        }
+      },
+      {
+        "title": {
+          "de": "Pfeiltasten in feinen Schritten bei Raster „Aus“",
+          "en": "Fine arrow-key steps when the snap grid is off",
+          "cs": "Jemný posun šipkami při vypnutém přichytávání"
+        },
+        "body": {
+          "de": "Ist das Fangraster aus, schieben die Pfeiltasten eine Form jetzt um 0,1 mm (mit Umschalt 0,5 mm), in der 3D-Ansicht und in der Skizze. Bisher waren es auch dann ganze Millimeter.",
+          "en": "With the snap grid off, the arrow keys now move a shape by 0.1 mm (0.5 mm with Shift), in the 3D view and in the sketch. Before, they still moved whole millimetres.",
+          "cs": "Při vypnutém přichytávání nyní šipky posouvají tvar o 0,1 mm, se Shiftem o 0,5 mm. Platí to v 3D editoru i náčrtu. Dříve se i bez přichytávání posouvalo po celých milimetrech."
+        }
+      }
+    ]
+  },
+  {
     "version": "1.67.5",
     "items": [
       {

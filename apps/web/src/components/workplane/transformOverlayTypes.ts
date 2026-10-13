@@ -365,6 +365,8 @@ export type TransformOverlayProps = {
   rotationReadout: RotationReadout;
   /** The turned body's angles, shown below it while it is selected; null hides it. */
   angleBadge?: string | null;
+  /** The selection is locked: handles are greyed and only show dimensions on hover. */
+  locked?: boolean;
   showRotationWheel: boolean;
   hideSelectionChrome: boolean;
   hideDimensionMarks: boolean;

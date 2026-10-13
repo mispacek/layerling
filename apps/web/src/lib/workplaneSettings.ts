@@ -6,8 +6,8 @@ import { isThreadProfile } from "@/lib/threadProfiles";
 
 export const DEFAULT_SNAP_GRID: GridSize = "1.0 mm";
 export const BRICK_SNAP_STEP = 8;
-// Used only when the snap grid is off, so arrow keys keep their old feel.
-export const KEYBOARD_NUDGE_FALLBACK_STEP = 1;
+// Used only when the snap grid is off: fine steps, since that is why the grid is switched off (#293).
+export const KEYBOARD_NUDGE_FALLBACK_STEP = 0.1;
 // Shift has always moved five times as far as a plain arrow press.
 export const KEYBOARD_NUDGE_COARSE_FACTOR = 5;
 export const MIN_CUSTOM_SHAPE_DIMENSION = 0.01;

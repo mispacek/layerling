@@ -34,7 +34,8 @@ describe("keyboard nudge step", () => {
     }
   });
 
-  it("keeps the old millimetre when the grid is off", () => {
+  it("takes fine steps when the grid is off", () => {
+    expect(KEYBOARD_NUDGE_FALLBACK_STEP).toBe(0.1);
     expect(keyboardNudgeStep("Off", false)).toBe(KEYBOARD_NUDGE_FALLBACK_STEP);
     expect(keyboardNudgeStep("Off", true)).toBe(KEYBOARD_NUDGE_FALLBACK_STEP * KEYBOARD_NUDGE_COARSE_FACTOR);
   });

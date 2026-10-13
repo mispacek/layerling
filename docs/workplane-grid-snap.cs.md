@@ -6,7 +6,7 @@ V **Nastavení pracovní plochy → Pracovní rovina** je zapnutá volba **Mří
 
 Čáry se počítají od počátku pracovní roviny. Při příliš hustém rastru se zobrazují jen celočíselné násobky kroku; přibližování jemné čáry obnovuje. Odstup viditelných čar u středu pohledu je nejméně přibližně 4 pixely. Tmavší čáry nadále leží na původních zvýrazněných násobcích, včetně celých palců. Pro velmi jemné vlastní kroky je množství vykreslené geometrie omezené přibližně na 2 000 čar v jednom směru. Toto ředění nemění přesnost přichytávání ani polohy těles.
 
-Příkaz **Přichytit k mřížce** používá stejnou základní rozteč. Náčrt a rastr uvnitř LEGO editoru mají dál vlastní kreslicí pravidla. Plocha, barvy, osy, obrys podložky a nastavení silnějších čar zůstávají součástí dosavadního vykreslování.
+Příkaz **Přichytit k mřížce** používá stejnou základní rozteč. Od upstreamu 1.67.6 je krok přichytávání společný pro náčrt i 3D editor; automatické vykreslení popsané zde se týká hlavní 3D pracovní plochy. Rastr uvnitř LEGO editoru má dál vlastní kreslicí pravidla. Plocha, barvy, osy, obrys podložky a nastavení silnějších čar zůstávají součástí dosavadního vykreslování.
 
 Opravena také ochrana před zpětným přepisem načteného nastavení: změna z dialogu je uživatelský zásah a musí se uložit stejně jako výběr kroku v nabídce. Nesmí být potlačena jako pouhé načtení projektu.
 

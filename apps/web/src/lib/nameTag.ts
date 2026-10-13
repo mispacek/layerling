@@ -1,4 +1,4 @@
-import { curvedTextPatch, DEFAULT_TEXT_SIZE, textBoxAroundLetters, textLetterBox } from "@/lib/textGeometry";
+import { curvedTextPatch, DEFAULT_TEXT_SIZE, displayTextOf, textBoxAroundLetters, textLetterBox } from "@/lib/textGeometry";
 import { customFontRevision, textFont } from "@/lib/textFonts";
 import { DEFAULT_TEXT_LAYERS, MAX_TEXT_LAYERS, MAX_TEXT_LAYER_GROW, type TextLayer, type textLayersOf } from "@/lib/textLayers";
 import type { WorkplaneShape } from "@/types/layerling";
@@ -79,7 +79,8 @@ function layoutMeasures(shape: WorkplaneShape) {
     });
     return box;
   };
-  const line = extent(wordsOf(shape));
+  // Arabic is measured as it is drawn: shaped and turned round (#294).
+  const line = extent(displayTextOf(shape));
   const capital = extent("H");
   const measures = {
     // The same floor of 1 the fit into the box uses, so a size set here is the size drawn.

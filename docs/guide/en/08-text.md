@@ -27,6 +27,10 @@ Besides the seven built-in fonts you can use any font of your own: a font file f
 
 If a text is selected, it gets the new font at once. Otherwise the font shows up under {{ui:prop.font}} in the {{ui:font.customGroup}} group, and {{ui:font.use}} in the window puts it on the selected texts. Fonts of your own work like the built-in ones: text on a circular arc, chamfers and fillets on the edges and the STEP export all work the same. Letters a font lacks are taken from Sans.
 
+### Arabic and Hebrew
+
+Arabic, Persian, Urdu and Hebrew are written right to left: the first letter stands on the right, and in a mixed text such as "Name عربي" only the Arabic word runs backwards, digits stay as usual. Arabic letters join their neighbours the way the script asks, and lam-alef becomes a ligature. This needs a font that has these letters; the built-in ones do not. Add one of your own, such as Arial, Tahoma or Segoe UI on Windows, or a free one such as Noto Naskh Arabic, Noto Sans Arabic or Amiri. Vowel marks sit on the letter they belong to. Text on a circular arc, outline, silhouette, layers and name tags work with it as with any other text.
+
 ### What works in which browser
 
 | Browser | Choose a font file | Font from the computer |

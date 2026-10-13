@@ -6,6 +6,17 @@ code still carries it - so a lower number further down is older, not newer.
 
 ## Unreleased
 
+- **Locked objects show it and hold still:** A selected locked object now greys out its resize, lift and rotate handles and shows a padlock beside the Z arrow; hovering a handle still shows the sizes. Every Combine, Modify and Arrange tool and Delete are greyed out, the right-click menu leaves out what would change it, and every key or command that would change it says "Object locked" - before, some reported success ("Moved 1 shape", "Selection to hole") without doing anything, and others failed without a word. One locked object now holds the whole selection: moving, turning, snapping, dropping, centring, scaling, colouring or dragging a mixed selection no longer changes only the unlocked parts. Locked objects can no longer be deleted or cut, and Hide in the toolbar and Ctrl+H now hide them, as the outliner and the properties panel already did. Locking while a tool is open closes the tool. Align keeps working with a locked part in the selection, which stays in place as the anchor. Nine different lock messages became the one "Object locked".
+
+## 1.68.0
+
+- **Arabic and Hebrew read right to left, Arabic letters join up:** A text in Arabic came out mirrored, letter by letter from the left, and each letter stood alone instead of joining its neighbours. Text in Arabic, Persian, Urdu or Hebrew is now laid out right to left - in a mixed line only the right-to-left words turn round, digits stay - and Arabic letters take their initial, medial and final forms, lam-alef its ligature. The forms come from the font: from its character map or from its shaping rules when it is added. This needs a font of your own with these letters, such as Arial, Noto Naskh Arabic or Amiri; the built-in typefaces have none. Reported by @iq0099 (#294).
+
+## 1.67.6
+
+- **Arrow keys take fine steps when the snap grid is off:** With the grid switched off, the arrow keys still moved a shape by a whole millimetre (5 with Shift), although dragging with the mouse was free. They now move by 0.1 mm (0.5 with Shift), in the 3D view and in the sketch (#293).
+- **One snap grid for the sketch and the 3D view:** The sketch kept a grid of its own. A grid picked there did not reach the 3D editor and was gone when you came back from it. Now both use the same grid, and it is saved with the design (#291).
+
 ## 1.67.5
 
 - **Slanted walls for stamps, a tip in the guide:** The sketches chapter has a new section, "Slanted walls, for stamps": layerling has no draft angle for an extrusion, but for plain outlines a body with Taper and a hole with its own Taper give slanted walls outside and inside, step by step. Suggested by @HolmanCotton.

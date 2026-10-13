@@ -7,7 +7,7 @@ summary: Formen auswählen, in der Objektliste finden, ausrichten, spiegeln, dre
 
 Ein Klick auf eine Form wählt sie aus. Mit [[Umschalt]] nimmst du weitere dazu oder wieder weg. Ein Klick ins Leere hebt die Auswahl auf, ebenso [[Esc]]. Ziehst du auf der leeren Arbeitsebene einen Rahmen auf, wählst du alles aus, was er berührt; mit gehaltenem [[Umschalt]] nimmt der Rahmen dazu, was nicht ausgewählt war, und weg, was es war. Und [[Strg]]+[[A]] wählt alle sichtbaren Körper.
 
-Was du im Weg hast, blendest du aus ({{ui:editor.tool.hideSelected}}, [[Strg]]+[[H]]). Ausgeblendete Formen bleiben im Entwurf, sie sind nur nicht zu sehen und kommen nicht mit in den Export; das Exportfenster sagt vorher, wie viele es sind. Mit [[Strg]]+[[Umschalt]]+[[H]] holst du alle zurück. Was liegen bleiben soll, sperrst du mit dem Schloss oben in den Einstellungen oder mit [[Strg]]+[[L]]. Gesperrte Formen lassen sich weder verschieben noch versehentlich löschen.
+Was du im Weg hast, blendest du aus ({{ui:editor.tool.hideSelected}}, [[Strg]]+[[H]]). Ausgeblendete Formen bleiben im Entwurf, sie sind nur nicht zu sehen und kommen nicht mit in den Export; das Exportfenster sagt vorher, wie viele es sind. Mit [[Strg]]+[[Umschalt]]+[[H]] holst du alle zurück. Was liegen bleiben soll, sperrst du mit dem Schloss oben in den Einstellungen oder mit [[Strg]]+[[L]]. Eine gesperrte Form lässt sich weder verschieben noch in Größe, Drehung oder Farbe ändern oder löschen: Ihre Griffe werden grau, neben dem Pfeil oben zeigt sich ein Schloss, und die Werkzeuge, die sie ändern würden, sind ausgegraut. Fährst du über einen Griff, siehst du trotzdem ihre Maße, und eine Taste, die sie ändern würde, meldet „Objekt gesperrt“. Solange eine gesperrte Form in der Auswahl ist, ändert sich auch an den anderen nichts. Ausblenden, Umbenennen, Kopieren und Duplizieren gehen weiterhin.
 
 ## Die Objektliste
 
@@ -42,7 +42,7 @@ Ist [[Alt]] schon gedrückt, wenn das Ziehen beginnt, ziehst du eine Kopie, wie 
 
 ## Ausrichten
 
-Zwei oder mehr ausgewählte Formen richtest du mit {{ui:editor.tool.align}} aneinander aus: Am Rand der Auswahl erscheinen Punkte für links, mittig und rechts, vorn, mittig und hinten sowie oben, mittig und unten. Ein Klick auf einen Punkt schiebt alle Formen dorthin. Klickst du zuerst eine der ausgewählten Formen an, bleibt sie an ihrem Platz und die anderen richten sich nach ihr.
+Zwei oder mehr ausgewählte Formen richtest du mit {{ui:editor.tool.align}} aneinander aus: Am Rand der Auswahl erscheinen Punkte für links, mittig und rechts, vorn, mittig und hinten sowie oben, mittig und unten. Ein Klick auf einen Punkt schiebt alle Formen dorthin. Klickst du zuerst eine der ausgewählten Formen an, bleibt sie an ihrem Platz und die anderen richten sich nach ihr. Eine gesperrte Form in der Auswahl ist von selbst diese feste Form.
 
 Eine schräg gedrehte Form, etwa um 45°, hat als Bezug den Kasten um sich herum, nicht ihre eigenen Kanten. Um an den Kanten auszurichten, setzt du zuerst eine Arbeitsebene auf eine Fläche dieser Form ({{ui:camera.placeWorkplane}}, dann die Fläche anklicken): Die Punkte stehen dann auf den Achsen dieser Ebene, und die Formen werden entlang davon gemessen und verschoben, wie in Tinkercad. Setzt du die Arbeitsebene zurück, richtest du wieder an der Platte aus.
 
@@ -113,7 +113,7 @@ Eine KI kann dasselbe über die MCP-Schnittstelle tun, mit `layerling_perforate_
 
 ## Mehrere Teile auf einmal ändern
 
-Sind mehrere Teile ausgewählt, zeigt das Eigenschaften-Feld rechts, wie viele es sind, und bietet an, was für alle zugleich gilt: {{ui:inspector.solid}} oder {{ui:inspector.hole}}, eine Farbe für alle (ein Klick auf {{ui:inspector.solid}} öffnet die Farben) und das Schloss zum Sperren. Ist die Auswahl gemischt, macht ein Klick alle zu Körpern oder alle zu Aussparungen. Gesperrte Teile bleiben, wie sie sind. Maße änderst du mit den Griffen, mit {{ui:scalePercent.title}} oder indem du eine Zahl in ein Maßschild tippst. Bei mehreren Teilen ist die Zahl das Maß der ganzen Auswahl: Alle Teile wachsen mit, samt den Abständen dazwischen, wie beim Ziehen am Griff. Körper und Aussparung gehen auch per Rechtsklick oder mit [[S]] und [[H]].
+Sind mehrere Teile ausgewählt, zeigt das Eigenschaften-Feld rechts, wie viele es sind, und bietet an, was für alle zugleich gilt: {{ui:inspector.solid}} oder {{ui:inspector.hole}}, eine Farbe für alle (ein Klick auf {{ui:inspector.solid}} öffnet die Farben) und das Schloss zum Sperren. Ist die Auswahl gemischt, macht ein Klick alle zu Körpern oder alle zu Aussparungen. Ist eines der Teile gesperrt, lässt sich nur das Schloss bedienen. Maße änderst du mit den Griffen, mit {{ui:scalePercent.title}} oder indem du eine Zahl in ein Maßschild tippst. Bei mehreren Teilen ist die Zahl das Maß der ganzen Auswahl: Alle Teile wachsen mit, samt den Abständen dazwischen, wie beim Ziehen am Griff. Körper und Aussparung gehen auch per Rechtsklick oder mit [[S]] und [[H]].
 
 ## Um Prozent skalieren
 
@@ -126,7 +126,7 @@ Bei mehreren Teilen wählst du, wie sie wachsen:
 - **{{ui:scalePercent.mode.together}}:** Die Teile wachsen um ihre gemeinsame Mitte, die Abstände wachsen mit. Das Ganze wird größer, als wäre es ein Teil.
 - **{{ui:scalePercent.mode.each}}:** Jedes Teil wächst an seinem Platz, die Abstände dazwischen bleiben gleich.
 
-Erst {{ui:scalePercent.apply}} ändert den Entwurf, und ein Schritt zurück macht es wieder rückgängig. Gesperrte Teile bleiben, wie sie sind.
+Erst {{ui:scalePercent.apply}} ändert den Entwurf, und ein Schritt zurück macht es wieder rückgängig. Ist ein gesperrtes Teil in der Auswahl, öffnet es sich nicht.
 
 ## Rückgängig machen
 

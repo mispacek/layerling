@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { afterEach, beforeAll, describe, expect, it } from "vitest";
+import { afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import * as THREE from "three";
 import { ShapeInspector, type TextLayerPatch } from "@/components/workplane/ShapeInspector";
 import { textLetterSize, textLetterSizePatch } from "@/lib/nameTag";
@@ -11,6 +11,7 @@ import { loadTextFonts } from "@/lib/textFonts";
 import { makeShapeFromAsset, toolbarShapeAssets } from "@/lib/shapeCatalog";
 import { DEFAULT_SNAP_GRID, DEFAULT_WORKPLANE_WORKSPACE } from "@/lib/workplaneSettings";
 import type { WorkplaneShape } from "@/types/layerling";
+import { getLanguage, setLanguage } from "@/lib/i18n";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -27,11 +28,17 @@ beforeAll(async () => {
 
 let container: HTMLDivElement | null = null;
 let root: Root | null = null;
-afterEach(() => {
+let languageBeforeTest = getLanguage();
+beforeEach(async () => {
+  languageBeforeTest = getLanguage();
+  await setLanguage("en", false); // These assertions intentionally inspect English panel labels.
+});
+afterEach(async () => {
   act(() => root?.unmount());
   container?.remove();
   container = null;
   root = null;
+  await setLanguage(languageBeforeTest, false);
 });
 
 function mount(shape: WorkplaneShape, onUpdate: (patch: Partial<WorkplaneShape>) => void, onLayerText?: (patch: TextLayerPatch) => void) {
