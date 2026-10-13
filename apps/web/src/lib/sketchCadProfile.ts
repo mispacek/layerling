@@ -1,4 +1,5 @@
 import { isConstructionSegment } from "@/lib/sketchConstruction";
+import { nestOutlines, polygonInside } from "@/lib/sketchContainment";
 import type { SketchPoint, SketchProfile, SketchSegment } from "@/types/layerling";
 
 export type OrderedCadSketchStep = { segment: SketchSegment; from: SketchPoint; to: SketchPoint };
@@ -86,19 +87,8 @@ function signedArea(points: Array<{ x: number; z: number }>) {
   }, 0) / 2;
 }
 
-function pointInPolygon(point: { x: number; z: number }, polygon: Array<{ x: number; z: number }>) {
-  let inside = false;
-  for (let index = 0, previous = polygon.length - 1; index < polygon.length; previous = index, index += 1) {
-    const current = polygon[index];
-    const before = polygon[previous];
-    if ((current.z > point.z) !== (before.z > point.z)
-      && point.x < ((before.x - current.x) * (point.z - current.z)) / (before.z - current.z) + current.x) inside = !inside;
-  }
-  return inside;
-}
-
 /**
- * The sketch without its holes (#197, Tinkercad's Silhouette): only the closed outlines no larger
+ * The sketch without its holes (#197, the usual Silhouette): only the closed outlines no larger
  * one holds stay, with the open lines; every outline inside them - holes and islands in holes -
  * is left out.
  */
@@ -112,7 +102,7 @@ export function silhouetteSketchProfile(profile: SketchProfile): SketchProfile {
     .filter((record) => record.polygon.length >= 3 && record.area > 1e-8);
   const dropped = new Set<string>();
   closed.forEach((record) => {
-    const held = closed.some((other) => other !== record && other.area > record.area && pointInPolygon(record.polygon[0], other.polygon));
+    const held = closed.some((other) => other !== record && other.area > record.area && polygonInside(record.polygon, other.polygon));
     if (held) record.path.steps.forEach((step) => dropped.add(step.segment.id));
   });
   if (!dropped.size) return profile;
@@ -128,46 +118,12 @@ export function cadSketchRegions(profile: SketchProfile): CadSketchRegion[] {
     .filter((path) => path.closed)
     .map((path) => {
       const polygon = sampledPath(path);
-      return { path, polygon, area: Math.abs(signedArea(polygon)) };
+      return { item: path, polygon, area: Math.abs(signedArea(polygon)) };
     })
-    .filter((record) => record.polygon.length >= 3 && record.area > 1e-8)
-    .sort((a, b) => b.area - a.area);
+    .filter((record) => record.polygon.length >= 3 && record.area > 1e-8);
 
-  // Compute nesting depth: count how many larger closed paths contain each record.
-  // Even depth = solid (outer boundary), odd depth = hole.
-  const depths = records.map((record, index) => {
-    let depth = 0;
-    for (let i = 0; i < records.length; i++) {
-      if (i === index) continue;
-      if (records[i].area > record.area && pointInPolygon(record.polygon[0], records[i].polygon)) {
-        depth++;
-      }
-    }
-    return depth;
-  });
-
-  const regions: CadSketchRegion[] = [];
-  records.forEach((record, index) => {
-    const depth = depths[index];
-    if (depth % 2 === 0) {
-      regions.push({ outer: record.path, holes: [] });
-    } else {
-      // Odd depth: find the nearest even-depth ancestor (smallest containing solid)
-      let bestParent: (typeof records)[number] | null = null;
-      for (let i = 0; i < records.length; i++) {
-        if (i === index) continue;
-        if (depths[i] % 2 === 0 && depths[i] < depth && records[i].area > record.area && pointInPolygon(record.polygon[0], records[i].polygon)) {
-          if (!bestParent || records[i].area < bestParent.area) {
-            bestParent = records[i];
-          }
-        }
-      }
-      if (bestParent) {
-        const region = regions.find((r) => r.outer === bestParent!.path);
-        if (region) region.holes.push(record.path);
-      }
-    }
-  });
+  // Even depth = solid (outer boundary), odd depth = hole; outlines that only overlap are all solids.
+  const regions: CadSketchRegion[] = nestOutlines(records);
 
   if (regions.length === 0 && openCount > 0 && allPaths.length > 0) {
     throw new Error("All profile paths are open. Close at least one loop before finishing the sketch.");

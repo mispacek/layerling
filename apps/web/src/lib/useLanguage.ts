@@ -5,7 +5,7 @@ import { DEFAULT_LANGUAGE, getLanguage, subscribeToLanguage, type Language } fro
 
 /**
  * Re-renders the calling component when the language changes. The server and
- * the first client render both answer English, so hydration matches; the stored
+ * the first client render both use the installation default, so hydration matches; the stored
  * choice is applied in an effect straight afterwards.
  */
 export function useLanguage(): Language {

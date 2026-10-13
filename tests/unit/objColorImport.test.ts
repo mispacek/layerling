@@ -25,7 +25,7 @@ function box(name: string, color: string | undefined, [cx, cy, cz]: [number, num
   return { name, color, vertices, faces };
 }
 
-/** Eine OBJ mit zwei Materialien, wie Tinkercad sie schreibt. */
+/** Eine OBJ mit zwei Materialien, wie andere Programme sie schreibt. */
 const MATERIAL_OBJ = [
   "mtllib obj.mtl",
   "o plate",
@@ -77,7 +77,7 @@ describe("OBJ import with colours (Discussion #79)", () => {
     expect(result.shapes[1].elevation).toBeCloseTo(3, 6);
   });
 
-  it("reads Tinkercad's colour from the material name when the .mtl is missing", () => {
+  it("reads the colour from the material name when the .mtl is missing", () => {
     const result = importedShapesFromObj("tinker.obj", MATERIAL_OBJ);
     expect(result.shapes.map((shape) => shape.color)).toEqual(["#e91d2d", "#ffffff"]);
     expect(result.missingMaterialColors).toBe(false);

@@ -34,7 +34,8 @@ describe("an open page noticing an update (#update-notice)", () => {
     expect(parseVersionInfo(null)).toBeNull();
     expect(parseVersionInfo("1.67.0")).toBeNull();
     expect(parseVersionInfo({ version: "1.67.0" })).toBeNull();
-    expect(parseVersionInfo({ version: "1.67.0", build: "x", highlights: [{ version: "1.0.0", title: { de: "", en: "x" } }, 5] })?.highlights).toEqual([]);
+    // A title needs its English text; a language that has no text of its own is left out, and the page reads English there.
+    expect(parseVersionInfo({ version: "1.67.0", build: "x", highlights: [{ version: "1.0.0", title: { de: "", en: "x" } }, { version: "1.0.1", title: { de: "y" } }, 5] })?.highlights).toEqual([{ version: "1.0.0", title: { en: "x" } }]);
   });
 
   it("asks past every cache, with a fresh address each time", async () => {

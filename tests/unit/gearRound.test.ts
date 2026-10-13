@@ -11,7 +11,7 @@ import {
 } from "@/lib/gearGeometry";
 
 /*
- * #201: round teeth, like Tinkercad's Useful gear - a convex arc per tooth and a concave arc per
+ * #201: round teeth, like the usual Useful gear - a convex arc per tooth and a concave arc per
  * gap, running smoothly into each other, set by module and teeth like the involute ones.
  */
 

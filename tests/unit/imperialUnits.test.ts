@@ -28,7 +28,7 @@ describe("imperial snap grid", () => {
 });
 
 describe("inch fractions", () => {
-  it("prints mixed numbers like Tinkercad", () => {
+  it("prints mixed numbers as similar tools do", () => {
     expect(formatFractionalInches(1.625)).toBe("1⅝");
     expect(formatFractionalInches(0.1875)).toBe("3/16");
     expect(formatFractionalInches(2.5)).toBe("2½");

@@ -82,6 +82,7 @@ const SHORTCUT_GROUPS: ShortcutGroup[] = [
     shortcuts: [
       { combos: ["H"], label: "shortcuts.hole" },
       { combos: ["S"], label: "shortcuts.solid" },
+      { combos: ["T"], label: "shortcuts.transparent" },
       { combos: ["M"], label: "shortcuts.mirror" },
       { combos: ["B"], label: "shortcuts.fillet" },
       { combos: ["Shift+B"], label: "shortcuts.chamfer" },
@@ -147,6 +148,7 @@ const SHORTCUT_GROUPS: ShortcutGroup[] = [
       { combos: ["L"], label: "shortcuts.sketchLockImage" },
       { combos: ["F", "Home"], label: "shortcuts.sketchResetView" },
       { combos: ["Shift+F"], label: "shortcuts.sketchFocusSelection" },
+      { combos: ["+", "−"], label: "shortcuts.sketchZoom" },
       { combos: ["Alt+Enter"], label: "shortcuts.sketchDimensionSymmetric" },
       { combos: ["← / → / ↑ / ↓", "Shift+← / → / ↑ / ↓"], label: "shortcuts.sketchNudge" },
       { combos: ["Shift"], label: "shortcuts.sketchAngleSnap" },

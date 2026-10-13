@@ -12,6 +12,9 @@ import {
   HOLE_PATTERN_MAX_SIZE,
   HOLE_PATTERN_MAX_SPACING,
   HOLE_PATTERN_MIN_SIZE,
+  HOLE_PATTERN_MIN_WALL,
+  holePatternMinSpacing,
+  holePatternWall,
   type HoleArrangement,
   type HoleForm,
   type HolePatternSettings,
@@ -142,6 +145,17 @@ export function HolePatternPanel({
         workspace={workspace}
         length
         onChange={(value) => onChange({ spacing: value })}
+      />
+      {/* The same as the spacing, said as the wall left between two holes (#239): set one and the other follows. */}
+      <EdgeModifierSlider
+        label={t("holePattern.wall")}
+        value={Math.max(HOLE_PATTERN_MIN_WALL, holePatternWall(settings))}
+        min={HOLE_PATTERN_MIN_WALL}
+        max={HOLE_PATTERN_MAX_SPACING / 2}
+        step={0.1}
+        workspace={workspace}
+        length
+        onChange={(value) => onChange({ spacing: holePatternMinSpacing(settings, value) })}
       />
 
       <div className="edge-modifier-field shell-openings" role="radiogroup" aria-label={t("holePattern.arrangement")}>

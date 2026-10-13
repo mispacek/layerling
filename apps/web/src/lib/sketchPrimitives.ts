@@ -16,6 +16,8 @@ export type SketchPrimitive =
   | "pieSlice"
   | "triangle"
   | "hexagon"
+  | "polygon"
+  | "star"
   | "boltCircle";
 
 export const SKETCH_PRIMITIVES: readonly SketchPrimitive[] = [
@@ -26,8 +28,35 @@ export const SKETCH_PRIMITIVES: readonly SketchPrimitive[] = [
   "pieSlice",
   "triangle",
   "hexagon",
+  "polygon",
+  "star",
   "boltCircle",
 ];
+
+/**
+ * Was sich an Vieleck und Stern vor dem Einfuegen einstellen laesst (#280): die Seiten- bzw.
+ * Zackenzahl und beim Stern, wie weit die Taeler nach innen reichen (in Prozent des Aussenradius).
+ * Danach sind es ganz gewoehnliche Eckpunkte, die Zahl steht nirgends mehr.
+ */
+export type SketchPrimitiveOptions = { sides?: number; innerPercent?: number };
+export const SKETCH_POLYGON_DEFAULT_SIDES = 5;
+export const SKETCH_POLYGON_MIN_SIDES = 3;
+export const SKETCH_POLYGON_MAX_SIDES = 64;
+export const SKETCH_STAR_DEFAULT_INNER_PERCENT = 40;
+export const SKETCH_STAR_MIN_INNER_PERCENT = 10;
+export const SKETCH_STAR_MAX_INNER_PERCENT = 90;
+
+export function normalizePolygonSides(value: unknown): number {
+  const sides = Math.round(Number(value));
+  if (!Number.isFinite(sides)) return SKETCH_POLYGON_DEFAULT_SIDES;
+  return Math.max(SKETCH_POLYGON_MIN_SIDES, Math.min(SKETCH_POLYGON_MAX_SIDES, sides));
+}
+
+export function normalizeStarInnerPercent(value: unknown): number {
+  const percent = Number(value);
+  if (!Number.isFinite(percent)) return SKETCH_STAR_DEFAULT_INNER_PERCENT;
+  return Math.max(SKETCH_STAR_MIN_INNER_PERCENT, Math.min(SKETCH_STAR_MAX_INNER_PERCENT, percent));
+}
 
 export function isSketchPrimitive(value: unknown): value is SketchPrimitive {
   return typeof value === "string" && (SKETCH_PRIMITIVES as readonly string[]).includes(value);
@@ -214,6 +243,7 @@ export function sketchPrimitiveGeometry(
   center: { x: number; z: number },
   makeId: MakeId,
   size = SKETCH_PRIMITIVE_SIZE,
+  options: SketchPrimitiveOptions = {},
 ): SketchPrimitiveGeometry {
   const cx = center.x;
   const cz = center.z;
@@ -229,6 +259,19 @@ export function sketchPrimitiveGeometry(
   if (primitive === "halfCircle") return halfCircleGeometry(makeId, cx, cz, radius);
   if (primitive === "pieSlice") return pieSliceGeometry(makeId, cx, cz, radius);
   if (primitive === "boltCircle") return boltCircleGeometry(makeId, cx, cz, radius);
+
+  if (primitive === "polygon" || primitive === "star") {
+    // Eine Ecke zeigt nach oben, wie beim Dreieck und beim Sechseck.
+    const sides = normalizePolygonSides(options.sides);
+    const inner = radius * normalizeStarInnerPercent(options.innerPercent) / 100;
+    const count = primitive === "star" ? sides * 2 : sides;
+    const corners: SketchPoint[] = Array.from({ length: count }, (_, index) => {
+      const angle = -Math.PI / 2 + (index * 2 * Math.PI) / count;
+      const reach = primitive === "star" && index % 2 === 1 ? inner : radius;
+      return { id: makeId("sketch-point"), x: cx + Math.cos(angle) * reach, z: cz + Math.sin(angle) * reach, mode: "corner" };
+    });
+    return { points: corners, segments: closedLoop(makeId, corners, "line") };
+  }
 
   const minX = cx - radius;
   const maxX = cx + radius;

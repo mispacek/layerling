@@ -1,5 +1,5 @@
+import { LANGUAGES, type Language } from "@/lib/languages";
 import whatsNewData from "./whatsNew.json";
-import type { Language } from "@/lib/i18n";
 
 /**
  * "What is new since your last visit": the highlights of each release, written
@@ -9,12 +9,8 @@ import type { Language } from "@/lib/i18n";
  * lines for what a user can do now that they could not before, and only rarely
  * for a fix.
  */
-// Older releases fetched from upstream may not yet include Czech.
-export type WhatsNewText = { de: string; en: string; cs?: string };
-
-export function whatsNewText(text: WhatsNewText, language: Language): string {
-  return text[language] || text.en;
-}
+/** A text in English and in as many other languages as were written; the others read the English one. */
+export type WhatsNewText = { en: string } & Partial<Record<Language, string>>;
 export type WhatsNewItem = { title: WhatsNewText; body: WhatsNewText };
 export type WhatsNewEntry = { version: string; items: WhatsNewItem[] };
 
@@ -97,10 +93,20 @@ export function lastSeenVersion(stored: string | null, hasDesigns: boolean): str
   return hasDesigns ? WHATS_NEW_BASELINE : null;
 }
 
-function isText(value: unknown): value is WhatsNewText {
+export function isText(value: unknown): value is WhatsNewText {
   if (!value || typeof value !== "object") return false;
-  const { de, en } = value as Record<string, unknown>;
-  return typeof de === "string" && de.trim() !== "" && typeof en === "string" && en.trim() !== "";
+  const { en } = value as Record<string, unknown>;
+  return typeof en === "string" && en.trim() !== "";
+}
+
+/** The English text and every other language's text that is a real string, nothing else. */
+export function cleanText(value: WhatsNewText): WhatsNewText {
+  const cleaned: WhatsNewText = { en: value.en };
+  for (const language of LANGUAGES) {
+    const text = (value as Partial<Record<Language, unknown>>)[language];
+    if (language !== "en" && typeof text === "string" && text.trim() !== "") cleaned[language] = text;
+  }
+  return cleaned;
 }
 
 /**
@@ -118,11 +124,11 @@ export function parseWhatsNewEntries(value: unknown, limit = 200): WhatsNewEntry
     const valid = items
       .slice(0, 20)
       .filter((item): item is WhatsNewItem => Boolean(item) && typeof item === "object" && isText((item as WhatsNewItem).title) && isText((item as WhatsNewItem).body))
-      .map((item) => ({
-        title: { de: item.title.de, en: item.title.en, ...(typeof item.title.cs === "string" && item.title.cs.trim() ? { cs: item.title.cs } : {}) },
-        body: { de: item.body.de, en: item.body.en, ...(typeof item.body.cs === "string" && item.body.cs.trim() ? { cs: item.body.cs } : {}) },
-      }));
+      .map((item) => ({ title: cleanText(item.title), body: cleanText(item.body) }));
     if (valid.length > 0) entries.push({ version, items: valid });
   }
   return entries;
 }
+
+/** Compatibility for Czech release-note consumers from earlier custom versions. */
+export function whatsNewText(text: WhatsNewText, language: Language): string { return text[language] || text.en; }

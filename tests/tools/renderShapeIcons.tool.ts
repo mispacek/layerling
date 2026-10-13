@@ -267,6 +267,15 @@ describe("palette icons", () => {
       elevation: 50,
       build: () => createGearGeometry({ width: 10 * Math.PI * 2, depth: 9, height: 6, teeth: 10, gearType: "rack", gearProfile: "involute", gearBacklash: 0 }),
     });
+    // The herringbone gear (#265, #277): a gear type needs its picture, or its button in the inspector stays black.
+    render({
+      name: "apps/web/public/assets/editor/gear-types/herringbone.png",
+      height: 14,
+      lay: false,
+      azimuth: 35,
+      elevation: 40,
+      build: () => createGearGeometry({ width: 32, depth: 32, height: 14, teeth: 14, gearType: "herringbone", gearProfile: "involute", gearBacklash: 0, helixAngle: 25, helixQuality: 15 }),
+    });
     render({
       name: "apps/web/public/assets/editor/shape-icons-gray/thread.png",
       height: 14,

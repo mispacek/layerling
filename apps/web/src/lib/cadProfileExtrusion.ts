@@ -19,7 +19,7 @@ import { dovetailOutlineForShape } from "@/lib/dovetailGeometry";
 import { loftProfileLoops } from "@/lib/loftGeometry";
 import { teardropExactSection } from "@/lib/teardropGeometry";
 import { screwHoleProfile } from "@/lib/screwHoleGeometry";
-import { DEFAULT_ROUNDED_BOX_CORNER_FILLET, DEFAULT_ROUNDED_BOX_TOP_BOTTOM_FILLET, normalizeCornerFillet, normalizeTopBottomFillet } from "@/lib/roundedBoxGeometry";
+import { DEFAULT_ROUNDED_BOX_CORNER_FILLET, DEFAULT_ROUNDED_BOX_TOP_BOTTOM_FILLET, normalizeCornerFillet, normalizeRoundedBoxQuality, normalizeTopBottomFillet } from "@/lib/roundedBoxGeometry";
 import { textGlyphShapes, textKeyringOf } from "@/lib/textGeometry";
 import { normalizeSketchStroke } from "@/lib/sketchStroke";
 import { textHasEdge } from "@/lib/textEdge";
@@ -1072,6 +1072,8 @@ export function cadProfileForShapeKind(shape: WorkplaneShape, designedRound = fa
     case "roundedBox": {
       const corner = normalizeCornerFillet(shape.cornerFillet ?? DEFAULT_ROUNDED_BOX_CORNER_FILLET, Math.min(width, depth) / 2);
       const ends = normalizeTopBottomFillet(shape.topBottomFillet ?? DEFAULT_ROUNDED_BOX_TOP_BOTTOM_FILLET, shape.height / 2);
+      // Quality 1 is drawn as a flat chamfer (#239); the exact round would contradict what the view shows.
+      if (normalizeRoundedBoxQuality(shape.roundedBoxQuality) === 1 && (corner > 1e-4 || ends > 1e-4)) return null;
       return { loops: [roundedRectLoop(width, depth, corner)], capFillet: ends > 1e-4 ? ends : undefined };
     }
     case "counterbore":
@@ -1278,6 +1280,7 @@ export function cadModifierThreadForShape(shape: WorkplaneShape): CadModifierThr
     threadPitch: shape.threadPitch,
     threadClearance: shape.threadClearance,
     threadBoltClearance: shape.threadBoltClearance,
+    threadAxialClearance: shape.threadAxialClearance,
     threadQuality: shape.threadQuality,
     threadHeadHeight: shape.threadHeadHeight,
     threadChamfer: shape.threadChamfer,
@@ -1305,7 +1308,7 @@ export function cadModifierThreadForShape(shape: WorkplaneShape): CadModifierThr
   // faces per turn instead of one per chord. They are circles only at the
   // profile's full depth, which a very coarse pitch on a thin rod can cut
   // short - then the points stay the profile.
-  if (settings.profile === "whitworth" && Math.abs(plan.major - plan.minor - settings.pitch * plan.profile.depthPerPitch) < 1e-9) {
+  if (settings.profile === "whitworth" && !plan.axialPlay && Math.abs(plan.major - plan.minor - settings.pitch * plan.profile.depthPerPitch) < 1e-9) {
     part.curve = { kind: "whitworth", radius: WHITWORTH_PROFILE_CONSTANTS.radiusPerPitch, halfAngle: (WHITWORTH_PROFILE_CONSTANTS.flankAngleDegrees / 2) * (Math.PI / 180) };
   }
   if (settings.role === "screw") {

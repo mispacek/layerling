@@ -13,6 +13,8 @@ services:
       HOSTNAME: "0.0.0.0"
       NEXT_TELEMETRY_DISABLED: "1"
       # LAYERLING_SHARED_PROJECTS_DIR: "/shared-projects"
+      # The colour theme people get on their first visit: system (the default), light, dark or graphite.
+      # LAYERLING_DEFAULT_THEME: "graphite"
       # Let an AI client (MCP) drive the open editors over the network. Off by default; whoever has the
       # token can read and change the open designs, so use a long random one on a trusted network. See the README.
       # LAYERLING_MCP_REMOTE: "true"

@@ -13,7 +13,7 @@ export function isSegmentCurved(profile: SketchProfile, segment: SketchSegment) 
 }
 
 /**
- * Bends a straight side into a curve, as Tinkercad does: it bows out to the side away from the
+ * Bends a straight side into a curve, as similar tools do: it bows out to the side away from the
  * middle of the sketch (to its left on an open line), by a quarter of its length. The side's own
  * two handles are set; they can be dragged afterwards. Null when there is nothing to curve.
  */

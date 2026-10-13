@@ -326,6 +326,9 @@ export function cadModifierUserErrorMessage(rawError: string | null | undefined)
   ) {
     return t("shell.errorTooThick");
   }
+  if (rawError.includes("This body cannot be hollowed with any wall thickness")) {
+    return t("shell.errorCannotHollow");
+  }
   if (rawError.includes("This revolved body is a mesh from an older layerling")) {
     return t("edge.errorOldRevolve");
   }

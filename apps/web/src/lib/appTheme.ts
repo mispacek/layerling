@@ -39,6 +39,16 @@ export function readStoredAppTheme(storage: Pick<Storage, "getItem"> | null | un
   }
 }
 
+/** Whether this browser has a theme on record, even "system": someone chose it, or it has been applied before. */
+export function hasStoredAppTheme(storage: Pick<Storage, "getItem"> | null | undefined): boolean {
+  if (!storage) return false;
+  try {
+    return storage.getItem(APP_THEME_STORAGE_KEY) !== null;
+  } catch {
+    return true;
+  }
+}
+
 export function storeAppTheme(
   storage: Pick<Storage, "setItem"> | null | undefined,
   preference: AppThemePreference,

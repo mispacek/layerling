@@ -37,6 +37,9 @@ export const EXACT_ROUND_TOLERANCE = 0.05;
 export const ROUND_FROM_SIDES = 96;
 export const ROUND_FROM_SPHERE_STEPS = 24;
 export const ROUND_FROM_HALF_SPHERE_STEPS = 32;
+/** Der Torus trug 144 Ecken rund um den Ring und 36 rund um den Wulst fest (torusTessellation.ts). */
+export const ROUND_FROM_TORUS_SIDES = 96;
+export const ROUND_FROM_TORUS_STEPS = 24;
 export const ROUND_FROM_ROOF_SIDES = 64;
 /** Das gebogene Rohr zeichnet ein rundes Profil mit `bentTubeQuality` Ecken, von sich aus 32 (bentTubeGeometry.ts). */
 export const ROUND_FROM_BENT_TUBE_QUALITY = 32;

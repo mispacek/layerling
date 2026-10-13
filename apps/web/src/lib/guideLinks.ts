@@ -1,8 +1,5 @@
-import type { Language } from "@/lib/i18n";
+import { LANGUAGE_INFO, type Language } from "@/lib/i18n";
 import type { ShapeKind } from "@/types/layerling";
-
-// The full illustrated manual currently has English and German editions.
-type GuideLanguage = "en" | "de";
 
 /**
  * The chapters of the user guide (docs/guide) by what they are about, with the
@@ -27,7 +24,7 @@ export const GUIDE_CHAPTERS = {
   shortcuts: { de: "tastenkuerzel", en: "shortcuts" },
   ai: { de: "ki-mit-mcp", en: "ai-with-mcp" },
   offline: { de: "offline-und-installieren", en: "offline-and-install" },
-} as const satisfies Record<string, Record<GuideLanguage, string>>;
+} as const satisfies Record<string, { en: string } & Partial<Record<Language, string>>>;
 
 export type GuideChapter = keyof typeof GUIDE_CHAPTERS;
 
@@ -90,18 +87,21 @@ export const GUIDE_SECTIONS = {
   sketchCurve: { chapter: "sketches", de: "eine-gerade-seite-kruemmen", en: "curving-a-straight-side" },
   commandSearch: { chapter: "shortcuts", de: "befehlssuche", en: "command-search" },
   whatsNew: { chapter: "start", de: "neu-seit-deinem-letzten-besuch", en: "new-since-your-last-visit" },
-} as const satisfies Record<string, { chapter: GuideChapter } & Record<GuideLanguage, string>>;
+} as const satisfies Record<string, { chapter: GuideChapter; en: string } & Partial<Record<Language, string>>>;
 
 export type GuideSection = keyof typeof GUIDE_SECTIONS;
 
 /** The address of a chapter or one of its sections, or of the guide's overview when neither is named. */
 export function guideHref(language: Language, chapter?: GuideChapter, section?: GuideSection): string {
-  const guideLanguage: GuideLanguage = language === "de" ? "de" : "en";
-  const directory = language === "de" ? "anleitung" : "guide";
+  const directory = LANGUAGE_INFO[language].guideDir;
   const target = section ? GUIDE_SECTIONS[section] : null;
   const page = target?.chapter ?? chapter;
   if (!page) return `/${directory}/index.html`;
-  return `/${directory}/${GUIDE_CHAPTERS[page][guideLanguage]}.html${target ? `#${target[guideLanguage]}` : ""}`;
+  // A language other than German names its chapters like the English ones, and a chapter it has not
+  // translated shows the English text under that same name; only German carries names of its own.
+  const chapterSlug = (GUIDE_CHAPTERS[page] as { en: string } & Partial<Record<Language, string>>)[language] ?? GUIDE_CHAPTERS[page].en;
+  const anchor = target ? (target as { en: string } & Partial<Record<Language, string>>)[language] ?? target.en : null;
+  return `/${directory}/${chapterSlug}.html${anchor ? `#${anchor}` : ""}`;
 }
 
 /**

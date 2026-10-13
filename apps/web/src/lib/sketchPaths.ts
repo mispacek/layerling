@@ -1,4 +1,5 @@
 import { isConstructionSegment } from "@/lib/sketchConstruction";
+import { nestOutlines } from "@/lib/sketchContainment";
 import type { SketchPoint, SketchProfile, SketchSegment } from "@/types/layerling";
 
 export type PathStep = { segment: SketchSegment; from: SketchPoint; to: SketchPoint };
@@ -87,6 +88,27 @@ export function pathEdges(paths: DisplayPath[]) {
     });
   });
   return edges;
+}
+
+export type DisplayRegion = { outer: DisplayPath; holes: DisplayPath[] };
+
+/**
+ * The closed paths as the bodies they become (#239): holes only where an outline lies wholly
+ * inside another, so two shapes pushed over each other show as one body, not as a hole.
+ */
+export function closedPathRegions(paths: DisplayPath[]): DisplayRegion[] {
+  const records = paths
+    .filter((path) => path.closed)
+    .map((path) => {
+      const polygon = pathEdges([path]).map((edge) => edge.from);
+      const area = Math.abs(polygon.reduce((sum, point, index) => {
+        const next = polygon[(index + 1) % polygon.length];
+        return sum + point.x * next.z - next.x * point.z;
+      }, 0)) / 2;
+      return { item: path, polygon, area };
+    })
+    .filter((record) => record.polygon.length >= 3 && record.area > 1e-8);
+  return nestOutlines(records);
 }
 
 export function isInsideEdges(point: { x: number; z: number }, edges: PlaneEdge[]) {

@@ -70,7 +70,7 @@ export const SHAPE_KEYWORDS: Readonly<Record<string, readonly string[]>> = {
   cone: ["kegel", "spitze"],
   text: ["font", "letters", "schrift", "buchstaben", "beschriftung"],
   nameTag: ["name tag", "key ring", "keychain", "multicolour", "multicolor", "layers", "namensschild", "schlüsselanhänger", "schluesselanhaenger", "mehrfarbig", "schichten"],
-  gear: ["cog", "zahnrad", "zahnraeder", "zahnräder"],
+  gear: ["cog", "zahnrad", "zahnraeder", "zahnräder", "herringbone", "pfeilrad", "pfeilzahnrad", "helical", "schrägrad"],
   thread: ["screw", "bolt", "nut", "gewinde", "schraube", "mutter"],
   hinge: ["scharnier", "gelenk"],
   spring: ["coil", "feder", "spirale"],

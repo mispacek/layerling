@@ -12,7 +12,8 @@ import dynamic from "next/dynamic";
 import { importFailureSummary, importModelFiles } from "@/lib/modelImport";
 import { loadTextFonts } from "@/lib/textFonts";
 import { loadStoredCustomFonts } from "@/lib/customFontStore";
-import { DEFAULT_APP_THEME, applyAppTheme, getAppThemePreference, readStoredAppTheme, resolveAppTheme, setAppTheme, storeAppTheme, subscribeToAppTheme, type AppThemePreference, type ResolvedAppTheme } from "@/lib/appTheme";
+import { fetchServerDefaultTheme } from "@/lib/serverDefaults";
+import { DEFAULT_APP_THEME, applyAppTheme, getAppThemePreference, hasStoredAppTheme, readStoredAppTheme, resolveAppTheme, setAppTheme, storeAppTheme, subscribeToAppTheme, type AppThemePreference, type ResolvedAppTheme } from "@/lib/appTheme";
 import { hydrateEditorHistoryState, notesForHistoryIndex, type EditorHistoryEntry } from "@/lib/editorHistory";
 import { DEFAULT_LANGUAGE, detectLanguage, setLanguage, t, translate, type Language } from "@/lib/i18n";
 import { localizedError } from "@/lib/userErrors";
@@ -853,6 +854,13 @@ export default function Home() {
     // The design name stays in the toolbar; the old switch is gone.
     window.localStorage.removeItem("layerling.showProjectNameInToolbar");
     const storedTheme = readStoredAppTheme(window.localStorage);
+    // A first visit takes the theme the server suggests (LAYERLING_DEFAULT_THEME), if it has one;
+    // a browser that already has a theme on record keeps it. A static copy has no server to ask.
+    if (!STATIC_EXPORT_BUILD && !hasStoredAppTheme(window.localStorage)) {
+      void fetchServerDefaultTheme().then((suggested) => {
+        if (suggested && getAppThemePreference() === storedTheme && !hasStoredAppTheme(window.localStorage)) setAppTheme(suggested);
+      });
+    }
     setAppTheme(storedTheme, false);
     setThemePreference(storedTheme);
     const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;

@@ -5,7 +5,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { AlertTriangle, Check, LoaderCircle, X } from "lucide-react";
 import { GuideHelpLink } from "@/components/GuideHelpLink";
-import { getLocale, t } from "@/lib/i18n";
+import { numberLocale, t } from "@/lib/i18n";
 import { simplifyTrianglePositions, type SimplifiedMesh } from "@/lib/meshSimplify";
 import { displayShapeName } from "@/lib/shapeCatalog";
 import { useLanguage } from "@/lib/useLanguage";
@@ -293,7 +293,7 @@ export function MeshSimplifyPanel({
     state.needsRender = true;
   }, [shape.color, showTriangles]);
 
-  const locale = getLocale();
+  const locale = numberLocale();
   const count = (triangles: number) => triangles.toLocaleString(locale);
   const reduces = Boolean(result && result.triangleCount < sourceTriangles);
   // A cut or merge keeps its parts for "Edit group"; the simplified mesh cannot, and should say so beforehand.

@@ -3,8 +3,9 @@ import type manifoldModule from "manifold-3d";
 import type { ManifoldToplevel } from "manifold-3d";
 import * as THREE from "three";
 import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
-import { getLocale } from "@/lib/i18n";
+import { numberLocale } from "@/lib/i18n";
 import { sphereTessellation } from "@/lib/sphereTessellation";
+import { torusTessellation } from "@/lib/torusTessellation";
 import { createGearGeometry } from "@/lib/gearGeometry";
 import { createStarGeometry } from "@/lib/starGeometry";
 import { createHeartGeometry } from "@/lib/heartGeometry";
@@ -338,10 +339,11 @@ function createBooleanWedgeGeometry(width: number, height: number, depth: number
   return geometry;
 }
 
-function createBooleanTorusGeometry(width: number, height: number, depth: number) {
+function createBooleanTorusGeometry(width: number, height: number, depth: number, shape: Pick<WorkplaneShape, "sides" | "steps">) {
   const tubeRadius = Math.max(0.1, height / 2);
   const majorRadius = Math.max(0.2, Math.min(width, depth) / 2 - tubeRadius);
-  const geometry = new THREE.TorusGeometry(majorRadius, tubeRadius, 36, 144);
+  const { ringSides, tubeSteps } = torusTessellation(shape, width, depth, height);
+  const geometry = new THREE.TorusGeometry(majorRadius, tubeRadius, tubeSteps, ringSides);
   geometry.rotateX(Math.PI / 2);
   const outerDiameter = (majorRadius + tubeRadius) * 2;
   geometry.scale(width / Math.max(0.001, outerDiameter), 1, depth / Math.max(0.001, outerDiameter));
@@ -401,7 +403,7 @@ function geometryMeshForShape(shape: WorkplaneShape): MeshData | null {
       geometry = createBooleanHalfSphereGeometry(width, height, depth, shape.steps ?? 32);
       break;
     case "torus":
-      geometry = createBooleanTorusGeometry(width, height, depth);
+      geometry = createBooleanTorusGeometry(width, height, depth, shape);
       break;
     case "ring":
     case "tube":
@@ -546,6 +548,7 @@ function geometryMeshForShape(shape: WorkplaneShape): MeshData | null {
         threadPitch: shape.threadPitch,
         threadClearance: shape.threadClearance,
         threadBoltClearance: shape.threadBoltClearance,
+        threadAxialClearance: shape.threadAxialClearance,
         threadQuality: shape.threadQuality,
         threadHeadHeight: shape.threadHeadHeight,
         threadChamfer: shape.threadChamfer,
@@ -655,7 +658,7 @@ function importedMeshForShape(shape: WorkplaneShape): MeshData {
 
 /** Tausender trennen, in der gerade eingestellten Sprache. */
 export function formatTriangleCount(count: number) {
-  return count.toLocaleString(getLocale());
+  return count.toLocaleString(numberLocale());
 }
 
 export function shapeAabb(shape: WorkplaneShape): Cuboid {

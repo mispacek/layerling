@@ -34,6 +34,24 @@ export function toggleSketchSelection(selected: SketchSelection, entity: SketchS
   return { kind: "multiple", pointIds, segmentIds, imageIds };
 }
 
+/**
+ * The corners a corner treatment works on: the selected points, whatever lines are selected with
+ * them. A frame round a shape, or a click inside it, selects its points and its lines together, and
+ * the corners should still be rounded then (#283).
+ */
+export function sketchSelectedPointIds(selected: SketchSelection): string[] {
+  if (selected?.kind === "point") return [selected.id];
+  if (selected?.kind === "multiple" && !selected.imageIds?.length) return selected.pointIds;
+  return [];
+}
+
+/** The selected lines, alone or together with points, for the tools that curve or straighten lines (#283). */
+export function sketchSelectedSegmentIds(selected: SketchSelection): string[] {
+  if (selected?.kind === "segment") return [selected.id];
+  if (selected?.kind === "multiple" && !selected.imageIds?.length) return selected.segmentIds;
+  return [];
+}
+
 export function sketchSelectionCount(selected: SketchSelection): number {
   if (!selected) return 0;
   if (selected.kind === "multiple") return selected.pointIds.length + selected.segmentIds.length + (selected.imageIds?.length ?? 0);

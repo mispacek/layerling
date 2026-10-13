@@ -54,7 +54,7 @@ Tippen ist genauer als Ziehen. Alle Zahlenfelder nehmen Millimeter, aber auch Pr
 
 ## Wie rund ist rund? Die Seitenzahl
 
-Runde Formen wie Zylinder, Kegel, Rohr, Ellipse oder die Bohrungen haben in den Eigenschaften den Schalter {{ui:prop.sidesFollowSize}} und den Regler {{ui:prop.sides}}. Der Hintergrund: Für die Anzeige und für STL, 3MF und OBJ zeichnet layerling einen Kreis als Vieleck aus vielen kleinen Seiten. Je mehr Seiten, desto glatter, aber desto mehr Dreiecke.
+Runde Formen wie Zylinder, Kegel, Rohr, Ellipse oder die Bohrungen haben in den Eigenschaften den Schalter {{ui:prop.sidesFollowSize}} und den Regler {{ui:prop.sides}}. Der {{ui:shape.torus}} hat zwei Regler: {{ui:prop.torusSides}} rund um den Ring und {{ui:prop.torusSteps}} rund um den Wulst. Auch bei ihm folgen beide der Größe, solange du sie nicht festhältst, und ein großer Torus zeigt so keine Facetten. Der Hintergrund: Für die Anzeige und für STL, 3MF und OBJ zeichnet layerling einen Kreis als Vieleck aus vielen kleinen Seiten. Je mehr Seiten, desto glatter, aber desto mehr Dreiecke.
 
 **Wo die Seitenzahl wichtig ist**
 
@@ -65,7 +65,7 @@ Runde Formen wie Zylinder, Kegel, Rohr, Ellipse oder die Bohrungen haben in den 
 **Wo sie keine Rolle spielt**
 
 - **Beim STEP-Export.** Er schreibt die runde Form, nicht das Vieleck.
-- **Bei Fasen und Verrundungen** ({{ui:editor.tool.chamfer}}, {{ui:editor.tool.fillet}}), solange die Form rund bleibt. Das ist der Fall, wenn du keine Seitenzahl eingestellt hast, wenn die Zahl mindestens so hoch ist wie der Vorgabewert der Form oder wenn das Vieleck höchstens {{value:EXACT_ROUND_TOLERANCE}} mm vom Kreis abweicht. Der Vorgabewert ist {{value:ROUND_FROM_SIDES}} Seiten bei Zylinder, Ellipse, Rohr und Kegel, {{value:ROUND_FROM_ROOF_SIDES}} beim {{ui:shape.roundRoof}}, {{value:ROUND_FROM_SPHERE_STEPS}} Schritte bei der {{ui:shape.sphere}}, {{value:ROUND_FROM_HALF_SPHERE_STEPS}} bei der {{ui:shape.halfSphere}} und eine {{ui:prop.quality}} von {{value:ROUND_FROM_BENT_TUBE_QUALITY}} bei einem runden {{ui:shape.bentTube}}.
+- **Bei Fasen und Verrundungen** ({{ui:editor.tool.chamfer}}, {{ui:editor.tool.fillet}}), solange die Form rund bleibt. Das ist der Fall, wenn du keine Seitenzahl eingestellt hast, wenn die Zahl mindestens so hoch ist wie der Vorgabewert der Form oder wenn das Vieleck höchstens {{value:EXACT_ROUND_TOLERANCE}} mm vom Kreis abweicht. Der Vorgabewert ist {{value:ROUND_FROM_SIDES}} Seiten bei Zylinder, Ellipse, Rohr und Kegel, {{value:ROUND_FROM_ROOF_SIDES}} beim {{ui:shape.roundRoof}}, {{value:ROUND_FROM_SPHERE_STEPS}} Schritte bei der {{ui:shape.sphere}}, {{value:ROUND_FROM_HALF_SPHERE_STEPS}} bei der {{ui:shape.halfSphere}}, {{value:ROUND_FROM_TORUS_SIDES}} Seiten und {{value:ROUND_FROM_TORUS_STEPS}} Stufen beim {{ui:shape.torus}} und eine {{ui:prop.quality}} von {{value:ROUND_FROM_BENT_TUBE_QUALITY}} bei einem runden {{ui:shape.bentTube}}.
 - **Bei einem Gewinde, einer Feder oder einem Schrägrad.** Das Kantenwerkzeug und der STEP-Export nehmen den exakten Körper; die {{ui:prop.quality}} bestimmt nur, wie fein die Form gezeichnet wird.
 
 **Wo sie wieder wichtig wird**
@@ -125,7 +125,7 @@ Der Ordner `Custom shapes` erscheint auch auf der Startseite. Dort öffnest du e
 
 Ein Muster, ein Logo oder ein Schriftzug soll auf einen Becher, eine Dose oder ein Rohr? Lege es zuerst flach auf die Platte, etwa als importiertes SVG oder als Text, so wie es von oben gesehen aussehen soll. Dann wickelst du es in den Einstellungen der Form unter {{ui:inspector.wrapCylinder}} um einen Zylinder:
 
-1. Klappe {{ui:inspector.wrapCylinder}} auf und gib den {{ui:inspector.wrapDiameter}} der Zylinderwand ein, etwa den Außendurchmesser deines Bechers.
+1. Klappe {{ui:inspector.wrapCylinder}} auf und gib den {{ui:inspector.wrapDiameter}} der Zylinderwand ein, etwa den Außendurchmesser deines Bechers. Auch Zehntelmillimeter gehen, etwa 63,5.
 2. Klicke auf {{ui:inspector.wrapApply}}. Was von links nach rechts lag, läuft jetzt um den Zylinder herum, der hintere Rand wird oben, und die Dicke steht nach außen ab.
 3. Markiere die gewickelte Form und den Zylinder und richte sie beide mittig aus, links-rechts und vorne-hinten. Die Mitte der gewickelten Form ist die Achse des Zylinders, also sitzt sie dann genau auf seiner Wand.
 

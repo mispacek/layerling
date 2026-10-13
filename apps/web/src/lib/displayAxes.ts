@@ -1,6 +1,6 @@
 /**
  * How the editor names its directions (#182). Inside, three.js runs x to the right, y up and z
- * towards the viewer. On screen the numbers follow CAD and Tinkercad, right-handed: X to the
+ * towards the viewer. On screen the numbers follow CAD and similar tools, right-handed: X to the
  * right, Y towards the back, Z up. So the Y a person reads or types is minus the inside z, and a
  * turn about Y is minus the inside turn about z. Everything stored stays as it was.
  */

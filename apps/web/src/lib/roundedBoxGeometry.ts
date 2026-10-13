@@ -182,6 +182,73 @@ function createExtrudedRoundedBox(
 }
 
 /**
+ * Quality 1 with the top and bottom edges rounded too (#239): every one of the twelve edges is
+ * one flat 45 degree chamfer and every corner one triangle. The grid of the full box cannot
+ * give that - its arcs always have twice the pieces of the quality, so 1 became two.
+ *
+ * Built as the box's inner core pushed out by an octahedron: per octant the three points where
+ * the axes leave it (A along x, B along y, C along z), joined by a triangle across each corner,
+ * a quad along each edge and a quad on each face.
+ */
+function createChamferedBox(width: number, depth: number, height: number, rc: number, rtb: number): THREE.BufferGeometry {
+  const innerX = width / 2 - rc;
+  const innerY = height / 2 - rtb;
+  const innerZ = depth / 2 - rc;
+  const signs = [1, -1];
+  const point = (kind: "A" | "B" | "C", sx: number, sy: number, sz: number) => new THREE.Vector3(
+    (innerX + (kind === "A" ? rc : 0)) * sx,
+    (innerY + (kind === "B" ? rtb : 0)) * sy + height / 2,
+    (innerZ + (kind === "C" ? rc : 0)) * sz,
+  );
+
+  const centre = new THREE.Vector3(0, height / 2, 0);
+  const vertices: number[] = [];
+  const triangle = (a: THREE.Vector3, b: THREE.Vector3, c: THREE.Vector3) => {
+    const normal = new THREE.Vector3().subVectors(b, a).cross(new THREE.Vector3().subVectors(c, a));
+    // A fully rounded side leaves slivers of no area; they would only confuse the normals.
+    if (normal.lengthSq() < 1e-14) return;
+    const middle = new THREE.Vector3().add(a).add(b).add(c).divideScalar(3);
+    // The body is convex, so a triangle faces outward when it points away from the centre.
+    const outward = normal.dot(middle.sub(centre)) >= 0;
+    (outward ? [a, b, c] : [a, c, b]).forEach((p) => vertices.push(p.x, p.y, p.z));
+  };
+  const quad = (a: THREE.Vector3, b: THREE.Vector3, c: THREE.Vector3, d: THREE.Vector3) => {
+    triangle(a, b, c);
+    triangle(a, c, d);
+  };
+
+  for (const sx of signs) {
+    for (const sy of signs) {
+      for (const sz of signs) {
+        triangle(point("A", sx, sy, sz), point("B", sx, sy, sz), point("C", sx, sy, sz));
+      }
+    }
+  }
+  for (const s1 of signs) {
+    for (const s2 of signs) {
+      // The edges along z (between A and B), along x (B and C) and along y (A and C).
+      quad(point("A", s1, s2, 1), point("B", s1, s2, 1), point("B", s1, s2, -1), point("A", s1, s2, -1));
+      quad(point("B", 1, s1, s2), point("C", 1, s1, s2), point("C", -1, s1, s2), point("B", -1, s1, s2));
+      quad(point("A", s1, 1, s2), point("C", s1, 1, s2), point("C", s1, -1, s2), point("A", s1, -1, s2));
+    }
+  }
+  for (const s of signs) {
+    quad(point("A", s, 1, 1), point("A", s, 1, -1), point("A", s, -1, -1), point("A", s, -1, 1));
+    quad(point("B", 1, s, 1), point("B", 1, s, -1), point("B", -1, s, -1), point("B", -1, s, 1));
+    quad(point("C", 1, 1, s), point("C", 1, -1, s), point("C", -1, -1, s), point("C", -1, 1, s));
+  }
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
+  geometry.computeVertexNormals();
+  const creased = toCreasedNormals(geometry, THREE.MathUtils.degToRad(30));
+  geometry.dispose();
+  creased.computeBoundingBox();
+  creased.computeBoundingSphere();
+  return creased;
+}
+
+/**
  * Erzeugt einen allseitig verrundeten Quader (sowohl vertikale Ecken als auch Deckel/Boden-Kanten).
  */
 function createFullRoundedBox(
@@ -242,7 +309,7 @@ function createFullRoundedBox(
  * 1. Eckenradius (4 aufrechte vertikale Kanten, ideal für Gehäuse & 3D-Druck)
  * 2. Kantenradius (Deckel- und Bodenkanten)
  *
- * Im Gegensatz zu Tinkercad bleiben die Radien bei Änderungen von Breite, Tiefe
+ * Im Gegensatz zu vielen anderen Programmen bleiben die Radien bei Änderungen von Breite, Tiefe
  * oder Höhe absolut konstant und verzerren nicht zu Ellipsen.
  */
 export function createRoundedBoxGeometry({
@@ -266,6 +333,10 @@ export function createRoundedBoxGeometry({
 
   if (rtb <= 1e-4) {
     return createExtrudedRoundedBox(safeW, safeD, safeH, rc, q);
+  }
+
+  if (q === 1) {
+    return createChamferedBox(safeW, safeD, safeH, rc, rtb);
   }
 
   return createFullRoundedBox(safeW, safeD, safeH, rc, rtb, q);

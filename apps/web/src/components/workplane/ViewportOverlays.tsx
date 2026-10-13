@@ -627,6 +627,10 @@ function fitNoteHeight(area: HTMLTextAreaElement | null) {
 /**
  * Das Schreibfeld einer Notiz. Es misst sich nach jedem Wechsel des Textes neu -
  * auch wenn der von aussen kommt, etwa aus einem Rueckgaengig.
+ *
+ * While typing, the field shows its own draft: the text takes a detour through
+ * the editor and the overlay before it comes back as `value`, and in between React
+ * would put the old text back - which throws the cursor to the end.
  */
 function NoteText({
   value,
@@ -642,21 +646,50 @@ function NoteText({
   onBlur: () => void;
 }) {
   const areaRef = useRef<HTMLTextAreaElement | null>(null);
+  const [draft, setDraft] = useState<string | null>(null);
+  // The text as it was when the field took focus, for Escape to go back to.
+  const originalRef = useRef(value);
+  const shown = draft ?? value;
   useLayoutEffect(() => {
     fitNoteHeight(areaRef.current);
-  }, [value]);
+  }, [shown]);
   return (
     <textarea
       className="note-text"
       ref={areaRef}
-      value={value}
+      value={shown}
       maxLength={NOTE_TEXT_LIMIT}
       rows={1}
       placeholder={t("note.placeholder")}
       autoFocus={focused}
-      onFocus={onFocus}
-      onBlur={onBlur}
-      onChange={(event) => onChange(event.target.value)}
+      onFocus={() => {
+        originalRef.current = value;
+        onFocus();
+      }}
+      onBlur={() => {
+        setDraft(null);
+        onBlur();
+      }}
+      onChange={(event) => {
+        setDraft(event.target.value);
+        onChange(event.target.value);
+      }}
+      onKeyDown={(event) => {
+        // Enter keeps the text, Escape takes it back to how it was; Shift+Enter starts a new line.
+        if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) {
+          event.preventDefault();
+          event.stopPropagation();
+          event.currentTarget.blur();
+        } else if (event.key === "Escape") {
+          event.preventDefault();
+          event.stopPropagation();
+          if (shown !== originalRef.current) {
+            setDraft(originalRef.current);
+            onChange(originalRef.current);
+          }
+          event.currentTarget.blur();
+        }
+      }}
     />
   );
 }
@@ -1116,7 +1149,7 @@ function cornerRulerNeighborLabel(
 /**
  * Projiziert jede platzierte Winkellineal-Instanz auf den Bildschirm: die
  * Ecke, die beiden Arm-Endpunkte, jeden Teilstrich (`cornerRulerTicks`),
- * die relative Bemaßung des ausgewählten Körpers (wie in Tinkercad) sowie
+ * die relative Bemaßung des ausgewählten Körpers (wie in similar tools) sowie
  * die automatische Bemaßung weiterer Formen am Lineal.
  * Reine Bildschirm-Darstellung wie beim Massband - kein Three.js-Objekt.
  */
@@ -1165,7 +1198,7 @@ export function syncCornerRulerToolOverlay(
         });
       };
       // Die Teilstriche zeigen nach aussen (weg vom jeweils anderen Arm),
-      // wie bei Tinkercad - nicht in die Ecke hinein, wo sonst platzierte
+      // wie bei vergleichbaren Programmen - nicht in die Ecke hinein, wo sonst platzierte
       // Formen sitzen wuerden.
       buildTicks(xAxis, zAxis.clone().negate(), ruler.armLengthX);
       buildTicks(zAxis, xAxis.clone().negate(), ruler.armLengthZ);

@@ -423,7 +423,7 @@ export function roundWave(teeth: number, tipRadius: number, rootRadius: number, 
 }
 
 /**
- * Round teeth (#201, like Tinkercad's Useful gear): each tooth one convex arc, each gap one
+ * Round teeth (#201, like the usual Useful gear): each tooth one convex arc, each gap one
  * concave arc, every arc running smoothly into the next. The tip sits ROUND_GEAR_ADDENDUM modules
  * above the pitch circle, the root ROUND_GEAR_DEDENDUM below it - a quarter module of room for the
  * other gear's tip - and the tooth is as thick on the pitch circle as half a pitch less half the
@@ -720,7 +720,13 @@ export function normalizeGearTeeth(value?: number) {
 }
 
 export function normalizeGearType(value?: string): GearType {
-  return value === "helical" || value === "bevel" || value === "internal" || value === "rack" ? value : DEFAULT_GEAR_TYPE;
+  return value === "helical" || value === "herringbone" || value === "bevel" || value === "internal" || value === "rack" ? value : DEFAULT_GEAR_TYPE;
+}
+
+/** A helical gear and a herringbone gear (two helical halves turning opposite ways, #265) have a helix angle. */
+export function gearTypeHasHelix(value?: string) {
+  const type = normalizeGearType(value);
+  return type === "helical" || type === "herringbone";
 }
 
 /** A ring gear (teeth pointing in) and a rack (#201) are set by module like involute gears, whatever profile is stored. */
@@ -931,8 +937,10 @@ export function createGearGeometry({
   const gearType = normalizeGearType(requestedType);
   const helixQuality = normalizeGearHelixQuality(requestedHelixQuality);
   const outlineCount = corners.length;
-  const ringCount = gearType === "helical" ? helixQuality : 2;
-  const twist = gearType === "helical" ? gearHelixTwist(safeWidth, safeDepth, safeHeight, { ...profile, helixAngle: requestedHelixAngle }) : 0;
+  const herringbone = gearType === "herringbone";
+  // A herringbone gear has a ring exactly in the middle, where the teeth turn round.
+  const ringCount = herringbone ? helixQuality + (helixQuality % 2 === 0 ? 1 : 0) : gearType === "helical" ? helixQuality : 2;
+  const twist = gearTypeHasHelix(gearType) ? gearHelixTwist(safeWidth, safeDepth, safeHeight, { ...profile, helixAngle: requestedHelixAngle }) : 0;
   const topScale = gearType === "bevel" ? BEVEL_GEAR_TOP_SCALE : 1;
   const boreX = centerHoleSize / 2;
   const boreZ = centerHoleSize / 2;
@@ -945,7 +953,9 @@ export function createGearGeometry({
   for (let ring = 0; ring < ringCount; ring += 1) {
     const progress = ring / (ringCount - 1);
     const y = progress * safeHeight;
-    const ringTwist = progress * twist;
+    // Each half of a herringbone gear is a helical gear of half the height: the teeth turn half the
+    // twist up to the middle and back to where they began at the top.
+    const ringTwist = herringbone ? (twist / 2) * (1 - Math.abs(2 * progress - 1)) : progress * twist;
     const scale = 1 + (topScale - 1) * progress;
 
     for (const corner of corners) {

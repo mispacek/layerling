@@ -13,7 +13,7 @@ export const DEFAULT_SKETCH_BACKGROUND = "#fcfbf8";
 export const DEFAULT_SKETCH_GRID_COLOR = "#d9822b";
 /** The sketch's area under the grid in the light theme (#143). */
 export const DEFAULT_SKETCH_PLATE_COLOR = "#f5f0e7";
-/** Edge lines on every body, when switched on: black like in Tinkercad. */
+/** Edge lines on every body, when switched on: black like in similar tools. */
 export const DEFAULT_EDGE_LINE_COLOR = "#000000";
 
 /** Width to height of the label texture, and so of the mesh that carries it. */
@@ -104,7 +104,7 @@ export function workplaneGridPalette(
 ): WorkplaneGridPalette {
   const base = baseWorkplaneGridPalette(theme, configuredColor, palette);
   // The darker lines in a colour of their own (#143); the centre cross and the border take it
-  // too, a little stronger, as Tinkercad draws them.
+  // too, a little stronger, as similar tools draw them.
   if (!/^#[0-9a-f]{6}$/i.test(majorColor)) return base;
   return {
     ...base,
@@ -206,7 +206,7 @@ export type WorkplaneGridLayout = {
 export function workplaneGridLayout(workspace: { gridBlockSize: number; gridBlockPreset?: string; units?: string; gridMajorInterval?: number }): WorkplaneGridLayout {
   const step = Math.min(200, Math.max(1, workspace.gridBlockSize));
   const inches = inchGridPresetMm(workspace.gridBlockPreset ?? "") !== null || workspace.units === "Imperial";
-  // A millimetre grid draws its darker line every fifth or, as Tinkercad, every tenth step (#143).
+  // A millimetre grid draws its darker line every fifth or, as similar tools, every tenth step (#143).
   if (!inches) return { step, majorInterval: workspace.gridMajorInterval === 10 ? 10 : WORKPLANE_MAJOR_GRID_INTERVAL };
   const perInch = Math.round(MM_PER_INCH / step);
   const majorInterval = Math.abs(perInch * step - MM_PER_INCH) < 1e-6 && perInch >= 2 ? perInch : step >= MM_PER_INCH - 1e-6 ? 12 : WORKPLANE_MAJOR_GRID_INTERVAL;
@@ -230,7 +230,7 @@ export function centeredWorkplaneGridCoordinates(span: number, step: number): Wo
 /** The grid lines across `span` for a layout, each marked as the axis, a major or a minor line. */
 /**
  * How wide the grid's lines lie on the plate, in millimetres, besides their one-pixel line (#143):
- * a band that grows as you zoom in, as every grid line does in Tinkercad, while the pixel line
+ * a band that grows as you zoom in, as every grid line does in similar tools, while the pixel line
  * keeps the grid visible from afar. A twentieth of the grid step for the fine lines, twice that for
  * the darker ones, so a 1 mm grid gets 0.05 and 0.1 mm.
  */
@@ -268,7 +268,7 @@ export const DEFAULT_LIGHT_ELEVATION = 52;
 
 /**
  * The main light's position for a direction (#143): the azimuth turns it round the plate, 0° from
- * the front and 90° from the right; the elevation lifts it, 90° straight above as in Tinkercad.
+ * the front and 90° from the right; the elevation lifts it, 90° straight above as in similar tools.
  * Straight above is held a hair off the vertical, so the shadow camera keeps an up direction.
  */
 export function keyLightPosition(azimuth: number, elevation: number, distance = 165) {

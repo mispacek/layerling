@@ -10,14 +10,17 @@ import { HexColorInput, HexColorPicker } from "react-colorful";
 import { APP_THEME_OPTIONS, type AppThemePreference } from "@/lib/appTheme";
 import { setToolbarSize, TOOLBAR_SIZE_OPTIONS, type ToolbarSize } from "@/lib/toolbarSize";
 import { useToolbarSize } from "@/lib/useToolbarSize";
-import { gearCenterHoleLimits, gearToothPitch } from "@/lib/gearGeometry";
+import { gearCenterHoleLimits, gearToothPitch, gearTypeHasHelix } from "@/lib/gearGeometry";
 import { automaticSideCount } from "@/lib/roundSideCount";
+import { torusTessellation } from "@/lib/torusTessellation";
 import { printerPresetById } from "@/lib/printBed";
 import { PRINTER_PRESETS } from "@/lib/printerPresets.generated";
 import {
   DEFAULT_THREAD_CLEARANCE,
   DEFAULT_THREAD_BOLT_CLEARANCE,
   MIN_THREAD_BOLT_CLEARANCE,
+  DEFAULT_THREAD_AXIAL_CLEARANCE,
+  threadAxialClearanceLimit,
   MAX_THREAD_BOLT_CLEARANCE,
   DEFAULT_THREAD_DIAMETER,
   DEFAULT_THREAD_HAND,
@@ -63,7 +66,7 @@ import {
   MIN_BENT_TUBE_SIZE,
   MIN_BENT_TUBE_WALL,
 } from "@/lib/bentTubeGeometry";
-import { getLocale, t, type MessageKey } from "@/lib/i18n";
+import { numberLocale, t, type MessageKey } from "@/lib/i18n";
 import { useLanguage } from "@/lib/useLanguage";
 import { measurementOptionLabel, normalizeScaleForUnits, parseMeasurementInput, scaleOptionsForUnits, WORKSPACE_UNIT_OPTIONS } from "@/lib/measurementUnits";
 import { shapeAssetDefaultDimensions, shapeAssetLabel, shapeAssetSpecialDefaults, toolbarShapeAssets } from "@/lib/shapeCatalog";
@@ -118,6 +121,7 @@ const TEXT_FONT_OPTIONS = ["Multilanguage", "Sans", "Serif", "Script", "Monospac
 const GEAR_TYPE_OPTIONS: Array<{ value: GearType; label: MessageKey }> = [
   { value: "spur", label: "gear.spur" },
   { value: "helical", label: "gear.helical" },
+  { value: "herringbone", label: "gear.herringbone" },
   { value: "bevel", label: "gear.bevel" },
   { value: "internal", label: "gear.internal" },
   { value: "rack", label: "gear.rack" },
@@ -156,7 +160,7 @@ const BENT_TUBE_PROFILE_OPTIONS: Array<{ value: BentTubeProfile; label: MessageK
   { value: "octagon", label: "bentTube.profileOctagon" },
 ];
 
-type ShapeSpecialNumberKey = "steps" | "sides" | "bevel" | "segments" | "topRadius" | "baseRadius" | "teeth" | "toothSize" | "toothWidth" | "centerHoleSize" | "helixAngle" | "helixQuality" | "gearPressureAngle" | "gearBacklash" | "gearRim" | "threadDiameter" | "threadPitch" | "threadClearance" | "threadBoltClearance" | "threadQuality" | "threadChamfer" | "threadHeadChamfer" | "springTurns" | "springWire" | "springQuality" | "topWidth" | "topDepth" | "starPoints" | "starInnerSize" | "starOuterFillet" | "starInnerFillet" | "starQuality" | "heartTipFillet" | "heartQuality" | "crescentThickness" | "crescentTipFillet" | "crescentQuality" | "honeycombCellSize" | "honeycombWallThickness" | "honeycombFrameWidth" | "dovetailNeckWidth" | "dovetailClearance" | "hingeKnuckles" | "hingePinDiameter" | "hingeLeafThickness" | "hingeClearance" | "screwHoleShaft" | "screwHoleHeadDepth" | "screwHoleAngle" | "cornerFillet" | "topBottomFillet" | "roundedBoxQuality" | "bentTubeSize" | "bentTubeWall" | "bentTubeQuality" | "knurlCount" | "knurlDepth" | "knurlAngle" | "knurlChamfer"
+type ShapeSpecialNumberKey = "steps" | "sides" | "bevel" | "segments" | "topRadius" | "baseRadius" | "teeth" | "toothSize" | "toothWidth" | "centerHoleSize" | "helixAngle" | "helixQuality" | "gearPressureAngle" | "gearBacklash" | "gearRim" | "threadDiameter" | "threadPitch" | "threadClearance" | "threadBoltClearance" | "threadAxialClearance" | "threadQuality" | "threadChamfer" | "threadHeadChamfer" | "springTurns" | "springWire" | "springQuality" | "topWidth" | "topDepth" | "starPoints" | "starInnerSize" | "starOuterFillet" | "starInnerFillet" | "starQuality" | "heartTipFillet" | "heartQuality" | "crescentThickness" | "crescentTipFillet" | "crescentQuality" | "honeycombCellSize" | "honeycombWallThickness" | "honeycombFrameWidth" | "dovetailNeckWidth" | "dovetailClearance" | "hingeKnuckles" | "hingePinDiameter" | "hingeLeafThickness" | "hingeClearance" | "screwHoleShaft" | "screwHoleHeadDepth" | "screwHoleAngle" | "cornerFillet" | "topBottomFillet" | "roundedBoxQuality" | "bentTubeSize" | "bentTubeWall" | "bentTubeQuality" | "knurlCount" | "knurlDepth" | "knurlAngle" | "knurlChamfer"
   | "loftBottomWidth" | "loftBottomDepth" | "loftTopWidth" | "loftTopDepth" | "loftWall";
 type ShapeSpecialField =
   | { type: "number"; key: ShapeSpecialNumberKey; label: string; defaultValue: number; min: number; max: number; step?: number; unit?: string }
@@ -198,6 +202,13 @@ function specialFieldsForShape(
     }];
   }
   if (kind === "sphere" || kind === "halfSphere") return [{ type: "number", key: "steps", label: t("prop.steps"), defaultValue: defaults.steps ?? (kind === "halfSphere" ? 32 : 24), min: 6, max: MAX_HIGH_RESOLUTION_STEPS, step: 1 }];
+  if (kind === "torus") {
+    const effective = torusTessellation({ sides: defaults.sides, steps: defaults.steps }, dimensions.width, dimensions.depth, dimensions.height);
+    return [
+      { type: "number", key: "sides", label: t("prop.torusSides"), defaultValue: effective.ringSides, min: 12, max: MAX_HIGH_RESOLUTION_SIDES, step: 1 },
+      { type: "number", key: "steps", label: t("prop.torusSteps"), defaultValue: effective.tubeSteps, min: 6, max: MAX_HIGH_RESOLUTION_STEPS, step: 1 },
+    ];
+  }
   if (kind === "cone") {
     return [
       { type: "number", key: "topRadius", label: t("prop.topRadius"), defaultValue: defaults.topRadius ?? 0, min: 0, max: MAX_CUSTOM_SHAPE_DIMENSION / 2, unit: "mm" },
@@ -259,6 +270,7 @@ function specialFieldsForShape(
       { type: "select", key: "threadHand", label: t("prop.threadHand"), defaultValue: defaults.threadHand ?? DEFAULT_THREAD_HAND, options: THREAD_HAND_OPTIONS.map((option) => ({ value: option.value, label: t(option.label) })) },
       { type: "select", key: "threadProfile", label: t("prop.threadProfile"), defaultValue: defaults.threadProfile ?? DEFAULT_THREAD_PROFILE, options: THREAD_PROFILE_OPTIONS.map((option) => ({ value: option.value, label: t(option.label) })) },
       { type: "number", key: "threadClearance", label: t("prop.clearance"), defaultValue: defaults.threadClearance ?? DEFAULT_THREAD_CLEARANCE, min: MIN_THREAD_CLEARANCE, max: MAX_THREAD_CLEARANCE, unit: "mm" },
+      { type: "number", key: "threadAxialClearance", label: t("prop.axialClearance"), defaultValue: defaults.threadAxialClearance ?? DEFAULT_THREAD_AXIAL_CLEARANCE, min: 0, max: threadAxialClearanceLimit(defaults.threadPitch ?? DEFAULT_THREAD_PITCH), step: 0.05, unit: "mm" },
       { type: "number", key: "threadBoltClearance", label: t("prop.boltClearance"), defaultValue: defaults.threadBoltClearance ?? DEFAULT_THREAD_BOLT_CLEARANCE, min: MIN_THREAD_BOLT_CLEARANCE, max: MAX_THREAD_BOLT_CLEARANCE, unit: "mm" },
       { type: "number", key: "threadChamfer", label: t("prop.chamfer"), defaultValue: defaults.threadChamfer ?? defaultThreadChamfer(defaults.threadPitch ?? DEFAULT_THREAD_PITCH, defaults.threadProfile ?? DEFAULT_THREAD_PROFILE, defaults.threadRole ?? DEFAULT_THREAD_ROLE), min: 0, max: 40, unit: "mm" },
       { type: "number", key: "threadQuality", label: t("prop.quality"), defaultValue: defaults.threadQuality ?? DEFAULT_THREAD_QUALITY, min: MIN_THREAD_QUALITY, max: MAX_THREAD_QUALITY, step: 6 },
@@ -290,7 +302,7 @@ function specialFieldsForShape(
     if (gearType === "internal") {
       fields.push({ type: "number", key: "gearRim", label: t("prop.gearRim"), defaultValue: defaults.gearRim ?? 3, min: 0.5, max: 60, unit: "mm" });
     }
-    if (gearType === "helical") {
+    if (gearTypeHasHelix(gearType)) {
       fields.push(
         { type: "number", key: "helixAngle", label: t("prop.helixAngle"), defaultValue: defaults.helixAngle ?? 22.5, min: -45, max: 45, unit: "°" },
         { type: "number", key: "helixQuality", label: t("prop.helixQuality"), defaultValue: defaults.helixQuality ?? 16, min: 4, max: 32, step: 1 },
@@ -448,7 +460,7 @@ export function WorkspaceSettingsModal({
   // "Custom" stays chosen while the field is open, even when the typed value happens to equal a preset.
   const [booleanLimitCustomOpen, setBooleanLimitCustomOpen] = useState(() => booleanTriangleLimitPreset(workspace.booleanTriangleLimit) === null);
   const booleanLimitMode: BooleanTriangleLimitPreset | "custom" = booleanLimitCustomOpen ? "custom" : booleanTriangleLimitPreset(workspace.booleanTriangleLimit) ?? "custom";
-  const formatSettingCount = (value: number) => value.toLocaleString(getLocale());
+  const formatSettingCount = (value: number) => value.toLocaleString(numberLocale());
   const scaleOptions = scaleOptionsForUnits(workspace.units);
   const scaleValue = normalizeScaleForUnits(workspace.units, workspace.scale);
   const gridColor = /^#[0-9a-f]{6}$/i.test(workspace.gridColor)
@@ -920,10 +932,10 @@ export function WorkspaceSettingsModal({
                     </button>
                     <button
                       type="button"
-                      title={t("workspace.tinkercadLookHint")}
-                      onClick={() => patchWorkspace(tinkercadLookPatch(workspace))}
+                      title={t("workspace.classicLookHint")}
+                      onClick={() => patchWorkspace(classicLookPatch(workspace))}
                     >
-                      {t("workspace.tinkercadLook")}
+                      {t("workspace.classicLook")}
                     </button>
                   </div>
                   <label className="workspace-range">
@@ -1473,11 +1485,11 @@ const EDGE_COLOR_PRESETS = [
 ] as const;
 
 /**
- * The work area as Tinkercad shows it, with the values @prmod3d measured (#143): white ground,
+ * The work area as similar tools show it, with the values @prmod3d measured (#143): white ground,
  * pale blue grid with darker lines every centimetre, black edge lines, light from straight above
  * with soft shadows. Everything stays adjustable afterwards.
  */
-function tinkercadLookPatch(workspace: WorkplaneWorkspaceSettings): Partial<WorkplaneWorkspaceSettings> {
+function classicLookPatch(workspace: WorkplaneWorkspaceSettings): Partial<WorkplaneWorkspaceSettings> {
   return {
     background: "#ffffff",
     surfaceColor: "#fafafa",

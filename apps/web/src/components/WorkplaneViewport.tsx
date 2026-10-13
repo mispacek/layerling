@@ -1,10 +1,10 @@
 "use client";
 
-import { ArrowDownToLine, ChevronLeft, ChevronRight, Crosshair, Cuboid, Download, Eye, EyeOff, FlipHorizontal, GripVertical, Home, Minus, MousePointer2, PanelsTopLeft, Plus, Rotate3d, RotateCcw, Ruler, RulerDimensionLine, Slice, Trash2, X } from "lucide-react";
+import { ArrowDownToLine, ChevronLeft, ChevronRight, Crosshair, Cuboid, Download, Eye, EyeOff, FlipHorizontal, GripVertical, Home, Layers, Minus, MousePointer2, PanelsTopLeft, Plus, Rotate3d, RotateCcw, Ruler, RulerDimensionLine, Slice, Trash2, X } from "lucide-react";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type Dispatch, type DragEvent, type MouseEvent as ReactMouseEvent, type MutableRefObject, type PointerEvent as ReactPointerEvent, type ReactNode, type SetStateAction, type WheelEvent as ReactWheelEvent } from "react";
 import { objectSnapOffset, shiftSnapBox, type ObjectSnapGuide, type SnapBox } from "@/lib/objectSnap";
 import { useMovablePanel, type MovablePanelOptions } from "@/lib/useMovablePanel";
-import { computeSectionPlaneVector, DEFAULT_SECTION_SETTINGS, getSectionBounds, SECTION_AXES_SHOWN, sectionAxisLetter, sectionFineWindow, type SectionPlaneAxis, type SectionPlaneSettings } from "@/lib/sectionView";
+import { computeSectionPlaneVector, DEFAULT_SECTION_SETTINGS, getSectionBounds, SECTION_AXES_SHOWN, sectionAxisLetter, sectionFineWindow, sectionPlacementWorkplane, type SectionPlaneAxis, type SectionPlaneSettings } from "@/lib/sectionView";
 import { projectSectionPoint, type SectionLoop, type SectionPoint } from "@/lib/sectionSvg";
 import { sectionMeasurement, sectionPointToWorld, snapSectionPoint, type SectionSnap } from "@/lib/sectionMeasure";
 import * as THREE from "three";
@@ -103,6 +103,7 @@ import { withShapeDefaults } from "@/lib/shapeDefaults";
 import { workplaneGridBandWidths, AXIS_ARROW_COLORS, axisArrowLayout, DEFAULT_EDGE_LINE_COLOR, fillLightPosition, keyLightPosition, sceneLightLevels, shadowBlurRadius, workplaneGridLayout, workplaneGridLines, workplaneGridPalette, workplaneLabelLayout, workplaneThemePalette, WORKPLANE_LABEL_ASPECT, WORKPLANE_LINE_ELEVATION, type WorkplaneGridLayout } from "@/lib/workplaneGrid";
 import { cleanNearZero, cleanRotationDegrees, isNonSolidShapeKind, mirroredAxisCount, mirrorSign, preservesEdgeTreatmentSize, proportionalResizeScale, resizedImportedCoordinates, resizedImportedMeshPositions, resizedShapeSize, shapeDepth, shapeExtrudeDeformAt, shapeHasExtrudeDeform, shapeHasShapeDeform, shapeHasTaper, shapeSupportsTaper, shapeTaperDimensions, shapeTaperScaleAt, shapeWidth, shapeWithParametricSource } from "@/lib/workplaneShapes";
 import { sphereTessellation } from "@/lib/sphereTessellation";
+import { torusTessellation } from "@/lib/torusTessellation";
 import type { LayerlingMcpViewFace } from "@/lib/layerlingMcpProtocol";
 import {
   TransformOverlay,
@@ -202,8 +203,22 @@ function orthographicZoomRange(camera: THREE.OrthographicCamera) {
  * Near and far planes that follow the distance: up close a near plane of
  * 0.1 mm would cut into a 3 mm view, far out a fixed one would leave the
  * depth buffer too coarse and faces would flicker into each other.
+ *
+ * The flat view draws the same picture wherever the camera stands on its line
+ * of sight, but the camera stays where the standard view (F) or the switch
+ * left it, often closer than the parts in front of the pivot: tilted towards
+ * the front, everything nearer than the camera was cut off. Its depth range
+ * reaches behind the camera as far as in front, so nothing in the picture is.
  */
 function fitCameraDepthRange(camera: THREE.Camera, target: THREE.Vector3) {
+  if (camera instanceof THREE.OrthographicCamera) {
+    const far = camera.position.distanceTo(target) + CAMERA_MAX_DISTANCE;
+    if (camera.near === -CAMERA_MAX_DISTANCE && Math.abs(camera.far - far) <= camera.far * 0.05) return;
+    camera.near = -CAMERA_MAX_DISTANCE;
+    camera.far = far;
+    camera.updateProjectionMatrix();
+    return;
+  }
   if (!(camera instanceof THREE.PerspectiveCamera)) return;
   const distance = camera.position.distanceTo(target);
   const near = clamp(distance / 2000, 0.01, 5);
@@ -898,6 +913,7 @@ function tapeShapeTopologyKey(shape: WorkplaneShape): string {
     threadPitch: shape.threadPitch,
     threadClearance: shape.threadClearance,
     threadBoltClearance: shape.threadBoltClearance,
+    threadAxialClearance: shape.threadAxialClearance,
     threadQuality: shape.threadQuality,
     threadHeadHeight: shape.threadHeadHeight,
     threadChamfer: shape.threadChamfer,
@@ -949,6 +965,7 @@ function tapeShapeTopologyKey(shape: WorkplaneShape): string {
     loftOffsetZ: shape.loftOffsetZ,
     loftWall: shape.loftWall,
     loftTwist: shape.loftTwist,
+    loftSmooth: shape.loftSmooth,
     slotEndRatio: shape.slotEndRatio,
     loftTiltX: shape.loftTiltX,
     loftTiltZ: shape.loftTiltZ,
@@ -1139,6 +1156,7 @@ function shapeGeometrySignature(shape: WorkplaneShape): string {
     threadPitch: shape.threadPitch,
     threadClearance: shape.threadClearance,
     threadBoltClearance: shape.threadBoltClearance,
+    threadAxialClearance: shape.threadAxialClearance,
     threadQuality: shape.threadQuality,
     threadHeadHeight: shape.threadHeadHeight,
     threadChamfer: shape.threadChamfer,
@@ -1190,6 +1208,7 @@ function shapeGeometrySignature(shape: WorkplaneShape): string {
     loftOffsetZ: shape.loftOffsetZ,
     loftWall: shape.loftWall,
     loftTwist: shape.loftTwist,
+    loftSmooth: shape.loftSmooth,
     slotEndRatio: shape.slotEndRatio,
     loftTiltX: shape.loftTiltX,
     loftTiltZ: shape.loftTiltZ,
@@ -3135,7 +3154,7 @@ export function WorkplaneViewport({
   /**
    * Die ausgewaehlten Formen, solange gerade nichts anderes den Bildschirm
    * belegt - siehe layerling-lineal.md. Mehrere zaehlen zusammen wie ein
-   * Koerper: gemessen wird ihre gemeinsame Umrissbox, wie in Tinkercad.
+   * Koerper: gemessen wird ihre gemeinsame Umrissbox, wie in similar tools.
    */
   const originDimensionShapeFor = useCallback(
     (shapesList: WorkplaneShape[], ids = selectedIdsRef.current) => {
@@ -4145,7 +4164,7 @@ export function WorkplaneViewport({
     };
   }, []);
 
-  // A double click on a sketch body opens its sketch, as in Tinkercad; on a group or a bundle it
+  // A double click on a sketch body opens its sketch, as in similar tools; on a group or a bundle it
   // opens that for editing (#150). The first click has already selected it, so this is the same
   // as Edit Sketch or Edit group. Both can be switched off in the settings.
   const onEditSketchRef = useRef(onEditSketch);
@@ -4351,7 +4370,7 @@ export function WorkplaneViewport({
     const local = placementWorkplaneCoordinates(workplane, raw);
     const step = snapStep(snapRef.current);
     const bounds = workspaceRef.current;
-    // Wie bei Tinkercad darf ein Teil neben der Platte geparkt werden (Discussion #80);
+    // Wie bei andere Programme darf ein Teil neben der Platte geparkt werden (Discussion #80);
     // die Grenze faengt nur den flachen Blick ab, bei dem der Strahl die Ebene weit draussen trifft.
     const reachX = bounds.width / 2 + bounds.width * PLATE_DRAG_REACH;
     const reachZ = bounds.depth / 2 + bounds.depth * PLATE_DRAG_REACH;
@@ -4373,7 +4392,7 @@ export function WorkplaneViewport({
   }, [toRawPlanePoint]);
 
   /**
-   * Where a shape on the pointer lands, as in Tinkercad's Cruise (#195): over a body on the face
+   * Where a shape on the pointer lands, as in the usual Cruise (#195): over a body on the face
    * under the pointer, lined up with it (a sloped one too); elsewhere on the current workplane.
    */
   const cruiseTarget = useCallback((clientX: number, clientY: number, skip?: ReadonlySet<string>) => {
@@ -6199,7 +6218,7 @@ export function WorkplaneViewport({
     setCornerRulerMode(next);
   }, [onCancelCruise]);
 
-  /** Der Griff ist immer direkt ziehbar, ohne eigenen Verschieben-Modus - wie bei einer Notiz-Nadel, nicht wie beim Massband (das mehrere Punkte je Strecke verwaltet und deshalb einen Modus braucht). Ein Klick ohne Zug dreht die Instanz um 90 Grad - wie in Tinkercad. */
+  /** Der Griff ist immer direkt ziehbar, ohne eigenen Verschieben-Modus - wie bei einer Notiz-Nadel, nicht wie beim Massband (das mehrere Punkte je Strecke verwaltet und deshalb einen Modus braucht). Ein Klick ohne Zug dreht die Instanz um 90 Grad - wie in similar tools. */
   const handleCornerRulerHandlePointerDown = useCallback((event: ReactPointerEvent<SVGCircleElement>, id: string) => {
     event.preventDefault();
     event.stopPropagation();
@@ -7882,7 +7901,7 @@ export function WorkplaneViewport({
             <button className="camera-controls-toggle" aria-label={t("camera.hide")} title={t("camera.hideShort")} aria-expanded={true} onClick={collapseCameraControls}>
               <ChevronLeft size={24} strokeWidth={2.25} aria-hidden="true" />
             </button>
-            <button aria-label={t("camera.home")} onClick={resetView}>
+            <button aria-label={t("camera.home")} aria-keyshortcuts="F" title={t("camera.shortcut", { label: t("camera.home"), keys: "F" })} onClick={resetView}>
               <Home size={24} strokeWidth={2.25} />
             </button>
             <button
@@ -7894,10 +7913,10 @@ export function WorkplaneViewport({
             >
               <Crosshair size={24} strokeWidth={2.25} />
             </button>
-            <button className="camera-zoom-button" aria-label={t("camera.zoomIn")} onClick={() => zoomCamera(0.7)}>
+            <button className="camera-zoom-button" aria-label={t("camera.zoomIn")} aria-keyshortcuts="+" title={t("camera.shortcut", { label: t("camera.zoomIn"), keys: "+" })} onClick={() => zoomCamera(0.7)}>
               <Plus size={28} strokeWidth={2.15} />
             </button>
-            <button className="camera-zoom-button" aria-label={t("camera.zoomOut")} onClick={() => zoomCamera(1.35)}>
+            <button className="camera-zoom-button" aria-label={t("camera.zoomOut")} aria-keyshortcuts="-" title={t("camera.shortcut", { label: t("camera.zoomOut"), keys: "−" })} onClick={() => zoomCamera(1.35)}>
               <Minus size={28} strokeWidth={2.15} />
             </button>
             {/* Zwei Finger zoomen und schieben von selbst. Zum Drehen fehlt die
@@ -8196,6 +8215,22 @@ export function WorkplaneViewport({
                             <span className="section-measure-help">{t("camera.sectionMeasureHelp")}</span>
                           )
                         ) : null}
+                      </div>
+
+                      <div className="section-measure-row">
+                        <button
+                          type="button"
+                          className="section-action-btn section-workplane-btn"
+                          onClick={() => {
+                            // The workplane lies on the cut (#154); the next sketch starts exactly there.
+                            onSetPlacementWorkplane(sectionPlacementWorkplane(sectionSettings), "shape");
+                            onWorkplaneModeChange(false);
+                          }}
+                          title={t("camera.sectionWorkplaneHint")}
+                        >
+                          <Layers size={14} strokeWidth={2.2} aria-hidden="true" />
+                          <span>{t("camera.sectionWorkplane")}</span>
+                        </button>
                       </div>
 
                       <div className="section-popover-footer">
@@ -8904,7 +8939,7 @@ function toggleCameraProjection(state: ThreeState) {
       CAMERA_MIN_DISTANCE,
       CAMERA_MAX_DISTANCE,
     );
-    next = new THREE.PerspectiveCamera(CAMERA_FOV, aspect, current.near, current.far);
+    next = new THREE.PerspectiveCamera(CAMERA_FOV, aspect, 0.1, 6000);
     next.position.copy(target).addScaledVector(direction, distance);
   }
 
@@ -8917,6 +8952,7 @@ function toggleCameraProjection(state: ThreeState) {
   next.layers.mask = current.layers.mask;
   next.lookAt(target);
   next.updateProjectionMatrix();
+  fitCameraDepthRange(next, target);
   next.updateMatrixWorld();
   state.camera = next;
   state.controls.object = next;
@@ -9456,7 +9492,7 @@ function createGridLines(
   if (minorBands.length) group.add(bandsFromSegments(minorBands, gridBands.minor, palette.minor, { order: 1.5 }));
 
   // A line is one pixel wide whatever the zoom, so the centre cross and the border also get
-  // a narrow band on the plate: stronger, and growing as you zoom in, as in Tinkercad (#143).
+  // a narrow band on the plate: stronger, and growing as you zoom in, as in similar tools (#143).
   const axisBand = THREE.MathUtils.clamp(Math.min(width, depth) * 0.0012, 0.15, 1);
   const borderBand = axisBand * 2;
   const axisBands: Array<[number, number, number, number]> = outlineOnly ? [] : [
@@ -10129,14 +10165,16 @@ function modifierEdgeMaterialStyle(active: boolean, hovered: boolean, previewAct
 }
 
 // Scaling a view-space point about the camera keeps it on the same pixel; in
-// an orthographic view only its depth may change.
+// an orthographic view only its depth may change, towards the viewer also for
+// a point behind the camera, which that view draws too.
 function pullModifierEdgeTowardCamera(material: THREE.LineBasicMaterial) {
   const pull = MODIFIER_EDGE_DEPTH_PULL.toFixed(4);
   material.onBeforeCompile = (shader) => {
     shader.vertexShader = shader.vertexShader.replace(
       "#include <project_vertex>",
       `#include <project_vertex>
-      mvPosition.xyz *= isOrthographic ? vec3(1.0, 1.0, ${pull}) : vec3(${pull});
+      if (isOrthographic) mvPosition.z += abs(mvPosition.z) * (1.0 - ${pull});
+      else mvPosition.xyz *= ${pull};
       gl_Position = projectionMatrix * mvPosition;`,
     );
   };
@@ -10423,11 +10461,13 @@ function syncTransformOverlay(
   }
   const cameraDistance = state.camera.position.distanceTo(frame.center);
   const cameraInSelectionFrame = frameLocalPoint(frame, state.camera.position);
-  const cameraInsideSelection = isPointInsideTransformBounds(cameraInSelectionFrame, frame.min, frame.max);
+  // The flat view's camera stands anywhere on its line of sight and sees behind itself too.
+  const flatView = state.camera instanceof THREE.OrthographicCamera;
+  const cameraInsideSelection = !flatView && isPointInsideTransformBounds(cameraInSelectionFrame, frame.min, frame.max);
   const project = (point: THREE.Vector3) => {
     const cameraSpace = point.clone().applyMatrix4(state.camera.matrixWorldInverse);
     const projected = cameraSpace.clone().applyMatrix4(state.camera.projectionMatrix);
-    return transformOverlayScreenPoint(projected, cameraSpace.z, rect.width, rect.height);
+    return transformOverlayScreenPoint(projected, flatView ? -1 : cameraSpace.z, rect.width, rect.height);
   };
 
   const xFootAxis = frame.xAxis.clone().normalize();
@@ -10796,7 +10836,8 @@ function syncAlignOverlay(
     const projected = corner.clone().project(state.camera);
     return { cameraSpace, projected };
   });
-  const nearPlane = state.camera instanceof THREE.PerspectiveCamera ? state.camera.near : 0.1;
+  // The flat view draws what is behind its camera too: nothing there is out of sight.
+  const nearPlane = state.camera instanceof THREE.PerspectiveCamera ? state.camera.near : -Infinity;
   if (projectedCorners.some(({ cameraSpace, projected }) => cameraSpace.z > -nearPlane * 1.5 || !Number.isFinite(projected.x) || !Number.isFinite(projected.y))) {
     clear();
     return;
@@ -10923,7 +10964,8 @@ function syncMirrorOverlay(
     const projected = corner.clone().project(state.camera);
     return { cameraSpace, projected };
   });
-  const nearPlane = state.camera instanceof THREE.PerspectiveCamera ? state.camera.near : 0.1;
+  // The flat view draws what is behind its camera too: nothing there is out of sight.
+  const nearPlane = state.camera instanceof THREE.PerspectiveCamera ? state.camera.near : -Infinity;
   if (projectedCorners.some(({ cameraSpace, projected }) => cameraSpace.z > -nearPlane * 1.5 || !Number.isFinite(projected.x) || !Number.isFinite(projected.y))) {
     clear();
     return;
@@ -11760,7 +11802,7 @@ function createShapeObject(
       addMesh(group, sharedShapeGeometry(geometryCacheKey, () => createHalfSphereGeometry(width, height, depth, shape.steps ?? 32)), material, shape);
       break;
     case "torus":
-      addMesh(group, sharedShapeGeometry(geometryCacheKey, () => createTorusGeometry(width, height, depth)), material, shape);
+      addMesh(group, sharedShapeGeometry(geometryCacheKey, () => createTorusGeometry(width, height, depth, shape)), material, shape);
       break;
     case "ring":
     case "tube":
@@ -11861,6 +11903,7 @@ function createShapeObject(
         threadPitch: shape.threadPitch,
         threadClearance: shape.threadClearance,
         threadBoltClearance: shape.threadBoltClearance,
+        threadAxialClearance: shape.threadAxialClearance,
         threadQuality: shape.threadQuality,
         threadHeadHeight: shape.threadHeadHeight,
         threadChamfer: shape.threadChamfer,
@@ -12508,10 +12551,11 @@ function createWedgeGeometry(width: number, height: number, depth: number) {
   return geometry.toNonIndexed();
 }
 
-function createTorusGeometry(width: number, height: number, depth: number) {
+function createTorusGeometry(width: number, height: number, depth: number, shape: Pick<WorkplaneShape, "sides" | "steps">) {
   const tubeRadius = Math.max(0.1, height / 2);
   const majorRadius = Math.max(0.2, Math.min(width, depth) / 2 - tubeRadius);
-  const geometry = new THREE.TorusGeometry(majorRadius, tubeRadius, 36, 144);
+  const { ringSides, tubeSteps } = torusTessellation(shape, width, depth, height);
+  const geometry = new THREE.TorusGeometry(majorRadius, tubeRadius, tubeSteps, ringSides);
   geometry.rotateX(Math.PI / 2);
   const outerDiameter = (majorRadius + tubeRadius) * 2;
   geometry.scale(width / outerDiameter, 1, depth / outerDiameter);

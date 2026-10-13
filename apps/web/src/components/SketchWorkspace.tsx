@@ -25,8 +25,8 @@ import { calibrateImage, centreImage, cropImage, imageAngleTo, imageCorners, ima
 import { DEFAULT_SKETCH_STROKE, SKETCH_STROKE_ALIGNS, SKETCH_STROKE_CAPS, SKETCH_STROKE_JOINS } from "@/lib/sketchStroke";
 import { selectWholeValue } from "@/lib/numberField";
 import { GuideHelpLink } from "@/components/GuideHelpLink";
-import { clampNudge, constrainToAxis, sketchSegmentDragPointIds, sketchSelectionMovePointIds, type SketchSelectableEntity, type SketchSelection } from "@/lib/sketchSelection";
-import { closedPathAt, cubicPoint, curveControls, isInsideEdges, orderedPaths, pathEdges, type DisplayPath, type PlaneEdge } from "@/lib/sketchPaths";
+import { clampNudge, constrainToAxis, sketchSegmentDragPointIds, sketchSelectedPointIds, sketchSelectedSegmentIds, sketchSelectionMovePointIds, type SketchSelectableEntity, type SketchSelection } from "@/lib/sketchSelection";
+import { closedPathAt, closedPathRegions, cubicPoint, curveControls, isInsideEdges, orderedPaths, pathEdges, type DisplayPath, type PlaneEdge } from "@/lib/sketchPaths";
 import { capturePointer } from "@/lib/pointerCapture";
 import { constrainToAngle, sketchLineAngle, sketchPolarPoint, splitTypedLine } from "@/lib/sketchPolar";
 
@@ -68,6 +68,9 @@ type SketchWorkspaceProps = {
   onSetPointMode: (id: string, mode: "corner" | "smooth" | "split") => void;
   /** Bends a straight side into a curve with handles, or makes a curved side straight again. */
   onCurveSegment?: (id: string) => void;
+  /** Curve or straighten all the selected lines at once (#283). */
+  onCurveSegments?: (ids: string[]) => void;
+  onStraightenSegments?: (ids: string[]) => void;
   onStraightenSegment?: (id: string) => void;
   /** Makes a line a construction line (#229), or a normal line again. */
   onSetSegmentConstruction?: (id: string, construction: boolean) => void;
@@ -514,7 +517,9 @@ export function SketchWorkspace({
   onInsertPoint,
   onSetPointMode,
   onCurveSegment,
+  onCurveSegments,
   onStraightenSegment,
+  onStraightenSegments,
   onSetSegmentConstruction,
   onApplyFillet,
   onApplyChamfer,
@@ -721,12 +726,15 @@ export function SketchWorkspace({
   }, [selectedPoint?.id, setCornerDialog]);
 
   // One corner, or several selected ones that get the same radius or distance at once (#269).
-  const selectedCornerIds = selected?.kind === "point"
-    ? [selected.id]
-    : selected?.kind === "multiple" && selected.segmentIds.length === 0 && !selected.imageIds?.length
-      ? selected.pointIds
-      : [];
-  const manyCorners = selectedCornerIds.length >= 2 && selectedCornerIds.some((id) => canApplySketchCornerTreatment(displayProfile, id));
+  const selectedCornerIds = sketchSelectedPointIds(selected);
+  // Points and lines selected together (a frame, a click inside a shape): one bar for both kinds of tool (#283).
+  const selectedLines = sketchSelectedSegmentIds(selected)
+    .map((id) => displayProfile.segments.find((segment) => segment.id === id))
+    .filter((segment): segment is SketchSegment => Boolean(segment));
+  const canCurveLines = selectedLines.some((segment) => !isSegmentCurved(displayProfile, segment));
+  const canStraightenLines = selectedLines.some((segment) => isSegmentCurved(displayProfile, segment) || (segment.kind ?? "line") !== "line");
+  const manyCorners = selected?.kind === "multiple" && selectedCornerIds.some((id) => canApplySketchCornerTreatment(displayProfile, id));
+  const manyLines = selected?.kind === "multiple" && selectedLines.length > 0 && Boolean(onCurveSegments && onStraightenSegments);
   const handleApplyCorner = () => {
     if (selectedCornerIds.length === 0 || !activeCornerDialog) return;
     const val = parseMeasurementInput(cornerValue);
@@ -1206,6 +1214,13 @@ export function SketchWorkspace({
       } else if (event.key.toLowerCase() === "f" || event.key === "Home") {
         event.preventDefault();
         resetView();
+      } else if (event.key === "+" || event.key === "=") {
+        // The 3D view's key steps; with Ctrl or Cmd (returned above) they stay the browser's page zoom.
+        event.preventDefault();
+        zoomByButton(0.72);
+      } else if (event.key === "-" || event.key === "_") {
+        event.preventDefault();
+        zoomByButton(1.28);
       } else if (tool === "select" && !pointerAction && ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) {
         // Fine moves, as on the workplane: one grid step, or a coarser one with
         // Shift. What moves is the selection - points, the ends of lines, an image.
@@ -1242,7 +1257,7 @@ export function SketchWorkspace({
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [activePoint, focusSelection, onTransformPoints, onUpdateImage, pendingMeasurementStart, pointerAction, profile, resetView, selected, snap, tool, workspace.depth, workspace.width]);
+  }, [activePoint, focusSelection, onTransformPoints, onUpdateImage, pendingMeasurementStart, pointerAction, profile, resetView, selected, snap, tool, workspace.depth, workspace.width, workspace.zoomSpeed]);
 
   const beginEntityDrag = (event: ReactPointerEvent<SVGElement>, action: PointerAction) => {
     if (event.button !== 0) return;
@@ -1502,8 +1517,8 @@ export function SketchWorkspace({
         >
           <Crosshair size={28} />
         </button>
-        <button aria-label={t("sketch.zoomIn")} onClick={() => zoomByButton(0.8)}><Plus size={33} /></button>
-        <button aria-label={t("sketch.zoomOut")} onClick={() => zoomByButton(1.25)}><Minus size={33} /></button>
+        <button aria-label={t("sketch.zoomIn")} aria-keyshortcuts="+" title={t("camera.shortcut", { label: t("sketch.zoomIn"), keys: "+" })} onClick={() => zoomByButton(0.8)}><Plus size={33} /></button>
+        <button aria-label={t("sketch.zoomOut")} aria-keyshortcuts="-" title={t("camera.shortcut", { label: t("sketch.zoomOut"), keys: "−" })} onClick={() => zoomByButton(1.25)}><Minus size={33} /></button>
         <button
           className={tool === "measure" ? "active" : ""}
           aria-label={t("camera.tapeTools")}
@@ -1672,7 +1687,10 @@ export function SketchWorkspace({
             />
           ) : null}
           <g className={`sketch-profile-fills ${profile.stroke ? "stroked" : ""}`} pointerEvents="none">
-            {paths.some((path) => path.closed) ? <path d={paths.filter((path) => path.closed).map(pathData).join(" ")} /> : null}
+            {/* One body at a time, with its holes: pushed over each other, two shapes show as one body, not as a hole (#239). */}
+            {closedPathRegions(paths).map((region) => (
+              <path key={region.outer.id} d={[region.outer, ...region.holes].map(pathData).join(" ")} />
+            ))}
           </g>
           {profile.stroke && strokePreview ? (
             // What the body will be: the drawn line with its width (#154).
@@ -2373,12 +2391,14 @@ export function SketchWorkspace({
           )}
         </div>
       ) : null}
-      {manyCorners && tool === "select" ? (
+      {(manyCorners || manyLines) && tool === "select" ? (
         <div className="sketch-point-actions" aria-label={t("sketch.pointActions")}>
-          {activeCornerDialog ? (
+          {activeCornerDialog && manyCorners ? (
             cornerDialogContent
           ) : (
             <>
+              {manyCorners ? (
+              <>
               <button
                 type="button"
                 title={t("sketch.filletCorners", { count: selectedCornerIds.length })}
@@ -2401,7 +2421,16 @@ export function SketchWorkspace({
                 <Slash />
                 <span>{t("sketch.chamfer")}</span>
               </button>
-              <GuideHelpLink section="sketchCorners" className="sketch-corner-help" iconSize={17} />
+              </>
+              ) : null}
+              {manyCorners && manyLines ? <span className="sketch-point-divider" /> : null}
+              {manyLines ? (
+                <>
+                  <button type="button" title={t("sketch.curveLineHint")} disabled={!canCurveLines} onClick={() => onCurveSegments?.(selectedLines.map((segment) => segment.id))}><Spline /><span>{t("sketch.curveLine")}</span></button>
+                  <button type="button" title={t("sketch.straightenLineHint")} disabled={!canStraightenLines} onClick={() => onStraightenSegments?.(selectedLines.map((segment) => segment.id))}><Minus /><span>{t("sketch.straightenLine")}</span></button>
+                </>
+              ) : null}
+              <GuideHelpLink section={manyCorners ? "sketchCorners" : "sketchCurve"} className="sketch-corner-help" iconSize={17} />
             </>
           )}
         </div>

@@ -3,18 +3,23 @@ import { isSketchPanGesture, SKETCH_MANUAL_MAX_ZOOM, SKETCH_MAX_ZOOM, sketchWhee
 
 describe("sketch pointer controls", () => {
   it("pans with the middle mouse button", () => {
-    expect(isSketchPanGesture({ button: 1, ctrlKey: false, metaKey: false })).toBe(true);
+    expect(isSketchPanGesture({ button: 1, ctrlKey: false, metaKey: false, shiftKey: false })).toBe(true);
   });
 
   it("pans with Ctrl or Cmd plus the right mouse button", () => {
-    expect(isSketchPanGesture({ button: 2, ctrlKey: true, metaKey: false })).toBe(true);
-    expect(isSketchPanGesture({ button: 2, ctrlKey: false, metaKey: true })).toBe(true);
+    expect(isSketchPanGesture({ button: 2, ctrlKey: true, metaKey: false, shiftKey: false })).toBe(true);
+    expect(isSketchPanGesture({ button: 2, ctrlKey: false, metaKey: true, shiftKey: false })).toBe(true);
+  });
+
+  it("pans with Shift plus the right mouse button, like the 3D editor", () => {
+    expect(isSketchPanGesture({ button: 2, ctrlKey: false, metaKey: false, shiftKey: true })).toBe(true);
   });
 
   it("does not repurpose unmodified or primary-button input", () => {
-    expect(isSketchPanGesture({ button: 2, ctrlKey: false, metaKey: false })).toBe(false);
-    expect(isSketchPanGesture({ button: 0, ctrlKey: true, metaKey: false })).toBe(false);
-    expect(isSketchPanGesture({ button: 0, ctrlKey: false, metaKey: true })).toBe(false);
+    expect(isSketchPanGesture({ button: 2, ctrlKey: false, metaKey: false, shiftKey: false })).toBe(false);
+    expect(isSketchPanGesture({ button: 0, ctrlKey: true, metaKey: false, shiftKey: false })).toBe(false);
+    expect(isSketchPanGesture({ button: 0, ctrlKey: false, metaKey: true, shiftKey: false })).toBe(false);
+    expect(isSketchPanGesture({ button: 0, ctrlKey: false, metaKey: false, shiftKey: true })).toBe(false);
   });
 
   it("zooms by the same wheel curve as the 3D editor", () => {

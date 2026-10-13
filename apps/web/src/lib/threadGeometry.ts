@@ -36,6 +36,17 @@ export const MAX_THREAD_CLEARANCE = 1.5;
 export const DEFAULT_THREAD_BOLT_CLEARANCE = 0;
 export const MIN_THREAD_BOLT_CLEARANCE = 0;
 export const MAX_THREAD_BOLT_CLEARANCE = 1;
+/**
+ * Spiel entlang der Achse fuer Innengewinde (Mutter, Gewindeloch), in mm (#256): so viel duenner
+ * wird jeder Zahn der Mutter, der Durchmesser bleibt. Das Spiel im Durchmesser (`threadClearance`)
+ * oeffnet die Flanken nur zu etwa 0,58 seines Betrags - wer eine senkrechte Luecke will, muesste
+ * den Durchmesser weit aufmachen und bekaeme seitliches Schlackern. 0 als Vorgabe, damit kein
+ * gespeichertes Gewinde anders herauskommt. Hoechstens ein Fuenftel der Steigung: darueber
+ * bleibt vom Zahn der Mutter nichts mehr.
+ */
+export const DEFAULT_THREAD_AXIAL_CLEARANCE = 0;
+export const MAX_THREAD_AXIAL_CLEARANCE = 1;
+const MAX_AXIAL_CLEARANCE_PER_PITCH = 0.2;
 export const MIN_THREAD_QUALITY = 12;
 export const MAX_THREAD_QUALITY = 96;
 
@@ -376,6 +387,14 @@ export function normalizeThreadClearance(value?: number) {
   return clamp(finite(value, LEGACY_THREAD_CLEARANCE), MIN_THREAD_CLEARANCE, MAX_THREAD_CLEARANCE);
 }
 
+export function threadAxialClearanceLimit(pitch: number) {
+  return Math.min(MAX_THREAD_AXIAL_CLEARANCE, Math.max(0, pitch) * MAX_AXIAL_CLEARANCE_PER_PITCH);
+}
+
+export function normalizeThreadAxialClearance(value: number | undefined, pitch: number) {
+  return clamp(finite(value, DEFAULT_THREAD_AXIAL_CLEARANCE), 0, threadAxialClearanceLimit(pitch));
+}
+
 export function normalizeThreadBoltClearance(value?: number) {
   return clamp(finite(value, DEFAULT_THREAD_BOLT_CLEARANCE), MIN_THREAD_BOLT_CLEARANCE, MAX_THREAD_BOLT_CLEARANCE);
 }
@@ -429,6 +448,7 @@ export type ThreadShapeFields = {
   threadPitch?: number;
   threadClearance?: number;
   threadBoltClearance?: number;
+  threadAxialClearance?: number;
   threadQuality?: number;
   threadHeadHeight?: number;
   threadChamfer?: number;
@@ -445,6 +465,8 @@ export type ThreadSettings = {
   pitch: number;
   clearance: number;
   boltClearance: number;
+  /** Play along the axis for a nut or tapped hole, in mm (#256). */
+  axialClearance: number;
   quality: number;
   headHeight: number;
   chamfer: number;
@@ -473,6 +495,7 @@ export function threadSettings(shape: ThreadShapeFields): ThreadSettings {
     profile,
     clearance: normalizeThreadClearance(shape.threadClearance),
     boltClearance: normalizeThreadBoltClearance(shape.threadBoltClearance),
+    axialClearance: normalizeThreadAxialClearance(shape.threadAxialClearance, head.pitch),
     quality: normalizeThreadQuality(shape.threadQuality),
     headHeight,
     chamfer,
@@ -733,6 +756,76 @@ function threadProfileSpec(profile: ThreadProfile): ThreadProfileSpecification {
   return V_PROFILE;
 }
 
+function profileLevelAt(points: readonly ThreadProfilePoint[], u: number) {
+  const phase = wrapUnit(u);
+  for (let index = 0; index < points.length; index += 1) {
+    const start = points[index];
+    const end = index + 1 < points.length ? points[index + 1] : { u: 1, level: points[0].level };
+    if (phase <= end.u) {
+      const span = end.u - start.u;
+      return span > 0 ? start.level + (end.level - start.level) * ((phase - start.u) / span) : end.level;
+    }
+  }
+  return points[0].level;
+}
+
+/**
+ * The profile with every tooth of the solid `widthUnits` wider along the axis (#256): at each
+ * place the level of the highest point within half that width to either side. Crests grow into
+ * flat tops, flanks move out, and a root narrower than the width fills up. Used for the body a
+ * nut or tapped hole is cut with: a wider cutter leaves a thinner tooth in the part.
+ *
+ * The result is exact at its corners (where a flank or crest of the old profile begins or
+ * ends, moved by half the width either way) and refined where two moved flanks meet.
+ */
+export function widenThreadProfile(points: readonly ThreadProfilePoint[], widthUnits: number): ThreadProfilePoint[] {
+  const half = widthUnits / 2;
+  if (!(half > 0)) return points.map((point) => ({ ...point }));
+  const level = (u: number) => {
+    let best = Math.max(profileLevelAt(points, u - half), profileLevelAt(points, u + half));
+    for (const point of points) {
+      for (const turn of [-1, 0, 1]) {
+        if (Math.abs(point.u + turn - u) <= half) best = Math.max(best, point.level);
+      }
+    }
+    return best;
+  };
+  const known: number[] = [0];
+  for (const point of points) {
+    for (const shift of [0, -half, half]) known.push(wrapUnit(point.u + shift));
+  }
+  const breaks = known.sort((a, b) => a - b).filter((u, index, all) => index === 0 || u - all[index - 1] > 1e-9);
+  const result: ThreadProfilePoint[] = [];
+  const refine = (from: ThreadProfilePoint, toU: number, toLevel: number, depth: number) => {
+    const middle = (from.u + toU) / 2;
+    const expected = (from.level + toLevel) / 2;
+    const actual = level(middle);
+    if (depth < 8 && Math.abs(actual - expected) > 1e-4 && toU - from.u > 1e-6) {
+      const point = { u: middle, level: actual };
+      refine(from, middle, actual, depth + 1);
+      result.push(point);
+      refine(point, toU, toLevel, depth + 1);
+    }
+  };
+  breaks.forEach((u, index) => {
+    const point = { u, level: level(u) };
+    result.push(point);
+    const next = index + 1 < breaks.length ? { u: breaks[index + 1], level: level(breaks[index + 1]) } : { u: 1, level: level(0) };
+    refine(point, next.u, next.level, 0);
+  });
+  // Drop corners that lie on the line between their neighbours; the first point stays, a profile starts at u = 0.
+  return result.filter((point, index, all) => {
+    if (index === 0) return true;
+    const before = all[(index + all.length - 1) % all.length];
+    const after = all[(index + 1) % all.length];
+    const beforeU = index === 0 ? before.u - 1 : before.u;
+    const afterU = index === all.length - 1 ? after.u + 1 : after.u;
+    if (afterU - beforeU <= 0) return true;
+    const along = before.level + (after.level - before.level) * ((point.u - beforeU) / (afterU - beforeU));
+    return Math.abs(along - point.level) > 1e-6;
+  });
+}
+
 /** Tiefe und Punktfolge eines Profils, fuer Tests und Auskunft. */
 export function threadProfileShape(profile: ThreadProfile): Readonly<ThreadProfileSpecification> {
   return threadProfileSpec(profile);
@@ -954,6 +1047,7 @@ export function threadFootprintPatch(shape: ThreadShapeFields & { width?: number
       ...settings,
       diameter,
       pitch,
+      axialClearance: normalizeThreadAxialClearance(settings.axialClearance, pitch),
       headHeight,
       chamfer,
       chamferLow,
@@ -972,6 +1066,7 @@ export function threadFootprintPatch(shape: ThreadShapeFields & { width?: number
     threadPitch: scaled.pitch,
     threadClearance: scaled.clearance,
     threadBoltClearance: scaled.boltClearance,
+    threadAxialClearance: scaled.axialClearance,
     threadQuality: scaled.quality,
     threadHeadHeight: scaled.headHeight,
     threadChamfer: scaled.chamfer,
@@ -997,7 +1092,12 @@ export function threadBuildPlan(options: ThreadGeometryOptions) {
   const height = Math.max(0.05, options.height);
   const spec = threadSizeSpec(settings.diameter, settings.pitch);
   const allowance = radialAllowance(settings);
-  const profile = threadProfileSpec(settings.profile);
+  const baseProfile = threadProfileSpec(settings.profile);
+  // A nut or tapped hole is cut with a body whose teeth are wider along the axis by the play (#256).
+  const axialPlay = (settings.role === "bore" || settings.role === "nut") && settings.axialClearance > 1e-6;
+  const profile = axialPlay
+    ? { depthPerPitch: baseProfile.depthPerPitch, points: widenThreadProfile(baseProfile.points, settings.axialClearance / settings.pitch) }
+    : baseProfile;
   const major = settings.diameter / 2 + allowance;
   const minor = Math.max(0.02, major - settings.pitch * profile.depthPerPitch);
   // Mit +1 steigt die Wendel, wenn der Winkel von +x nach +z waechst - um die
@@ -1037,6 +1137,7 @@ export function threadBuildPlan(options: ThreadGeometryOptions) {
     height,
     spec,
     profile,
+    axialPlay,
     major,
     minor,
     handSign,

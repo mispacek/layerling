@@ -32,7 +32,7 @@ function knownSchema(schema: unknown) {
 export const LYL_FORMAT_VERSION = 2;
 export const LYL_MINIMUM_READER_VERSION = 2;
 export const LYL_OLDEST_READABLE_FORMAT_VERSION = 1;
-export const LYL_CREATED_WITH_VERSION = "1.66.7";
+export const LYL_CREATED_WITH_VERSION = "1.67.5";
 export const LYL_MEDIA_TYPE = "application/vnd.layerling.project+zip";
 
 export const LYL_LIMITS = {
@@ -1328,6 +1328,10 @@ function validateShapeDefinition(definition: Record<string, unknown>, label: str
       const threadBoltClearance = finiteNumber(definition.threadBoltClearance, `${label}.threadBoltClearance`);
       if (threadBoltClearance < 0 || threadBoltClearance > 1) throw new Error(`${label}.threadBoltClearance is outside the supported range`);
     }
+    if (definition.threadAxialClearance !== undefined) {
+      const threadAxialClearance = finiteNumber(definition.threadAxialClearance, `${label}.threadAxialClearance`);
+      if (threadAxialClearance < 0 || threadAxialClearance > 1) throw new Error(`${label}.threadAxialClearance is outside the supported range`);
+    }
     if (definition.threadQuality !== undefined) {
       const threadQuality = finiteNumber(definition.threadQuality, `${label}.threadQuality`);
       if (!Number.isInteger(threadQuality) || threadQuality < 12 || threadQuality > 96) {
@@ -1394,7 +1398,7 @@ function validateShapeDefinition(definition: Record<string, unknown>, label: str
       const centerHoleSize = finiteNumber(definition.centerHoleSize, `${label}.centerHoleSize`);
       if (centerHoleSize < 0) throw new Error(`${label}.centerHoleSize cannot be negative`);
     }
-    if (!["spur", "helical", "bevel", "internal", "rack"].includes(definition.gearType as string)) throw new Error(`${label}.gearType is invalid`);
+    if (!["spur", "helical", "herringbone", "bevel", "internal", "rack"].includes(definition.gearType as string)) throw new Error(`${label}.gearType is invalid`);
     if (definition.gearRim !== undefined) {
       const rim = finiteNumber(definition.gearRim, `${label}.gearRim`);
       if (rim <= 0) throw new Error(`${label}.gearRim must be positive`);
@@ -1506,7 +1510,7 @@ function validateShapeDefinition(definition: Record<string, unknown>, label: str
   }
   if (kind === "loft") {
     // Lenient on purpose: the geometry clamps the values itself; only nonsense is refused.
-    for (const key of ["loftBottomWidth", "loftBottomDepth", "loftTopWidth", "loftTopDepth", "loftBottomCorner", "loftTopCorner", "loftBottomSides", "loftTopSides", "loftOffsetX", "loftOffsetZ", "loftWall", "loftTwist", "loftTiltX", "loftTiltZ"] as const) {
+    for (const key of ["loftBottomWidth", "loftBottomDepth", "loftTopWidth", "loftTopDepth", "loftBottomCorner", "loftTopCorner", "loftBottomSides", "loftTopSides", "loftOffsetX", "loftOffsetZ", "loftWall", "loftTwist", "loftTiltX", "loftTiltZ", "loftSmooth"] as const) {
       if (definition[key] === undefined) continue;
       const value = finiteNumber(definition[key], `${label}.${key}`);
       if (Math.abs(value) > 1e6) throw new Error(`${label}.${key} is outside the supported range`);

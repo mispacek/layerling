@@ -2,9 +2,11 @@ import { describe, expect, it } from "vitest";
 import {
   DEFAULT_HOLE_PATTERN,
   faceOutlineFromTriangles,
+  HEXAGON_FLAT_RATIO,
   holeFootprintPolygon,
   holePatternCenters,
   holePatternMinSpacing,
+  holePatternWall,
   normalizeHolePattern,
   rectangleOutline,
   type FaceOutline,
@@ -149,5 +151,37 @@ describe("hole pattern", () => {
     expect(settings.margin).toBe(0);
     expect(settings.depth).toBeNull();
     expect(normalizeHolePattern({ form: "nonsense" as never }).form).toBe(DEFAULT_HOLE_PATTERN.form);
+  });
+});
+
+describe("wall between the holes (#239)", () => {
+  const round = { form: "round" as const, size: 6, height: 6, arrangement: "grid" as const };
+
+  it("is the spacing minus the hole size for round holes in a grid", () => {
+    expect(holePatternWall({ ...round, spacing: 9 })).toBeCloseTo(3, 4);
+    expect(holePatternWall({ ...round, spacing: 12 })).toBeCloseTo(6, 4);
+  });
+
+  it("is zero for holes that overlap", () => {
+    expect(holePatternWall({ ...round, spacing: 5 })).toBe(0);
+  });
+
+  it("gives the spacing for a wanted wall, and back", () => {
+    for (const settings of [
+      round,
+      { ...round, arrangement: "staggered" as const },
+      { form: "hexagon" as const, size: 6, height: 6, arrangement: "staggered" as const },
+      { form: "rectangle" as const, size: 8, height: 4, arrangement: "grid" as const },
+      { form: "slot" as const, size: 10, height: 4, arrangement: "staggered" as const },
+    ]) {
+      const spacing = holePatternMinSpacing(settings, 1.6);
+      expect(holePatternWall({ ...settings, spacing })).toBeCloseTo(1.6, 2);
+    }
+  });
+
+  it("is the same wall in every direction for hexagons that interlock", () => {
+    const hexagon = { form: "hexagon" as const, size: 6, height: 6, arrangement: "staggered" as const };
+    // flats face each other along the row and along the diagonal, so the wall is the spacing less the flat-to-flat width
+    expect(holePatternWall({ ...hexagon, spacing: 9 })).toBeCloseTo(9 - 6 * HEXAGON_FLAT_RATIO, 3);
   });
 });

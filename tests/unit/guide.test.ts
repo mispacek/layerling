@@ -229,9 +229,10 @@ describe("guide content", () => {
   it("opens the chapter that fits a shape", () => {
     expect(guideHref("de", "solids")).toBe("/anleitung/koerper-und-aussparungen.html");
     expect(guideHref("en")).toBe("/guide/index.html");
-    expect(guideHref("cs")).toBe("/guide/index.html");
-    expect(guideHref("cs", "solids")).toBe(guideHref("en", "solids"));
-    expect(guideHref("cs", undefined, "hollowing")).toBe(guideHref("en", undefined, "hollowing"));
+    // The new registry gives Czech its own guide shell; untranslated chapters keep English slugs.
+    expect(guideHref("cs")).toBe("/prirucka/index.html");
+    expect(guideHref("cs", "solids")).toBe("/prirucka/solids-and-holes.html");
+    expect(guideHref("cs", undefined, "hollowing")).toBe(guideHref("en", undefined, "hollowing").replace("/guide/", "/prirucka/"));
     expect(guideChapterForShape({ kind: "text" })).toBe("text");
     expect(guideChapterForShape({ kind: "thread" })).toBe("threads");
     expect(guideChapterForShape({ kind: "box", groupedShapes: [{}] })).toBe("solids");

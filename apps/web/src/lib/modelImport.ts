@@ -4,7 +4,8 @@ import { importExtensionSupported } from "@/lib/importExtensions";
 import { importedShapesFromObj } from "@/lib/objImport";
 import { attachProjectAsset, projectAssetFromBytes, sourceFormatForFileName } from "@/lib/projectAssets";
 import { importedShapeFromStl } from "@/lib/stlImport";
-import { importedShapeFromSvg } from "@/lib/svgImport";
+import { readKeepSvgPage } from "@/lib/importPreferences";
+import { importedShapeFromSvgWithReport } from "@/lib/svgImport";
 import { importedShapesFrom3mf } from "@/lib/threemfImport";
 import { sketchProfileFromSvg } from "@/lib/svgSketch";
 import type { ProjectAsset, SketchProfile, WorkplaneShape } from "@/types/layerling";
@@ -19,7 +20,7 @@ export type ImportFailure = { fileName: string; reason: string };
 
 /**
  * Was zum Import ausgewaehlt wurde, zurechtgelegt: ein ZIP (so liefert
- * Tinkercad seine OBJ, mit der .mtl daneben) wird ausgepackt, und .mtl-Dateien
+ * andere Programme ihre OBJ, mit der .mtl daneben) wird ausgepackt, und .mtl-Dateien
  * sind keine eigenen Teile, sondern die Farben fuer die OBJ daneben.
  */
 async function prepareImportFiles(files: readonly File[]) {
@@ -73,6 +74,8 @@ export async function importModelFiles(
      * the sketch of its outlines. Null keeps the mesh - so does an import without it.
      */
     svgAsSketch?: (mesh: WorkplaneShape, profile: SketchProfile) => Promise<WorkplaneShape | null>;
+    /** An SVG keeps its place on its drawing page, so files of one page line up (#258). Left out: the setting in the import window. */
+    svgKeepPagePosition?: boolean;
   } = {},
 ): Promise<ModelImportResult | null> {
   const prepared = await prepareImportFiles(selected);
@@ -134,7 +137,11 @@ export async function importModelFiles(
         const text = new TextDecoder().decode(bytes);
         // The mesh lies mirrored top to bottom - turned up out of the drawing - and older designs
         // rebuild it so from their file. A new import mirrors it back to read right from above (#197).
-        shape = { ...importedShapeFromSvg(file.name, text), mirrorZ: true };
+        const svg = importedShapeFromSvgWithReport(file.name, text, { keepPagePosition: options.svgKeepPagePosition ?? readKeepSvgPage() });
+        shape = { ...svg.shape, mirrorZ: true };
+        if (svg.pageKept === false) result.notes.push(t("status.importSvgNoPage", { name: file.name }));
+        // A shape that does not build into a solid is left out; say so instead of leaving a gap unexplained (#258).
+        if (svg.skippedShapes > 0) result.notes.push(t("status.importSvgSkipped", { name: file.name, count: svg.skippedShapes }));
         // A sketch body carries its outline itself and needs neither the file nor its mesh.
         const profile = options.svgAsSketch ? sketchProfileFromSvg(text) : null;
         const sketched = profile ? await options.svgAsSketch!(shape, profile).catch(() => null) : null;

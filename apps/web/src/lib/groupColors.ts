@@ -2,7 +2,7 @@ import type { WorkplaneShape } from "@/types/layerling";
 
 /**
  * Whether a group shows each part in its own colour ("Multicolor" in
- * Tinkercad) instead of one colour for the whole group.
+ * similar tools) instead of one colour for the whole group.
  *
  * A bundle always keeps its parts' colours. Without an explicit choice a
  * group keeps what it always did: parts that stay separate bodies show their

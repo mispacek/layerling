@@ -77,7 +77,7 @@ export function isBackupFileName(fileName: string) {
 }
 
 /**
- * Ein ZIP ist nur dann eine Sicherung, wenn Entwuerfe darin liegen. Tinkercad
+ * Ein ZIP ist nur dann eine Sicherung, wenn Entwuerfe darin liegen. similar tools
  * gibt seine OBJ ebenfalls als ZIP heraus (mit der .mtl), und die ist ein
  * Import. Gelesen werden dafuer nur die Namen, nichts wird entpackt.
  */

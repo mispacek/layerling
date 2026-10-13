@@ -127,6 +127,8 @@ export type CadModifierProfilePart = {
    */
   twist?: number;
   twistCenter?: { x: number; z: number };
+  /** Loft only: 0 to 1, how much of an S-curve the sides take between the ends instead of a straight line (#271); built like a turned loft, through sections. */
+  smooth?: number;
   /** Loft only, with a twist: how far the lean moves the top; the turning centre moves along with it. */
   twistLean?: { x: number; z: number };
   /**

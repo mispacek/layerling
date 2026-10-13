@@ -226,6 +226,16 @@ describe("cadModifierUserErrorMessage", () => {
     expect(cadModifierUserErrorMessage("The CAD worker could not start. Update to Firefox 121+, Chrome/Brave 114+, or Safari 17.2+, then try again.")).toContain("CAD-Rechenkern");
   });
 
+  it("tells a body that cannot be hollowed from a wall that is too thick (forum 618422)", () => {
+    setLanguage("de", false);
+    const raw = "This body cannot be hollowed with any wall thickness.";
+    expect(cadModifierUserErrorMessage(raw)).toContain("lässt sich nicht aushöhlen");
+    expect(cadModifierUserErrorMessage(raw)).not.toContain("so dick");
+    setLanguage("en", false);
+    expect(cadModifierUserErrorMessage(raw)).toContain("cannot be hollowed, not even with a very thin wall");
+    expect(cadModifierUserErrorMessage(raw)).not.toContain("thinner wall");
+  });
+
   it("translates hollowing (shell) error messages into German and English", () => {
     setLanguage("de", false);
     expect(cadModifierUserErrorMessage("The walls cannot be this thick for this body. Choose a thinner wall.")).toBe(

@@ -1,6 +1,7 @@
 import type { WorkplaneShape } from "@/types/layerling";
 import * as THREE from "three";
 import { quaternionForShape } from "@/lib/geometryRotation";
+import { placementWorkplaneFromSurface, type PlacementWorkplane } from "@/lib/placementWorkplane";
 import { shapeDepth, shapeWidth } from "@/lib/workplaneShapes";
 
 export type SectionPlaneAxis = "x" | "y" | "z";
@@ -102,6 +103,22 @@ export function getSectionBounds(
 export function sectionFineWindow(bounds: Pick<SectionBounds, "min" | "max">) {
   const span = Math.min(10, Math.max(0.5, (bounds.max - bounds.min) / 20));
   return { span, step: span / 200 };
+}
+
+/**
+ * The workplane on the cut (#154): on the plane of the section view, facing out of the body that
+ * stays - towards the side that was cut away, as the face a cut leaves does. A sketch started there
+ * draws the way one looks at that cut, so its outline in the sketch view is the cut's own. The
+ * origin is where the plane crosses its axis.
+ */
+export function sectionPlacementWorkplane(settings: Pick<SectionPlaneSettings, "axis" | "offset" | "flipped">): PlacementWorkplane {
+  const { normal } = computeSectionPlaneVector({ ...settings, enabled: true, showPlane: true });
+  const origin = {
+    x: settings.axis === "x" ? settings.offset : 0,
+    y: settings.axis === "y" ? settings.offset : 0,
+    z: settings.axis === "z" ? settings.offset : 0,
+  };
+  return placementWorkplaneFromSurface(origin, { x: -normal.x || 0, y: -normal.y || 0, z: -normal.z || 0 }, { x: 1, y: 0, z: 0 }, false, true);
 }
 
 /**

@@ -76,9 +76,9 @@ It is not a full CAD package: there is no parametric timeline and no assemblies.
 - **Millimetres or inches** – with Imperial units every measure is shown in inches, as fractions like Tinkercad (1 5/8) or as decimals, the snap grid steps from 1/64 to 1 inch, and the plate's grid is drawn in inches.
 - **Your printer's plate** – pick one of 190 common printers and the plate takes its size. Its name and build volume show in the corner of the workplane (a switch in the settings hides this and the design's name), and a warning appears when a body reaches past the edge.
 - **Overhangs and filament** – "Show overhangs" hatches every face steeper than 45° (or your printer's own angle) that would need supports, and the export window shows volume, weight and metres of filament before you slice.
-- **Shape library** – boxes, cylinders, capsules (one end smaller if needed, say for a belt guard), spheres, cones, pyramids, wedges, text, roofs, half spheres, torus shapes, tubes, lofts from one outline to another (say square to round, solid or with a wall, twisted or with a tilted top), polygon prisms from three to twenty-four sides, coil springs, a print-in-place hinge, knurled grips (straight, crossed or round) and more.
+- **Shape library** – boxes, cylinders, capsules (one end smaller if needed, say for a belt guard), spheres, cones, pyramids, wedges, text, roofs, half spheres, torus shapes, tubes, lofts from one outline to another (say square to round, solid or with a wall, straight or flaring smoothly, twisted or with a tilted top), polygon prisms from three to twenty-four sides, coil springs, a print-in-place hinge, knurled grips (straight, crossed or round) and more.
 - **Threads that fit** – threaded rods, screws with a socket, countersunk or hex head, hex nuts and tapped holes. M2 to M12, UNC/UNF from #4 to one inch and the Whitworth pipe threads G1/16 to G4 (ISO 228-1) are one pick away, or set your own diameter and pitch, left-hand as well; an inch or G size asks for threads per inch instead of millimetres. The ends take a chamfer, and a tapped hole is a cutter: drop it into a part, group, and the hole comes out threaded.
-- **Gears that mesh** – spur, helical and bevel gears, ring gears and racks with involute teeth, set by module and number of teeth like a gear generator, with pressure angle and backlash for printing - or with round teeth, forgiving on small printed gears and a smooth grip on knobs. Select two gears and the panel gives the centre distance they mesh at.
+- **Gears that mesh** – spur, helical, herringbone and bevel gears, ring gears and racks with involute teeth, set by module and number of teeth like a gear generator, with pressure angle and backlash for printing - or with round teeth, forgiving on small printed gears and a smooth grip on knobs. Select two gears and the panel gives the centre distance they mesh at.
 - **Solids and holes** – turn shapes into cutters and group them into the final geometry. Edit group (**E**) lays a group's parts loose to change them and rebuilds it with Done – also a group inside a group, as deep as the design goes.
 - **Multicolor groups** – a group can show every part in its own colour, also after holes were cut into it, and a 3MF or OBJ export keeps those colours, so the slicer can map the parts onto filaments.
 - **Bundle** – Ctrl+B holds parts together like Tinkercad's bundle: they move, turn and scale as one, but keep their colours and stay separate bodies in the export – handy for multicolour prints.
@@ -218,6 +218,8 @@ Everyday commands:
 - **Update** (after pulling new code or extracting a new ZIP): `docker compose -f docker/compose.yml up -d --build`; with the ready-made image `docker compose -f docker/compose.yml pull` and then `up -d`
 
 The image runs `next start` in production mode, so the MCP bridge is off there unless you switch it on (see [Letting an AI client reach a copy on a NAS or server](#letting-an-ai-client-reach-a-copy-on-a-nas-or-server)). To offer a shared project folder, bind a writable directory and set `LAYERLING_SHARED_PROJECTS_DIR` in `compose.yml` to the path inside the container where it is mounted, for example `./shared-projects:/shared-projects` with `LAYERLING_SHARED_PROJECTS_DIR: "/shared-projects"` (see [Shared Designs on a Network](#shared-designs-on-a-network)). After changing it, run `docker compose up -d`: `docker compose restart` keeps the old setting. `docker exec <container> printenv LAYERLING_SHARED_PROJECTS_DIR` shows the one in use.
+
+To choose the colour theme people get on their first visit, set `LAYERLING_DEFAULT_THEME` to `system`, `light`, `dark` or `graphite` (the same way, in `compose.yml` or in the environment of `npm run start`). Anyone who has opened layerling before keeps the theme their browser already has, and anyone can still change it with the theme switch. Without the setting the theme follows the system. A copy served as plain files has no server to read it, so it does not apply there.
 
 ### Static Hosting: Plain Files on a Web Server
 
@@ -457,6 +459,10 @@ reporting process.
 layerling is a fork of [SketchForge-3D](https://github.com/Formsmith746/SketchForge-3D) by Formsmith746 and the SketchForge
 contributors. The fork started on 16 September 2026 from SketchForge 1.0.9. SketchForge remains an excellent project and
 the reason this one exists.
+
+## Trademarks
+
+Tinkercad is a trademark of Autodesk, Inc. layerling is an independent project and is not affiliated with, endorsed or sponsored by Autodesk.
 
 ## License
 

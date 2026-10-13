@@ -90,7 +90,7 @@ export function validateSvgSourcePreflight(source: string) {
   }
 
   if (/\b(?:width|height|viewBox|d)\s*=\s*(["'])[^"']*\bNaN\b[^"']*\1/i.test(source)) {
-    throw new Error("SVG contains invalid NaN geometry. In Tinkercad, make sure the workplane intersects the model before exporting the cross-section");
+    throw new Error("SVG contains invalid NaN geometry. In the program that made it, make sure the cross-section really cuts the model before exporting it");
   }
 
   const xmlElementCount = source.match(/<[a-z][^!?/\s>]*/gi)?.length ?? 0;
@@ -240,6 +240,13 @@ function cleanRingPoints(points: THREE.Vector2[]) {
     if (!cleaned.length || cleaned[cleaned.length - 1].distanceToSquared(point) > same) cleaned.push(point.clone());
   }
   if (cleaned.length > 1 && cleaned[0].distanceToSquared(cleaned[cleaned.length - 1]) <= same) cleaned.pop();
+  // An outline written with rounded numbers rarely ends exactly where it began: Affinity's relative
+  // steps leave the last point 0.001 beside the first. The closing edge between them is a sliver the
+  // extrusion cannot triangulate, which dropped the whole letter without a word (#258, the T of a
+  // traced logo). A last point within a hundred-thousandth of the drawing's size of the first is the
+  // first.
+  const closeEnough = (extent * 1e-5) ** 2;
+  if (cleaned.length > 3 && cleaned[0].distanceToSquared(cleaned[cleaned.length - 1]) <= closeEnough) cleaned.pop();
   return cleaned;
 }
 
@@ -532,6 +539,8 @@ export function buildSvgExtrusionFromPaths(paths: readonly THREE.ShapePath[]) {
   const shapes = composeNestedRings(sourceShapes);
   const rawPositions: number[] = [];
   const acceptedAnalyses: TriangleSoupAnalysis[] = [];
+  // Shapes that do not build into a solid are left out; the import says how many (#258).
+  let skippedShapes = 0;
 
   for (const shape of shapes) {
     const rawGeometry = new THREE.ExtrudeGeometry(shape, {
@@ -561,6 +570,8 @@ export function buildSvgExtrusionFromPaths(paths: readonly THREE.ShapePath[]) {
     if (candidateAnalysis) {
       rawPositions.push(...candidatePositions);
       acceptedAnalyses.push(candidateAnalysis);
+    } else {
+      skippedShapes += 1;
     }
     if (geometry !== rawGeometry) geometry.dispose();
     rawGeometry.dispose();
@@ -583,12 +594,51 @@ export function buildSvgExtrusionFromPaths(paths: readonly THREE.ShapePath[]) {
   const rawNormals: number[] = [];
   for (let index = 0; index < normal.count; index += 1) rawNormals.push(normal.getX(index), normal.getY(index), normal.getZ(index));
   geometry.dispose();
-  return { rawPositions, rawNormals, analysis };
+  return { rawPositions, rawNormals, analysis, skippedShapes };
 }
 
 export function importedShapeFromSvg(fileName: string, source: string): WorkplaneShape {
+  return importedShapeFromSvgWithReport(fileName, source).shape;
+}
+
+/** The page a drawing is made on, in its own units: its viewBox, or a width and a height in pixels. */
+export type SvgPage = { x: number; y: number; width: number; height: number };
+
+/**
+ * The page of a drawing, or null when it states none (a width of 100 % says nothing). Drawings that
+ * belong together, like the layers of one Affinity document exported as separate files, share a
+ * page, and their place on it is what keeps them lined up (#258).
+ */
+export function svgPageOfDrawing(source: string): SvgPage | null {
+  const tag = /<svg\b[^>]*>/i.exec(source)?.[0];
+  if (!tag) return null;
+  const attribute = (name: string) => new RegExp(`\\b${name}\\s*=\\s*["']([^"']*)["']`, "i").exec(tag)?.[1];
+  const viewBox = attribute("viewBox");
+  if (viewBox) {
+    const [x, y, width, height] = viewBox.trim().split(/[\s,]+/).map(Number);
+    if ([x, y, width, height].every(Number.isFinite) && width > 0 && height > 0) return { x, y, width, height };
+  }
+  const pixels = (value: string | undefined) => {
+    const match = value === undefined ? null : /^\s*(\d+(?:\.\d+)?)\s*(?:px)?\s*$/i.exec(value);
+    return match ? Number(match[1]) : null;
+  };
+  const width = pixels(attribute("width"));
+  const height = pixels(attribute("height"));
+  return width && height ? { x: 0, y: 0, width, height } : null;
+}
+
+/**
+ * The imported shape, how many of the drawing's shapes could not be built and were left out, and
+ * what became of a wish to keep the drawing's place on its page: true when it was kept, false when
+ * the drawing states no page and was centred as usual, null when it was not asked for.
+ */
+export function importedShapeFromSvgWithReport(
+  fileName: string,
+  source: string,
+  options: { keepPagePosition?: boolean } = {},
+): { shape: WorkplaneShape; skippedShapes: number; pageKept: boolean | null } {
   const parsed = parseSvgForImport(source);
-  const { rawPositions, rawNormals, analysis } = buildSvgExtrusionFromPaths(parsed.paths);
+  const { rawPositions, rawNormals, analysis, skippedShapes } = buildSvgExtrusionFromPaths(parsed.paths);
   const centerX = analysis.width / 2;
   const centerZ = analysis.depth / 2;
   let minX = Number.POSITIVE_INFINITY;
@@ -605,7 +655,7 @@ export function importedShapeFromSvg(fileName: string, source: string): Workplan
     positions.push(rawPositions[index] - minX - centerX, rawPositions[index + 1] - minY, rawPositions[index + 2] - minZ - centerZ);
   }
 
-  return {
+  const shape: WorkplaneShape = {
     id: createLocalId("uploaded-svg"),
     name: fileName.replace(/\.[^.]+$/, "") || "Imported SVG",
     kind: "mesh",
@@ -631,6 +681,22 @@ export function importedShapeFromSvg(fileName: string, source: string): Workplan
     locked: false,
     hidden: false,
   };
+  let pageKept: boolean | null = null;
+  if (options.keepPagePosition) {
+    const page = svgPageOfDrawing(source);
+    pageKept = page !== null;
+    if (page) {
+      // The drawing's middle, and the middle of its page, in the drawing's own units with y running
+      // down; the page's middle goes where a centred drawing's middle goes, so every file of a page
+      // meets there and the drawing sits where it was drawn. The mesh lies mirrored (z = -y) until
+      // the import turns it back, so a drawing's y is the shape's z.
+      const middleX = minX + analysis.width / 2;
+      const middleY = -(minZ + analysis.depth / 2);
+      shape.x += middleX - (page.x + page.width / 2);
+      shape.z += middleY - (page.y + page.height / 2);
+    }
+  }
+  return { shape, skippedShapes, pageKept };
 }
 
 export function invalidSvgMeshReason(shape: WorkplaneShape) {

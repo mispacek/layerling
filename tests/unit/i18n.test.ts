@@ -8,6 +8,7 @@ import {
   isLanguage,
   languageFromTag,
   LANGUAGES,
+  LANGUAGE_INFO,
   setLanguage,
   translate,
 } from "@/lib/i18n";
@@ -16,6 +17,8 @@ import { MESSAGES_CS } from "@/lib/messages.cs";
 import { MESSAGES_EN } from "@/lib/messages.en";
 
 const CATALOGUES = { en: MESSAGES_EN, de: MESSAGES_DE, cs: MESSAGES_CS } as const;
+/** Czech has every interface sentence even while its guide chapters use English fallback. */
+const COMPLETE_LANGUAGES = LANGUAGES.filter((language) => LANGUAGE_INFO[language].complete || language === "cs");
 
 function placeholders(value: string) {
   return [...value.matchAll(/\{(\w+)\}/g)].map((match) => match[1]).sort();
@@ -31,13 +34,13 @@ function alleBauteile(wurzel: string) {
 describe("message catalogues", () => {
   it("covers every key in every language", () => {
     const keys = Object.keys(MESSAGES_EN).sort();
-    for (const language of LANGUAGES) {
+    for (const language of COMPLETE_LANGUAGES) {
       expect(Object.keys(CATALOGUES[language]).sort()).toEqual(keys);
     }
   });
 
   it("leaves no message empty", () => {
-    for (const language of LANGUAGES) {
+    for (const language of COMPLETE_LANGUAGES) {
       for (const [key, value] of Object.entries(CATALOGUES[language])) {
         expect(value.trim(), `${language}:${key}`).not.toBe("");
       }
@@ -46,7 +49,7 @@ describe("message catalogues", () => {
 
   it("keeps the same placeholders in every translation", () => {
     for (const [key, english] of Object.entries(MESSAGES_EN)) {
-      for (const language of LANGUAGES) {
+      for (const language of COMPLETE_LANGUAGES) {
         const translated = CATALOGUES[language][key as keyof typeof MESSAGES_EN];
         expect(placeholders(translated), `${language}:${key}`).toEqual(placeholders(english));
       }

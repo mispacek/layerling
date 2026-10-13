@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { toCreasedNormals } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import type { CadModifierProfileLoop } from "@/lib/cadModifierTypes";
+import { loftEaseShare } from "@/lib/loftEase";
 import { regularPolygonFootprintScale } from "@/lib/regularPolygonFootprint";
 import { meshYawDegrees, mirrorSign } from "@/lib/workplaneShapes";
 import type { WorkplaneShape } from "@/types/layerling";
@@ -36,6 +37,7 @@ export const DEFAULT_LOFT = {
   twist: 0,
   tiltX: 0,
   tiltZ: 0,
+  smooth: 0,
   height: 30,
 };
 
@@ -83,13 +85,15 @@ export type LoftMeasures = {
   /** Degrees the top end tilts about the x axis (its front rising) and about the z axis (its right side rising). */
   tiltX: number;
   tiltZ: number;
+  /** 0 to 1: how much of an S-curve the sides take between the two ends instead of a straight line (#271). */
+  smooth: number;
 };
 
 export type LoftShapeFields = Pick<WorkplaneShape,
   "width" | "depth" | "size" | "height"
   | "loftBottomOutline" | "loftTopOutline" | "loftBottomWidth" | "loftBottomDepth" | "loftTopWidth" | "loftTopDepth"
   | "loftBottomCorner" | "loftTopCorner" | "loftBottomSides" | "loftTopSides" | "loftOffsetX" | "loftOffsetZ" | "loftWall"
-  | "loftTwist" | "loftTiltX" | "loftTiltZ">;
+  | "loftTwist" | "loftTiltX" | "loftTiltZ" | "loftSmooth">;
 
 export function normalizeLoftOutline(value: unknown, fallback: LoftOutline = "round"): LoftOutline {
   return value === "round" || value === "rectangle" || value === "polygon" ? value : fallback;
@@ -132,6 +136,7 @@ export function normalizeLoftMeasures(raw: Partial<LoftMeasures>): LoftMeasures 
     twist: Math.min(MAX_LOFT_TWIST, Math.max(-MAX_LOFT_TWIST, finite(raw.twist, 0))),
     tiltX: Math.min(MAX_LOFT_TILT, Math.max(-MAX_LOFT_TILT, finite(raw.tiltX, 0))),
     tiltZ: Math.min(MAX_LOFT_TILT, Math.max(-MAX_LOFT_TILT, finite(raw.tiltZ, 0))),
+    smooth: Math.min(1, Math.max(0, finite(raw.smooth, 0))),
   };
 }
 
@@ -159,6 +164,7 @@ export function loftStoredMeasures(shape: LoftShapeFields): LoftMeasures {
     twist: shape.loftTwist,
     tiltX: shape.loftTiltX,
     tiltZ: shape.loftTiltZ,
+    smooth: shape.loftSmooth,
   });
 }
 
@@ -257,6 +263,7 @@ export function loftFieldsFromMeasures(measures: LoftMeasures): Partial<Workplan
     loftTwist: measures.twist,
     loftTiltX: measures.tiltX,
     loftTiltZ: measures.tiltZ,
+    loftSmooth: measures.smooth,
   };
 }
 
@@ -544,9 +551,10 @@ function turnedLoftBounds(measures: LoftMeasures) {
   let maxZ = -Infinity;
   for (let step = 0; step < count; step += 1) {
     const t = step / (count - 1);
-    const middle = mix(bottomMiddle, topMiddle, t);
+    const share = loftEaseShare(t, measures.smooth);
+    const middle = mix(bottomMiddle, topMiddle, share);
     rings.bottom.forEach((point, index) => {
-      const placed = placeTurned(mix(point, rings.top[index], t), middle, t, measures, 0);
+      const placed = placeTurned(mix(point, rings.top[index], share), middle, t, measures, 0);
       minX = Math.min(minX, placed.x);
       maxX = Math.max(maxX, placed.x);
       minZ = Math.min(minZ, placed.z);
@@ -574,9 +582,10 @@ export function loftTurn(shape: LoftShapeFields) {
     let low = 0;
     for (let step = 1; step <= 24; step += 1) {
       const t = step / 24;
-      const middle = mix(bottomMiddle, topMiddle, t);
+      const share = loftEaseShare(t, tilted.smooth);
+      const middle = mix(bottomMiddle, topMiddle, share);
       rings.bottom.forEach((point, index) => {
-        low = Math.min(low, placeTurned(mix(point, rings.top[index], t), middle, t, tilted, lift).y);
+        low = Math.min(low, placeTurned(mix(point, rings.top[index], share), middle, t, tilted, lift).y);
       });
     }
     return low;
@@ -668,20 +677,34 @@ function piecesToBezierLoop(pieces: Piece[]): CadModifierProfileLoop {
  * The loops of the exact body: outer first, the opening second, bottom and top piece for piece.
  * A turned or tilted loft also says how its sections turn and how high its top's middle stands.
  */
-export function loftProfileLoops(shape: LoftShapeFields) {
+export type LoftProfileLoops = {
+  loops: CadModifierProfileLoop[];
+  topLoops: CadModifierProfileLoop[];
+  smooth?: number;
+  twist?: number;
+  twistCenter?: Point;
+  twistLean?: { x: number; z: number };
+  tilt?: { x: number; z: number };
+  height?: number;
+};
+
+export function loftProfileLoops(shape: LoftShapeFields): LoftProfileLoops {
   const { outer, inner } = loftPieces(shape);
   const turn = loftTurn(shape);
-  const toLoop = turn.turned ? piecesToBezierLoop : piecesToLoop;
+  const smooth = turn.measures.smooth;
+  // A smooth transition is built through sections like a turned one, and the kernel mixes those piece by piece.
+  const toLoop = turn.turned || smooth > 1e-9 ? piecesToBezierLoop : piecesToLoop;
   const loops = [toLoop(outer.bottom)];
   const topLoops = [toLoop(outer.top)];
   if (inner) {
     loops.push(toLoop(inner.bottom));
     topLoops.push(toLoop(inner.top));
   }
-  if (!turn.turned) return { loops, topLoops };
+  if (!turn.turned && smooth <= 1e-9) return { loops, topLoops };
   return {
     loops,
     topLoops,
+    ...(smooth > 1e-9 ? { smooth } : {}),
     twist: turn.measures.twist,
     twistCenter: turn.bottomMiddle,
     twistLean: { x: turn.topMiddle.x - turn.bottomMiddle.x, z: turn.topMiddle.z - turn.bottomMiddle.z },
@@ -751,8 +774,9 @@ export function createLoftGeometry(shape: LoftShapeFields): THREE.BufferGeometry
   };
   // A turned or tilted loft is built through the kernel's sections: every row of the wall is a
   // section, mixed between bottom and top, turned and tilted by its share and lifted.
+  const smooth = turn.measures.smooth;
   const place = (point: Point, v: number): Point3 => turn.turned
-    ? placeTurned(point, mix(turn.bottomMiddle, turn.topMiddle, v), v, turn.measures, turn.lift)
+    ? placeTurned(point, mix(turn.bottomMiddle, turn.topMiddle, loftEaseShare(v, smooth)), v, turn.measures, turn.lift)
     : { x: point.x, y: height * v, z: point.z };
   // The outlines run counter-clockwise (x towards z); seen that way a wall triangle
   // (bottom i, top i+1, bottom i+1) faces outwards, the opening's the other way round.
@@ -761,11 +785,14 @@ export function createLoftGeometry(shape: LoftShapeFields): THREE.BufferGeometry
   // lines. The wall is then cut into rows up the height, as many as that twist needs.
   const addWall = (rings: { bottom: Point[]; top: Point[] }, outward: boolean) => {
     const count = rings.bottom.length;
-    const rows = turn.turned ? Math.max(wallRows(rings, height), (loftSectionCount(turn.measures) - 1) * 2) : wallRows(rings, height);
+    const turnedRows = turn.turned ? Math.max(wallRows(rings, height), (loftSectionCount(turn.measures) - 1) * 2) : wallRows(rings, height);
+    // The S-curve of a smooth transition needs rows to follow it.
+    const rows = smooth > 1e-9 ? Math.max(turnedRows, 24) : turnedRows;
     const starts: number[] = [];
     for (let row = 0; row <= rows; row += 1) {
       const v = row / rows;
-      starts.push(addRing(rings.bottom.map((b, i) => place(mix(b, rings.top[i], v), v))));
+      const share = loftEaseShare(v, smooth);
+      starts.push(addRing(rings.bottom.map((b, i) => place(mix(b, rings.top[i], share), v))));
     }
     for (let row = 0; row < rows; row += 1) {
       const b = starts[row];

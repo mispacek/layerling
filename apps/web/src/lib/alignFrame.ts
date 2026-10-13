@@ -5,7 +5,7 @@ import type { AlignAxis } from "@/types/layerling";
  * Align along a workplane (#232). The align tool lines parts up along the three axes of the plate;
  * a part turned by 45° has its box round it, not its own edges, to line up with. With a workplane
  * set on a face the tool takes that plane's axes instead - its x, its normal and its z, as the
- * x, y and z of the handles - and measures each part along them, as Tinkercad does. Without a
+ * x, y and z of the handles - and measures each part along them, as similar tools do. Without a
  * workplane nothing changes.
  */
 export type AlignAxes = {

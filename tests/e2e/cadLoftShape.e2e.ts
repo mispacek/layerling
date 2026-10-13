@@ -164,4 +164,35 @@ describe("exact bodies for the transition with the real OCCT kernel", () => {
     expect(cad.isValid(rounded)).toBe(true);
     expect(cad.getVolume(rounded)).toBeLessThan(cad.getVolume(solid));
   });
+
+  // #271: a smooth transition follows an S-curve between the ends; the body is built through sections along the same curve.
+  it("smooth hose adapter: a tube along the S-curve, as big as the integral says and where the mesh is", () => {
+    const source = loft({ loftBottomOutline: "round", loftTopOutline: "round", loftBottomWidth: 25, loftBottomDepth: 25, loftTopWidth: 50, loftTopDepth: 50, height: 40, loftWall: 2, loftSmooth: 1 });
+    const { solid } = exact(source);
+    // The ring between the outer radius r(t) and the opening r(t) - 2, integrated along the S-curve.
+    const outerRadius = (t: number) => 12.5 + (25 - 12.5) * (t * t * (3 - 2 * t));
+    let volume = 0;
+    const steps = 2000;
+    for (let step = 0; step < steps; step += 1) {
+      const r = outerRadius((step + 0.5) / steps);
+      volume += Math.PI * (r * r - (r - 2) * (r - 2)) * (40 / steps);
+    }
+    expect(Math.abs(cad.getVolume(solid) - volume) / volume).toBeLessThan(0.01);
+    const box = cad.getBoundingBox(solid);
+    expect(box.ymin).toBeCloseTo(0, 4);
+    expect(box.ymax).toBeCloseTo(40, 4);
+    expect(box.xmax).toBeCloseTo(25, 2);
+  });
+
+  it("smooth 0 is the straight transition, exactly the cone frustum as before", () => {
+    const source = loft({ loftBottomOutline: "round", loftTopOutline: "round", loftBottomWidth: 30, loftBottomDepth: 30, loftTopWidth: 20, loftTopDepth: 20, loftWall: 2, loftSmooth: 0 });
+    const { solid } = exact(source);
+    const outer = frustum(30, Math.PI * 15 ** 2, Math.PI * 10 ** 2);
+    const inner = frustum(30, Math.PI * 13 ** 2, Math.PI * 8 ** 2);
+    expect(cad.getVolume(solid)).toBeCloseTo(outer - inner, 1);
+  });
+
+  it("smooth square to circle with the top moved sideways is a valid solid where the mesh is", () => {
+    exact(loft({ loftSmooth: 0.7, loftOffsetX: 8, loftOffsetZ: -4 }));
+  });
 });

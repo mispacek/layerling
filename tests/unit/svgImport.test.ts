@@ -82,8 +82,8 @@ describe("SVG source preflight", () => {
     expect(() => validateSvgSourcePreflight('<svg><use href="https://example.com/art.svg#part"/></svg>')).toThrow(/external references/i);
   });
 
-  it("reports malformed Tinkercad cross-section geometry", () => {
-    expect(() => validateSvgSourcePreflight('<svg width="NaNmm" viewBox="NaN NaN NaN NaN"><path d="z"/></svg>')).toThrow(/workplane intersects the model/i);
+  it("reports malformed cross-section geometry", () => {
+    expect(() => validateSvgSourcePreflight('<svg width="NaNmm" viewBox="NaN NaN NaN NaN"><path d="z"/></svg>')).toThrow(/cross-section really cuts the model/i);
   });
 
   it("rejects excessive geometry before SVGLoader runs", () => {
@@ -122,14 +122,14 @@ describe("SVG path extrusion", () => {
     expect(() => buildSvgExtrusionFromPaths([rectangle(0, 0, 10, 10, { fill: "#00000000" })])).toThrow(/no readable visible/i);
   });
 
-  it("imports a closed Tinkercad-style stroke as an extrusion profile", () => {
-    const tinkercadOutline = shapePath([[0, 0], [10, 0], [10, 6], [0, 6], [0, 0]], {
+  it("imports a closed stroke as an extrusion profile", () => {
+    const strokeOutline = shapePath([[0, 0], [10, 0], [10, 6], [0, 6], [0, 0]], {
       closed: false,
       fill: "none",
       stroke: "rgb(255,0,0)",
       strokeWidth: 0.001,
     });
-    const result = buildSvgExtrusionFromPaths([tinkercadOutline]);
+    const result = buildSvgExtrusionFromPaths([strokeOutline]);
     expect(result.analysis.width).toBeCloseTo(10);
     expect(result.analysis.depth).toBeCloseTo(6);
     expect(result.analysis.volume).toBeCloseTo(240);

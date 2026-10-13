@@ -1,5 +1,239 @@
 [
   {
+    "version": "1.67.5",
+    "items": [
+      {
+        "title": {
+          "de": "Notizen schreiben mit Enter und Esc",
+          "en": "Writing notes with Enter and Esc",
+          "cs": "Úpravy poznámek pomocí Enter a Esc"
+        },
+        "body": {
+          "de": "Beim Schreiben einer Notiz übernimmt Enter jetzt den Text, Esc stellt ihn wieder her, wie er vorher war, und Umschalt+Enter beginnt eine neue Zeile. Und tippst du mitten im Text, bleibt der Cursor dort, statt ans Ende zu springen.",
+          "en": "While you write a note, Enter now keeps the text, Esc puts it back to how it was, and Shift+Enter starts a new line. And when you type in the middle of the text, the cursor stays there instead of jumping to the end.",
+          "cs": "Při úpravě poznámky nyní Enter potvrdí text, Esc obnoví původní znění a Shift+Enter vloží nový řádek. Při psaní uprostřed textu už kurzor nepřeskakuje na konec."
+        }
+      }
+    ]
+  },
+  {
+    "version": "1.67.4",
+    "items": [
+      {
+        "title": {
+          "de": "Skizze: ganze Form auf einmal runden oder krümmen",
+          "en": "Sketch: round or curve a whole shape at once",
+          "cs": "Náčrt: zaoblení a zakřivení celého tvaru"
+        },
+        "body": {
+          "de": "Wählst du in einer Skizze eine ganze Form aus, mit einem Rahmen oder einem Klick hinein, bietet die Leiste jetzt für alle ihre Ecken Verrunden und Fasen und für alle ihre Linien Krümmen und Gerade an. Vorher gingen diese Werkzeuge nur bei einer einzelnen Auswahl.",
+          "en": "Select a whole shape in a sketch, with a frame or a click inside it, and the bar now offers Round and Chamfer for all of its corners and Curve and Straight for all of its lines. Before, these tools only worked on a single selection.",
+          "cs": "Vyberte celý tvar rámečkem nebo kliknutím dovnitř. Lišta nyní umožňuje zaoblit nebo zkosit všechny jeho rohy a zakřivit či narovnat všechny úsečky. Dříve tyto nástroje pracovaly jen s jednotlivým výběrem."
+        }
+      },
+      {
+        "title": {
+          "de": "SVG-Dateien einer Seite deckungsgleich importieren",
+          "en": "Import SVG files of one page so they line up",
+          "cs": "Import SVG ze společné stránky se zachováním polohy"
+        },
+        "body": {
+          "de": "Im Importfenster gibt es ein neues Feld, „SVG: Lage auf der Zeichenfläche beibehalten“. Damit behält jede Zeichnung ihren Platz auf der Seite, auf der sie gezeichnet wurde. Exportierst du die Ebenen eines Dokuments als einzelne SVG-Dateien, liegen sie nach dem Import wieder genau übereinander, so wie du es von Tinkercad kennst.",
+          "en": "The import window has a new box, “SVG: keep the place on the drawing page”. With it each drawing keeps the place it has on the page it was drawn on. Export the layers of a document as separate SVG files and they line up exactly again after the import, as you know it from Tinkercad.",
+          "cs": "V importu přibyla volba „SVG: zachovat polohu na stránce výkresu“. Každý výkres ponechá na místě, kde byl nakreslen. Vrstvy dokumentu vyexportované do samostatných SVG se po importu opět přesně překryjí."
+        }
+      }
+    ]
+  },
+  {
+    "version": "1.67.3",
+    "items": [
+      {
+        "title": {
+          "de": "Suche in der Anleitung",
+          "en": "Search in the guide",
+          "cs": "Vyhledávání v příručce"
+        },
+        "body": {
+          "de": "Jede Seite der Anleitung hat jetzt oben ein Suchfeld. Tippe ein oder zwei Wörter, und es zeigt die Abschnitte, in denen sie vorkommen, mit einem Textausschnitt. Ein Klick springt direkt dorthin.",
+          "en": "Every page of the user guide now has a search box at the top. Type a word or two and it shows the sections where they appear, with a snippet of the text. One click takes you straight there.",
+          "cs": "Na každé stránce příručky je nyní vyhledávací pole. Zadejte jedno či více slov a zobrazí se odpovídající části s úryvkem textu. Kliknutím přejdete přímo na nalezené místo."
+        }
+      },
+      {
+        "title": {
+          "de": "Vieleck und Stern in der Skizze",
+          "en": "Polygon and star in the sketch",
+          "cs": "Mnohoúhelník a hvězda v náčrtu"
+        },
+        "body": {
+          "de": "Das Menü der Skizzenformen hat zwei neue Formen: ein Vieleck und einen Stern. Unten im Menü stellst du die Zahl der Seiten oder Zacken ein und beim Stern, wie tief die Täler reichen. Danach sind es ganz normale Eckpunkte, die du weiter bearbeiten kannst.",
+          "en": "The sketch shapes menu has two new shapes: a polygon and a star. At the bottom of the menu you set the number of sides or points and, for the star, how deep the valleys reach. Afterwards they are ordinary corner points you can keep editing.",
+          "cs": "V nabídce tvarů náčrtu přibyl mnohoúhelník a hvězda. Dole nastavíte počet stran či cípů a u hvězdy také její vnitřní velikost. Výsledné rohové body lze běžně dále upravovat."
+        }
+      }
+    ]
+  },
+  {
+    "version": "1.67.2",
+    "items": [
+      {
+        "title": {
+          "de": "Arbeitsebene auf dem Schnitt",
+          "en": "Workplane on the cut",
+          "cs": "Pracovní rovina v řezu"
+        },
+        "body": {
+          "de": "In der Schnittansicht gibt es einen neuen Knopf, „Arbeitsebene hier“. Er legt die Arbeitsebene auf den Schnitt, so dass eine Skizze genau dort beginnt und die Kontur des Schnitts zeigt, etwa für einen Deckel, der in den freigelegten Innenraum passt.",
+          "en": "The section view has a new button, “Workplane here”. It puts the workplane on the cut, so a sketch starts exactly there and shows the outline of the cut, for a lid that fits the cavity the section opened, for example.",
+          "cs": "V pohledu v řezu přibylo tlačítko „Pracovní rovina zde“. Umístí pracovní rovinu do řezu, takže náčrt začíná přesně tam a zobrazí obrys řezu. Hodí se například pro víko zapadající do odkryté dutiny."
+        }
+      },
+      {
+        "title": {
+          "de": "Standard-Farbschema für den Server",
+          "en": "A default theme for your server",
+          "cs": "Výchozí barevný motiv serveru"
+        },
+        "body": {
+          "de": "Wer layerling auf einem eigenen Server oder in Docker betreibt, kann mit der Umgebungsvariablen LAYERLING_DEFAULT_THEME festlegen, welches Farbschema Besucher beim ersten Mal bekommen: system, light, dark oder graphite. Wer schon ein Schema gewählt hat, behält es.",
+          "en": "If you run layerling on your own server or in Docker, the environment variable LAYERLING_DEFAULT_THEME sets which colour theme visitors get the first time: system, light, dark or graphite. Anyone who has already chosen one keeps it.",
+          "cs": "Na vlastním serveru nebo v Dockeru lze proměnnou LAYERLING_DEFAULT_THEME nastavit výchozí motiv pro nové návštěvníky: system, light, dark nebo graphite. Uložená volba uživatele zůstane zachovaná."
+        }
+      }
+    ]
+  },
+  {
+    "version": "1.67.1",
+    "items": [
+      {
+        "title": {
+          "de": "Loft: weicher Übergang",
+          "en": "Loft: smooth transition",
+          "cs": "Propojení profilů: plynulý přechod"
+        },
+        "body": {
+          "de": "Die Form Loft hat einen neuen Regler, „Weicher Übergang“. Bei 0 laufen die Seiten gerade wie bei einem Kegel, bei 100 in einer S-Kurve: ideal für einen Schlauchadapter, der sich weich vom schmalen zum weiten Rohr aufweitet. Mit Wand bleibt er an beiden Enden offen.",
+          "en": "The Loft shape has a new slider, “Smooth transition”. At 0 the sides run straight like a cone, at 100 along an S-curve: ideal for a hose adapter that flares smoothly from a narrow to a wide pipe. With a wall it stays open at both ends.",
+          "cs": "Tvar Propojení profilů má nový posuvník „Plynulý přechod“. Při 0 jsou boky přímé jako u kužele, při 100 mají průběh ve tvaru S. Hodí se například pro adaptér mezi úzkou a širší trubkou. Při nastavení tloušťky stěny zůstanou oba konce otevřené."
+        }
+      },
+      {
+        "title": {
+          "de": "Um Zylinder wickeln: Zehntelmillimeter",
+          "en": "Wrap around a cylinder: tenths of a millimetre",
+          "cs": "Obtočení kolem válce po desetinách milimetru"
+        },
+        "body": {
+          "de": "Der Durchmesser beim Wickeln um einen Zylinder lässt sich jetzt in Zehntelmillimetern einstellen, etwa 63,5 mm für einen Becher. Der Regler springt in 0,1 mm, und das Feld nimmt Nachkommastellen.",
+          "en": "The diameter for wrapping around a cylinder can now be set in tenths of a millimetre, such as 63.5 mm for a cup. The slider steps by 0.1 mm and the field takes decimals.",
+          "cs": "Průměr při obtočení kolem válce lze nastavit po desetinách milimetru, například na 63,5 mm pro hrnek. Posuvník má krok 0,1 mm a pole přijímá desetinná čísla."
+        }
+      }
+    ]
+  },
+  {
+    "version": "1.67.0",
+    "items": [
+      {
+        "title": {
+          "de": "Torus: Seiten und Stufen einstellbar",
+          "en": "Torus: adjustable sides and steps",
+          "cs": "Torus: nastavitelný počet segmentů"
+        },
+        "body": {
+          "de": "Der Torus hat jetzt zwei Regler in den Eigenschaften: „Seiten am Ring“ und „Stufen am Wulst“. Ohne eigene Angabe folgen sie der Größe, ein großer Torus wird also von selbst glatt. Stellst du sie niedrig, zeichnet layerling den Torus eckig, in der Ansicht und im Export.",
+          "en": "The torus has two sliders in its properties now: “Ring sides” and “Tube steps”. Left alone they follow the size, so a large torus comes out smooth by itself. Set them low and layerling draws the torus faceted, in the view and in the export.",
+          "cs": "Torus má nové posuvníky pro počet segmentů prstence a jeho průřezu. Bez vlastního nastavení se podrobnost řídí velikostí, takže velký torus je automaticky hladký. Nízké hodnoty vytvoří hranatý tvar v náhledu i exportu."
+        }
+      },
+      {
+        "title": {
+          "de": "T macht die Auswahl durchsichtig",
+          "en": "T makes the selection see-through",
+          "cs": "Klávesa T přepíná průhlednost výběru"
+        },
+        "body": {
+          "de": "Mit der Taste T machst du die ausgewählten Körper durchsichtig, mit einem zweiten Druck wieder undurchsichtig. Ist in einer gemischten Auswahl schon einer durchsichtig, werden zuerst alle undurchsichtig. Aussparungen und gesperrte Körper bleiben, wie sie sind.",
+          "en": "Press T to make the selected bodies see-through, and again to make them opaque. If a mixed selection already has a see-through body, all become opaque first. Holes and locked bodies stay as they are.",
+          "cs": "Stisknutím T zprůhledníte vybraná tělesa, dalším stisknutím průhlednost zrušíte. Pokud smíšený výběr už obsahuje průhledné těleso, nejprve se všechny zobrazí neprůhledně. Odečítací a zamčená tělesa se nemění."
+        }
+      },
+      {
+        "title": {
+          "de": "Lochmuster: Wand zwischen den Löchern",
+          "en": "Hole pattern: wall between the holes",
+          "cs": "Rastr otvorů: stěna mezi otvory"
+        },
+        "body": {
+          "de": "Das Lochmuster hat einen neuen Regler, „Wand zwischen den Löchern“. Er zeigt den Steg, der zwischen zwei Nachbarlöchern bleibt, also die Wandstärke im Druck, und stellt ihn ein: Der Abstand von Mitte zu Mitte folgt, und umgekehrt. Das gilt für alle Lochformen und beide Anordnungen.",
+          "en": "The hole pattern has a new slider, “Wall between the holes”. It shows the wall left between two neighbouring holes, which is the wall thickness in the print, and sets it: the spacing centre to centre follows, and the other way round. It works for every hole shape and both arrangements.",
+          "cs": "Nový posuvník „Stěna mezi otvory“ ukazuje a nastavuje tloušťku materiálu mezi sousedními otvory. Rozteč středů se podle něj přepočítá a naopak. Funguje pro všechny tvary otvorů a obě uspořádání."
+        }
+      },
+      {
+        "title": {
+          "de": "Abgerundeter Quader: Qualität 1 ist eine echte Fase",
+          "en": "Rounded box: quality 1 is a true chamfer",
+          "cs": "Zaoblený kvádr: kvalita 1 vytváří rovinné zkosení"
+        },
+        "body": {
+          "de": "Mit Qualität 1 bekommt ein Abgerundeter Quader eine echte Fase, jetzt auch dann, wenn Deckel- und Bodenkante gerundet sind. Vorher ergab das zwei Stücke statt einer flachen Fläche.",
+          "en": "With quality 1 a rounded box gets a true chamfer, now also when its top and bottom edges are rounded. Before, that gave two pieces instead of one flat face.",
+          "cs": "Při kvalitě 1 se na zaobleném kvádru vytvoří rovinné zkosení i tehdy, jsou-li horní a dolní hrany zaoblené. Dříve v tomto případě vznikaly dvě části místo jedné rovinné plochy."
+        }
+      },
+      {
+        "title": {
+          "de": "Skizze: Formen übereinander schieben",
+          "en": "Sketch: pushing shapes over each other",
+          "cs": "Náčrt: překrývající se tvary"
+        },
+        "body": {
+          "de": "Zwei Formen, die du in der Skizze übereinander schiebst, zeigen keine Aussparung mehr an der Überlappung, denn der Körper wird ihre Vereinigung. Und sie verhaken sich nicht mehr: Beim Verschieben entstehen keine gemeinsamen Punkte an den Kreuzungen, du kannst sie wieder auseinanderziehen.",
+          "en": "Two shapes you push over each other in the sketch no longer show a hole where they overlap, because the body becomes their union. And they no longer get caught on each other: moving makes no shared points at the crossings, so you can pull them apart again.",
+          "cs": "Překryv dvou tvarů v náčrtu už nevytváří zobrazený otvor, protože výsledné těleso je jejich sjednocením. Tvary se také nezachytávají o sebe: při posunu nevznikají společné body v průsečících a lze je opět oddělit."
+        }
+      },
+      {
+        "title": {
+          "de": "Gewinde: Spiel in Achsrichtung",
+          "en": "Threads: play along the axis",
+          "cs": "Závity: axiální vůle"
+        },
+        "body": {
+          "de": "Mutter und Gewindeloch haben ein neues Feld, „Spiel in Achsrichtung“. Es macht die Zähne dünner, ohne den Durchmesser aufzuweiten, damit ein gedrucktes Gewinde leicht läuft und nicht seitlich wackelt. In der Anleitung steht ein neuer Abschnitt mit Tipps für gedruckte Gewinde.",
+          "en": "Nuts and tapped holes have a new field, “Play along the axis”. It makes the teeth thinner without widening the diameter, so a printed thread turns easily and does not wobble sideways. The guide has a new section with tips for printed threads.",
+          "cs": "Matice a závitový otvor mají nové pole „Axiální vůle“. Ztenčuje zuby vnitřního závitu bez zvětšení průměru, aby vytištěný závit lehce chodil a neviklal se do stran. Příručka obsahuje nové rady pro tisk závitů."
+        }
+      },
+      {
+        "title": {
+          "de": "Pfeilrad",
+          "en": "Herringbone gear",
+          "cs": "Šípové ozubení"
+        },
+        "body": {
+          "de": "Das Zahnrad gibt es jetzt auch als Pfeilrad: zwei Schrägrad-Hälften, die gegenläufig drehen. Es zentriert sich von selbst auf der Welle und schiebt nicht seitlich, das macht es für den 3D-Druck angenehm. Winkel und Qualität stellst du wie beim Schrägrad ein.",
+          "en": "The gear now comes as a herringbone gear too: two helical halves turning opposite ways. It centres itself on its shaft and does not push sideways, which makes it pleasant for 3D printing. You set angle and quality as for the helical gear.",
+          "cs": "Ozubené kolo lze nově vytvořit se šípovým ozubením: dvě poloviny mají opačný směr sklonu zubů. Opačné axiální síly se vyrovnávají. Úhel a kvalitu nastavíte stejně jako u šikmého ozubení."
+        }
+      },
+      {
+        "title": {
+          "de": "SVG-Import: Buchstaben fehlten",
+          "en": "SVG import: missing letters",
+          "cs": "Import SVG: chybějící písmena"
+        },
+        "body": {
+          "de": "Ein SVG, dessen Umriss nicht genau am Startpunkt endet, etwa bei einem nachgezeichneten Logo aus Affinity, kam ohne diese Form herein, oder die Datei wurde ganz abgelehnt. Solche Umrisse werden jetzt sauber geschlossen. Und Formen, die sich nicht zu einem Körper bauen lassen, meldet der Import jetzt, statt sie stillschweigend wegzulassen.",
+          "en": "An SVG whose outline does not end exactly at its start, such as a traced logo from Affinity, came in without that shape, or the whole file was refused. Such outlines are now closed cleanly. And shapes that cannot be built into a solid are now reported by the import instead of being left out silently.",
+          "cs": "Obrysy SVG, které končí těsně vedle počátečního bodu, se nyní správně uzavřou. Dříve mohl tvar chybět nebo být celý soubor odmítnut. Import také oznámí tvary, ze kterých nelze vytvořit těleso, místo jejich tichého vynechání."
+        }
+      }
+    ]
+  },
+  {
     "version": "1.66.7",
     "items": [
       {

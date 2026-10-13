@@ -1,7 +1,7 @@
 "use client";
 
 import { GuideHelpLink } from "@/components/GuideHelpLink";
-import { AlertTriangle, Check, Percent, Circle as CircleIcon, CloudUpload, Download, Eye, EyeOff, FilePlus2, FolderOpen, Hexagon as HexagonIcon, Info, ListTree, Pencil, Search, Square as SquareIcon, Triangle as TriangleIcon, X } from "lucide-react";
+import { AlertTriangle, Check, Percent, Circle as CircleIcon, CloudUpload, Download, Eye, EyeOff, FilePlus2, FolderOpen, Hexagon as HexagonIcon, Info, ListTree, Pencil, Pentagon as PentagonIcon, Search, Square as SquareIcon, Star as StarIcon, Triangle as TriangleIcon, X } from "lucide-react";
 import { ObjectListPanel } from "@/components/workplane/ObjectListPanel";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import * as THREE from "three";
@@ -23,9 +23,19 @@ import type { IconLayerPatch, IconTagControls, TextLayerPatch } from "@/componen
 import { IconTagPanel } from "@/components/workplane/IconTagPanel";
 import { loadedManifoldRuntime, onManifoldReady } from "@/lib/manifoldHandle";
 import { canApplySketchCornerTreatment } from "@/lib/sketchFilletChamfer";
-import { sketchPrimitiveGeometry } from "@/lib/sketchPrimitives";
+import {
+  normalizePolygonSides,
+  normalizeStarInnerPercent,
+  SKETCH_POLYGON_DEFAULT_SIDES,
+  SKETCH_POLYGON_MAX_SIDES,
+  SKETCH_POLYGON_MIN_SIDES,
+  SKETCH_STAR_DEFAULT_INNER_PERCENT,
+  SKETCH_STAR_MAX_INNER_PERCENT,
+  SKETCH_STAR_MIN_INNER_PERCENT,
+  sketchPrimitiveGeometry,
+} from "@/lib/sketchPrimitives";
 import { cloneSketchProfile, orderedSketchPaths, withSegmentHandles, withSmoothSketchHandles } from "@/lib/sketchSmoothHandles";
-import { curveSketchSegment, straightenSketchSegment } from "@/lib/sketchSegmentCurve";
+import { curveSketchSegment, isSegmentCurved, straightenSketchSegment } from "@/lib/sketchSegmentCurve";
 import { withSegmentsConstruction } from "@/lib/sketchConstruction";
 import { alignAxesForWorkplane, cuboidAlongAxes, shiftAlongAxis, type AlignAxes } from "@/lib/alignFrame";
 import {
@@ -108,6 +118,7 @@ import { ShortcutsModal } from "./workplane/ShortcutsModal";
 import { CommandPalette, type PaletteCommand } from "./workplane/CommandPalette";
 import { COMMAND_KEYWORDS, SHAPE_KEYWORDS } from "@/lib/commandKeywords";
 import { ShapeContextMenu, type ShapeContextMenuItem } from "./workplane/ShapeContextMenu";
+import { nextSelectionTransparency } from "@/lib/selectionTransparency";
 import { canonicalizeShape, cloneWorkplaneShapeTreeWithFreshIds, cleanNearZero, cleanRotationDegrees, isNonSolidShapeKind, meshYawDegrees, preservesEdgeTreatmentSize, serializeShapesForSync, shapeDepth, shapeExtrudeDeformPatch, shapeHasShapeDeform, shapeTaperPatch, shapeTransformShouldRemainEditable, shapeWidth, shapeWithParametricSource, patchTouchesBodyParameters, withHoleMode, workplaneShapesEqual, shellNeedingRebuild } from "@/lib/workplaneShapes";
 import { workplaneCenteringOffset } from "@/lib/workplaneCentering";
 import { bakeCadMetadataForShapeTransform, cadBrepTransformForShape, cadModifierPrimitiveForAnalyticShape, cadModifierPrimitiveForBakedShape, importedStepPartForShape } from "@/lib/cadBakeMetadata";
@@ -130,6 +141,7 @@ import { exportMeshesToObj } from "@/lib/objExport";
 import { rotateSketchPoints, selectedClosedSketchPoints } from "@/lib/sketchRotation";
 import { PROJECT_THUMBNAIL_IDLE_MS, projectThumbnailSceneChanged, type ProjectThumbnailSceneKey } from "@/lib/projectThumbnail";
 import { importedShapeFromObj } from "@/lib/objImport";
+import { readKeepSvgPage, storeKeepSvgPage } from "@/lib/importPreferences";
 import { importFailureSummary, importModelFiles } from "@/lib/modelImport";
 import { dedupeProjectAssets } from "@/lib/projectAssets";
 import { customShapesBackupEntries, deleteMyShape, listMyShapes, myShapeNameFromFile, restoreCustomShapesFromBackup, myShapesBackupFileName, onMyShapesChanged, readMyShapePackage, renameMyShape, saveMyShape, shapesForLibrary, shapesFromLibrary, type MyShapeMeta } from "@/lib/myShapes";
@@ -137,9 +149,9 @@ import { renderMyShapeThumbnail } from "@/lib/myShapeThumbnail";
 import { packBackup, unpackBackup } from "@/lib/projectBackup";
 import { MyShapesSection, type CustomShapeEntry, type CustomShapeLocation } from "@/components/workplane/MyShapesSection";
 import { deleteServerCustomShape, listServerCustomShapes, readServerCustomShape, renameServerCustomShape, saveServerCustomShape, type ServerCustomShape } from "@/lib/customShapesServer";
-import { addLineIntersectionPoints, splitSketchSegment } from "@/lib/sketchPointRefinement";
+import { addLineIntersectionPoints, onlyMovesPoints, splitSketchSegment } from "@/lib/sketchPointRefinement";
 import { copySketchSelection, freeSketchPasteOffset, pasteSketchClipboard, type SketchClipboard } from "@/lib/sketchClipboard";
-import { sketchSelectionCount, toggleSketchSelection } from "@/lib/sketchSelection";
+import { sketchSelectedPointIds, sketchSelectionCount, toggleSketchSelection } from "@/lib/sketchSelection";
 import { applySketchCorners } from "@/lib/sketchFilletChamfer";
 import { revolveAxisShift } from "@/lib/revolveAxis";
 import { buildSketchRevolveMesh, DEFAULT_SKETCH_REVOLVE_SETTINGS, normalizeSketchRevolveSettings, type SketchRevolveMesh } from "@/lib/sketchRevolve";
@@ -202,7 +214,7 @@ import { wrapMeshAroundCylinder, type CylinderWrapError } from "@/lib/cylinderWr
 import { screenAlignedNudge } from "@/lib/keyboardNudge";
 import { LAYERLING_MCP_HEARTBEAT_MS, LAYERLING_MCP_POLL_RETRY_MS, LAYERLING_MCP_ROUTE, type LayerlingMcpCommand, type LayerlingMcpSceneSummary, type LayerlingMcpViewFace } from "@/lib/layerlingMcpProtocol";
 import type { CadModifierComponentMesh, CadModifierDeflection, CadModifierDisplayEdge, CadModifierEdge, CadModifierHelicalGearPart, CadModifierKind, CadModifierMeshPart, CadModifierPrimitivePart, CadModifierProfilePart, CadModifierQuality, CadModifierSpringPart, CadModifierThreadPart, CadModifierWorkerRequest, CadModifierWorkerResponse } from "@/lib/cadModifierTypes";
-import { getSectionBounds, sectionAxisLetter, type SectionPlaneAxis, type SectionPlaneSettings } from "@/lib/sectionView";
+import { getSectionBounds, sectionAxisLetter, sectionPlacementWorkplane, type SectionPlaneAxis, type SectionPlaneSettings } from "@/lib/sectionView";
 import { projectSectionPoint, SECTION_VIEW_FACE, sectionSvgDocument, sliceMeshContours } from "@/lib/sectionSvg";
 import type { AlignAxis, AlignHandleStatus, AlignTarget, GridSize, ParametricSource, ProjectAsset, ShapeAsset, ShapeCustomization, ShapeKind, SketchImage, SketchOperation, SketchPoint, SketchProfile, SketchRevolveSettings, SketchSegment, ShellEdges, ShellOpenings, ShellSide, WorkplaneNote, WorkplaneShape, WorkplaneWorkspaceSettings } from "@/types/layerling";
 import { type Vec3, type MeshData, type Cuboid, type ShapeUpdatePatch, type ManifoldSolid, MIN_SHAPE_DIMENSION, resetManifoldRuntime, cleanModelDimension, getManifoldRuntime, meshForShape, appendMeshData, formatTriangleCount, shapeAabb, boundsForShapes, boundsForCuboids, meshAabb, boundsForPositions, quantizedPointKey } from "@/lib/editorMeshCore";
@@ -2133,7 +2145,7 @@ function mcpLoftChange(params: Record<string, unknown>): Partial<LoftMeasures> {
     ["loftBottomWidth", "bottomWidth"], ["loftBottomDepth", "bottomDepth"], ["loftTopWidth", "topWidth"], ["loftTopDepth", "topDepth"],
     ["loftBottomCorner", "bottomCorner"], ["loftTopCorner", "topCorner"], ["loftBottomSides", "bottomSides"], ["loftTopSides", "topSides"],
     ["loftOffsetX", "offsetX"], ["loftOffsetZ", "offsetZ"], ["loftWall", "wall"],
-    ["loftTwist", "twist"], ["loftTiltX", "tiltX"], ["loftTiltZ", "tiltZ"],
+    ["loftTwist", "twist"], ["loftTiltX", "tiltX"], ["loftTiltZ", "tiltZ"], ["loftSmooth", "smooth"],
   ];
   numbers.forEach(([param, key]) => {
     const value = mcpOptionalNumber(params[param]);
@@ -2236,6 +2248,7 @@ function applyMcpThreadSettings(
     threadPitch: settings.pitch,
     threadClearance: settings.clearance,
     threadBoltClearance: settings.boltClearance,
+    threadAxialClearance: settings.axialClearance,
     threadQuality: settings.quality,
     threadHeadHeight: settings.headHeight,
     threadChamfer: settings.chamfer,
@@ -2661,15 +2674,16 @@ export function LayerlingEditor({
   const [sketchMeasurement, setSketchMeasurement] = useState<SketchMeasurement>(null);
   const [editingSketchShapeId, setEditingSketchShapeId] = useState<string | null>(null);
   const [sketchCornerDialog, setSketchCornerDialog] = useState<"fillet" | "chamfer" | null>(null);
+  // The sides of the polygon and star and the inner size of the star, set in the sketch shapes menu (#280).
+  const [sketchShapeOptions, setSketchShapeOptions] = useState<SketchShapeOptions>({
+    sides: SKETCH_POLYGON_DEFAULT_SIDES,
+    innerPercent: SKETCH_STAR_DEFAULT_INNER_PERCENT,
+  });
   // Stroke for sketches (#154): the panel, and the stroked outline shown while drawing.
   const [sketchStrokePanelOpen, setSketchStrokePanelOpen] = useState(false);
   const [sketchStrokePreview, setSketchStrokePreview] = useState<string | null>(null);
   // The points a corner treatment would apply to: one, or several selected ones (#269).
-  const selectedSketchPointIds = useMemo(() => {
-    if (sketchSelection?.kind === "point") return [sketchSelection.id];
-    if (sketchSelection?.kind === "multiple" && sketchSelection.segmentIds.length === 0 && !sketchSelection.imageIds?.length) return sketchSelection.pointIds;
-    return [];
-  }, [sketchSelection]);
+  const selectedSketchPointIds = useMemo(() => sketchSelectedPointIds(sketchSelection), [sketchSelection]);
   const canFilletSketchPoint = useMemo(
     () => selectedSketchPointIds.some((id) => canApplySketchCornerTreatment(sketchProfile, id)),
     [selectedSketchPointIds, sketchProfile],
@@ -4054,7 +4068,8 @@ export function LayerlingEditor({
       // Most edits build a new profile from points and lines only; the stroke (#154) carries over
       // unless the edit sets it - or clears it with `stroke: undefined`.
       const carried = "stroke" in next || !latest?.stroke ? next : { ...next, stroke: latest.stroke };
-      const snapshot = cloneSketchProfile(addLineIntersectionPoints(carried, createLocalId));
+      // Moving shapes over each other makes no shared points where their lines cross (#239); drawing does.
+      const snapshot = cloneSketchProfile(latest && onlyMovesPoints(latest, carried) ? carried : addLineIntersectionPoints(carried, createLocalId));
       setSketchProfile(snapshot);
       if (latest && JSON.stringify(latest) === JSON.stringify(snapshot)) {
         return;
@@ -4215,6 +4230,8 @@ export function LayerlingEditor({
       boltCircle: t("status.sketchTool.boltCircle"),
       triangle: t("status.sketchTool.triangle"),
       hexagon: t("status.sketchTool.hexagon"),
+      polygon: t("sketch.polygon"),
+      star: t("sketch.star"),
       select: t("status.sketchTool.select"),
       refine: t("status.sketchTool.refine"),
       erase: t("status.sketchTool.erase"),
@@ -4312,7 +4329,7 @@ export function LayerlingEditor({
 
   const addSketchPrimitive = useCallback(
     (primitive: SketchPrimitive, center: { x: number; z: number } = { x: 0, z: 0 }) => {
-      const { points, segments } = sketchPrimitiveGeometry(primitive, center, createLocalId);
+      const { points, segments } = sketchPrimitiveGeometry(primitive, center, createLocalId, undefined, sketchShapeOptions);
 
       const next: SketchProfile = {
         ...sketchProfile,
@@ -4324,7 +4341,7 @@ export function LayerlingEditor({
       setSketchSelection(null);
       setSketchTool("select");
     },
-    [commitSketchProfile, sketchProfile],
+    [commitSketchProfile, sketchProfile, sketchShapeOptions],
   );
 
   const pressSketchPoint = useCallback(
@@ -4620,6 +4637,36 @@ export function LayerlingEditor({
   const curveSketchSegmentAction = useCallback((id: string) => {
     const next = curveSketchSegment(sketchProfile, id);
     if (next) commitSketchProfile(next, t("status.sketchLineCurved"));
+  }, [commitSketchProfile, sketchProfile]);
+
+  /** Curves every selected straight line at once, one undo step (#283). */
+  const curveSketchSegmentsAction = useCallback((ids: string[]) => {
+    let next = sketchProfile;
+    let count = 0;
+    for (const id of ids) {
+      const segment = next.segments.find((entry) => entry.id === id);
+      if (!segment || isSegmentCurved(next, segment)) continue;
+      const curved = curveSketchSegment(next, id);
+      if (curved) {
+        next = curved;
+        count += 1;
+      }
+    }
+    if (count > 0) commitSketchProfile(next, count === 1 ? t("status.sketchLineCurved") : t("status.sketchLinesCurved", { count }));
+  }, [commitSketchProfile, sketchProfile]);
+
+  /** Makes every selected curved line straight again at once (#283). */
+  const straightenSketchSegmentsAction = useCallback((ids: string[]) => {
+    let next = sketchProfile;
+    let count = 0;
+    for (const id of ids) {
+      const straightened = straightenSketchSegment(next, id);
+      if (straightened) {
+        next = straightened;
+        count += 1;
+      }
+    }
+    if (count > 0) commitSketchProfile(next, count === 1 ? t("status.sketchLineStraightened") : t("status.sketchLinesStraightened", { count }));
   }, [commitSketchProfile, sketchProfile]);
 
   const straightenSketchSegmentAction = useCallback((id: string) => {
@@ -5044,7 +5091,7 @@ export function LayerlingEditor({
   }, [commitShapes, hasSelection, selectedIds, shapes]);
 
   /*
-   * darkwingbreydins Forenwunsch: wie in Tinkercad soll ein Duplizieren nach
+   * darkwingbreydins Forenwunsch: wie in similar tools soll ein Duplizieren nach
    * dem Verschieben eines vorigen Duplikats denselben Versatz wiederholen, so
    * dass wiederholtes Duplizieren allein eine Lochreihe ergibt. Das Ziel ist
    * eine reine Sitzungserinnerung, kein Projektfeld: sie haengt an der
@@ -6567,6 +6614,23 @@ export function LayerlingEditor({
     [commitShapes, hasSelection, selectedIds, shapes],
   );
 
+  /** The T key (#276): every selected part see-through, or, when any already is, every part opaque. */
+  const toggleSelectionTransparency = useCallback(() => {
+    if (!hasSelection) {
+      setNotice(t("status.selectShapeFirst"));
+      return;
+    }
+    const selected = new Set(selectedIds);
+    const eligible = (shape: WorkplaneShape) => selected.has(shape.id) && !isNonSolidShapeKind(shape.kind);
+    const transparent = nextSelectionTransparency(shapes.filter(eligible));
+    if (transparent === null) return;
+    commitShapes(
+      shapes.map((shape) => (eligible(shape) && !shape.locked && !shape.hole ? { ...shape, transparent: transparent || undefined } : shape)),
+      selectedIds,
+      transparent ? t("status.selectionTransparent") : t("status.selectionOpaque"),
+    );
+  }, [commitShapes, hasSelection, selectedIds, shapes]);
+
   /** One colour for every selected part (#183); locked ones stay as they are, a group shows it whole. */
   const setSelectionColor = useCallback(
     (color: string) => {
@@ -7016,7 +7080,7 @@ export function LayerlingEditor({
     commitShapes([...shapesRef.current.filter((shape) => !selected.has(shape.id)), editableGroup], editableGroup.id, t("status.groupedMany", { count: selectedShapes.length }));
   }, [commitShapes, selectedIds, selectedShapes]);
 
-  /** Tinkercad's bundle (Ctrl+B): the parts move, turn and scale together and stay what they are. */
+  /** the usual bundle (Ctrl+B): the parts move, turn and scale together and stay what they are. */
   const bundleSelected = useCallback(() => {
     if (selectedShapes.length < 2) {
       setNotice(t("status.selectTwoToBundle"));
@@ -7569,7 +7633,7 @@ export function LayerlingEditor({
   }, [buildSectionSvg, projectName]);
 
   // Der Dateiimport steht weiter unten; die MCP-Aktion nimmt denselben Weg.
-  const importFilesRef = useRef<((files: File[], fileHandle?: LylFileHandle) => Promise<{ importedIds: string[]; failures: Array<{ fileName: string; reason: string }> }>) | null>(null);
+  const importFilesRef = useRef<((files: File[], fileHandle?: LylFileHandle, options?: { keepSvgPage?: boolean }) => Promise<{ importedIds: string[]; failures: Array<{ fileName: string; reason: string }> }>) | null>(null);
 
   // Custom shapes (#109): kept in this browser (IndexedDB) and, where the
   // shared store is on, in its "Custom shapes" folder. Shown on top of the
@@ -8145,6 +8209,7 @@ export function LayerlingEditor({
             threadPitch: threaded.threadPitch,
             threadClearance: threaded.threadClearance,
             threadBoltClearance: threaded.threadBoltClearance,
+            threadAxialClearance: threaded.threadAxialClearance,
             threadQuality: threaded.threadQuality,
             threadHeadHeight: threaded.threadHeadHeight,
             threadChamfer: threaded.threadChamfer,
@@ -9092,7 +9157,8 @@ export function LayerlingEditor({
           : Uint8Array.from(atob(params.base64 as string), (char) => char.charCodeAt(0));
         const files = [new File([bytes as BlobPart], fileName)];
         if (typeof params.mtl === "string") files.push(new File([params.mtl], fileName.replace(/\.[^.]+$/, "") + ".mtl"));
-        const result = await importer(files);
+        // Through MCP the answer does not depend on a setting of the browser: only a wish keeps the page.
+        const result = await importer(files, undefined, { keepSvgPage: params.keepPagePosition === true });
         if (!result.importedIds.length) throw new Error(result.failures.map((failure) => `${failure.fileName}: ${failure.reason}`).join("; ") || "Nothing was imported");
         const imported = currentShapes().filter((shape) => result.importedIds.includes(shape.id));
         return {
@@ -9147,6 +9213,13 @@ export function LayerlingEditor({
           const origin = onFace.reduce((sum, v) => ({ x: sum.x + v[0] / onFace.length, y: sum.y + v[1] / onFace.length, z: sum.z + v[2] / onFace.length }), { x: 0, y: 0, z: 0 });
           const tangent = new THREE.Vector3(side === "left" || side === "right" ? 0 : 1, 0, side === "left" || side === "right" ? 1 : 0).applyQuaternion(quaternion);
           placed = placementWorkplaneFromSurface(origin, { x: normal.x, y: normal.y, z: normal.z }, { x: tangent.x, y: tangent.y, z: tangent.z }, params.flip === true, true);
+          setActivePlacementWorkplane(placed, "shape");
+        }
+        // On the plane of the section view, as the button there does (#154).
+        if (params.onSection === true) {
+          const section = window.layerlingSectionView?.({}).settings;
+          if (!section?.enabled) throw new Error("Switch the section view on first (layerling_section_view), then the workplane can lie on its cut");
+          placed = sectionPlacementWorkplane(section);
           setActivePlacementWorkplane(placed, "shape");
         }
         if (params.reset === true) setActivePlacementWorkplane(horizontalPlacementWorkplane(), "base");
@@ -9529,7 +9602,7 @@ export function LayerlingEditor({
   const exportDesign = useCallback(async (format: DirectExportFormat, exportName: string, chooseFile = false) => {
     const source = exportSource();
     const selectionScoped = source.selection;
-    // Ausgeblendetes bleibt draussen, wie bei Tinkercad: ein beiseitegelegtes
+    // Ausgeblendetes bleibt draussen, wie bei vergleichbaren Programmen: ein beiseitegelegtes
     // Teil soll nicht unbemerkt mitgedruckt werden (Discussion #80).
     const { visible: sourceShapes, hiddenNote } = visibleExportShapes(source.shapes);
     const exportable = sourceShapes.filter((shape) => !shape.hole && !isNonSolidShapeKind(shape.kind));
@@ -10104,7 +10177,7 @@ export function LayerlingEditor({
     }
   }, [commitShapes]);
 
-  const importFiles = useCallback(async (selected: File[], fileHandle?: LylFileHandle): Promise<{ importedIds: string[]; failures: Array<{ fileName: string; reason: string }> }> => {
+  const importFiles = useCallback(async (selected: File[], fileHandle?: LylFileHandle, importOptions?: { keepSvgPage?: boolean }): Promise<{ importedIds: string[]; failures: Array<{ fileName: string; reason: string }> }> => {
     const none = { importedIds: [] as string[], failures: [] as Array<{ fileName: string; reason: string }> };
     if (!selected.length) return none;
     const projectFiles = selected.filter((file) => /\.(lyl|skf)$/i.test(file.name));
@@ -10126,6 +10199,7 @@ export function LayerlingEditor({
     const sourceProjectId = projectInfoRef.current.projectId;
     const result = await importModelFiles(selected, {
       cancelled: () => projectInfoRef.current.projectId !== sourceProjectId,
+      svgKeepPagePosition: importOptions?.keepSvgPage,
       // An SVG comes in as a sketch body, its fill changeable afterwards (#197); should the
       // kernel build it differently from the mesh, the mesh stays.
       svgAsSketch: async (mesh, profile) => {
@@ -10206,7 +10280,7 @@ export function LayerlingEditor({
       const selected = new Set(selectedIds);
       // Right and up on the keys mean right and away on the screen: each picks
       // the workplane axis that points that way most, so after turning the
-      // view the keys still go where the arrows point (as in Tinkercad).
+      // view the keys still go where the arrows point (as in similar tools).
       const { xStep, zStep } = screenAlignedNudge(placementWorkplane, deltaX, deltaZ, window.layerlingScreenDirections?.());
       const translation = {
         x: placementWorkplane.xAxis.x * xStep + placementWorkplane.zAxis.x * zStep,
@@ -10462,7 +10536,7 @@ export function LayerlingEditor({
         return;
       }
 
-      // C without Ctrl picks the selection up, as Tinkercad's Cruise: it follows the pointer over
+      // C without Ctrl picks the selection up, as the usual Cruise: it follows the pointer over
       // the faces of other bodies and a click sets it down there (#195).
       if (!shortcut && !event.altKey && !event.shiftKey && key === "c" && hasSelection) {
         event.preventDefault();
@@ -10603,6 +10677,9 @@ export function LayerlingEditor({
       } else if (key === "s") {
         event.preventDefault();
         setSelectionHoleMode(false);
+      } else if (key === "t" && !shortcut && !event.altKey && hasSelection) {
+        event.preventDefault();
+        toggleSelectionTransparency();
       } else if (key === "m") {
         event.preventDefault();
         toggleMirrorMode();
@@ -10665,6 +10742,7 @@ export function LayerlingEditor({
     setSelectionHoleMode,
     showHidden,
     toggleAlignMode,
+    toggleSelectionTransparency,
     toggleHidden,
     toggleMirrorMode,
     edgeModifier,
@@ -10808,6 +10886,8 @@ export function LayerlingEditor({
         onEditSketch={beginSketchEdit}
         onSketchTool={setActiveSketchTool}
         onSketchPrimitive={(primitive) => addSketchPrimitive(primitive, { x: 0, z: 0 })}
+        sketchShapeOptions={sketchShapeOptions}
+        onSketchShapeOptions={setSketchShapeOptions}
         onSketchImage={() => {
           if (sketchTool !== "select") {
             setNotice(t("status.chooseSelectFirst"));
@@ -10984,6 +11064,8 @@ export function LayerlingEditor({
             onInsertPoint={insertSketchPoint}
             onSetPointMode={setSketchPointMode}
             onCurveSegment={curveSketchSegmentAction}
+            onCurveSegments={curveSketchSegmentsAction}
+            onStraightenSegments={straightenSketchSegmentsAction}
             onStraightenSegment={straightenSketchSegmentAction}
             onSetSegmentConstruction={setSketchSegmentConstruction}
             onApplyFillet={applySketchFilletHandler}
@@ -11488,6 +11570,44 @@ function SketchReferenceIcon({ name }: { name: SketchReferenceIconName }) {
   );
 }
 
+type SketchShapeOptions = { sides: number; innerPercent: number };
+
+/** A number in the sketch shapes menu: typed freely, tidied to its limits when it is left. */
+function SketchShapeNumberField({ label, value, min, max, suffix, normalize, onChange }: {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  suffix?: string;
+  normalize: (value: unknown) => number;
+  onChange: (value: number) => void;
+}) {
+  const [draft, setDraft] = useState(String(value));
+  useEffect(() => setDraft(String(value)), [value]);
+  const commit = () => {
+    const next = normalize(draft.replace(",", "."));
+    setDraft(String(next));
+    onChange(next);
+  };
+  return (
+    <label>
+      <span>{label}</span>
+      <input
+        type="text"
+        inputMode="decimal"
+        aria-label={label}
+        title={`${min} - ${max}`}
+        value={draft}
+        onFocus={(event) => event.currentTarget.select()}
+        onChange={(event) => setDraft(event.currentTarget.value)}
+        onBlur={commit}
+        onKeyDown={(event) => { if (event.key === "Enter") event.currentTarget.blur(); }}
+      />
+      {suffix ? <span className="unit">{suffix}</span> : null}
+    </label>
+  );
+}
+
 const sketchShapeMenuItems = [
   { primitive: "rectangle", label: "sketch.rectangle", icon: SquareIcon },
   { primitive: "circle", label: "sketch.circle", icon: CircleIcon },
@@ -11496,6 +11616,8 @@ const sketchShapeMenuItems = [
   { primitive: "pieSlice", label: "sketch.pieSlice", icon: SketchPieSliceIcon },
   { primitive: "triangle", label: "sketch.triangle", icon: TriangleIcon },
   { primitive: "hexagon", label: "sketch.hexagon", icon: HexagonIcon },
+  { primitive: "polygon", label: "sketch.polygon", icon: PentagonIcon },
+  { primitive: "star", label: "sketch.star", icon: StarIcon },
   { primitive: "boltCircle", label: "sketch.boltCircle", icon: SketchBoltCircleIcon },
 ] satisfies Array<{ primitive: SketchPrimitive; label: MessageKey; icon: ComponentType<SVGProps<SVGSVGElement>> }>;
 
@@ -11597,6 +11719,8 @@ function SecondaryToolbar({
   onEditSketch,
   onSketchTool,
   onSketchPrimitive,
+  sketchShapeOptions,
+  onSketchShapeOptions,
   onSketchImage,
   onSketchCopy,
   onSketchPaste,
@@ -11709,6 +11833,8 @@ function SecondaryToolbar({
   onEditSketch: () => void;
   onSketchTool: (tool: SketchTool) => void;
   onSketchPrimitive: (primitive: SketchPrimitive) => void;
+  sketchShapeOptions: SketchShapeOptions;
+  onSketchShapeOptions: (options: SketchShapeOptions) => void;
   onSketchImage: () => void;
   onSketchCopy: () => void;
   onSketchPaste: () => void;
@@ -12416,16 +12542,16 @@ function SecondaryToolbar({
             className={`action-icon-button ${noteMode ? "active" : ""}`}
             aria-label={t("editor.tool.note")}
             aria-pressed={noteMode}
-            title={t("editor.tool.note")}
+            title={`${t("editor.tool.note")} (${COMMAND_SHORTCUTS.note})`}
             onClick={onNoteTool}
             disabled={historyViewActive}
           >
             <ToolbarNoteIcon />
           </button>
-          <button className="action-icon-button" aria-label={t("editor.import")} title={t("editor.import")} onClick={() => onTopPanel("import")} disabled={historyViewActive}>
+          <button className="action-icon-button" aria-label={t("editor.import")} title={`${t("editor.import")} (${COMMAND_SHORTCUTS.import})`} onClick={() => onTopPanel("import")} disabled={historyViewActive}>
             <ToolbarImportIcon />
           </button>
-          <button className="action-icon-button" aria-label={t("editor.export")} title={t("editor.export")} onClick={() => onTopPanel("export")}>
+          <button className="action-icon-button" aria-label={t("editor.export")} title={`${t("editor.export")} (${COMMAND_SHORTCUTS.export})`} onClick={() => onTopPanel("export")}>
             <ToolbarVectorExportIcon />
           </button>
           <button className="action-icon-button" aria-label={t("editor.workspaceSettings")} title={t("editor.workspaceSettings")} onClick={() => window.dispatchEvent(new Event("layerling:open-workspace-settings"))}>
@@ -12514,6 +12640,25 @@ function SecondaryToolbar({
                           </button>
                         ))}
                       </div>
+                      <div className="sketch-shape-options">
+                        <SketchShapeNumberField
+                          label={t("sketch.polygonSides")}
+                          value={sketchShapeOptions.sides}
+                          min={SKETCH_POLYGON_MIN_SIDES}
+                          max={SKETCH_POLYGON_MAX_SIDES}
+                          normalize={normalizePolygonSides}
+                          onChange={(sides) => onSketchShapeOptions({ ...sketchShapeOptions, sides })}
+                        />
+                        <SketchShapeNumberField
+                          label={t("sketch.starInner")}
+                          value={sketchShapeOptions.innerPercent}
+                          min={SKETCH_STAR_MIN_INNER_PERCENT}
+                          max={SKETCH_STAR_MAX_INNER_PERCENT}
+                          suffix="%"
+                          normalize={normalizeStarInnerPercent}
+                          onChange={(innerPercent) => onSketchShapeOptions({ ...sketchShapeOptions, innerPercent })}
+                        />
+                      </div>
                     </div>
                   ) : null}
                 </div>
@@ -12574,10 +12719,10 @@ function SecondaryToolbar({
                 <div className="toolbar-section sketch-history-section" data-group="history">
                   <div className="toolbar-section-label">{t("editor.group.history")}</div>
                   <div className="toolbar-section-tools">
-                    <button className={`toolbar-icon ${sketchCanUndo ? "" : "disabled"}`} type="button" aria-label={t("sketch.undo")} title={t("status.undo")} onClick={onSketchUndo} disabled={!sketchCanUndo}>
+                    <button className={`toolbar-icon ${sketchCanUndo ? "" : "disabled"}`} type="button" aria-label={t("sketch.undo")} title={`${t("status.undo")} (${COMMAND_SHORTCUTS["sketch-undo"]})`} onClick={onSketchUndo} disabled={!sketchCanUndo}>
                       <ToolbarUndoIcon />
                     </button>
-                    <button className={`toolbar-icon ${sketchCanRedo ? "" : "disabled"}`} type="button" aria-label={t("sketch.redo")} title={t("status.redo")} onClick={onSketchRedo} disabled={!sketchCanRedo}>
+                    <button className={`toolbar-icon ${sketchCanRedo ? "" : "disabled"}`} type="button" aria-label={t("sketch.redo")} title={`${t("status.redo")} (${COMMAND_SHORTCUTS["sketch-redo"]})`} onClick={onSketchRedo} disabled={!sketchCanRedo}>
                       <ToolbarRedoIcon />
                     </button>
                   </div>
@@ -12789,6 +12934,8 @@ function TopActionPanel({
   onPickInsertProjectFile: () => void;
   workspaceHistoryLimit: LylHistoryLimit;
 }) {
+  const [keepSvgPage, setKeepSvgPage] = useState(false);
+  useEffect(() => setKeepSvgPage(readKeepSvgPage()), []);
   const [exportFormat, setExportFormat] = useState<ExportFormat>("stl");
   const [exportName, setExportName] = useState(projectName);
   const previousProjectNameRef = useRef(projectName);
@@ -12949,6 +13096,17 @@ function TopActionPanel({
             <strong>{t("import.dropZone")}</strong>
             <span>{t("import.dropZoneHint")}</span>
           </button>
+          <label className="import-option" title={t("import.keepSvgPageHint")}>
+            <input
+              type="checkbox"
+              checked={keepSvgPage}
+              onChange={(event) => {
+                setKeepSvgPage(event.currentTarget.checked);
+                storeKeepSvgPage(event.currentTarget.checked);
+              }}
+            />
+            <span>{t("import.keepSvgPage")}</span>
+          </label>
         </div>
       ) : null}
       {panel === "export" ? (

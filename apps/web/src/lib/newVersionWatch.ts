@@ -1,4 +1,4 @@
-import { compareVersions, type WhatsNewText } from "@/lib/whatsNew";
+import { cleanText, compareVersions, isText as isLocalizedText, type WhatsNewText } from "@/lib/whatsNew";
 
 /**
  * An open page noticing that layerling was updated behind its back. Every export carries a
@@ -33,8 +33,8 @@ export function parseVersionInfo(value: unknown): VersionInfo | null {
       if (typeof item !== "object" || item === null) return [];
       const { version: entryVersion, title } = item as Record<string, unknown>;
       const text = title as Record<string, unknown> | null;
-      if (!isText(entryVersion) || typeof text !== "object" || text === null || !isText(text.de) || !isText(text.en)) return [];
-      return [{ version: entryVersion, title: { de: text.de, en: text.en, ...(isText(text.cs) ? { cs: text.cs } : {}) } }];
+      if (!isText(entryVersion) || typeof text !== "object" || text === null || !isLocalizedText(text)) return [];
+      return [{ version: entryVersion, title: cleanText(text) }];
     }),
   };
 }

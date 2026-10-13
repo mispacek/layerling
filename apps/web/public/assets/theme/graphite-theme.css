@@ -238,6 +238,14 @@ html:where([data-theme="dark"][data-palette="graphite"]),
   border-top: 1px solid #e1e1e1;
 }
 
+:where(html[data-theme="dark"][data-palette="graphite"]) .dashboard-trademark {
+  color: #757575;
+}
+
+html[data-theme="dark"]:where([data-palette="graphite"]) .dashboard-trademark {
+  color: #8d8d8d;
+}
+
 :where(html[data-theme="dark"][data-palette="graphite"]) .dashboard-legal-dot {
   color: #aaaaaa;
 }
@@ -280,25 +288,6 @@ html:where([data-theme="dark"][data-palette="graphite"]),
 
 :where(html[data-theme="dark"][data-palette="graphite"]) .theme-check {
   color: #cf710f;
-}
-
-:where(html[data-theme="dark"][data-palette="graphite"]) .language-switch button {
-  color: #676767;
-}
-
-:where(html[data-theme="dark"][data-palette="graphite"]) .language-switch button:hover,
-:where(html[data-theme="dark"][data-palette="graphite"]) .language-switch button:focus-visible {
-  color: #9a5a06;
-  background: #e9e9e9;
-}
-
-:where(html[data-theme="dark"][data-palette="graphite"]) .language-switch button.active {
-  color: #414141;
-  background: #e1e1e1;
-}
-
-:where(html[data-theme="dark"][data-palette="graphite"]) .language-switch svg {
-  border: 1px solid rgba(65, 65, 65, 0.25);
 }
 
 :where(html[data-theme="dark"][data-palette="graphite"]) .dashboard-legal a.dashboard-legal-sponsor {
@@ -2337,6 +2326,18 @@ html:where([data-theme="dark"][data-palette="graphite"])[data-toolbar-size="larg
   box-shadow: inset 0 0 0 1px rgba(166, 86, 0, 0.12), 0 4px 14px rgba(54, 54, 54, 0.1);
 }
 
+:where(html[data-theme="dark"][data-palette="graphite"]) .import-option {
+  color: #474747;
+}
+
+:where(html[data-theme="dark"][data-palette="graphite"]) .import-option input {
+  accent-color: #b3680f;
+}
+
+html[data-theme="dark"]:where([data-palette="graphite"]) .import-option {
+  color: #e4e4e4;
+}
+
 :where(html[data-theme="dark"][data-palette="graphite"]) .import-drop-zone svg {
   color: #404040;
 }
@@ -2406,6 +2407,48 @@ html:where([data-theme="dark"][data-palette="graphite"])[data-toolbar-size="larg
 :where(html[data-theme="dark"][data-palette="graphite"]) .sketch-primitive-center {
   fill: #ffffff;
   stroke: rgba(123, 63, 0, 0.95);
+}
+
+:where(html[data-theme="dark"][data-palette="graphite"]) .sketch-shape-options {
+  border-top: 1px solid #e4e4e4;
+}
+
+:where(html[data-theme="dark"][data-palette="graphite"]) .sketch-shape-options label {
+  color: #474747;
+}
+
+:where(html[data-theme="dark"][data-palette="graphite"]) .sketch-shape-options input {
+  color: #575757;
+  background: #ffffff;
+  border: 1px solid #cccccc;
+  outline: 0;
+}
+
+:where(html[data-theme="dark"][data-palette="graphite"]) .sketch-shape-options input:focus {
+  border-color: #ea953d;
+  box-shadow: 0 0 0 3px rgba(161, 83, 0, 0.14);
+}
+
+:where(html[data-theme="dark"][data-palette="graphite"]) .sketch-shape-options .unit {
+  color: #757575;
+}
+
+html[data-theme="dark"]:where([data-palette="graphite"]) .sketch-shape-options {
+  border-color: #4b4b4b;
+}
+
+html[data-theme="dark"]:where([data-palette="graphite"]) .sketch-shape-options label {
+  color: #e4e4e4;
+}
+
+html[data-theme="dark"]:where([data-palette="graphite"]) .sketch-shape-options input {
+  color: #e4e4e4;
+  background: #272727;
+  border-color: #4b4b4b;
+}
+
+html[data-theme="dark"]:where([data-palette="graphite"]) .sketch-shape-options .unit {
+  color: #8d8d8d;
 }
 
 :where(html[data-theme="dark"][data-palette="graphite"]) .sketch-geometry-selection-box {
@@ -6599,25 +6642,6 @@ html[data-theme="dark"]:where([data-palette="graphite"]) .shortcuts-or {
 
 html[data-theme="dark"]:where([data-palette="graphite"]) .guide-section li {
   color: #b9b9b9;
-}
-
-html[data-theme="dark"]:where([data-palette="graphite"]) .language-switch button {
-  color: #7f7f7f;
-}
-
-html[data-theme="dark"]:where([data-palette="graphite"]) .language-switch button:hover,
-html[data-theme="dark"]:where([data-palette="graphite"]) .language-switch button:focus-visible {
-  color: #f3a452;
-  background: #2d2d2d;
-}
-
-html[data-theme="dark"]:where([data-palette="graphite"]) .language-switch button.active {
-  color: #ebebeb;
-  background: #333333;
-}
-
-html[data-theme="dark"]:where([data-palette="graphite"]) .language-switch svg {
-  border-color: rgba(235, 235, 235, 0.3);
 }
 
 html[data-theme="dark"]:where([data-palette="graphite"]) .workspace-divider {

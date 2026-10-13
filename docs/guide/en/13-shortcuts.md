@@ -16,6 +16,8 @@ Can't find a tool? Press [[Ctrl]]+[[K]] or click the magnifying glass in the {{u
 - The search understands the English and the German word alike and ignores capital letters and umlauts: "aushoehlen" finds {{ui:editor.tool.hollow}}.
 - Every entry shows the keys that do the same and the area of the toolbar it lives in, so you learn where it is.
 - Entries that are greyed out cannot run right now, mostly because nothing is selected. They stay in the list so the search still tells you where the tool is.
+
+The guide you are reading has a search box too, at the top of every page: type a word or two and it lists the sections that contain all of them, with the matching words marked. Click one, or press [[Enter]] for the first, to jump straight there.
 - A shape's name adds that shape to the workplane, just like clicking it in the shapes menu.
 - With an empty field the search lists the commands you used last at the top.
 - The name of a body in your design finds that body and selects it, which helps in a design with many parts. Bodies only appear once you type.

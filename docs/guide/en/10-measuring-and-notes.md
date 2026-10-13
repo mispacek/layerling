@@ -58,6 +58,7 @@ A note records what the geometry does not say: "This screw is 0.3 mm too tight",
 - If you place it **beside**, it stays on the workplane ({{ui:note.free}}).
 - {{ui:note.detach}} releases an attached note from the body.
 - Dragging moves the note, a click opens it for editing.
+- While you write, [[Enter]] keeps the text and [[Esc]] puts it back to how it was before you started; [[Shift]]+[[Enter]] starts a new line.
 
 Notes are saved in the design, appear in no export and can be shown or hidden with {{ui:visibility.notes}}.
 

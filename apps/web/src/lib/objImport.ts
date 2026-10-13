@@ -223,7 +223,7 @@ export function parseMtlColors(source: string): Map<string, string> {
 }
 
 /**
- * Tinkercad nennt seine Materialien nach der Farbe: "color_16089887" ist die
+ * Manche Programme nennen ihre Materialien nach der Farbe: "color_16089887" ist die
  * Zahl 0xF58D1F. Das hilft, wenn die .mtl nicht mitgekommen ist.
  */
 function colorFromMaterialName(name: string) {

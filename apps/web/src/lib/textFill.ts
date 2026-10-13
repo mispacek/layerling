@@ -10,7 +10,7 @@ import { createTextGeometry, keyringEarRadius, textGlyphShapes, textKeyringCente
 import type { TextEdge, TextKeyringSide, WorkplaneShape } from "@/types/layerling";
 
 /**
- * Fill modes for the Text shape (#215, as Tinkercad's): instead of the filled letters, a line
+ * Fill modes for the Text shape (#215, as similar tools's): instead of the filled letters, a line
  * round them - outside, inside or centred on their outline - the letters widened by that line
  * ("Wider", a base layer for a multicolour name tag), and the silhouette without the counters.
  * The letters are the same glyph outlines the edge tool uses, flattened to points at the

@@ -89,7 +89,7 @@ function parseFractionInput(value: string) {
 }
 
 /**
- * Inches as a mixed number the way Tinkercad prints them: 1.625 becomes "1⅝",
+ * Inches as a mixed number the way andere Programme prints them: 1.625 becomes "1⅝",
  * 0.1875 "3/16". The value is rounded to the nearest 1/64 in, so this is a
  * display format; typed decimals keep their exact value underneath.
  */
@@ -263,7 +263,7 @@ export function showsInchFractions(workspace: { inchFormat?: WorkplaneWorkspaceS
   return workspace.inchFormat !== "decimal";
 }
 
-/** Millimetres printed in the workspace unit; inches as fractions (1⅝) like Tinkercad, or as decimals. */
+/** Millimetres printed in the workspace unit; inches as fractions (1⅝) like similar tools, or as decimals. */
 export function formatLengthMm(value: number, accuracy: number) {
   const zeroThreshold = 0.5 * 10 ** -accuracy;
   const shown = millimetersToDisplay(value, lengthUnit);

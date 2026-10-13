@@ -54,7 +54,7 @@ describe("placeColoredParts", () => {
 });
 
 describe("zipHoldsDesigns", () => {
-  it("tells a backup from Tinkercad's OBJ ZIP", async () => {
+  it("tells a backup from another tool's OBJ ZIP", async () => {
     const { zipSync, strToU8 } = await import("fflate");
     const { zipHoldsDesigns } = await import("@/lib/projectBackup");
     expect(zipHoldsDesigns(zipSync({ "Entwurf.lyl": strToU8("x") }))).toBe(true);

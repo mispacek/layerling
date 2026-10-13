@@ -7,7 +7,7 @@ import type { WorkplaneShape } from "@/types/layerling";
 type Vec = { x: number; y: number; z: number };
 
 /**
- * Tinkercad's Cruise for parts already placed (#195): the selection is set down on a face - its
+ * the usual Cruise for parts already placed (#195): the selection is set down on a face - its
  * underside (the bottom of the leading part, as that part stands) turned onto the face and its
  * foot, the middle of that underside, on the point. The leading part lines up with the face as a
  * new shape dropped there would, keeping only its own turn about its up axis - so its edges run

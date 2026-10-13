@@ -2,7 +2,7 @@ import { DEFAULT_SKETCH_STROKE, normalizeSketchStroke } from "@/lib/sketchStroke
 import type { SketchStroke, SketchStrokeAlign } from "@/types/layerling";
 
 /**
- * The fill of a plain text in one list, as Tinkercad names it (#215): the filled letters, a line
+ * The fill of a plain text in one list, as similar tools name it (#215): the filled letters, a line
  * centred on their outline, a line outside it and a line inside it - the stroke aligns the text
  * fill modes already have. "Wider" is the filled letters grown by the line width, so it reads as
  * filled here and has its own switch.
@@ -36,7 +36,7 @@ export function textStrokeWider(wider: boolean, textStroke: unknown): SketchStro
 
 /**
  * Whether a line's settings - its width and its corners - stand right under the list, as in
- * Tinkercad: for Outline, Outer line and Inner line. Filled has no line; "Wider" keeps its
+ * similar tools: for Outline, Outer line and Inner line. Filled has no line; "Wider" keeps its
  * width there and its corners under "More", next to its switch.
  */
 export function textLineSettingsInView(textStroke: unknown): boolean {

@@ -3,10 +3,10 @@
 import { Sparkles, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { GuideHelpLink } from "@/components/GuideHelpLink";
-import { t } from "@/lib/i18n";
+import { localizedText, t } from "@/lib/i18n";
 import { useLanguage } from "@/lib/useLanguage";
 import type { WhatsNewView } from "@/lib/useWhatsNew";
-import { whatsNewBefore, whatsNewText, type WhatsNewEntry } from "@/lib/whatsNew";
+import { whatsNewBefore, type WhatsNewEntry } from "@/lib/whatsNew";
 
 /** The versions with their highlights, in the interface language. */
 export function WhatsNewList({ entries }: { entries: readonly WhatsNewEntry[] }) {
@@ -19,8 +19,8 @@ export function WhatsNewList({ entries }: { entries: readonly WhatsNewEntry[] })
           <ul>
             {entry.items.map((item) => (
               <li key={item.title.en}>
-                <strong>{whatsNewText(item.title, language)}</strong>
-                <span>{whatsNewText(item.body, language)}</span>
+                <strong>{localizedText(item.title, language)}</strong>
+                <span>{localizedText(item.body, language)}</span>
               </li>
             ))}
           </ul>

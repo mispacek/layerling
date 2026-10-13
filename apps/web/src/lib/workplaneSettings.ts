@@ -272,8 +272,11 @@ export function normalizeShapeCustomizations(value: unknown, fallback: ShapeCust
       height: optionalShapeDimension(source.height, fallbackEntry?.height),
       maxDimension: optionalShapeDimension(source.maxDimension, fallbackEntry?.maxDimension),
     };
-    if (kind === "sphere" || kind === "halfSphere") {
+    if (kind === "sphere" || kind === "halfSphere" || kind === "torus") {
       entry.steps = optionalShapeNumber(source.steps, fallbackEntry?.steps, 6, MAX_HIGH_RESOLUTION_STEPS, true);
+    }
+    if (kind === "torus") {
+      entry.sides = optionalShapeNumber(source.sides, fallbackEntry?.sides, 12, MAX_HIGH_RESOLUTION_SIDES, true);
     }
     if (kind === "cylinder" || kind === "ellipse" || kind === "slot" || kind === "cone" || kind === "tube" || kind === "ring" || kind === "counterbore" || kind === "countersink" || kind === "teardrop") {
       entry.sides = optionalShapeNumber(source.sides, fallbackEntry?.sides, 3, MAX_HIGH_RESOLUTION_SIDES, true);
@@ -344,6 +347,7 @@ export function normalizeShapeCustomizations(value: unknown, fallback: ShapeCust
         entry[key] = optionalShapeNumber(source[key], fallbackEntry?.[key], 0, MAX_CUSTOM_SHAPE_DIMENSION / 2);
       }
       entry.loftTwist = optionalShapeNumber(source.loftTwist, fallbackEntry?.loftTwist, -360, 360);
+      entry.loftSmooth = optionalShapeNumber(source.loftSmooth, fallbackEntry?.loftSmooth, 0, 1);
       entry.loftTiltX = optionalShapeNumber(source.loftTiltX, fallbackEntry?.loftTiltX, -45, 45);
       entry.loftTiltZ = optionalShapeNumber(source.loftTiltZ, fallbackEntry?.loftTiltZ, -45, 45);
       for (const key of ["loftBottomSides", "loftTopSides"] as const) {
@@ -428,6 +432,7 @@ export function normalizeShapeCustomizations(value: unknown, fallback: ShapeCust
       entry.threadPitch = optionalShapeNumber(source.threadPitch, fallbackEntry?.threadPitch, 0.2, 12);
       entry.threadClearance = optionalShapeNumber(source.threadClearance, fallbackEntry?.threadClearance, 0, 1.5);
       entry.threadBoltClearance = optionalShapeNumber(source.threadBoltClearance, fallbackEntry?.threadBoltClearance, 0, 1);
+      entry.threadAxialClearance = optionalShapeNumber(source.threadAxialClearance, fallbackEntry?.threadAxialClearance, 0, 1);
       entry.threadQuality = optionalShapeNumber(source.threadQuality, fallbackEntry?.threadQuality, 12, 96, true);
       entry.threadChamfer = optionalShapeNumber(source.threadChamfer, fallbackEntry?.threadChamfer, 0, 40);
       entry.threadChamferBottom = optionalShapeNumber(source.threadChamferBottom, fallbackEntry?.threadChamferBottom, 0, 40);
@@ -440,7 +445,7 @@ export function normalizeShapeCustomizations(value: unknown, fallback: ShapeCust
       entry.centerHoleSize = optionalShapeNumber(source.centerHoleSize, fallbackEntry?.centerHoleSize, 0, MAX_CUSTOM_SHAPE_DIMENSION);
       entry.gearType = source.gearType === undefined
         ? fallbackEntry?.gearType
-        : source.gearType === "spur" || source.gearType === "helical" || source.gearType === "bevel" || source.gearType === "internal" || source.gearType === "rack"
+        : source.gearType === "spur" || source.gearType === "helical" || source.gearType === "herringbone" || source.gearType === "bevel" || source.gearType === "internal" || source.gearType === "rack"
           ? source.gearType
           : fallbackEntry?.gearType;
       entry.helixAngle = optionalShapeNumber(source.helixAngle, fallbackEntry?.helixAngle, -45, 45);
@@ -528,7 +533,7 @@ export function keyboardNudgeStep(size: GridSize, coarse: boolean, coarseFactor 
 
 /**
  * How many steps Shift and an arrow key move (#222): as many as the darker grid line is apart,
- * the "Darker grid line every" setting - 5 by default, and 10 as in Tinkercad. In inches the
+ * the "Darker grid line every" setting - 5 by default, and 10 as in similar tools. In inches the
  * setting is not offered, so it stays at 5.
  */
 export function keyboardNudgeCoarseFactor(workspace: Pick<WorkplaneWorkspaceSettings, "units" | "gridMajorInterval">) {

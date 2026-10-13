@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { sketchSelectionCount, toggleSketchSelection } from "@/lib/sketchSelection";
+import { sketchSelectedPointIds, sketchSelectedSegmentIds, sketchSelectionCount, toggleSketchSelection } from "@/lib/sketchSelection";
 
 describe("toggleSketchSelection (Shift+click in the sketch)", () => {
   it("selects a point or line when nothing is selected", () => {
@@ -89,5 +89,32 @@ describe("sketchSelectionCount", () => {
     expect(sketchSelectionCount({ kind: "point", id: "a" })).toBe(1);
     expect(sketchSelectionCount({ kind: "multiple", pointIds: ["a", "b"], segmentIds: ["ab"], imageIds: ["img"] })).toBe(4);
     expect(sketchSelectionCount({ kind: "multiple", pointIds: ["a"], segmentIds: [] })).toBe(1);
+  });
+});
+
+describe("the corners and lines of a selection (#283)", () => {
+  const frame = { kind: "multiple", pointIds: ["a", "b", "c"], segmentIds: ["ab", "bc"] } as const;
+
+  it("takes the points of a selection that holds lines as well", () => {
+    expect(sketchSelectedPointIds(frame)).toEqual(["a", "b", "c"]);
+    expect(sketchSelectedPointIds({ kind: "point", id: "a" })).toEqual(["a"]);
+    expect(sketchSelectedPointIds({ kind: "multiple", pointIds: ["a", "b"], segmentIds: [] })).toEqual(["a", "b"]);
+  });
+
+  it("takes the lines of a selection that holds points as well", () => {
+    expect(sketchSelectedSegmentIds(frame)).toEqual(["ab", "bc"]);
+    expect(sketchSelectedSegmentIds({ kind: "segment", id: "ab" })).toEqual(["ab"]);
+  });
+
+  it("finds nothing in a selection of the wrong kind", () => {
+    expect(sketchSelectedPointIds(null)).toEqual([]);
+    expect(sketchSelectedPointIds({ kind: "segment", id: "ab" })).toEqual([]);
+    expect(sketchSelectedSegmentIds({ kind: "point", id: "a" })).toEqual([]);
+    expect(sketchSelectedSegmentIds(null)).toEqual([]);
+  });
+
+  it("leaves out a selection that holds a picture", () => {
+    expect(sketchSelectedPointIds({ kind: "multiple", pointIds: ["a", "b"], segmentIds: [], imageIds: ["img"] })).toEqual([]);
+    expect(sketchSelectedSegmentIds({ kind: "multiple", pointIds: [], segmentIds: ["ab", "bc"], imageIds: ["img"] })).toEqual([]);
   });
 });

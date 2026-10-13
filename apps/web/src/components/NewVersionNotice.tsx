@@ -2,10 +2,9 @@
 
 import { RefreshCw } from "lucide-react";
 import { highlightsAfter } from "@/lib/newVersionWatch";
-import { t } from "@/lib/i18n";
+import { localizedText, t } from "@/lib/i18n";
 import { useLanguage } from "@/lib/useLanguage";
 import { useNewVersionNotice } from "@/lib/useNewVersionNotice";
-import { whatsNewText } from "@/lib/whatsNew";
 
 const RUNNING_VERSION = process.env.NEXT_PUBLIC_APP_VERSION ?? "";
 
@@ -25,7 +24,7 @@ export function NewVersionNotice() {
       {news.length > 0 ? (
         <ul>
           {news.map((entry) => (
-            <li key={`${entry.version}-${entry.title.en}`}>{whatsNewText(entry.title, language)}</li>
+            <li key={`${entry.version}-${entry.title.en}`}>{localizedText(entry.title, language)}</li>
           ))}
         </ul>
       ) : null}

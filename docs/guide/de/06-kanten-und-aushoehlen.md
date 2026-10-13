@@ -63,13 +63,15 @@ Dosen, Becher, Gehäuse und Abdeckungen haben eines gemeinsam: Sie sind innen le
 
 Die Wände wachsen nach innen. Außen bleibt alles, wie es ist.
 
-Die {{ui:shell.edges}} wirken nur dort, wo die Innenwände auseinanderlaufen - an einer Stufe im Körper oder rund um eine Öffnung. Die Ecken des Hohlraums eines einfachen Quaders sind mit beiden Einstellungen immer scharf. Für ein rundes Innere rundest du zuerst die Außenkanten des Körpers (siehe oben) und höhlst ihn dann aus: Das Innere folgt mit dem Radius minus der Wandstärke.
+Die {{ui:shell.edges}} wirken nur dort, wo die Innenwände auseinanderlaufen - an einer Stufe im Körper oder rund um eine Öffnung. Die Ecken des Hohlraums eines einfachen Quaders sind mit beiden Einstellungen immer scharf. Für ein rundes Innere rundest du zuerst die Außenkanten des Körpers (siehe oben) und höhlst ihn dann aus: Das Innere folgt mit dem Radius minus der Wandstärke. Lässt sich das runde Innere nicht bauen, was bei einem Umriss aus sehr vielen kurzen geraden Stücken wie einer nachgezeichneten Zeichnung vorkommen kann, baut layerling denselben Hohlkörper stattdessen mit scharfen Innenecken.
 
 ![Das Ergebnis: eine Schale mit 3 mm Wand, oben offen.](shot:hollow-result)
 
 ![Derselbe Quader, nur an der Vorderseite offen: ein Schlitz für eine Schublade.](shot:hollow-sides)
 
 Für jede offene Seite braucht der Körper ganz außen auf dieser Seite eine ebene Fläche. Kugeln und freie Formen lassen sich deshalb so nicht aushöhlen. Wenn die Wand zu dick für den Körper ist, meldet layerling das und bittet um eine dünnere.
+
+**Körper, die in einer Spitze enden,** etwa ein Kegel oder ein gedrehtes Dreieck, haben oben keine ebene Fläche, die offen bleiben könnte. Auch ein ganz geschlossener Hohlraum gelingt dort nicht, denn eine Spitze lässt sich nicht nach innen versetzen: Selbst mit 1 mm Wand kommt die Meldung, dass die Wände nicht so dick sein können. Zeichne die Wand dann vor dem Drehen ins Profil: Dupliziere den Umriss, verkleinere die Kopie gleichmäßig, setze sie in die Mitte des großen Umrisses und schneide mit ihr den großen aus, dann dreh das Ganze (Kapitel Skizzen, Abschnitt Rotieren). Der Abstand der beiden Umrisse ist die Wandstärke.
 
 Änderst du später die Größe des ausgehöhlten Körpers, höhlt layerling ihn in der neuen Größe gleich noch einmal aus. Die Wand bleibt so dick, wie du sie gewählt hast, auch bei runden Körpern. Ein Zylinder, den du dabei in eine Richtung mehr ziehst als in die andere, wird zur Ellipse.
 

@@ -1012,6 +1012,19 @@ button {
   font-weight: 700;
 }
 
+.dashboard-trademark {
+  flex: 1 0 100%;
+  margin: 0;
+  color: #988672;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+html[data-theme="dark"] .dashboard-trademark {
+  color: #b3a48d;
+}
+
 .dashboard-legal-group {
   display: flex;
   flex-wrap: wrap;
@@ -1034,6 +1047,9 @@ button {
   font-size: 13px;
   font-weight: 700;
 }
+
+.language-flag { display: inline-flex; flex: 0 0 16px; width: 16px; height: 11px; }
+.language-flag svg { display: block; width: 100%; height: 100%; }
 
 .dashboard-topbar-actions {
   display: inline-flex;
@@ -1171,40 +1187,6 @@ button {
   flex-shrink: 0;
   margin-left: auto;
   color: #cf710f;
-}
-
-.language-switch button {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  height: 27px;
-  box-sizing: border-box;
-  padding: 0 7px;
-  color: #8a7560;
-  border-radius: 6px;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 700;
-  line-height: 1;
-  cursor: pointer;
-}
-
-.language-switch button:hover,
-.language-switch button:focus-visible {
-  color: #9a5a06;
-  background: #f5ebdc;
-}
-
-.language-switch button.active {
-  color: #573f26;
-  background: #f0e4d2;
-}
-
-.language-switch svg {
-  width: 15px;
-  height: 11px;
-  border: 1px solid rgba(87, 63, 38, 0.25);
-  border-radius: 2px;
 }
 
 /* The one thing in this row that asks for something, so it is the one thing
@@ -2728,7 +2710,7 @@ html[data-theme="dark"] .whats-new-earlier:hover {
 }
 
 /* The one emphasised thing in the panel, because it is the sentence this
-   project exists for: people arriving from Tinkercad. */
+   project exists for: people arriving from other tools. */
 .dashboard-welcome-switch {
   padding: 13px 16px;
   color: #6c5640;
@@ -5902,6 +5884,27 @@ html[data-toolbar-size="large"] .shape-menu-dropdown:not(.sketch-shape-menu-drop
   box-shadow: inset 0 0 0 1px rgba(166, 86, 0, 0.12), 0 4px 14px rgba(70, 51, 30, 0.1);
 }
 
+.import-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  color: #604529;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.import-option input {
+  width: 16px;
+  height: 16px;
+  accent-color: #b3680f;
+}
+
+html[data-theme="dark"] .import-option {
+  color: #f0e7d9;
+}
+
 .import-drop-zone svg {
   color: #573e24;
 }
@@ -6099,7 +6102,7 @@ html[data-toolbar-size="large"] .shape-menu-dropdown:not(.sketch-shape-menu-drop
 
 .sketch-plate-wrap {
   position: absolute;
-  inset: 14px 14px 42px;
+  inset: 14px 14px 0;
   display: block;
   overflow: hidden;
 }
@@ -6148,6 +6151,65 @@ html[data-toolbar-size="large"] .shape-menu-dropdown:not(.sketch-shape-menu-drop
 
 .sketch-primitive-source {
   cursor: grab;
+}
+
+.sketch-shape-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 8px 14px;
+  padding: 10px 15px 12px;
+  border-top: 1px solid #efe7d9;
+}
+
+.sketch-shape-options label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #604529;
+  font: 700 13px/1.2 var(--font-ui);
+}
+
+.sketch-shape-options input {
+  width: 58px;
+  height: 28px;
+  margin-left: auto;
+  padding: 0 8px;
+  color: #746352;
+  font: 700 14px/1 var(--font-ui);
+  text-align: right;
+  background: #ffffff;
+  border: 1px solid #daccbe;
+  border-radius: 8px;
+  outline: 0;
+}
+
+.sketch-shape-options input:focus {
+  border-color: #ea953d;
+  box-shadow: 0 0 0 3px rgba(161, 83, 0, 0.14);
+}
+
+.sketch-shape-options .unit {
+  margin-left: -4px;
+  color: #988672;
+  font-size: 12px;
+}
+
+html[data-theme="dark"] .sketch-shape-options {
+  border-color: #594a3a;
+}
+
+html[data-theme="dark"] .sketch-shape-options label {
+  color: #f0e7d9;
+}
+
+html[data-theme="dark"] .sketch-shape-options input {
+  color: #f0e7d9;
+  background: #2a2018;
+  border-color: #594a3a;
+}
+
+html[data-theme="dark"] .sketch-shape-options .unit {
+  color: #b3a48d;
 }
 
 .sketch-primitive-source:active {
@@ -14094,25 +14156,6 @@ html[data-theme="dark"] .shortcuts-or {
 
 html[data-theme="dark"] .guide-section li {
   color: #cbbba6;
-}
-
-html[data-theme="dark"] .language-switch button {
-  color: #a89179;
-}
-
-html[data-theme="dark"] .language-switch button:hover,
-html[data-theme="dark"] .language-switch button:focus-visible {
-  color: #f3a452;
-  background: #3a2c16;
-}
-
-html[data-theme="dark"] .language-switch button.active {
-  color: #f3ede3;
-  background: #40301d;
-}
-
-html[data-theme="dark"] .language-switch svg {
-  border-color: rgba(243, 237, 227, 0.3);
 }
 
 html[data-theme="dark"] .workspace-divider {

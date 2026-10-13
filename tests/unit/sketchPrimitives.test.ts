@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { BOLT_CIRCLE_HOLES, SKETCH_PRIMITIVES, isSketchPrimitive, sketchPrimitiveGeometry } from "@/lib/sketchPrimitives";
+import { BOLT_CIRCLE_HOLES, SKETCH_PRIMITIVES, isSketchPrimitive, normalizePolygonSides, normalizeStarInnerPercent, sketchPrimitiveGeometry } from "@/lib/sketchPrimitives";
 import type { SketchPoint, SketchSegment } from "@/types/layerling";
 
 /*
@@ -177,6 +177,55 @@ describe("fertige Skizzenformen", () => {
       expect(segments.every((segment) => segment.kind === "line"), primitive).toBe(true);
       expect(points.every((point) => point.mode === "corner"), primitive).toBe(true);
     }
+  });
+
+  it("baut das Vieleck mit der gewuenschten Seitenzahl (#280)", () => {
+    const standard = sketchPrimitiveGeometry("polygon", { x: 0, z: 0 }, makeId);
+    expect(standard.points).toHaveLength(5);
+    for (const sides of [3, 7, 12, 64]) {
+      const { points, segments } = sketchPrimitiveGeometry("polygon", { x: 5, z: -3 }, makeId, 30, { sides });
+      expect(points, `${sides} Seiten`).toHaveLength(sides);
+      expect(segments.every((segment) => segment.kind === "line")).toBe(true);
+      expect(points.every((point) => point.mode === "corner")).toBe(true);
+      expect(istGeschlossen(points, segments), `${sides} Seiten`).toBe(true);
+      // Alle Ecken liegen auf dem Kreis mit dem halben Durchmesser, eine zeigt nach oben.
+      for (const point of points) expect(Math.hypot(point.x - 5, point.z + 3)).toBeCloseTo(15, 6);
+      expect(Math.min(...points.map((point) => point.z))).toBeCloseTo(-3 - 15, 6);
+    }
+  });
+
+  it("haelt Seitenzahl und Innengroesse in den Grenzen", () => {
+    expect(normalizePolygonSides(2)).toBe(3);
+    expect(normalizePolygonSides(500)).toBe(64);
+    expect(normalizePolygonSides("6,0")).toBe(5);
+    expect(normalizePolygonSides("6.4")).toBe(6);
+    expect(normalizePolygonSides(undefined)).toBe(5);
+    expect(normalizeStarInnerPercent(1)).toBe(10);
+    expect(normalizeStarInnerPercent(150)).toBe(90);
+    expect(normalizeStarInnerPercent(55)).toBe(55);
+    expect(normalizeStarInnerPercent("abc")).toBe(40);
+    expect(sketchPrimitiveGeometry("polygon", { x: 0, z: 0 }, makeId, 20, { sides: 1 }).points).toHaveLength(3);
+  });
+
+  it("baut den Stern mit abwechselnd Spitze und Tal (#280)", () => {
+    const { points, segments } = sketchPrimitiveGeometry("star", { x: 0, z: 0 }, makeId, 40, { sides: 5, innerPercent: 40 });
+    expect(points).toHaveLength(10);
+    expect(istGeschlossen(points, segments)).toBe(true);
+    expect(segments.every((segment) => segment.kind === "line")).toBe(true);
+    points.forEach((point, index) => {
+      expect(Math.hypot(point.x, point.z), `Ecke ${index}`).toBeCloseTo(index % 2 === 0 ? 20 : 8, 6);
+    });
+    // Die erste Spitze zeigt nach oben.
+    expect(points[0]!.x).toBeCloseTo(0, 6);
+    expect(points[0]!.z).toBeCloseTo(-20, 6);
+  });
+
+  it("macht aus mehr Zacken und tieferen Taelern einen spitzeren Stern", () => {
+    const flach = sketchPrimitiveGeometry("star", { x: 0, z: 0 }, makeId, 20, { sides: 8, innerPercent: 85 }).points;
+    expect(flach).toHaveLength(16);
+    expect(Math.hypot(flach[1]!.x, flach[1]!.z)).toBeCloseTo(8.5, 6);
+    const tief = sketchPrimitiveGeometry("star", { x: 0, z: 0 }, makeId, 20, { sides: 8, innerPercent: 10 }).points;
+    expect(Math.hypot(tief[1]!.x, tief[1]!.z)).toBeCloseTo(1, 6);
   });
 
   it("nimmt nur die Formen an, die es gibt", () => {

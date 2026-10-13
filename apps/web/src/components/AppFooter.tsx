@@ -2,7 +2,7 @@
 
 import { Heart, Sparkles } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
-import { t, type Language } from "@/lib/i18n";
+import { LANGUAGE_INFO, t, type Language } from "@/lib/i18n";
 import { useLanguage } from "@/lib/useLanguage";
 import { SOURCE_CODE_URL, type AppUpdateInfo } from "@/lib/appUpdate";
 import { useAppUpdate } from "@/lib/useAppUpdate";
@@ -14,7 +14,7 @@ export { SOURCE_CODE_URL };
 
 /** Der Verweis in der Fußzeile zeigt auf die Anleitung in der gewählten Sprache. */
 function readmeUrl(language: Language) {
-  return `${SOURCE_CODE_URL.replace(/\/+$/, "")}/blob/main/${language === "de" ? "README.de.md" : "README.md"}`;
+  return `${SOURCE_CODE_URL.replace(/\/+$/, "")}/blob/main/${LANGUAGE_INFO[language].readme}`;
 }
 
 // The release list rather than the tag of this build: a fork that never
@@ -26,11 +26,10 @@ function releaseNotesUrl() {
 
 // German readers are already gathered in the drucktipps3d forum this project
 // grew out of; everyone else is pointed at GitHub Discussions instead, since
-// a German forum means nothing to them.
-const FORUM_URL = "https://forum.drucktipps3d.de/forum/board/127-layerling/";
-
+// a German forum means nothing to them. Which is which sits with the language
+// (languages.ts).
 function communityUrl(language: Language) {
-  return language === "de" ? FORUM_URL : `${SOURCE_CODE_URL.replace(/\/+$/, "")}/discussions`;
+  return LANGUAGE_INFO[language].communityUrl;
 }
 
 // Whoever operates a layerling installation may be required to publish a legal
@@ -43,19 +42,19 @@ const LEGAL_LINK_SOURCES = [
   {
     url: process.env.NEXT_PUBLIC_IMPRINT_URL,
     label: process.env.NEXT_PUBLIC_IMPRINT_LABEL,
-    fallbackLabel: { de: "Impressum", en: "Imprint", cs: "Údaje o provozovateli" },
+    fallbackLabel: "imprint",
   },
   {
     url: process.env.NEXT_PUBLIC_PRIVACY_URL,
     label: process.env.NEXT_PUBLIC_PRIVACY_LABEL,
-    fallbackLabel: { de: "Datenschutz", en: "Privacy Policy", cs: "Ochrana osobních údajů" },
+    fallbackLabel: "privacy",
   },
 ] as const;
 
 function legalLinks(language: Language) {
   return LEGAL_LINK_SOURCES.map((link) => ({
     href: link.url?.trim() ?? "",
-    label: link.label?.trim() || link.fallbackLabel[language],
+    label: link.label?.trim() || LANGUAGE_INFO[language].legal[link.fallbackLabel],
   })).filter((link) => link.href.length > 0);
 }
 
@@ -89,7 +88,7 @@ function joinWithDots(items: ReactNode[]) {
 
 // The anchor of the Windows quickstart section, which also explains updating.
 function updateStepsUrl(language: Language) {
-  return `${readmeUrl(language)}#${language === "de" ? "schnellstart-unter-windows" : "windows-quickstart"}`;
+  return `${readmeUrl(language)}#${LANGUAGE_INFO[language].quickstartAnchor}`;
 }
 
 /**
@@ -203,6 +202,7 @@ export function AppFooter({
           ) : null,
         ])}
       </div>
+      {variant === "dashboard" ? <p className="dashboard-trademark">{t("footer.trademark")}</p> : null}
     </footer>
     </>
   );

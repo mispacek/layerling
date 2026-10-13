@@ -4,6 +4,7 @@ import "./technic.css";
 import { NewVersionNotice } from "@/components/NewVersionNotice";
 import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistration";
 import { DOM_MUTATION_GUARD_SCRIPT } from "@/lib/domMutationGuard";
+import { LANGUAGES } from "@/lib/languages";
 import { TOOLBAR_SIZE_BOOT_SCRIPT } from "@/lib/toolbarSize";
 import { DEFAULT_LANGUAGE } from "@/lib/i18n";
 import { GRAPHITE_STYLESHEET_HREF, GRAPHITE_STYLESHEET_ID } from "@/lib/appTheme";
@@ -22,7 +23,7 @@ const STRUCTURED_DATA = {
   description: DESCRIPTION,
   applicationCategory: "DesignApplication",
   operatingSystem: "Any (web browser)",
-  inLanguage: ["en", "de", "cs"],
+  inLanguage: [...LANGUAGES],
   isAccessibleForFree: true,
   offers: { "@type": "Offer", price: "0", priceCurrency: "EUR" },
   image: "https://3d.espide.eu/assets/layerling/layerling-social.png",

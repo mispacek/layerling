@@ -21,6 +21,7 @@ import {
   normalizeGearToothSize,
   normalizeGearToothWidth,
   normalizeGearType,
+  gearTypeHasHelix,
   gearToothPitch,
   DEFAULT_GEAR_BACKLASH,
   involuteGearDiameter,
@@ -60,6 +61,8 @@ import {
   normalizeThreadChamfer,
   normalizeThreadClearance,
   normalizeThreadBoltClearance,
+  normalizeThreadAxialClearance,
+  threadAxialClearanceLimit,
   MIN_THREAD_BOLT_CLEARANCE,
   MAX_THREAD_BOLT_CLEARANCE,
   normalizeThreadDiameter,
@@ -173,6 +176,7 @@ import { useMovablePanel, type MovablePanelOptions } from "@/lib/useMovablePanel
 import { isNonSolidShapeKind, resizedShapeSize, shapeDepth, shapeHasTaper, shapeOverallFootprintDimensions, shapeSupportsTaper, shapeTaperDimensions, shapeWidth } from "@/lib/workplaneShapes";
 import { normalizeSketchRevolveSettings } from "@/lib/sketchRevolve";
 import { roundSideCount } from "@/lib/roundSideCount";
+import { torusTessellation } from "@/lib/torusTessellation";
 import { normalizePyramidTop } from "@/lib/pyramidGeometry";
 import {
   MAX_SPRING_QUALITY,
@@ -241,6 +245,7 @@ const TEXT_FONT_OPTIONS = ["Multilanguage", "Sans", "Serif", "Script", "Monospac
 const GEAR_TYPE_OPTIONS: Array<{ value: GearType; label: MessageKey }> = [
   { value: "spur", label: "gear.spur" },
   { value: "helical", label: "gear.helical" },
+  { value: "herringbone", label: "gear.herringbone" },
   { value: "bevel", label: "gear.bevel" },
   { value: "internal", label: "gear.internal" },
   { value: "rack", label: "gear.rack" },
@@ -341,7 +346,7 @@ const RELATIVE_SIZE_PROPERTY_IDS = new Set(["width", "height", "length", "diamet
 const ROTATION_PROPERTY_IDS = new Set(["rotateX", "rotateY", "rotateZ"]);
 
 function propertyUsesLengthUnit(key: string) {
-  return ["textLineWidth", "letterSize", "iconWidth", "keyringDiameter", "positionX", "positionY", "positionZ", "pivotX", "pivotY", "pivotZ", "radius", "length", "width", "height", "bevel", "topRadius", "baseRadius", "thickness", "toothSize", "toothWidth", "gearBacklash", "centerHole", "slotSmallEnd", "slotCentreDistance", "sketchLineWidth", "topLength", "topWidth", "bottomLength", "bottomWidth", "diameter", "pitch", "clearance", "boltClearance", "threadLength", "headHeight", "chamfer", "chamferBottom", "headChamfer", "wire", "starOuterSize", "starInnerSize", "starOuterFillet", "starInnerFillet", "heartTipFillet", "crescentThickness", "crescentTipFillet", "honeycombCellSize", "honeycombWallThickness", "honeycombFrameWidth", "cornerFillet", "topBottomFillet", "bentTubeSize", "bentTubeWall", "bentTubeSegmentLength", "bentTubeBendRadius", "dovetailNeckWidth", "dovetailClearance", "hingePinDiameter", "hingeLeafThickness", "hingeClearance", "screwHoleShaft", "screwHoleHeadDepth", "knurlDepth", "knurlChamfer", "loftBottomWidth", "loftBottomDepth", "loftTopWidth", "loftTopDepth", "loftBottomCorner", "loftTopCorner", "loftOffsetX", "loftOffsetZ", "loftWall"].includes(key);
+  return ["textLineWidth", "letterSize", "iconWidth", "keyringDiameter", "positionX", "positionY", "positionZ", "pivotX", "pivotY", "pivotZ", "radius", "length", "width", "height", "bevel", "topRadius", "baseRadius", "thickness", "toothSize", "toothWidth", "gearBacklash", "centerHole", "slotSmallEnd", "slotCentreDistance", "sketchLineWidth", "topLength", "topWidth", "bottomLength", "bottomWidth", "diameter", "pitch", "clearance", "axialClearance", "boltClearance", "threadLength", "headHeight", "chamfer", "chamferBottom", "headChamfer", "wire", "starOuterSize", "starInnerSize", "starOuterFillet", "starInnerFillet", "heartTipFillet", "crescentThickness", "crescentTipFillet", "honeycombCellSize", "honeycombWallThickness", "honeycombFrameWidth", "cornerFillet", "topBottomFillet", "bentTubeSize", "bentTubeWall", "bentTubeSegmentLength", "bentTubeBendRadius", "dovetailNeckWidth", "dovetailClearance", "hingePinDiameter", "hingeLeafThickness", "hingeClearance", "screwHoleShaft", "screwHoleHeadDepth", "knurlDepth", "knurlChamfer", "loftBottomWidth", "loftBottomDepth", "loftTopWidth", "loftTopDepth", "loftBottomCorner", "loftTopCorner", "loftOffsetX", "loftOffsetZ", "loftWall"].includes(key);
 }
 
 /**
@@ -374,6 +379,49 @@ function roundSideProperties(
       step: 1,
       disabled: followsSize,
       onChange: (sides) => onUpdate({ sides: Math.round(sides) }),
+    },
+  ];
+}
+
+/**
+ * Der Torus hat zwei Zahlen: Seiten rund um den Ring, Stufen rund um den Wulst. Beide folgen
+ * zusammen der Groesse, bis der Schalter sie festhaelt (#272).
+ */
+function torusSideProperties(
+  shape: WorkplaneShape,
+  width: number,
+  depth: number,
+  onUpdate: ShapeInspectorUpdate,
+): ShapePropertyConfig[] {
+  const followsSize = shape.sides === undefined && shape.steps === undefined;
+  const effective = torusTessellation(shape, width, depth, shape.height);
+  return [
+    {
+      type: "toggle",
+      id: "sidesFollowSize",
+      label: t("prop.sidesFollowSize"),
+      value: followsSize,
+      onChange: (follows) => onUpdate(follows ? { sides: undefined, steps: undefined } : { sides: effective.ringSides, steps: effective.tubeSteps }),
+    },
+    {
+      id: "sides",
+      label: t("prop.torusSides"),
+      value: effective.ringSides,
+      min: 12,
+      max: MAX_HIGH_RESOLUTION_SIDES,
+      step: 1,
+      disabled: followsSize,
+      onChange: (sides) => onUpdate({ sides: Math.round(sides), steps: shape.steps ?? effective.tubeSteps }),
+    },
+    {
+      id: "steps",
+      label: t("prop.torusSteps"),
+      value: effective.tubeSteps,
+      min: 6,
+      max: MAX_HIGH_RESOLUTION_STEPS,
+      step: 1,
+      disabled: followsSize,
+      onChange: (steps) => onUpdate({ steps: Math.round(steps), sides: shape.sides ?? effective.ringSides }),
     },
   ];
 }
@@ -954,6 +1002,8 @@ function getShapePropertiesWithAppLimits(shape: WorkplaneShape, onUpdate: ShapeI
       { id: "loftWall", label: t("prop.loftWall"), value: m.wall, min: 0, max: Math.max(0.1, maxLoftWall(m)), step: 0.1, onChange: (value) => change({ wall: value }) },
       // The sections turn and tilt evenly on the way up (#205); a tilt keeps the top above the plate.
       { id: "loftTwist", label: t("prop.loftTwist"), value: m.twist, min: -MAX_LOFT_TWIST, max: MAX_LOFT_TWIST, step: 5, onChange: (value) => change({ twist: value }) },
+      // The S-curve between the two ends (#271): a hose adapter that flares smoothly, shown as a percentage.
+      { id: "loftSmooth", label: t("prop.loftSmooth"), value: Math.round(m.smooth * 100), min: 0, max: 100, step: 5, hint: t("loft.smoothHint"), onChange: (value) => change({ smooth: Math.min(100, Math.max(0, value)) / 100 }) },
       { id: "loftTiltX", label: t("prop.loftTiltX"), value: m.tiltX, min: -loftTiltLimit(shape, "x"), max: loftTiltLimit(shape, "x"), step: 1, onChange: (value) => change({ tiltX: value }) },
       { id: "loftTiltZ", label: t("prop.loftTiltZ"), value: m.tiltZ, min: -loftTiltLimit(shape, "z"), max: loftTiltLimit(shape, "z"), step: 1, onChange: (value) => change({ tiltZ: value }) },
     ];
@@ -1048,6 +1098,15 @@ function getShapePropertiesWithAppLimits(shape: WorkplaneShape, onUpdate: ShapeI
   if (shape.kind === "sphere") {
     return [
       { id: "steps", label: t("prop.steps"), value: shape.steps ?? 24, min: 6, max: MAX_HIGH_RESOLUTION_STEPS, step: 1, onChange: (steps) => onUpdate({ steps: Math.round(steps) }) },
+      { id: "length", label: t("prop.length"), value: depth, min: MIN_SHAPE_SIZE, max: 160, onChange: setDepth },
+      { id: "width", label: t("prop.width"), value: width, min: MIN_SHAPE_SIZE, max: 160, onChange: setWidth },
+      { id: "height", label: t("prop.height"), value: shape.height, min: MIN_SHAPE_SIZE, max: 160, onChange: setHeight },
+    ];
+  }
+
+  if (shape.kind === "torus") {
+    return [
+      ...torusSideProperties(shape, width, depth, onUpdate),
       { id: "length", label: t("prop.length"), value: depth, min: MIN_SHAPE_SIZE, max: 160, onChange: setDepth },
       { id: "width", label: t("prop.width"), value: width, min: MIN_SHAPE_SIZE, max: 160, onChange: setWidth },
       { id: "height", label: t("prop.height"), value: shape.height, min: MIN_SHAPE_SIZE, max: 160, onChange: setHeight },
@@ -1265,6 +1324,7 @@ function getShapePropertiesWithAppLimits(shape: WorkplaneShape, onUpdate: ShapeI
       next.pitch = normalizeThreadPitch(next.pitch, next.diameter);
       next.clearance = normalizeThreadClearance(next.clearance);
       next.boltClearance = normalizeThreadBoltClearance(next.boltClearance);
+      next.axialClearance = normalizeThreadAxialClearance(next.axialClearance, next.pitch);
       next.quality = normalizeThreadQuality(next.quality);
       next.chamfer = normalizeThreadChamfer(next.chamfer, { role: next.role, diameter: next.diameter, pitch: next.pitch, profile: next.profile });
       next.chamferLow = normalizeThreadChamfer(next.chamferLow, { role: next.role, diameter: next.diameter, pitch: next.pitch, profile: next.profile });
@@ -1287,6 +1347,7 @@ function getShapePropertiesWithAppLimits(shape: WorkplaneShape, onUpdate: ShapeI
         threadPitch: next.pitch,
         threadClearance: next.clearance,
         threadBoltClearance: next.boltClearance,
+        threadAxialClearance: next.axialClearance,
         threadQuality: next.quality,
         threadHeadHeight: next.headHeight,
         threadChamfer: next.chamfer,
@@ -1442,6 +1503,17 @@ function getShapePropertiesWithAppLimits(shape: WorkplaneShape, onUpdate: ShapeI
         step: 0.05,
         hint: t("thread.clearanceHint"),
         onChange: (clearance) => applyThread({ clearance }),
+      });
+      // The play along the axis (#256): the tooth of the part gets thinner, the diameter stays.
+      properties.push({
+        id: "axialClearance",
+        label: t("prop.axialClearance"),
+        value: settings.axialClearance,
+        min: 0,
+        max: threadAxialClearanceLimit(settings.pitch),
+        step: 0.05,
+        hint: t("thread.axialClearanceHint"),
+        onChange: (axialClearance) => applyThread({ axialClearance }),
       });
     } else {
       // Stange und Schraube: das Spiel macht den Bolzen duenner, fuer eine
@@ -1658,7 +1730,7 @@ function getShapePropertiesWithAppLimits(shape: WorkplaneShape, onUpdate: ShapeI
         onChange: (toothWidth) => onUpdate({ toothWidth }),
       },
     );
-    if (normalizeGearType(shape.gearType) === "helical") {
+    if (gearTypeHasHelix(shape.gearType)) {
       properties.push({
         id: "helixAngle",
       label: t("prop.helixAngle"),
@@ -1767,7 +1839,7 @@ function getShapePropertiesWithAppLimits(shape: WorkplaneShape, onUpdate: ShapeI
 }
 
 /**
- * How a text is filled (#215), as Tinkercad lists it: one list - filled, outline, outer line,
+ * How a text is filled (#215), as similar tools list it: one list - filled, outline, outer line,
  * inner line - and, for a line, its width and corners right under it. The silhouette and "Wider"
  * (the filled letters grown by the line width, its corners beside it) are rarer and sit under
  * "More" (TEXT_FILL_MORE_IDS). The box follows the fill (textFillPatch), the letters stay as
@@ -1830,7 +1902,7 @@ function textFillProperties(shape: WorkplaneShape, onUpdate: ShapeInspectorUpdat
 }
 
 /**
- * How an extruded sketch body is filled, without opening the sketch (#197, as Tinkercad's SVG
+ * How an extruded sketch body is filled, without opening the sketch (#197, as the usual SVG
  * fill modes): the area, a stroke outside, inside or centred on its lines with a width and
  * corners, and the silhouette that leaves its holes out. The editor builds the body again.
  */
@@ -1995,7 +2067,7 @@ export function ShapeInspector({
 }) {
   useLanguage();
   const solidColor = shape.color;
-  // Picking one colour for a group means one colour for all of it, as in Tinkercad.
+  // Picking one colour for a group means one colour for all of it, as in similar tools.
   const singleColorPatch: Partial<WorkplaneShape> = canToggleGroupColors(shape) ? { multicolor: false } : {};
   const locked = Boolean(shape.locked);
   // A calculation typed into a field (#180) is noted just before the field's change and rides
@@ -2039,7 +2111,7 @@ export function ShapeInspector({
   const textFillMore = shape.kind === "text" ? properties.filter((property) => TEXT_FILL_MORE_IDS.has(property.id)) : [];
   const textFillEnd = primaryProperties.reduce((end, property, index) => (TEXT_FILL_IN_VIEW_IDS.has(property.id) ? index + 1 : end), 0);
   const threadProperties = isThread
-    ? properties.filter((property) => ["pitch", "threadsPerInch", "threadHand", "threadProfile", "clearance", "boltClearance", "chamfer", "chamferBottom", "quality"].includes(property.id))
+    ? properties.filter((property) => ["pitch", "threadsPerInch", "threadHand", "threadProfile", "clearance", "axialClearance", "boltClearance", "chamfer", "chamferBottom", "quality"].includes(property.id))
     : [];
   const gearTeethProperties = shape.kind === "gear"
     ? properties.filter((property) => ["gearProfile", "teeth", "gearModule", "gearPressureAngle", "gearBacklash", "gearRim", "toothSize", "toothWidth"].includes(property.id))
@@ -2255,10 +2327,10 @@ export function ShapeInspector({
         </div>
         <div className="inspector-header-actions">
           <GuideHelpLink chapter={guideChapterForShape(shape)} section={guideSectionForShape(shape)} className="inspector-help-link" />
-          <button className={locked ? "inspector-header-icon active" : "inspector-header-icon"} aria-label={locked ? t("outliner.unlock") : t("outliner.lock")} onClick={() => onUpdate({ locked: !locked })}>
+          <button className={locked ? "inspector-header-icon active" : "inspector-header-icon"} aria-label={locked ? t("outliner.unlock") : t("outliner.lock")} aria-keyshortcuts="Control+L" title={t("camera.shortcut", { label: locked ? t("outliner.unlock") : t("outliner.lock"), keys: "Ctrl+L" })} onClick={() => onUpdate({ locked: !locked })}>
             {locked ? <Lock size={16} /> : <Unlock size={16} />}
           </button>
-          <button className={shape.hidden ? "inspector-header-icon active" : "inspector-header-icon"} aria-label={shape.hidden ? t("outliner.show") : t("outliner.hide")} onClick={() => onUpdate({ hidden: !shape.hidden })}>
+          <button className={shape.hidden ? "inspector-header-icon active" : "inspector-header-icon"} aria-label={shape.hidden ? t("outliner.show") : t("outliner.hide")} aria-keyshortcuts="Control+H" title={t("camera.shortcut", { label: shape.hidden ? t("outliner.show") : t("outliner.hide"), keys: "Ctrl+H" })} onClick={() => onUpdate({ hidden: !shape.hidden })}>
             {shape.hidden ? <EyeOff size={16} /> : <Eye size={16} />}
           </button>
         </div>
@@ -2665,7 +2737,7 @@ export function ShapeInspector({
           ) : null}
         </div>
       ) : null}
-      {gearType === "helical" ? (
+      {gearTypeHasHelix(gearType ?? undefined) ? (
         <div className={`property-card ${gearHelixOpen ? "" : "collapsed"}`}>
           <button
             className="property-card-header"
@@ -3192,7 +3264,8 @@ function CylinderWrapCard({
             value={diameter}
             min={1}
             max={400}
-            step={1}
+            // Tenths of a millimetre: a cup is 63.5 across, not 63 or 64 (#274).
+            step={0.1}
             workspace={workspace}
             disabled={disabled}
             onChange={setDiameter}
@@ -3588,7 +3661,7 @@ function RangeProperty({
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(formatPropertyNumber(controlValue, accuracy, controlStep));
   const unit = isLength ? lengthDisplayUnit(workspace).label : ROTATION_PROPERTY_IDS.has(id) ? "°" : null;
-  // Inches read as fractions (1⅝), like Tinkercad; the slider and typed decimals stay exact.
+  // Inches read as fractions (1⅝), like similar tools; the slider and typed decimals stay exact.
   const formatShown = (shown: number) => (unit === "in" && showsInchFractions(workspace) ? formatFractionalInches(shown) : formatPropertyNumber(shown, accuracy, controlStep));
   const toModelValue = (nextValue: number) => isLength ? displayToMillimeters(nextValue, workspace) : nextValue;
   // The calculation the field was last set from comes back when it is entered (#180), as long as
@@ -3890,7 +3963,7 @@ function GearTypeSelector({ value, disabled, onChange }: { value: GearType; disa
 }
 
 /**
- * The properties panel for several parts at once (#183), as in Tinkercad: how many are
+ * The properties panel for several parts at once (#183), as in similar tools: how many are
  * selected, solid or hole and a colour for all of them, and locking. Sizes stay with a single
  * body, the handles and Scale by percent. Locked parts are left as they are.
  */
@@ -3939,7 +4012,7 @@ export function SelectionInspector({
         </div>
         <div className="inspector-header-actions">
           <GuideHelpLink section="selectionProperties" className="inspector-help-link" />
-          <button className={allLocked ? "inspector-header-icon active" : "inspector-header-icon"} aria-label={allLocked ? t("outliner.unlock") : t("outliner.lock")} onClick={onToggleLocked}>
+          <button className={allLocked ? "inspector-header-icon active" : "inspector-header-icon"} aria-label={allLocked ? t("outliner.unlock") : t("outliner.lock")} aria-keyshortcuts="Control+L" title={t("camera.shortcut", { label: allLocked ? t("outliner.unlock") : t("outliner.lock"), keys: "Ctrl+L" })} onClick={onToggleLocked}>
             {allLocked ? <Lock size={16} /> : <Unlock size={16} />}
           </button>
         </div>

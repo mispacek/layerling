@@ -1,3 +1,4 @@
+import { loftEaseShare, LOFT_SMOOTH_SECTIONS } from "@/lib/loftEase";
 import { JoinType, type OcctKernel, type ShapeHandle } from "occt-wasm";
 import type { CadModifierProfileLoop, CadModifierProfilePart, CadModifierProfileSegment } from "@/lib/cadModifierTypes";
 
@@ -456,18 +457,21 @@ function twistedLoftSolid(cad: OcctKernel, profile: CadModifierProfilePart, tole
   const center = profile.twistCenter ?? { x: 0, z: 0 };
   const lean = profile.twistLean ?? { x: 0, z: 0 };
   const tilt = profile.tilt ?? { x: 0, z: 0 };
-  const sections = Math.max(2, Math.ceil(Math.max(Math.abs(twist), Math.abs(tilt.x), Math.abs(tilt.z)) / TWIST_SECTION_STEP) + 1);
+  const turnSections = Math.max(2, Math.ceil(Math.max(Math.abs(twist), Math.abs(tilt.x), Math.abs(tilt.z)) / TWIST_SECTION_STEP) + 1);
+  const sections = (profile.smooth ?? 0) > 1e-9 ? Math.max(turnSections, LOFT_SMOOTH_SECTIONS) : turnSections;
   const solidOf = (index: number) => {
     const wires: ShapeHandle[] = [];
     for (let step = 0; step < sections; step += 1) {
       const t = step / (sections - 1);
-      const loop = mixLoops(profile.loops[index], top[index], t);
+      // A smooth transition (#271) mixes the two ends along an S-curve; the turn and the height stay even.
+      const share = loftEaseShare(t, profile.smooth ?? 0);
+      const loop = mixLoops(profile.loops[index], top[index], share);
       const angle = (twist * t * Math.PI) / 180;
       const cos = Math.cos(angle);
       const sin = Math.sin(angle);
       // The lean shifts the whole section, so the turn goes around the section's own middle, shifted with it.
-      const cx = center.x + lean.x * t;
-      const cz = center.z + lean.z * t;
+      const cx = center.x + lean.x * share;
+      const cz = center.z + lean.z * share;
       // Turned about the vertical through (cx, cz): x' = (x - cx)cos - (z - cz)sin, z' = (x - cx)sin + (z - cz)cos;
       // then tilted about x (y = z sin a, z = z cos a) and about z (x = x cos b - y sin b, y = x sin b + y cos b);
       // then put back on (cx, cz) and lifted - as loftGeometry's placeTurned draws it.
@@ -503,7 +507,7 @@ function twistedLoftSolid(cad: OcctKernel, profile: CadModifierProfilePart, tole
 
 function loftSolid(cad: OcctKernel, profile: CadModifierProfilePart, tolerance: number) {
   const top = profile.topLoops ?? [];
-  if (Math.abs(profile.twist ?? 0) > 1e-9 || Math.abs(profile.tilt?.x ?? 0) > 1e-9 || Math.abs(profile.tilt?.z ?? 0) > 1e-9) {
+  if (Math.abs(profile.twist ?? 0) > 1e-9 || Math.abs(profile.tilt?.x ?? 0) > 1e-9 || Math.abs(profile.tilt?.z ?? 0) > 1e-9 || (profile.smooth ?? 0) > 1e-9) {
     return twistedLoftSolid(cad, profile, tolerance);
   }
   if ([...profile.loops, ...top].every((loop) => loop.segments.every((segment) => segment.kind === "line")) && sidesAreFlat(profile, tolerance)) {

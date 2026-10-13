@@ -58,6 +58,7 @@ Eine Notiz hält fest, was die Geometrie nicht sagt: „Hier ist eine Schraube 0
 - Setzt du sie **daneben**, bleibt sie auf der Arbeitsebene ({{ui:note.free}}).
 - {{ui:note.detach}} löst eine angeheftete Notiz vom Körper.
 - Ziehen verschiebt die Notiz, ein Klick öffnet sie zum Bearbeiten.
+- Beim Schreiben übernimmt [[Enter]] den Text, und [[Esc]] stellt ihn wieder her, wie er vorher war; [[Umschalt]]+[[Enter]] beginnt eine neue Zeile.
 
 Notizen werden im Entwurf gespeichert, tauchen in keinem Export auf und lassen sich über {{ui:visibility.notes}} ein- und ausblenden.
 

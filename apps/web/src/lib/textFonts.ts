@@ -65,8 +65,11 @@ export function withFallbackGlyphs(data: FontData, fallback: FontData): FontData
   return { ...data, glyphs } as FontData;
 }
 
-/** Faces that miss common letters borrow them from Sans. */
-const BORROWS_FROM_SANS = new Set(["Multilanguage", "Stencil", "Rounded"]);
+/**
+ * Faces that miss common letters borrow them from Sans. Script lacks the whole Cyrillic and Greek
+ * alphabets and 37 letters of Latin Extended-A, among them the Polish ą and ę, which came out as "?".
+ */
+const BORROWS_FROM_SANS = new Set(["Multilanguage", "Stencil", "Rounded", "Script"]);
 
 export function loadTextFonts(): Promise<void> {
   if (loadedFonts) return Promise.resolve();

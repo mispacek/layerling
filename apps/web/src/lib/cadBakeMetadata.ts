@@ -2,7 +2,8 @@ import * as THREE from "three";
 import type { WorkplaneShape } from "@/types/layerling";
 import type { CadModifierPrimitivePart } from "@/lib/cadModifierTypes";
 import { meshYawDegrees, mirrorSign, preservesEdgeTreatmentSize, resizedImportedCoordinates, shapeDepth, shapeHasShapeDeform, shapeWidth } from "@/lib/workplaneShapes";
-import { drawnRound, ROUND_FROM_SIDES, ROUND_FROM_SPHERE_STEPS } from "@/lib/roundness";
+import { drawnRound, ROUND_FROM_SIDES, ROUND_FROM_SPHERE_STEPS, ROUND_FROM_TORUS_SIDES, ROUND_FROM_TORUS_STEPS } from "@/lib/roundness";
+import { torusTessellation } from "@/lib/torusTessellation";
 import { roundSideCount } from "@/lib/roundSideCount";
 import { sphereTessellation } from "@/lib/sphereTessellation";
 
@@ -211,6 +212,14 @@ export function cadModifierPrimitiveForAnalyticShape(shape: WorkplaneShape): Cad
     const tubeRadius = height / 2;
     const majorRadius = width / 2 - tubeRadius;
     if (!Number.isFinite(tubeRadius) || tubeRadius <= 0 || !Number.isFinite(majorRadius) || majorRadius <= 0) {
+      return null;
+    }
+    // A torus of few sides or steps is drawn faceted, like a cylinder of few sides.
+    const { ringSides, tubeSteps } = torusTessellation(shape, width, depth, height);
+    if (
+      !drawnRound(shape.sides, ROUND_FROM_TORUS_SIDES, ringSides, width, depth)
+      || !drawnRound(shape.steps, ROUND_FROM_TORUS_STEPS, tubeSteps, height, height)
+    ) {
       return null;
     }
     const centeredMatrix = new THREE.Matrix4()

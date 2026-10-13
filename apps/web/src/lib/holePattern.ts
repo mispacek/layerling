@@ -410,29 +410,61 @@ function footprintsCloserThan(polygon: readonly Point2[], dU: number, dV: number
   return false;
 }
 
+/** The directions in which a hole meets its neighbours: along the row and along the next one. */
+function neighbourDirections(arrangement: HoleArrangement) {
+  return arrangement === "staggered"
+    ? [{ u: 1, v: 0 }, { u: 0.5, v: STAGGER_ROW_RATIO }]
+    : [{ u: 1, v: 0 }, { u: 0, v: 1 }];
+}
+
 /**
- * The smallest spacing at which neighbouring holes of this shape keep a wall of
- * `HOLE_PATTERN_MIN_WALL`: a grid compares along both axes, a staggered
+ * The smallest spacing at which neighbouring holes of this shape keep a wall of `wall`
+ * (default `HOLE_PATTERN_MIN_WALL`): a grid compares along both axes, a staggered
  * pattern along the row and along the diagonal. Hexagons that interlock in a
  * staggered pattern can stand closer than their corner-to-corner size.
  */
-export function holePatternMinSpacing(settings: Pick<HolePatternSettings, "form" | "size" | "height" | "arrangement">) {
+export function holePatternMinSpacing(
+  settings: Pick<HolePatternSettings, "form" | "size" | "height" | "arrangement">,
+  wall = HOLE_PATTERN_MIN_WALL,
+) {
   const polygon = holeFootprintPolygon(settings);
-  const directions = settings.arrangement === "staggered"
-    ? [{ u: 1, v: 0 }, { u: 0.5, v: STAGGER_ROW_RATIO }]
-    : [{ u: 1, v: 0 }, { u: 0, v: 1 }];
+  const gap = Math.max(HOLE_PATTERN_MIN_WALL, wall);
   let needed = HOLE_PATTERN_MIN_SIZE;
-  for (const direction of directions) {
+  for (const direction of neighbourDirections(settings.arrangement)) {
     let low = 0;
-    let high = (holeFootprintSize(settings).width + holeFootprintSize(settings).height) * 2 + HOLE_PATTERN_MIN_WALL;
+    let high = (holeFootprintSize(settings).width + holeFootprintSize(settings).height) * 2 + gap;
     for (let step = 0; step < 40; step += 1) {
       const middle = (low + high) / 2;
-      if (footprintsCloserThan(polygon, direction.u * middle, direction.v * middle, HOLE_PATTERN_MIN_WALL)) low = middle;
+      if (footprintsCloserThan(polygon, direction.u * middle, direction.v * middle, gap)) low = middle;
       else high = middle;
     }
     needed = Math.max(needed, high);
   }
   return needed;
+}
+
+/**
+ * The wall between two neighbouring holes (#239): the least clear distance between a hole and
+ * its neighbours at the current spacing, which is what the print's wall thickness comes to.
+ * Holes that overlap have none. It is the other way to say the spacing - set one, the other
+ * follows: `holePatternMinSpacing(settings, wall)` is the spacing for a wanted wall.
+ */
+export function holePatternWall(settings: Pick<HolePatternSettings, "form" | "size" | "height" | "arrangement" | "spacing">) {
+  const polygon = holeFootprintPolygon(settings);
+  const spacing = Math.max(HOLE_PATTERN_MIN_SIZE, settings.spacing);
+  let wall = Infinity;
+  for (const direction of neighbourDirections(settings.arrangement)) {
+    const dU = direction.u * spacing;
+    const dV = direction.v * spacing;
+    const moved = polygon.map((point) => ({ u: point.u + dU, v: point.v + dV }));
+    if (moved.some((point) => insideConvex(polygon, point)) || polygon.some((point) => insideConvex(moved, point))) return 0;
+    for (let i = 0; i < polygon.length; i += 1) {
+      for (let j = 0; j < moved.length; j += 1) {
+        wall = Math.min(wall, segmentSegmentDistance(polygon[i], polygon[(i + 1) % polygon.length], moved[j], moved[(j + 1) % moved.length]));
+      }
+    }
+  }
+  return Number.isFinite(wall) ? wall : 0;
 }
 
 /** Keeps every number of the settings inside what the tool offers. */

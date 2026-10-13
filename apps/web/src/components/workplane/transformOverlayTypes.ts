@@ -133,7 +133,7 @@ const ROTATE_ARROW_MIN_SAGITTA = 3;
  * The arrow of a rotate handle, built in space like the circle it stands for: an arc in the plane
  * perpendicular to `axis`, bulging away from the axis along `radial`, with `mid` as its middle, run
  * through the camera by `project`. So it sits in perspective on the selection and turns with the view,
- * as the arrows do in Tinkercad. Coordinates are relative to the projected `mid`, in pixels.
+ * as the arrows of similar tools do. Coordinates are relative to the projected `mid`, in pixels.
  */
 export function rotateHandleArrow(
   project: (point: RotateArrowVector) => TransformOverlayPoint,
@@ -343,7 +343,7 @@ export type EditingDimension = {
   value: string;
 } | null;
 
-/** Click on a corner handle: width and depth open together, like Tinkercad's X and Y boxes. */
+/** Click on a corner handle: width and depth open together, like the usual X and Y boxes. */
 export type EditingCorner = {
   entries: Array<{ key: string; axis: "width" | "depth"; x: number; y: number; value: string; original: string }>;
 } | null;

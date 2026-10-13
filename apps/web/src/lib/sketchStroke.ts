@@ -5,7 +5,7 @@ import type { SketchProfile, SketchStroke, SketchStrokeAlign, SketchStrokeCap, S
 /**
  * Stroke for sketches (#154): instead of filling its outlines, a sketch can be drawn as a line of
  * a given width. A closed outline becomes a frame - its wall inside, outside or centred on the
- * drawn line, as in Tinkercad (a 0.2 mm outside stroke round a dovetail hole is a print
+ * drawn line, as in similar tools (a 0.2 mm outside stroke round a dovetail hole is a print
  * tolerance). An open line becomes a stripe with chosen corners and ends. The sketch keeps the
  * drawn line; the stroked outline is worked out when the body is built.
  */

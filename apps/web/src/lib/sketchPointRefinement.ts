@@ -159,6 +159,27 @@ export function splitSketchSegment(
 
 type SegmentSplit = { amount: number; pointId: string };
 
+/**
+ * Is `after` the same sketch as `before`, only with points in other places? Then nothing was
+ * drawn, erased or joined: shapes were moved (#239). Moved lines that cross get no shared point
+ * from this, or two shapes pushed over each other would be welded together and could not be
+ * pulled apart again.
+ */
+export function onlyMovesPoints(before: SketchProfile, after: SketchProfile) {
+  if (before.points.length !== after.points.length || before.segments.length !== after.segments.length) return false;
+  const pointIds = new Set(before.points.map((point) => point.id));
+  if (!after.points.every((point) => pointIds.has(point.id))) return false;
+  const segments = new Map(before.segments.map((segment) => [segment.id, segment]));
+  return after.segments.every((segment) => {
+    const known = segments.get(segment.id);
+    return Boolean(known)
+      && known!.startId === segment.startId
+      && known!.endId === segment.endId
+      && known!.kind === segment.kind
+      && Boolean(known!.construction) === Boolean(segment.construction);
+  });
+}
+
 function cross(ax: number, az: number, bx: number, bz: number) {
   return ax * bz - az * bx;
 }

@@ -10,7 +10,7 @@ import { createTextGeometry, textGlyphShapes } from "@/lib/textGeometry";
 import { DEFAULT_TEXT_LAYERS, MAX_TEXT_LAYERS, nameTagOffsets, textLayerShapes, textLayersOf, type TextLayer } from "@/lib/textLayers";
 import type { SketchStroke, WorkplaneShape } from "@/types/layerling";
 
-// #215: the name tag panel - letter size, "+" / "–" and the Tinkercad fill list - on top of the layers of textLayers.
+// #215: the name tag panel - letter size, "+" / "–" and the andere Programme fill list - on top of the layers of textLayers.
 let runtime: ManifoldToplevel;
 
 beforeAll(async () => {
@@ -170,7 +170,7 @@ describe("+ and – (#215)", () => {
   });
 });
 
-describe("the fill list of a plain text, as Tinkercad's (#215)", () => {
+describe("the fill list of a plain text, as the usual one (#215)", () => {
   const stroke = (align: SketchStroke["align"], width = 1.2): SketchStroke => ({ width, align, join: "round", cap: "flat" });
 
   it("maps Filled, Outline, Outer line and Inner line onto area, centred, outside and inside", () => {

@@ -1,7 +1,7 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
-import { OcctKernel, type ShapeHandle } from "occt-wasm";
+import { JoinType, OcctKernel, type ShapeHandle } from "occt-wasm";
 import { shellSolid } from "@/lib/cadShell";
 
 // Layerling is Y-up; OCCT primitives are built along Z.
@@ -212,5 +212,80 @@ describe("hollowing a solid with the real OCCT kernel", () => {
     // Two 16 mm walls do not fit into the 30 mm depth.
     expect(() => shellSolid(kernel, solid, 16, "top")).toThrow(/thinner wall/);
     kernel.release(solid);
+  });
+
+  it("builds sharp inner corners when the rounded ones cannot be built (forum 618422)", () => {
+    // A traced outline of many short pieces defeated the arc joins at every wall thickness while sharp
+    // joins worked; a kernel whose arc joins always fail stands in for it.
+    const arcsFail = new Proxy(kernel, {
+      get(target, property) {
+        if (property === "shell") {
+          return (solid: ShapeHandle, faces: ShapeHandle[], wall: number, tolerance: number, join: JoinType) => {
+            if (join === JoinType.Arc) throw new Error("the arc joins failed");
+            return target.shell(solid, faces, wall, tolerance, join);
+          };
+        }
+        const value = Reflect.get(target, property) as unknown;
+        return typeof value === "function" ? value.bind(target) : value;
+      },
+    });
+    const solid = box();
+    const result = shellSolid(arcsFail, solid, 2, "top", "round");
+    expectHollow(result, 40 * 30 * 20 - 36 * 26 * 18);
+    kernel.release(result);
+    kernel.release(solid);
+  });
+
+  it("takes sliver faces out of the body before hollowing it (forum 618422)", () => {
+    // A box 40 x 20 x 30 whose top is cut into a big face and a strip 0.005 mm wide, as a mesh
+    // that overlapped a little leaves it.
+    const quad = (points: Array<[number, number, number]>) =>
+      kernel.makeFace(kernel.makeWire(points.map((from, index) => {
+        const to = points[(index + 1) % points.length];
+        return kernel.makeLineEdge({ x: from[0], y: from[1], z: from[2] }, { x: to[0], y: to[1], z: to[2] });
+      })));
+    const strip = 29.995;
+    const faces = [
+      quad([[0, 0, 0], [40, 0, 0], [40, 0, 30], [0, 0, 30]]),
+      quad([[0, 20, 0], [40, 20, 0], [40, 20, strip], [0, 20, strip]]),
+      quad([[0, 20, strip], [40, 20, strip], [40, 20, 30], [0, 20, 30]]),
+      quad([[0, 0, 0], [40, 0, 0], [40, 20, 0], [0, 20, 0]]),
+      quad([[0, 0, 30], [40, 0, 30], [40, 20, 30], [0, 20, 30]]),
+      quad([[0, 0, 0], [0, 0, 30], [0, 20, 30], [0, 20, strip], [0, 20, 0]]),
+      quad([[40, 0, 0], [40, 0, 30], [40, 20, 30], [40, 20, strip], [40, 20, 0]]),
+    ];
+    const body = kernel.fixFaceOrientations(kernel.sewAndSolidify(faces, 1e-6));
+    expect(kernel.isSolid(body)).toBe(true);
+    expect(kernel.getSubShapes(body, "face")).toHaveLength(7);
+
+    let cleaned = 0;
+    const watching = new Proxy(kernel, {
+      get(target, property) {
+        if (property === "defeature") {
+          return (shape: ShapeHandle, remove: ShapeHandle[], tolerance: number) => {
+            cleaned += remove.length;
+            return target.defeature(shape, remove, tolerance);
+          };
+        }
+        const value = Reflect.get(target, property) as unknown;
+        return typeof value === "function" ? value.bind(target) : value;
+      },
+    });
+    const result = shellSolid(watching, body, 2, "top");
+    expect(cleaned).toBe(1);
+    expect(kernel.isValid(result)).toBe(true);
+    expect(kernel.getVolume(result)).toBeCloseTo(40 * 20 * 30 - 36 * 18 * 26, 1);
+    kernel.release(result);
+    kernel.release(body);
+  });
+
+  it("does not blame the wall when the body cannot be hollowed at all (forum 618422)", () => {
+    // Two boxes that touch along one edge only: no solid the kernel can shell, whatever the wall.
+    const joined = kernel.fuse(kernel.makeBox(20, 20, 20), kernel.translate(kernel.makeBox(20, 20, 20), 20, 20, 0));
+    for (const wall of [0.2, 1]) {
+      expect(() => shellSolid(kernel, joined, wall, "top")).toThrow(/cannot be hollowed with any wall thickness/);
+      expect(() => shellSolid(kernel, joined, wall, "top")).not.toThrow(/thinner wall/);
+    }
+    kernel.release(joined);
   });
 });

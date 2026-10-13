@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { setLanguage } from "@/lib/i18n";
-import { ERROR_RULES, localizedError } from "@/lib/userErrors";
+import { ERROR_RULES, localizedError, looksEnglish } from "@/lib/userErrors";
 import { MESSAGES_DE } from "@/lib/messages.de";
 import { MESSAGES_EN } from "@/lib/messages.en";
 import { MESSAGES_CS } from "@/lib/messages.cs";
@@ -52,5 +52,24 @@ describe("error messages for people", () => {
       expect(MESSAGES_DE[rule.key], rule.key).toBeTruthy();
       expect(MESSAGES_EN[rule.key], rule.key).toBeTruthy();
     }
+  });
+});
+
+describe("a raw English text in a language without a word list of its own", () => {
+  it("reads plain English as English, and nothing else", () => {
+    expect(looksEnglish("The kernel could not build the body.")).toBe(true);
+    expect(looksEnglish("This file has no valid contours")).toBe(true);
+    expect(looksEnglish("Der Körper konnte nicht gebaut werden")).toBe(false);
+    expect(looksEnglish("Не удалось построить тело")).toBe(false);
+    expect(looksEnglish("Fehler")).toBe(false);
+    expect(looksEnglish("no")).toBe(false);
+  });
+
+  it("is left alone in English, and wrapped in German as before", () => {
+    setLanguage("en", false);
+    expect(localizedError("Something odd happened in the kernel")).toBe("Something odd happened in the kernel");
+    setLanguage("de", false);
+    expect(localizedError("Something odd happened in the kernel")).toContain("Something odd happened in the kernel");
+    expect(localizedError("Something odd happened in the kernel")).not.toBe("Something odd happened in the kernel");
   });
 });

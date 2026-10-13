@@ -2,10 +2,11 @@ export type SketchPointerModifiers = {
   button: number;
   ctrlKey: boolean;
   metaKey: boolean;
+  shiftKey: boolean;
 };
 
 export function isSketchPanGesture(event: SketchPointerModifiers) {
-  return event.button === 1 || (event.button === 2 && (event.ctrlKey || event.metaKey));
+  return event.button === 1 || (event.button === 2 && (event.ctrlKey || event.metaKey || event.shiftKey));
 }
 
 export type SketchView = { zoom: number; pan: { x: number; z: number } };

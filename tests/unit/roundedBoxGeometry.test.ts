@@ -197,3 +197,49 @@ describe("roundedBox geometry", () => {
     expect((full.boundingBox?.max.x ?? 0) - (full.boundingBox?.min.x ?? 0)).toBeCloseTo(50, 3);
   });
 });
+
+describe("roundedBox chamfer (quality 1, #239)", () => {
+  const chamfered = () => createRoundedBoxGeometry({ width: 40, depth: 30, height: 20, cornerFillet: 4, topBottomFillet: 3, roundedBoxQuality: 1 });
+
+  it("is watertight with outward faces", () => {
+    const position = chamfered().getAttribute("position");
+    const uses = edgeUseCounts(position);
+    expect([...uses.values()].every((count) => count === 2)).toBe(true);
+    expect(signedVolume(position)).toBeGreaterThan(0);
+  });
+
+  it("keeps the size of the box", () => {
+    const geometry = chamfered();
+    geometry.computeBoundingBox();
+    const box = geometry.boundingBox!;
+    expect(box.max.x - box.min.x).toBeCloseTo(40, 4);
+    expect(box.max.z - box.min.z).toBeCloseTo(30, 4);
+    expect(box.max.y - box.min.y).toBeCloseTo(20, 4);
+    expect(box.min.y).toBeCloseTo(0, 4);
+  });
+
+  it("is a chamfer, not a round: the volume is less than the round box of the same radii", () => {
+    const round = createRoundedBoxGeometry({ width: 40, depth: 30, height: 20, cornerFillet: 4, topBottomFillet: 3, roundedBoxQuality: 8 });
+    expect(signedVolume(chamfered().getAttribute("position"))).toBeLessThan(signedVolume(round.getAttribute("position")));
+  });
+
+  it("draws the top and bottom chamfer with one piece, like the corner-only box does for the corners", () => {
+    const geometry = chamfered();
+    const position = geometry.getAttribute("position");
+    // On the plane through the middle of the depth, the edge between the top and the +x side is one slanted piece.
+    const points = new Set<string>();
+    for (let index = 0; index < position.count; index += 1) {
+      if (position.getX(index) > 15.99 && position.getY(index) > 16.99 && Math.abs(position.getZ(index)) < 11.01) points.add(`${position.getX(index).toFixed(3)},${position.getY(index).toFixed(3)}`);
+    }
+    expect(points.size).toBe(2);
+  });
+
+  it("survives a corner fillet of zero and a body that is rounded to the middle", () => {
+    for (const options of [{ cornerFillet: 0, topBottomFillet: 3 }, { cornerFillet: 15, topBottomFillet: 10 }]) {
+      const position = createRoundedBoxGeometry({ width: 30, depth: 30, height: 20, roundedBoxQuality: 1, ...options }).getAttribute("position");
+      expect(position.count).toBeGreaterThan(0);
+      expect(signedVolume(position)).toBeGreaterThan(0);
+      expect([...edgeUseCounts(position).values()].every((count) => count === 2)).toBe(true);
+    }
+  });
+});

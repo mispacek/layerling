@@ -1,4 +1,4 @@
-import { getLanguage, t } from "@/lib/i18n";
+import { getLanguage, isInterfaceSentence, t } from "@/lib/i18n";
 import type { MessageKey } from "@/lib/messages.en";
 
 /*
@@ -126,6 +126,19 @@ export const ERROR_RULES: ErrorRule[] = [
 const GERMAN_HINT = /\b(der|die|das|dem|den|nicht|und|ein|eine|einen|wurde|konnte|bitte|keine|kein|wird|ist|mit|für)\b|[äöüß]/i;
 const ENGLISH_HINT = /\b(the|is|are|not|could|cannot|must|has|have|no|contains|invalid|failed|unable|file|too|was|were|to|of|and|or|missing|unexpected)\b/i;
 
+const ENGLISH_WORDS = new RegExp(ENGLISH_HINT.source, "gi");
+
+/**
+ * Whether a text reads as English: plain ASCII with at least two of the usual English words. For
+ * the languages that have no word list of their own here; a text in a language with its own
+ * letters is never taken for English, and one that already is an interface sentence is not
+ * wrapped again.
+ */
+export function looksEnglish(text: string): boolean {
+  if (/[^\x00-\x7F]/.test(text)) return false;
+  return new Set((text.match(ENGLISH_WORDS) ?? []).map((word) => word.toLowerCase())).size >= 2;
+}
+
 /** A message for a person: known texts come from the message tables, unknown English ones get a sentence around them. */
 export function localizedError(raw: string): string {
   const text = String(raw ?? "").trim();
@@ -135,10 +148,10 @@ export function localizedError(raw: string): string {
     if (match) return t(rule.key, rule.values?.(match));
   }
   const language = getLanguage();
-  const nativeHint = language === "cs"
-    ? /[áčďéěíňóřšťúůýž]|\b(nelze|chyba|není|soubor|se|nebo|pro)\b/i
-    : GERMAN_HINT;
-  if (language !== "en" && ENGLISH_HINT.test(text) && !nativeHint.test(text)) {
+  if (language === "de") {
+    if (ENGLISH_HINT.test(text) && !GERMAN_HINT.test(text)) return t("error.unknown", { detail: text });
+  } else if (language !== "en" && looksEnglish(text) && !isInterfaceSentence(text, language)) {
+    // Any other language: a raw English text still gets a sentence in the person's language around it.
     return t("error.unknown", { detail: text });
   }
   return text;

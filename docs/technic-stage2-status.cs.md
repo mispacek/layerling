@@ -1,6 +1,6 @@
 # Rozpracovaná druhá etapa Lego Compatible – 13. 10. 2026
 
-Práce byla zastavena na žádost uživatele kvůli vypnutí počítače. Změny jsou uložené v pracovním stromu větve `codex/customizations`; zatím nejsou commitnuté ani odeslané na GitHub/WEDOS.
+Práce byla zastavena na žádost uživatele kvůli vypnutí počítače. Při následné aktualizaci upstreamu na 1.67.5 byly rozpracované změny uložené v commitu `bb25d8e1` a záložní větvi `codex/backup-before-1675`. Nebyly odeslané na GitHub/WEDOS. Podrobnosti aktualizace jsou v `docs/upstream-1.67.5.cs.md`.
 
 ## Hotové změny v kódu
 

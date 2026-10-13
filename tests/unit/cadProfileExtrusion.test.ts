@@ -634,3 +634,13 @@ describe("round shapes drawn with few sides", () => {
     expect(cadModifierProfileForShape(shape("cone", { width: 30, depth: 15, height: 15, sides: 96 }))?.kind).toBe("revolution");
   });
 });
+
+describe("rounded box in the edge tool (#239)", () => {
+  it("is the exact round, but not at quality 1, which is drawn as a flat chamfer", () => {
+    const base = { width: 40, depth: 30, height: 20, cornerFillet: 4, topBottomFillet: 3 };
+    expect(cadModifierProfileForShape(shape("roundedBox", { ...base, roundedBoxQuality: 8 }))).not.toBeNull();
+    expect(cadModifierProfileForShape(shape("roundedBox", { ...base, roundedBoxQuality: 2 }))).not.toBeNull();
+    expect(cadModifierProfileForShape(shape("roundedBox", { ...base, roundedBoxQuality: 1 }))).toBeNull();
+    expect(cadModifierProfileForShape(shape("roundedBox", { ...base, topBottomFillet: 0, roundedBoxQuality: 1 }))).toBeNull();
+  });
+});
