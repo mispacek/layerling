@@ -5,14 +5,16 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { buildTechnicShape } from "@/lib/technicBuilder";
 import { technicBounds, type TechnicRecipe } from "@/lib/technicRecipe";
 import { technicMeasurements } from "@/lib/technicMeasurements";
+import { TECHNIC_PREVIEW_COLORS, TECHNIC_SELECTION_TEXTURE_SIZE, technicSelectionMask } from "@/lib/technicPreviewHighlight";
 import { t } from "@/lib/i18n";
 
 /** Read-only preview of the same geometry used by Done/STL, with the editor's mouse bindings. */
-export function TechnicPreview({ recipe, activeLayer = 0, triangleLimit }: { recipe: TechnicRecipe; activeLayer?: number; triangleLimit: number }) {
+export function TechnicPreview({ recipe, activeLayer = 0, selection = [], triangleLimit }: { recipe: TechnicRecipe; activeLayer?: number; selection?: readonly string[]; triangleLimit: number }) {
   const stage = useRef<HTMLDivElement>(null);
   const update = useRef<((positions: number[]) => void) | null>(null);
   const fit = useRef<() => void>(() => {});
   const planeUpdate = useRef<((recipe: TechnicRecipe, layer: number) => void) | null>(null);
+  const highlightUpdate = useRef<((recipe: TechnicRecipe, layer: number, selection: readonly string[]) => void) | null>(null);
   const [status, setStatus] = useState<"technic.building" | "technic.previewUnavailable" | "technic.error.recipe" | "technic.error.geometry" | "">("technic.building");
   useEffect(() => {
     const host = stage.current!;
@@ -32,7 +34,43 @@ export function TechnicPreview({ recipe, activeLayer = 0, triangleLimit }: { rec
     const light = new THREE.DirectionalLight(0xffffff, 2.2);
     light.position.set(1, 2, 3); camera.add(light);
     scene.add(camera, new THREE.HemisphereLight(0xffffff, 0x303040, 0.7));
-    const material = new THREE.MeshStandardMaterial({ color: "#cf101b", roughness: 0.7 });
+    const selectionTexture = new THREE.DataTexture(new Uint8Array(TECHNIC_SELECTION_TEXTURE_SIZE ** 2), TECHNIC_SELECTION_TEXTURE_SIZE, TECHNIC_SELECTION_TEXTURE_SIZE, THREE.RedFormat);
+    selectionTexture.needsUpdate = true;
+    const highlightUniforms = {
+      technicMask: { value: selectionTexture }, technicOrigin: { value: new THREE.Vector3() },
+      technicPitch: { value: 8 }, technicHeight: { value: 8 }, technicActiveLayer: { value: 0 },
+      technicActiveColor: { value: new THREE.Color(TECHNIC_PREVIEW_COLORS.active) },
+      technicSelectedColor: { value: new THREE.Color(TECHNIC_PREVIEW_COLORS.selected) },
+      technicInactiveColor: { value: new THREE.Color(TECHNIC_PREVIEW_COLORS.inactive) },
+    };
+    const material = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.7 });
+    material.onBeforeCompile = shader => {
+      Object.assign(shader.uniforms, highlightUniforms);
+      shader.vertexShader = "varying vec3 vTechnicMaterialPosition;\n" + shader.vertexShader.replace("#include <begin_vertex>", `#include <begin_vertex>
+        // Bias into the material to assign shared/top/bottom faces to their own cell.
+        vTechnicMaterialPosition = transformed - normalize(objectNormal) * 0.002;`);
+      shader.fragmentShader = `varying vec3 vTechnicMaterialPosition;
+        uniform sampler2D technicMask;
+        uniform vec3 technicOrigin;
+        uniform float technicPitch, technicHeight, technicActiveLayer;
+        uniform vec3 technicActiveColor, technicSelectedColor, technicInactiveColor;
+        ` + shader.fragmentShader.replace("#include <color_fragment>", `#include <color_fragment>
+        vec3 technicPosition = vTechnicMaterialPosition + technicOrigin;
+        bool technicActive = abs(floor(technicPosition.y / technicHeight) - technicActiveLayer) < 0.5;
+        vec2 technicCell = floor(vec2(technicPosition.x, -technicPosition.z) / technicPitch + 0.5);
+        bool technicSelected = technicActive && all(lessThanEqual(abs(technicCell), vec2(128.0)))
+          && texture2D(technicMask, (technicCell + 128.5) / 257.0).r > 0.5;
+        diffuseColor.rgb *= technicSelected ? technicSelectedColor : technicActive ? technicActiveColor : technicInactiveColor;`);
+    };
+    highlightUpdate.current = (r, layer, selected) => {
+      if (!r.cells.length) return;
+      const b = technicBounds(r), m = technicMeasurements(r);
+      highlightUniforms.technicOrigin.value.set(b.centerX, b.baseY, b.centerZ);
+      highlightUniforms.technicPitch.value = m.pitch; highlightUniforms.technicHeight.value = m.height;
+      highlightUniforms.technicActiveLayer.value = layer;
+      selectionTexture.image.data = technicSelectionMask(r, layer, selected); selectionTexture.needsUpdate = true;
+      draw();
+    };
     const mesh = new THREE.Mesh(new THREE.BufferGeometry(), material);
     const edgeMaterial = new THREE.LineBasicMaterial({ color: "#430b0f", transparent: true, opacity: 0.8 });
     const edges = new THREE.LineSegments(new THREE.BufferGeometry(), edgeMaterial);
@@ -80,12 +118,13 @@ export function TechnicPreview({ recipe, activeLayer = 0, triangleLimit }: { rec
     };
     const observer = new ResizeObserver(resize); observer.observe(host); resize();
     return () => {
-      update.current = null; planeUpdate.current = null; fit.current = () => {}; observer.disconnect(); controls.dispose();
+      update.current = null; planeUpdate.current = null; highlightUpdate.current = null; fit.current = () => {}; observer.disconnect(); controls.dispose();
       canvas.removeEventListener("pointerdown", pan, { capture: true });
-      mesh.geometry.dispose(); edges.geometry.dispose(); plane.geometry.dispose(); material.dispose(); edgeMaterial.dispose(); planeMaterial.dispose(); renderer.dispose(); renderer.forceContextLoss(); canvas.remove();
+      mesh.geometry.dispose(); edges.geometry.dispose(); plane.geometry.dispose(); selectionTexture.dispose(); material.dispose(); edgeMaterial.dispose(); planeMaterial.dispose(); renderer.dispose(); renderer.forceContextLoss(); canvas.remove();
     };
   }, []);
   useEffect(() => { planeUpdate.current?.(recipe, activeLayer); }, [recipe, activeLayer]);
+  useEffect(() => { highlightUpdate.current?.(recipe, activeLayer, selection); }, [recipe, activeLayer, selection]);
   useEffect(() => {
     let cancelled = false;
     setStatus("technic.building");
@@ -103,6 +142,8 @@ export function TechnicPreview({ recipe, activeLayer = 0, triangleLimit }: { rec
     <div className="technic-preview-stage" ref={stage} />
     <button className="technic-preview-fit" onClick={() => fit.current()}>{t("technic.fitPreview")}</button>
     {status ? <p className="technic-preview-status" role="status">{t(status)}</p> : null}
+    <p className="technic-preview-colors">{(["active", "selected", "inactive"] as const).map(kind => <span key={kind}>
+      <i aria-hidden="true" style={{ backgroundColor: TECHNIC_PREVIEW_COLORS[kind] }} />{t(`technic.preview.${kind}`)}</span>)}</p>
     <p className="technic-muted">{t("technic.previewHelp")}</p>
   </div>;
 }

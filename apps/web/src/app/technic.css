@@ -42,6 +42,15 @@
 .technic-sample { position: absolute; left: 2px; bottom: 1px; font-size: 9px; background: var(--panel); }
 .technic-selection-tools { display: flex; flex-wrap: wrap; gap: 5px; margin: 8px 0; }
 .technic-selection-tools button { padding: 6px 8px; font-size: 12px; }
+.technic-transfer-tools { border-top: 1px solid var(--border); padding-top: 8px; margin-bottom: 12px; }
+.technic-transfer-tools > label { display: block; font-size: 12px; }
+.technic-transfer-tools > div { display: flex; gap: 5px; margin-top: 6px; }
+.technic-transfer-tools button { flex: 1; padding: 7px 6px; font-size: 12px; }
+.technic-transfer-tools .technic-muted { margin: 6px 0 0; }
+.technic-preview-colors { display: flex; flex-wrap: wrap; gap: 5px 10px; margin: 6px 8px 0; font-size: 11px; }
+.technic-preview-colors > span { display: inline-flex; align-items: center; gap: 4px; }
+.technic-preview-colors i { width: 9px; height: 9px; border-radius: 2px; }
+.technic-preview .technic-preview-fit { bottom: 76px; }
 .technic-field-pair, .technic-measurements { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .technic-panel-content input:not([type="range"]), .technic-panel-content select { width: 100%; min-width: 0; margin-top: 5px; padding: 7px; border: 1px solid var(--border-strong); border-radius: 6px; color: var(--foreground); background: var(--background); font: inherit; }
 .technic-panel-content .technic-field-pair label, .technic-panel-content .technic-measurements label { min-width: 0; margin: 8px 0 0; }

@@ -8,7 +8,7 @@ import { DEFAULT_WORKPLANE_WORKSPACE } from "@/lib/workplaneSettings";
 import type { WorkplaneWorkspaceSettings } from "@/types/layerling";
 import { DEFAULT_TECHNIC_CORNER_RADIUS, TECHNIC_CELL_LIMIT, TECHNIC_LAYER_LIMIT, technicLayer, technicLayerCount, technicLayerRecipe, parseTechnicPattern, technicBounds, technicCellKey, technicCorners, technicPattern, technicRounding, type TechnicCell, type TechnicRecipe, type TechnicRounding } from "@/lib/technicRecipe";
 import { DEFAULT_TECHNIC_MEASUREMENTS, TECHNIC_MEASUREMENT_RANGES, technicMeasurements, loadTechnicProfiles, saveTechnicProfile, type TechnicMeasurements, type TechnicPrintProfile } from "@/lib/technicMeasurements";
-import { technicRectangle, transformTechnicSelection } from "@/lib/technicSelection";
+import { technicRectangle, transformTechnicSelection, transferTechnicSelection } from "@/lib/technicSelection";
 import { TECHNIC_TEMPLATES, technicTemplate, technicCalibration, type TechnicTemplate } from "@/lib/technicTemplates";
 import { appendTechnicLayer, removeTechnicLayer } from "@/lib/technicLayers";
 import { TechnicPreview } from "./TechnicPreview";
@@ -98,6 +98,7 @@ export function TechnicWorkspace({ initial, initialRoundingOpen = false, workspa
   const [brush, setBrush] = useState<Omit<TechnicCell, "x" | "y" | "z">>({ kind: "pin", axis: "Z", roll: 0 });
   const [selected, setSelected] = useState<string[]>([]);
   const [placement, setPlacement] = useState<"move" | "copy" | null>(null);
+  const [transferLayer, setTransferLayer] = useState<number | null>(null);
   const [hover, setHover] = useState<{ x: number; y: number } | null>(null);
   const selectionStroke = useRef<{ start: { x: number; y: number }; base: string[] } | null>(null);
   const paintStroke = useRef<DraftSnapshot | null>(null);
@@ -120,6 +121,8 @@ export function TechnicWorkspace({ initial, initialRoundingOpen = false, workspa
   const canvas = useRef<HTMLDivElement>(null);
   const pendingPan = useRef({ x: 0, y: 0 });
   const selectedCells = recipe.cells.filter(c => selected.includes(technicCellKey(c.x, c.y, technicLayer(c))));
+  const defaultTarget = activeLayer + 1 < layerCount ? activeLayer + 1 : layerCount < TECHNIC_LAYER_LIMIT ? layerCount : activeLayer - 1;
+  const transferTarget = transferLayer !== null && transferLayer !== activeLayer && transferLayer <= layerCount ? transferLayer : defaultTarget;
   const cell = selectedCells[0];
   const settings = mode === "select" && cell ? cell : brush;
   const bounds = recipe.cells.length ? technicBounds(recipe) : null;
@@ -192,6 +195,7 @@ export function TechnicWorkspace({ initial, initialRoundingOpen = false, workspa
     const target = current.cells.find(c => technicCellKey(c.x, c.y, technicLayer(c)) === key);
     if (mode === "set" && !target) return;
     if (mode === "select") {
+      setError("");
       if (placement) {
         const result = transformTechnicSelection(current, selected, { kind: placement,
           dx: x - Math.min(...selectedCells.map(c => c.x)), dy: y - Math.min(...selectedCells.map(c => c.y)) });
@@ -229,7 +233,8 @@ export function TechnicWorkspace({ initial, initialRoundingOpen = false, workspa
     finishStroke();
     const z = Math.max(0, Math.min(technicLayerCount(draft) - 1, next));
     setLayer(z); activeLayerRef.current = z;
-    setSelected([]); setPlacement(null); setHover(null);
+    setSelected([]); setPlacement(null); setHover(null); setTransferLayer(null);
+    setError("");
     const slice = technicLayerRecipe(draft, z);
     setPattern(technicPattern(slice));
     setView(fittedGridView(slice.cells.length ? slice : draft, size.columns, size.rows));
@@ -253,6 +258,12 @@ export function TechnicWorkspace({ initial, initialRoundingOpen = false, workspa
     const result = transformTechnicSelection(recipeRef.current, selected, { kind });
     if (!result) { setError(t("technic.error.overlap")); return; }
     commit(result.recipe); setSelected(result.selection);
+  }
+  function transfer(kind: "move" | "copy") {
+    const result = transferTechnicSelection(recipeRef.current, selected, kind, transferTarget);
+    if (!result) { setError(t("technic.error.overlap")); return; }
+    commit(result.recipe); chooseLayer(transferTarget, result.recipe); setSelected(result.selection); setPreview(true);
+    root.current?.scrollTo?.({ top: 0 });
   }
   function pan(x: number, y: number) {
     setView(v => ({ x: Math.max(-128, Math.min(129 - size.columns, v.x + x)), y: Math.max(-129 + size.rows, Math.min(128, v.y + y)) }));
@@ -338,7 +349,7 @@ export function TechnicWorkspace({ initial, initialRoundingOpen = false, workspa
           </svg>
         </div>
       </div>
-      {preview ? <TechnicPreview recipe={recipe} activeLayer={activeLayer} triangleLimit={workspace.booleanTriangleLimit} /> : null}
+      {preview ? <TechnicPreview recipe={recipe} activeLayer={activeLayer} selection={selected} triangleLimit={workspace.booleanTriangleLimit} /> : null}
       </div>
       <p className="technic-caption">{t("technic.editLayerOnly", { layer: activeLayer + 1 })}<br />{t(placement ? "technic.placeSelection" : `technic.hint.${mode}`)} · X → · Y ↑ · Z ⊙
         <span className="technic-preview-legend">{t("technic.holeLegend")}</span></p>
@@ -363,6 +374,16 @@ export function TechnicWorkspace({ initial, initialRoundingOpen = false, workspa
           <button disabled={busy} onClick={() => mirror("mirrorX")}>{t("technic.mirrorX")}</button>
           <button disabled={busy} onClick={() => mirror("mirrorY")}>{t("technic.mirrorY")}</button>
           <button disabled={busy} onClick={() => { commit({ ...recipe, cells: recipe.cells.filter(c => !selected.includes(technicCellKey(c.x, c.y, technicLayer(c)))) }); setSelected([]); setPlacement(null); }}>{t("technic.deleteSelection")}</button>
+        </div> : null}
+        {mode === "select" && selectedCells.length ? <div className="technic-transfer-tools">
+          <label>{t("technic.toLayer")}<select aria-label={t("technic.toLayer")} disabled={busy} value={transferTarget} onChange={e => { setTransferLayer(Number(e.target.value)); setError(""); }}>
+            {Array.from({ length: layerCount }, (_, z) => z !== activeLayer ? <option key={z} value={z}>{t("technic.targetLayer", { layer: z + 1, height: Number((z * measurements.height).toFixed(2)) })}</option> : null)}
+            {layerCount < TECHNIC_LAYER_LIMIT ? <option value={layerCount}>{t("technic.newTargetLayer", { layer: layerCount + 1 })}</option> : null}
+          </select></label>
+          <div><button disabled={busy || recipe.cells.length + selectedCells.length > TECHNIC_CELL_LIMIT} onClick={() => transfer("copy")}>{t("technic.copyToLayer")}</button>
+            <button disabled={busy} onClick={() => transfer("move")}>{t("technic.moveToLayer")}</button></div>
+          <p className="technic-muted">{t("technic.transferHelp")}</p>
+          {error ? <p className="technic-error" role="alert">{error}</p> : null}
         </div> : null}
         {mode === "set" ? <p className="technic-muted">{t("technic.stampHelp")}</p> : null}
         <div className="technic-module-list">{(["solid", "pin", "axle"] as const).map(kind =>
@@ -467,7 +488,7 @@ export function TechnicWorkspace({ initial, initialRoundingOpen = false, workspa
           <p className="technic-muted">{t("technic.replaceHelp")}</p>
         </details>
         <p className="technic-muted">{t("technic.editHelp")}</p>
-        {error ? <p className="technic-error" role="alert">{error}</p> : null}
+        {error && !(mode === "select" && selectedCells.length) ? <p className="technic-error" role="alert">{error}</p> : null}
       </div>
       <footer><button onClick={onCancel}>{t("common.cancel")}</button>
         <button className="technic-done" disabled={busy || !recipe.cells.length} onClick={() => void apply()}>{t(busy ? "technic.building" : "technic.done")}</button></footer>

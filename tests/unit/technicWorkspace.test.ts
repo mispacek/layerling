@@ -35,6 +35,52 @@ async function render(onApply = vi.fn(async (_recipe: TechnicRecipe) => {}), onC
   return { onApply, onCancel };
 }
 describe("construction workspace draft", () => {
+  it("copies a selection into a new floor in one undo step and retains the target selection", async () => {
+    const { onApply } = await render(); await click('[data-cell="0,0"]');
+    await button(t("technic.axle")); await button("X"); await button("45°");
+    await button(t("technic.copyToLayer"));
+    expect(host.querySelector<HTMLSelectElement>('.technic-layer-bar select')!.value).toBe("1");
+    expect(host.querySelectorAll(".technic-cell.selected")).toHaveLength(1);
+    expect(host.querySelector('.technic-cell.selected')!.getAttribute("data-cell")).toBe("0,0,1");
+    await click(`button[aria-label="${t("editor.tool.undo")}"]`);
+    expect(host.querySelector<HTMLSelectElement>('.technic-layer-bar select')!.value).toBe("0");
+    expect(host.querySelectorAll(".technic-cell.filled")).toHaveLength(20);
+    await click(`button[aria-label="${t("editor.tool.redo")}"]`);
+    expect(host.querySelector<HTMLSelectElement>('.technic-layer-bar select')!.value).toBe("1");
+    await button(t("technic.done"));
+    const r = onApply.mock.calls[0][0];
+    expect(r.layerCount).toBe(2); expect(r.cells).toHaveLength(21);
+    expect(r.cells.at(-1)).toMatchObject({ x: 0, y: 0, z: 1, kind: "axle", axis: "X", roll: 45 });
+    expect(r.cells[0]).toMatchObject({ kind: "axle", axis: "X", roll: 45 });
+  });
+  it("moves selection to an existing floor and restores source floor on undo", async () => {
+    const { onApply } = await render(); await button(t("technic.addLayer"));
+    await act(async () => { const select = host.querySelector<HTMLSelectElement>('.technic-layer-bar select')!; select.value = "0"; select.dispatchEvent(new Event("change", { bubbles: true })); });
+    await click('[data-cell="0,0"]'); await button(t("technic.moveToLayer"));
+    expect(host.querySelector<HTMLSelectElement>('.technic-layer-bar select')!.value).toBe("1");
+    await click(`button[aria-label="${t("editor.tool.undo")}"]`);
+    expect(host.querySelector<HTMLSelectElement>('.technic-layer-bar select')!.value).toBe("0");
+    expect(host.querySelectorAll(".technic-cell.filled")).toHaveLength(20);
+    await click(`button[aria-label="${t("editor.tool.redo")}"]`);
+    await button(t("technic.done"));
+    const r = onApply.mock.calls[0][0];
+    expect(r.layerCount).toBe(2); expect(r.cells).toHaveLength(20);
+    expect(r.cells.filter(c => !c.z)).toHaveLength(19);
+  });
+  it("refuses occupied transfer targets without changing draft history or floors", async () => {
+    const { onApply } = await render(); await button(t("technic.duplicateLayer"));
+    await click('[data-cell="0,0,1"]');
+    await act(async () => { const select = host.querySelector<HTMLSelectElement>('.technic-transfer-tools select')!; select.value = "0"; select.dispatchEvent(new Event("change", { bubbles: true })); });
+    await button(t("technic.copyToLayer"));
+    expect(host.querySelector('.technic-error')!.textContent).toBe(t("technic.error.overlap"));
+    expect(host.querySelector<HTMLSelectElement>('.technic-layer-bar select')!.value).toBe("1");
+    expect(host.querySelectorAll(".technic-cell.selected")).toHaveLength(1);
+    await act(async () => { const select = host.querySelector<HTMLSelectElement>('.technic-transfer-tools select')!; select.value = "2"; select.dispatchEvent(new Event("change", { bubbles: true })); });
+    expect(host.querySelector('.technic-error')).toBeNull();
+    await click(`button[aria-label="${t("editor.tool.undo")}"]`);
+    expect(host.querySelector<HTMLSelectElement>('.technic-layer-bar select')!.value).toBe("0");
+    await button(t("technic.done")); expect(onApply.mock.calls[0][0].cells).toEqual(initial.cells);
+  });
   it("adds and paints an independent floor; undo/redo restore both the recipe and active floor", async () => {
     const { onApply } = await render();
     await button(t("technic.addLayer"));

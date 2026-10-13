@@ -11,6 +11,18 @@
 7. **Odebrat patro** odstraní jeho buňky a posune vyšší patra o jedno dolů. Poslední patro odstranit nelze. **Zpět/Znovu** obnovuje návrh i aktivní patro.
 8. **Vytvořit těleso** uloží celý dílek do projektu; **Zrušit** opustí návrh bez změny projektu. Uložený dílek znovu otevřete přes jeho nabídku nebo tlačítko **Zaoblení** v 3D editoru.
 
+## Přenos výběru mezi patry a zvýraznění
+
+V režimu **Vybrat** označte buňku, více buněk tažením nebo přes Shift. Pod úpravami výběru zvolte **Do patra** a klikněte na **Kopírovat do patra** nebo **Přesunout do patra**. Nabídka obsahuje ostatní existující patra a také nové patro nad posledním; není nutné ho nejprve ručně založit.
+
+Přenos zachová souřadnice X/Y, typ a směr otvorů, natočení kříže, korekce i zaoblení. Kopie ponechá původní buňky, přesun je odebere ze zdrojového patra. Cílové patro se otevře a přenesené buňky zůstanou vybrané. Vše včetně přidání nového patra tvoří jeden krok Zpět. Prázdné zdrojové patro zůstává zachované, aby se neposunula vyšší patra.
+
+Obsazený cíl se nepřepisuje; celý přenos se odmítne bez změny návrhu nebo historie. Totéž platí pro překročení limitu pater/buněk. Při plném limitu buněk lze stále použít přesun. Hláška o překrytí se zobrazí u ovládání výběru.
+
+V **3D náhledu** je aktivní patro červené, vybrané buňky oranžové a ostatní patra šedá. Změna výběru nebo aktivního patra nemění výslednou síť a nevyžaduje nový výpočet tělesa. Zvýraznění označuje viditelné povrchy; ostatní patra zůstávají neprůhledná. Modrá rovina dál ukazuje základ aktivního patra. Barvy a pomocná rovina se neukládají do STL ani do geometrie projektu.
+
+Otáčení výběru o 90° a kontrola oddělených částí jsou další plánované kroky, dosud nejsou implementované.
+
 ## Rozměry a geometrie
 
 - Výška všech pater je společná, výchozí 8 mm; mění se v **Úpravách pro tisk**. Nejvýše 32 pater a 256 obsazených buněk celkem.
@@ -28,3 +40,11 @@
 - **Fyzický tisk / hosting:** neověřeno. Rozměrové testy neprokazují pasovatelnost s konkrétní stavebnicí. Změny nebyly odeslány na GitHub ani nasazeny na WEDOS.
 
 Lokální export: `apps/web/.next-export/`; logy v ignorovaném `node_modules/technic-layers-{unit,export}.log`. Screenshot v ignorovaném `.codex-run/technic-multilayer.png`. Vývojovou aplikaci na portu 3000 je potřeba ručně restartovat přes `start-local.cmd`, pokud ještě používá prostředí starší verze.
+
+### Ověření následného přenosu a zvýraznění (13. 10. 2026)
+
+- 71 cílených jednotkových testů a 34 testů skutečné geometrie prošlo. Kontrola katalogu překladů CS/EN/DE nemá chybějící nové klíče ani rozdílné parametry. TypeScript a statický export včetně obou CAD workerů prošly. Celá jednotková sada nebyla v této etapě znovu spuštěna; její výsledek výše patří předchozí etapě.
+- V samostatném projektu **Lego – přenos mezi patry** na portu 3001 ověřena kopie přímo do nového patra, přesun do existujícího patra a kopie do uvolněného místa. Odmítnuté překrytí nezměnilo buňky ani historii. Zpět/Znovu obnovuje počet pater, buňky a aktivní patro. Po vytvoření tělesa a obnovení stránky zůstalo 22 buněk v patrech s počty 19/2/1.
+- Skutečný WebGL náhled rozlišuje oranžový výběr, červené aktivní patro a šedá ostatní patra, bez chyb shaderu v konzoli. Zvýraznění funguje na sjednocené geometrii, včetně povrchů velkých trojúhelníků přes více buněk.
+- Na šířce 390 px ověřena kopie a Zpět; dokument nepřesahuje vodorovně. Fyzický tisk, offline obnovení a nasazení na WEDOS nebyly ověřeny.
+- Finální exportní log: ignorovaný `node_modules/technic-transfer-export.log`; screenshot: `.codex-run/technic-transfer.png`.
