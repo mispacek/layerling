@@ -40,7 +40,7 @@
 .technic-template-list rect { fill: var(--workplane); stroke: var(--foreground); stroke-width: .4; }
 .technic-template-list circle { fill: var(--panel); stroke: var(--foreground); stroke-width: .4; }
 .technic-template-list path { stroke: var(--panel); stroke-width: 2; }
-.technic-grid { position: relative; display: grid; width: max-content; border-top: 1px solid var(--border-strong); border-left: 1px solid var(--border-strong); user-select: none; touch-action: manipulation; }
+.technic-grid { position: relative; display: grid; width: max-content; border-top: 1px solid var(--border-strong); border-left: 1px solid var(--border-strong); user-select: none; touch-action: none; }
 .technic-corner-overlay { position: absolute; top: 1px; left: 1px; width: calc(100% - 1px); height: calc(100% - 1px); z-index: 2; pointer-events: none; overflow: hidden; }
 .technic-corner-cut { fill: var(--panel); }
 .technic-corner-fill { fill: var(--workplane); }
@@ -84,4 +84,9 @@
   .technic-panel { width: 100%; min-height: 430px; border-left: 0; border-top: 1px solid var(--border-strong); }
   .technic-panel-content { overflow: visible; }
   .technic-preview { width: 42%; min-width: 140px; }
+}
+@media (max-width: 480px) {
+  .technic-drawing { height: 600px; }
+  .technic-views { flex-direction: column; }
+  .technic-preview { width: 100%; min-width: 0; height: 220px; flex: none; border-left: 0; border-top: 1px solid var(--border); }
 }

@@ -78,7 +78,7 @@ export const MESSAGES_CS: Record<MessageKey, string> = {
   "technic.resetMeasurements": "Obnovit základní rozměry",
   "technic.measureHelp": "Rozměry jsou uložené s dílkem. Profil se použije jen na otevřený návrh. Úbytek obrysu zachová rozteč otvorů; kladné korekce zvětší otvory.",
   "technic.calibration": "Kalibrační dílek",
-  "technic.calibrationHelp": "Tři kruhové a tři křížové otvory: −krok, 0, +krok vůči aktuálním korekcím. Hodnoty jsou vidět v rastru. Směr Z vytvoří malou destičku 3 × 2; pro X/Y jsou řady oddělené a spojené po straně. Hotový dílek exportujte jako STL.",
+  "technic.calibrationHelp": "Tři kruhové a tři křížové otvory: −krok, 0, +krok vůči aktuálním korekcím. Kruhový vzorek s nejmenší vůlí má zaoblený vnější roh pro orientaci po tisku. Hodnoty jsou vidět v rastru. Směr Z vytvoří destičku 3 × 2; pro X/Y jsou řady oddělené a spojené po straně. Hotový dílek exportujte jako STL.",
   "technic.calibrationStep": "Krok zkoušené vůle (mm)",
   "technic.makeCalibration": "Vytvořit kalibrační dílek",
   "technic.new": "Sestavit dílek",

@@ -9,7 +9,7 @@ import { t } from "@/lib/i18n";
 /** Read-only preview of the same geometry used by Done/STL, with the editor's mouse bindings. */
 export function TechnicPreview({ recipe, triangleLimit }: { recipe: TechnicRecipe; triangleLimit: number }) {
   const stage = useRef<HTMLDivElement>(null);
-  const update = useRef<((positions: number[], height: number) => void) | null>(null);
+  const update = useRef<((positions: number[]) => void) | null>(null);
   const fit = useRef<() => void>(() => {});
   const [status, setStatus] = useState<"technic.building" | "technic.previewUnavailable" | "technic.error.recipe" | "technic.error.geometry" | "">("technic.building");
   useEffect(() => {
@@ -29,24 +29,30 @@ export function TechnicPreview({ recipe, triangleLimit }: { recipe: TechnicRecip
     canvas.addEventListener("pointerdown", pan, { capture: true });
     const light = new THREE.DirectionalLight(0xffffff, 2.2);
     light.position.set(1, 2, 3); camera.add(light);
-    scene.add(camera, new THREE.AmbientLight(0xffffff, 1.5));
+    scene.add(camera, new THREE.HemisphereLight(0xffffff, 0x303040, 0.7));
     const material = new THREE.MeshStandardMaterial({ color: "#cf101b", roughness: 0.7 });
     const mesh = new THREE.Mesh(new THREE.BufferGeometry(), material);
-    scene.add(mesh);
+    const edgeMaterial = new THREE.LineBasicMaterial({ color: "#430b0f", transparent: true, opacity: 0.8 });
+    const edges = new THREE.LineSegments(new THREE.BufferGeometry(), edgeMaterial);
+    scene.add(mesh, edges);
     let fitted = false;
     const draw = () => renderer.render(scene, camera);
     fit.current = () => {
       const sphere = mesh.geometry.boundingSphere;
       if (!sphere || sphere.radius <= 0) return;
       controls.target.copy(sphere.center);
-      camera.position.copy(sphere.center).add(new THREE.Vector3(sphere.radius * 2, sphere.radius * 2, sphere.radius * 2.6));
+      const verticalAngle = THREE.MathUtils.degToRad(camera.fov) / 2;
+      const angle = Math.min(verticalAngle, Math.atan(Math.tan(verticalAngle) * camera.aspect));
+      const distance = sphere.radius * 1.15 / Math.sin(angle);
+      camera.position.copy(sphere.center).add(new THREE.Vector3(2, 2, 2.6).normalize().multiplyScalar(distance));
       controls.update(); fitted = true; draw();
     };
-    update.current = (positions, height) => {
+    update.current = positions => {
       const geometry = new THREE.BufferGeometry();
       geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
       geometry.computeVertexNormals(); geometry.computeBoundingSphere();
       mesh.geometry.dispose(); mesh.geometry = geometry;
+      edges.geometry.dispose(); edges.geometry = new THREE.EdgesGeometry(geometry, 35);
       if (!fitted) fit.current();
       draw();
     };
@@ -60,7 +66,7 @@ export function TechnicPreview({ recipe, triangleLimit }: { recipe: TechnicRecip
     return () => {
       update.current = null; fit.current = () => {}; observer.disconnect(); controls.dispose();
       canvas.removeEventListener("pointerdown", pan, { capture: true });
-      mesh.geometry.dispose(); material.dispose(); renderer.dispose(); renderer.forceContextLoss(); canvas.remove();
+      mesh.geometry.dispose(); edges.geometry.dispose(); material.dispose(); edgeMaterial.dispose(); renderer.dispose(); renderer.forceContextLoss(); canvas.remove();
     };
   }, []);
   useEffect(() => {
@@ -68,11 +74,11 @@ export function TechnicPreview({ recipe, triangleLimit }: { recipe: TechnicRecip
     setStatus("technic.building");
     const timer = window.setTimeout(() => {
       if (!update.current) { setStatus("technic.previewUnavailable"); return; }
-      if (!recipe.cells.length) { update.current([], 8); setStatus(""); return; }
+      if (!recipe.cells.length) { update.current([]); setStatus(""); return; }
       void buildTechnicShape(recipe, triangleLimit).then(shape => {
         if (cancelled) return;
-        update.current?.(shape.importedMesh!.positions, shape.height); setStatus("");
-      }).catch(error => { if (!cancelled) { update.current?.([], 8); setStatus(error instanceof Error && error.message === "technic.error.recipe" ? "technic.error.recipe" : "technic.error.geometry"); } });
+        update.current?.(shape.importedMesh!.positions); setStatus("");
+      }).catch(error => { if (!cancelled) { update.current?.([]); setStatus(error instanceof Error && error.message === "technic.error.recipe" ? "technic.error.recipe" : "technic.error.geometry"); } });
     }, 450);
     return () => { cancelled = true; window.clearTimeout(timer); };
   }, [recipe, triangleLimit]);

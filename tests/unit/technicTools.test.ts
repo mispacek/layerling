@@ -41,6 +41,8 @@ describe("Lego selection and reusable templates", () => {
       expect(r.cells.filter(c => c.kind !== "solid").map(c => c.holeOffset)).toEqual([-0.1, 0, 0.1, -0.1, 0, 0.1]);
       expect(r.cells.filter(c => c.kind === "pin")).toHaveLength(3);
       expect(r.cells.filter(c => c.kind === "axle")).toHaveLength(3);
+      expect(r.cells.filter(c => c.rounding === "outer")).toHaveLength(1);
+      expect(r.cells.find(c => c.rounding === "outer")).toMatchObject({ kind: "pin", holeOffset: -0.1 });
     }
     expect(technicBounds(technicCalibration(initialTechnicRecipe(), 0.1, "Z")!)).toMatchObject({ width: 24, depth: 16 });
   });

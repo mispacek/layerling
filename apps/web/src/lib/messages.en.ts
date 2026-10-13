@@ -54,7 +54,7 @@ export const MESSAGES_EN = {
   "technic.resetMeasurements": "Reset measurements",
   "technic.measureHelp": "Measurements are saved with the part. A profile applies only to the open draft. Outline inset preserves hole spacing; positive corrections enlarge holes.",
   "technic.calibration": "Calibration part",
-  "technic.calibrationHelp": "Three pin and three axle holes: −step, 0, +step relative to current corrections. Values appear in the grid. Z makes a small 3 × 2 plate; X/Y rows are separated and joined at the side. Export the finished part as STL.",
+  "technic.calibrationHelp": "Three pin and three axle holes: −step, 0, +step relative to current corrections. The tightest pin sample has a rounded outer corner to identify orientation after printing. Values appear in the grid. Z makes a 3 × 2 plate; X/Y rows are separated and joined at the side. Export the finished part as STL.",
   "technic.calibrationStep": "Test clearance step (mm)",
   "technic.makeCalibration": "Create calibration part",
   "technic.new": "Build a part",

@@ -53,7 +53,7 @@ export const MESSAGES_DE: Record<MessageKey, string> = {
   "technic.resetMeasurements": "Grundmaße wiederherstellen",
   "technic.measureHelp": "Maße werden mit dem Teil gespeichert. Ein Profil gilt nur für den offenen Entwurf. Der Kontureinzug erhält die Lochabstände; positive Korrekturen vergrößern die Löcher.",
   "technic.calibration": "Kalibrierteil",
-  "technic.calibrationHelp": "Drei Pin- und drei Achslöcher: −Schritt, 0, +Schritt zu den aktuellen Korrekturen. Werte stehen im Raster. Z erzeugt eine kleine 3 × 2 Platte; X/Y-Reihen sind getrennt und seitlich verbunden. Das fertige Teil als STL exportieren.",
+  "technic.calibrationHelp": "Drei Pin- und drei Achslöcher: −Schritt, 0, +Schritt zu den aktuellen Korrekturen. Die engste Pinprobe hat eine abgerundete Außenecke zur Orientierung nach dem Druck. Werte stehen im Raster. Z erzeugt eine 3 × 2 Platte; X/Y-Reihen sind getrennt und seitlich verbunden. Das fertige Teil als STL exportieren.",
   "technic.calibrationStep": "Schritt der Testpassung (mm)",
   "technic.makeCalibration": "Kalibrierteil erstellen",
   "technic.new": "Bauteil zusammensetzen",

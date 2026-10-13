@@ -20,7 +20,8 @@ export function technicTemplate(kind: TechnicTemplate, width: number, depth: num
 export function technicCalibration(recipe: TechnicRecipe, step: number, axis: TechnicCell["axis"]): TechnicRecipe | null {
   if (!Number.isFinite(step) || step < 0.01 || step > 0.4) return null;
   const cells: TechnicCell[] = [];
-  for (let y = 0; y < 2; y++) for (let x = 0; x < 3; x++) cells.push({ x, y, kind: y === 1 ? "pin" : "axle", axis, roll: 0, holeOffset: (x - 1) * step });
+  for (let y = 0; y < 2; y++) for (let x = 0; x < 3; x++) cells.push({ x, y, kind: y === 1 ? "pin" : "axle", axis, roll: 0,
+    holeOffset: (x - 1) * step, ...(y === 1 && x === 0 ? { rounding: "outer" as const } : {}) });
   // Horizontal bores need exposed faces on both ends. Separate the two rows and
   // connect them beside the samples, never across their openings.
   if (axis !== "Z") {

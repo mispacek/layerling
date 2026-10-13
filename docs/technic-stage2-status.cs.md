@@ -1,4 +1,18 @@
-# Rozpracovaná druhá etapa Lego Compatible – 13. 10. 2026
+# Dokončená druhá etapa Lego Compatible – 13. 10. 2026
+
+Po aktualizaci na upstream 1.67.5 jsme dokončili tuto etapu: hromadné úpravy, 3D náhled, rozměrové profily, kalibrační dílek a katalog sedmi šablon. Rozhraní bylo ověřené i při šířce 390 px.
+
+## Závěrečné opravy a ověření
+
+- Náhled má kontrastní obrysové hrany a čitelnější osvětlení. Přiblížení celého dílku zohledňuje šířku i výšku náhledu.
+- Na obrazovkách do 480 px se 3D náhled přesune pod rastr. Při změně velikosti rastru se jeho prázdné okraje přizpůsobí dostupnému místu, takže nezakrývají dílek. Po použití šablony, vzoru či kalibrace se zobrazí výsledek.
+- Rastr rezervuje dotykové gesto pro kreslení; posun viditelné části zůstává na šipkách. Fyzické ovládání na tabletu nebylo testované.
+- Kruhový kalibrační vzorek s nejmenší vůlí má zaoblení vnějšího rohu jako orientační značku po tisku; používá dosavadní zaoblení uložené s buňkou.
+- Staticky/lokálně: 71 cílených jednotkových testů a 27 testů skutečné geometrie prošlo; TypeScript, finální export a oba CAD workery prošly. Finální exportní log je v ignorovaném `node_modules/technic-stage2-ready-export.log`.
+- Živě: katalog L s rozměry 5 × 3 vytvořil 7 buněk; kalibrace vytvořila 6 buněk; Zpět/Znovu obnovilo původní rám a kalibraci. Zrušení návrhu zachovalo původní projekt. Na šířce 390 px nebyl vodorovný přesah a po vytvoření návrhu se posun vrátil na výsledek. Testováno v samostatném projektu `Ověření aktualizace 1.67.5` na `http://127.0.0.1:3001/`.
+- Screenshot: ignorovaný `.codex-run/technic-stage2-finished.png`. Fyzický tisk, pasovatelnost a WEDOS hosting zůstávají neověřené; nic nebylo odeslané na GitHub ani WEDOS.
+
+## Historie přerušení
 
 Práce byla zastavena na žádost uživatele kvůli vypnutí počítače. Při následné aktualizaci upstreamu na 1.67.5 byly rozpracované změny uložené v commitu `bb25d8e1` a záložní větvi `codex/backup-before-1675`. Nebyly odeslané na GitHub/WEDOS. Podrobnosti aktualizace jsou v `docs/upstream-1.67.5.cs.md`.
 
@@ -13,7 +27,7 @@ Práce byla zastavena na žádost uživatele kvůli vypnutí počítače. Při n
 
 Více pater, různé výšky jednotlivých buněk a další konektory jsou odložené do dalších etap dle dohody.
 
-## Ověření
+## Ověření před přerušením
 
 - Poslední cílený běh: 86 jednotkových a 27 geometrických testů prošlo (včetně `.lyl` a STL round tripu).
 - Finální statický export prošel včetně TypeScript kontroly a obou CAD workerů; Service Worker obsahuje 162 souborů, otisk `06b871566f6e32b5`. Výstup: `apps/web/.next-export/`.
@@ -23,7 +37,7 @@ Více pater, různé výšky jednotlivých buněk a další konektory jsou odlo�
 - Testováno pouze v projektu `Lego Compatible – ověření`; rozpracovaný návrh nebyl vložen do projektu.
 - Logy posledního exportu a celé sady jsou v ignorovaných `node_modules/technic-stage2-export.log` a `node_modules/technic-stage2-unit.log`.
 
-## Při pokračování
+## Původní seznam pro pokračování (nyní dokončený v rozsahu této etapy)
 
 1. Zkontrolovat `git status --short`; zachovat všechny rozpracované soubory.
 2. Ověřit konec posledního exportního logu; případně spustit `npm.cmd run export` s Node 24 pouze pro tento proces.

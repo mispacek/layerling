@@ -50,7 +50,7 @@ Použití šablony nebo kalibrace nahradí návrh v editoru; Zpět jej obnoví. 
 
 **Kalibrační dílek** vytvoří tři kruhové a tři křížové otvory s korekcemi −krok, 0, +krok. Výchozí krok je 0,1 mm a lze jej měnit.
 Pro Z jde o destičku 24 × 16 × 8 mm při výchozích rozměrech. U X/Y jsou dvě řady oddělené a spojené po straně, aby všech šest otvorů zůstalo průchozích (24 × 32 nebo 32 × 24 mm).
-Hodnoty vzorků jsou uvedené v rastru, nikoli vyražené do tištěného tělesa; poznamenejte si orientaci před tiskem. Hotový dílek exportujte běžným exportem do STL.
+Hodnoty vzorků jsou uvedené v rastru, nikoli vyražené do tištěného tělesa. Kruhový vzorek s nejmenší vůlí má zaoblené vnější rohy jako hmatovou orientační značku. Při zachování této značky lze poznat orientaci i po tisku; zaoblení lze běžně změnit v editoru. Hotový dílek exportujte běžným exportem do STL.
 Po vyzkoušení konkrétních pinů/os nastavte odpovídající korekce a uložte profil. U součástí X/Y ověřte také vliv podpěr a směru vrstev tisku.
 
 Referenční rozměry vycházejí z [PartDesigner – measurements.ts](https://github.com/marian42/partdesigner/blob/master/src/measurements.ts).

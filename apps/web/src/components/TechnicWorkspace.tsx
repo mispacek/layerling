@@ -16,6 +16,15 @@ import { selectWholeValue } from "@/lib/numberField";
 
 type Mode = "select" | "add" | "remove" | "set";
 
+function fittedGridView(recipe: TechnicRecipe, columns: number, rows: number) {
+  if (!recipe.cells.length) return { x: -Math.floor(columns / 2), y: Math.floor(rows / 2) };
+  const b = technicBounds(recipe);
+  const marginX = Math.max(0, Math.min(2, Math.floor((columns - (b.maxX - b.minX + 1)) / 2)));
+  const marginY = Math.max(0, Math.min(2, Math.floor((rows - (b.maxY - b.minY + 1)) / 2)));
+  return { x: Math.max(-128, Math.min(129 - columns, b.minX - marginX)),
+    y: Math.max(-129 + rows, Math.min(128, b.maxY + marginY)) };
+}
+
 /** Match the editor's measurement fields: comma, point and arithmetic; commit on blur/Enter. */
 function TechnicNumberField({ value, min, max, step = 1, integer = false, disabled, onChange }: {
   value: number; min: number; max: number; step?: number; integer?: boolean; disabled?: boolean; onChange: (value: number) => void;
@@ -94,7 +103,7 @@ export function TechnicWorkspace({ initial, initialRoundingOpen = false, workspa
   const [templateDepth, setTemplateDepth] = useState(5);
   const [calibrationStep, setCalibrationStep] = useState(0.1);
   const [calibrationAxis, setCalibrationAxis] = useState<TechnicCell["axis"]>("Z");
-  const [view, setView] = useState(() => { const b = technicBounds(initial); return { x: b.minX - 2, y: b.maxY + 2 }; });
+  const [view, setView] = useState(() => fittedGridView(initial, 12, 10));
   const [size, setSize] = useState({ columns: 12, rows: 10 });
   const [pattern, setPattern] = useState(() => technicPattern(initial));
   const [error, setError] = useState("");
@@ -125,7 +134,10 @@ export function TechnicWorkspace({ initial, initialRoundingOpen = false, workspa
     if (!node) return;
     const observer = new ResizeObserver(entries => {
       const { width, height } = entries[0].contentRect;
-      setSize({ columns: Math.max(3, Math.min(24, Math.floor((width - 16) / 44))), rows: Math.max(4, Math.min(24, Math.floor((height - 16) / 44))) });
+      const columns = Math.max(3, Math.min(24, Math.floor((width - 16) / 44)));
+      const rows = Math.max(4, Math.min(24, Math.floor((height - 16) / 44)));
+      setSize({ columns, rows });
+      setView(fittedGridView(recipeRef.current, columns, rows));
     });
     observer.observe(node);
     return () => observer.disconnect();
@@ -206,7 +218,10 @@ export function TechnicWorkspace({ initial, initialRoundingOpen = false, workspa
   }
   function replaceDraft(next: TechnicRecipe) {
     commit(next); setSelected([]); setPlacement(null);
-    const b = technicBounds(next); setView({ x: b.minX - 2, y: b.maxY + 2 });
+    setView(fittedGridView(next, size.columns, size.rows));
+    // On a narrow screen the panel is below the drawing. Show the result after
+    // replacing a pattern instead of leaving the pupil at the bottom of its controls.
+    root.current?.scrollTo?.({ top: 0 });
   }
   function mirror(kind: "mirrorX" | "mirrorY") {
     const result = transformTechnicSelection(recipeRef.current, selected, { kind });

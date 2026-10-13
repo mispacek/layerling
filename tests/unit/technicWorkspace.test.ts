@@ -7,10 +7,14 @@ import { initialTechnicRecipe, type TechnicRecipe } from "@/lib/technicRecipe";
 import { t } from "@/lib/i18n";
 
 let host: HTMLDivElement, root: Root;
+let resizeGrid: (entries: { contentRect: { width: number; height: number } }[]) => void;
 const initial = initialTechnicRecipe();
 beforeEach(() => {
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
-  vi.stubGlobal("ResizeObserver", class { observe() {} disconnect() {} });
+  vi.stubGlobal("ResizeObserver", class {
+    constructor(callback: typeof resizeGrid) { resizeGrid = callback; }
+    observe() {} disconnect() {}
+  });
   host = document.createElement("div"); document.body.append(host); root = createRoot(host);
 });
 afterEach(async () => { await act(async () => root.unmount()); host.remove(); vi.unstubAllGlobals(); });
@@ -30,6 +34,12 @@ async function render(onApply = vi.fn(async (_recipe: TechnicRecipe) => {}), onC
   return { onApply, onCancel };
 }
 describe("construction workspace draft", () => {
+  it("uses available narrow-grid space for the part instead of leaving two empty margin columns", async () => {
+    await render();
+    await act(async () => resizeGrid([{ contentRect: { width: 370, height: 240 } }]));
+    expect(host.querySelectorAll(".technic-cell.filled")).toHaveLength(20);
+    expect(host.querySelector(".technic-cell")?.getAttribute("data-cell")).toBe("0,4");
+  });
   it("accepts Czech decimals in dimensions, retains them in the applied recipe and resets the draft on undo", async () => {
     const { onApply } = await render();
     const input = host.querySelector<HTMLInputElement>(".technic-measurements input")!;
