@@ -6,8 +6,24 @@ import { projectShapesFingerprint } from "@/lib/editorHistory";
 import { canEditTechnic, replaceTechnicShape } from "@/lib/technicBuilder";
 import { Vector3 } from "three";
 import { quaternionForShape } from "@/lib/editorBooleans";
+import { DEFAULT_TECHNIC_MEASUREMENTS } from "@/lib/technicMeasurements";
 
 describe("optional Lego Compatible recipes", () => {
+  it.each([false, true])("keeps the recipe's base origin when changing height on a tilted part (mirrorY=%s)", mirrorY => {
+    const recipe = initialTechnicRecipe();
+    const previous = sceneShape({ id: "old", kind: "mesh", name: "test", color: "#f00", x: 30, z: -12, elevation: 4,
+      width: 56, depth: 40, height: 8, rotation: 20, rotationX: 30, technicRecipe: recipe });
+    previous.mirrorY = mirrorY;
+    const nextRecipe = { ...recipe, measurements: { ...DEFAULT_TECHNIC_MEASUREMENTS, height: 10 } };
+    const next = sceneShape({ id: "new", kind: "mesh", name: "test", color: "#f00", width: 56, depth: 40, height: 10, technicRecipe: nextRecipe });
+    const replaced = replaceTechnicShape(previous, next);
+    const baseOrigin = (s: typeof previous) => {
+      const b = technicBounds(s.technicRecipe!);
+      return new Vector3(-b.centerX, -s.height / 2 * (s.mirrorY ? -1 : 1), -b.centerZ)
+        .applyQuaternion(quaternionForShape(s)).add(new Vector3(s.x, (s.elevation ?? 0) + s.height / 2, s.z));
+    };
+    expect(baseOrigin(previous).distanceTo(baseOrigin(replaced))).toBeLessThan(1e-8);
+  });
   it("supports individual choices and retains legacy rounding", () => {
     const r = initialTechnicRecipe(); r.cells = r.cells.map(c => ({ ...c, rounded: true }));
     expect(technicCorners(r)).toHaveLength(8);

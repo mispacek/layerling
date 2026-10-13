@@ -20,6 +20,26 @@
 .technic-workspace button[aria-pressed="true"] { border-color: var(--primary); box-shadow: inset 0 0 0 1px var(--primary); }
 .technic-view-tools button, .technic-panel header button { display: grid; place-items: center; min-width: 32px; min-height: 32px; }
 .technic-canvas { flex: 1; min-height: 180px; overflow: auto; padding: 8px; }
+.technic-views { display: flex; flex: 1; min-height: 0; min-width: 0; }
+.technic-preview { display: flex; flex-direction: column; width: 40%; min-width: 200px; position: relative; border-left: 1px solid var(--border); }
+.technic-preview-stage { flex: 1; min-height: 180px; min-width: 0; position: relative; }
+.technic-preview-stage canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+.technic-preview .technic-muted { padding: 0 8px; font-size: 11px; }
+.technic-preview-status { position: absolute; top: 8px; left: 8px; right: 8px; margin: 0; font-size: 12px; padding: 6px; background: var(--panel); pointer-events: none; }
+.technic-preview-fit { position: absolute; right: 8px; bottom: 40px; padding: 6px 8px; font-size: 11px !important; }
+.technic-grid .technic-cell.technic-ghost { box-shadow: inset 0 0 0 3px var(--primary); opacity: .65; }
+.technic-sample { position: absolute; left: 2px; bottom: 1px; font-size: 9px; background: var(--panel); }
+.technic-selection-tools { display: flex; flex-wrap: wrap; gap: 5px; margin: 8px 0; }
+.technic-selection-tools button { padding: 6px 8px; font-size: 12px; }
+.technic-field-pair, .technic-measurements { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.technic-panel-content input:not([type="range"]), .technic-panel-content select { width: 100%; min-width: 0; margin-top: 5px; padding: 7px; border: 1px solid var(--border-strong); border-radius: 6px; color: var(--foreground); background: var(--background); font: inherit; }
+.technic-panel-content .technic-field-pair label, .technic-panel-content .technic-measurements label { min-width: 0; margin: 8px 0 0; }
+.technic-template-list { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+.technic-template-list button { display: flex; flex-direction: column; align-items: center; padding: 6px; font-size: 11px; gap: 3px; }
+.technic-template-list svg { width: 65px; height: 40px; }
+.technic-template-list rect { fill: var(--workplane); stroke: var(--foreground); stroke-width: .4; }
+.technic-template-list circle { fill: var(--panel); stroke: var(--foreground); stroke-width: .4; }
+.technic-template-list path { stroke: var(--panel); stroke-width: 2; }
 .technic-grid { position: relative; display: grid; width: max-content; border-top: 1px solid var(--border-strong); border-left: 1px solid var(--border-strong); user-select: none; touch-action: manipulation; }
 .technic-corner-overlay { position: absolute; top: 1px; left: 1px; width: calc(100% - 1px); height: calc(100% - 1px); z-index: 2; pointer-events: none; overflow: hidden; }
 .technic-corner-cut { fill: var(--panel); }
@@ -63,4 +83,5 @@
   .technic-drawing { flex: none; height: 390px; }
   .technic-panel { width: 100%; min-height: 430px; border-left: 0; border-top: 1px solid var(--border-strong); }
   .technic-panel-content { overflow: visible; }
+  .technic-preview { width: 42%; min-width: 140px; }
 }

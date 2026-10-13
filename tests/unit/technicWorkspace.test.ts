@@ -20,7 +20,8 @@ async function click(selector: string) {
   await act(async () => node.click());
 }
 async function button(text: string) {
-  const node = [...host.querySelectorAll<HTMLButtonElement>("button")].find(n => n.textContent?.trim().endsWith(text))!;
+  const nodes = [...host.querySelectorAll<HTMLButtonElement>("button")];
+  const node = (nodes.find(n => n.textContent?.trim() === text) ?? nodes.find(n => n.textContent?.trim().endsWith(text)))!;
   expect(node).not.toBeUndefined();
   await act(async () => node.click());
 }
@@ -29,6 +30,49 @@ async function render(onApply = vi.fn(async (_recipe: TechnicRecipe) => {}), onC
   return { onApply, onCancel };
 }
 describe("construction workspace draft", () => {
+  it("accepts Czech decimals in dimensions, retains them in the applied recipe and resets the draft on undo", async () => {
+    const { onApply } = await render();
+    const input = host.querySelector<HTMLInputElement>(".technic-measurements input")!;
+    await act(async () => input.focus());
+    await act(async () => {
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(input, "8,1");
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    await act(async () => input.blur());
+    expect(input.value).toBe("8.1");
+    await click(`button[aria-label="${t("editor.tool.undo")}"]`); expect(input.value).toBe("8");
+    await click(`button[aria-label="${t("editor.tool.redo")}"]`); expect(input.value).toBe("8.1");
+    await button(t("technic.done"));
+    expect(onApply.mock.calls[0][0].measurements?.pitch).toBe(8.1);
+  });
+  it("selects a rectangle, changes all selected cells, copies by clicking a destination and undoes it", async () => {
+    const { onApply } = await render();
+    const start = host.querySelector('[data-cell="0,0"]')!;
+    const end = host.querySelector('[data-cell="2,0"]')!;
+    await act(async () => start.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true, button: 0, buttons: 1 })));
+    await act(async () => end.dispatchEvent(new MouseEvent("pointerover", { bubbles: true, buttons: 1 })));
+    await act(async () => end.dispatchEvent(new MouseEvent("pointerup", { bubbles: true, buttons: 0 })));
+    expect(host.querySelectorAll(".technic-cell.selected")).toHaveLength(3);
+    await button(t("technic.axle")); await button("X");
+    await button(t("technic.copy")); await click('[data-cell="1,2"]');
+    await click(`button[aria-label="${t("editor.tool.undo")}"]`);
+    await click(`button[aria-label="${t("editor.tool.redo")}"]`);
+    await button(t("technic.done"));
+    const result = onApply.mock.calls[0][0];
+    expect(result.cells).toHaveLength(23);
+    expect(result.cells.filter(c => c.kind === "axle")).toHaveLength(6);
+    expect(result.cells.filter(c => c.kind === "axle").every(c => c.axis === "X")).toBe(true);
+  });
+  it("records one painted stroke as one undo operation", async () => {
+    await render(); await button(t("technic.mode.add"));
+    const start = host.querySelector('[data-cell="1,1"]')!, end = host.querySelector('[data-cell="2,1"]')!;
+    await act(async () => start.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true, button: 0, buttons: 1 })));
+    await act(async () => end.dispatchEvent(new MouseEvent("pointerover", { bubbles: true, buttons: 1 })));
+    await act(async () => end.dispatchEvent(new MouseEvent("pointerup", { bubbles: true, buttons: 0 })));
+    expect(host.querySelectorAll(".technic-cell.filled")).toHaveLength(22);
+    await click(`button[aria-label="${t("editor.tool.undo")}"]`);
+    expect(host.querySelectorAll(".technic-cell.filled")).toHaveLength(20);
+  });
   it("samples and stamps orientation and rounding while preserving cell types and empty space", async () => {
     const { onApply } = await render();
     await click('[data-cell="0,0"]'); await button(t("technic.axle")); await button("X"); await button("45°");

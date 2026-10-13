@@ -3,6 +3,8 @@ import manifoldModule from "manifold-3d";
 import { rememberManifoldRuntime } from "@/lib/manifoldHandle";
 import { buildTechnicShape } from "@/lib/technicBuilder";
 import { initialTechnicRecipe, type TechnicCell, type TechnicRecipe } from "@/lib/technicRecipe";
+import { DEFAULT_TECHNIC_MEASUREMENTS } from "@/lib/technicMeasurements";
+import { technicCalibration } from "@/lib/technicTemplates";
 import { disposeManifold, shapeToManifoldSolid } from "@/lib/editorBooleans";
 import { getManifoldRuntime, meshForShape, type ManifoldSolid } from "@/lib/editorMeshCore";
 import { exportMeshesToStl } from "@/lib/stlExport";
@@ -29,6 +31,37 @@ async function bodyFor(r: TechnicRecipe) {
   return { shape, body, dispose: () => [...new Set([...created, body])].reverse().forEach(disposeManifold) };
 }
 describe("real Lego Compatible bodies", () => {
+  it("erodes the united outline without splitting adjoining cells or changing hole pitch", async () => {
+    const r = { ...recipe([cell("solid"), cell("solid", "Z", 1)]), measurements: { ...DEFAULT_TECHNIC_MEASUREMENTS, pitch: 8.1, height: 9, bodyInset: 0.1 } };
+    const { body, shape, dispose } = await bodyFor(r);
+    try {
+      expect(shape.width).toBeCloseTo(16); expect(shape.depth).toBeCloseTo(7.9); expect(shape.height).toBe(9);
+      expect(body.volume()).toBeCloseTo(16 * 7.9 * 9, 3);
+      const components = body.decompose(); expect(components).toHaveLength(1); components.forEach(disposeManifold);
+      expect(body.rayCast([0, -1, 0], [0, 10, 0])).toHaveLength(2);
+    } finally { dispose(); }
+  });
+  it.each(["X", "Y", "Z"] as const)("keeps every calibration hole open and its correction distinct along %s", async axis => {
+    const r = technicCalibration(recipe([]), 0.15, axis)!;
+    const { body, dispose } = await bodyFor(r);
+    try {
+      const centreX = (Math.min(...r.cells.map(c => c.x)) + Math.max(...r.cells.map(c => c.x))) * 4;
+      const centreZ = -(Math.min(...r.cells.map(c => c.y)) + Math.max(...r.cells.map(c => c.y))) * 4;
+      for (const c of r.cells.filter(c => c.kind !== "solid")) {
+        const x = c.x * 8 - centreX, z = -c.y * 8 - centreZ;
+        const ray = axis === "X" ? [[x - 5, 4, z], [x + 5, 4, z]] : axis === "Y" ? [[x, 4, z - 5], [x, 4, z + 5]] : [[x, -1, z], [x, 9, z]];
+        expect(body.rayCast(ray[0] as [number, number, number], ray[1] as [number, number, number])).toHaveLength(0);
+        if (c.kind === "pin") {
+          const edge = 4.95 / 2;
+          const offsetRay = axis === "X" ? [[x - 5, 4, z + edge], [x + 5, 4, z + edge]] : axis === "Y" ? [[x + edge, 4, z - 5], [x + edge, 4, z + 5]] : [[x + edge, -1, z], [x + edge, 9, z]];
+          const hits = body.rayCast(offsetRay[0] as [number, number, number], offsetRay[1] as [number, number, number]);
+          if (c.holeOffset! < 0) expect(hits.length).toBeGreaterThan(0);
+          if (c.holeOffset! > 0) expect(hits).toHaveLength(0);
+        }
+      }
+      const components = body.decompose(); expect(components).toHaveLength(1); components.forEach(disposeManifold);
+    } finally { dispose(); }
+  });
   it.each(["outer", "inner", "both"] as const)("builds only the requested %s rounding", async rounding => {
     const r = initialTechnicRecipe();
     r.cornerRadius = 2; r.cells = r.cells.map(c => ({ ...c, kind: "solid", rounding }));
@@ -118,6 +151,7 @@ describe("real Lego Compatible bodies", () => {
   });
   it("round-trips real geometry, recipe and history in .lyl and rejects malformed metadata", async () => {
     const shape = await buildTechnicShape({ ...recipe([cell("pin", "X", -1), cell("axle", "Y", 0, 0, 45)]), cornerRadius: 2,
+      measurements: { ...DEFAULT_TECHNIC_MEASUREMENTS, pitch: 8.1, pinCorrection: 0.1, axleCorrection: -0.1 },
       cells: [cell("pin", "X", -1), { ...cell("axle", "Y", 0, 0, 45), rounded: true }] }, 300_000);
     const bytes = await exportLylProject({ projectName: "Technic", createdAt: 1_700_000_000_000, modifiedAt: 1_700_000_000_000,
       shapes: [shape], history: [editorHistoryEntry([], []), editorHistoryEntry([shape], [shape.id])], historyIndex: 1,
