@@ -208,7 +208,7 @@ export function TechnicWorkspace({ initial, initialRoundingOpen = false, workspa
       return;
     }
     if (mode === "set") {
-      commit({ ...current, cells: current.cells.map(c => c === target ? { ...c, axis: brush.axis, roll: brush.roll,
+      commit({ ...current, cells: current.cells.map(c => c === target ? { ...c, kind: brush.kind, axis: brush.axis, roll: brush.roll,
         holeOffset: brush.holeOffset, rounded: undefined, rounding: technicRounding(brush) } : c) });
       pendingPan.current = { x: 0, y: 0 };
       return;
@@ -395,7 +395,7 @@ export function TechnicWorkspace({ initial, initialRoundingOpen = false, workspa
         </div> : null}
         {mode === "set" ? <p className="technic-muted">{t("technic.stampHelp")}</p> : null}
         <div className="technic-module-list">{(["solid", "pin", "axle"] as const).map(kind =>
-          <button key={kind} disabled={busy || mode === "remove" || mode === "set"} aria-pressed={settings.kind === kind} onClick={() => change({ kind })}>
+          <button key={kind} disabled={busy || mode === "remove"} aria-pressed={settings.kind === kind} onClick={() => change({ kind })}>
             <TechnicModuleIcon className="technic-module-icon" kind={kind} />{t(`technic.${kind}`)}</button>)}</div>
         <label>{t("technic.axis")} <span className="technic-key-hint">{t("technic.axisKeys")}</span></label>
         <div className="technic-mode-buttons">{(["X", "Y", "Z"] as const).map(axis =>

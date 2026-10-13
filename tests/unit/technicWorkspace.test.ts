@@ -216,7 +216,7 @@ describe("construction workspace draft", () => {
     await click(`button[aria-label="${t("editor.tool.undo")}"]`);
     expect(host.querySelectorAll(".technic-cell.filled")).toHaveLength(20);
   });
-  it("samples and stamps orientation and rounding while preserving cell types and empty space", async () => {
+  it("samples and stamps cell type, orientation and rounding while preserving empty space", async () => {
     const { onApply } = await render();
     await click('[data-cell="0,0"]'); await button(t("technic.axle")); await button("X"); await button("45°");
     await act(async () => { const select = host.querySelector<HTMLSelectElement>('.technic-rounding select')!; select.value = "outer"; select.dispatchEvent(new Event("change", { bubbles: true })); });
@@ -224,8 +224,25 @@ describe("construction workspace draft", () => {
     await button(t("technic.done"));
     const result = onApply.mock.calls[0][0];
     expect(result.cells).toHaveLength(20);
-    expect(result.cells.find(c => c.x === 1 && c.y === 0)).toMatchObject({ kind: "pin", axis: "X", roll: 45, rounding: "outer" });
+    expect(result.cells.find(c => c.x === 1 && c.y === 0)).toMatchObject({ kind: "axle", axis: "X", roll: 45, rounding: "outer" });
     expect(result.cells.find(c => c.x === -1)).toBeUndefined();
+  });
+  it("lets Apply change between all three cell types and undo each stamp", async () => {
+    const { onApply } = await render(); await button(t("technic.mode.set"));
+    await button(t("technic.solid")); await click('[data-cell="0,0"]');
+    expect(host.querySelector('[data-cell="0,0"]')!.getAttribute("aria-label")).toContain(t("technic.solid"));
+    await button(t("technic.axle")); await button("Y"); await button("45°");
+    await click('[data-cell="0,0"]');
+    expect(host.querySelector('[data-cell="0,0"]')!.getAttribute("aria-label")).toContain(t("technic.axle"));
+    await click(`button[aria-label="${t("editor.tool.undo")}"]`);
+    expect(host.querySelector('[data-cell="0,0"]')!.getAttribute("aria-label")).toContain(t("technic.solid"));
+    await click(`button[aria-label="${t("editor.tool.redo")}"]`);
+    await button(t("technic.pin")); await click('[data-cell="1,0"]');
+    await button(t("technic.done"));
+    const cells = onApply.mock.calls[0][0].cells;
+    expect(cells).toHaveLength(initial.cells.length);
+    expect(cells.find(c => c.x === 0 && c.y === 0)).toMatchObject({ kind: "axle", axis: "Y", roll: 45 });
+    expect(cells.find(c => c.x === 1 && c.y === 0)).toMatchObject({ kind: "pin", axis: "Y" });
   });
   it("does not move cells under a held pointer when painting at the visible boundary", async () => {
     await render(); await button(t("technic.mode.add"));

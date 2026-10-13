@@ -79,7 +79,7 @@ Zaoblení rohů obrysu nyní zůstává v předloze a při její změně se pře
 ## Nastavit a zaoblení rohů
 Každá buňka má vlastní volbu **Bez zaoblení / Vnější / Vnitřní / Vnější i vnitřní**. **Zaoblit aktivní patro** nanese aktuální volbu na jeho buňky; **Nastavit** ji přenáší na kliknuté buňky. Starší `rounded: true` zachová obě zaoblení. Označení mřížky a jednotek je **Lego**, uložené identifikátory zůstávají stejné.
 
-V režimu **Vybrat** zvolte vzorovou buňku a upravte její směr, natočení a zaoblení. Přepněte na **Nastavit** a klikáním nebo tažením přenášejte tato nastavení na další obsazené buňky. Typ buňky zůstává zachovaný, prázdné buňky se nepřidávají.
+V režimu **Vybrat** zvolte vzorovou buňku a upravte její typ, směr, natočení a zaoblení. Přepněte na **Nastavit** a klikáním nebo tažením přenášejte tato nastavení na další obsazené buňky. Typ můžete zvolit také přímo v režimu **Nastavit**: **Plná buňka / Otvor pro pin / Otvor pro osu**. Volba v panelu připraví nastavení; použije se až kliknutím na buňku v rastru. Prázdné buňky se nepřidávají.
 
 V části **Zaoblení rohů** lze zaoblit vybranou buňku nebo aktivní patro. Poloměr 0,2–4 mm je společný. Zaoblení se počítá na sjednoceném obrysu daného patra: vnější rohy se oříznou, vnitřní rohy se vyplní obloukem, společné rovné stěny zůstanou spojené. Průchozí otvory pokračují přes materiál přidaný vnitřním zaoblením.
 
