@@ -52,7 +52,7 @@ describe("optional Lego Compatible recipes", () => {
     expect(validTechnicRecipe(r)).toBe(true);
     expect(r.cells).toHaveLength(20);
     expect(technicBounds(r)).toMatchObject({ width: 56, depth: 40 });
-    expect(technicPattern(r)).toBe("ooooooo\no.....o\no.....o\no.....o\nooooooo");
+    expect(parseTechnicPattern(technicPattern(r), "X", 45)).toEqual(r.cells.slice().sort((a, b) => b.y - a.y || a.x - b.x));
   });
   it("keeps sparse negative coordinates and uses exactly 8 mm spacing", () => {
     const r = { ...initialTechnicRecipe(), cells: [{ x: -3, y: 2, kind: "solid" as const, axis: "Z" as const, roll: 0 as const }, { x: 1, y: -1, kind: "solid" as const, axis: "Z" as const, roll: 0 as const }] };
@@ -64,6 +64,32 @@ describe("optional Lego Compatible recipes", () => {
       { x: 0, y: 1, kind: "solid", axis: "X", roll: 45 }, { x: 1, y: 1, kind: "pin", axis: "X", roll: 45 },
       { x: 1, y: 0, kind: "axle", axis: "X", roll: 45 },
     ]);
+  });
+  it("retains independently oriented bores and axle rolls when changing the brush", () => {
+    const cells = parseTechnicPattern("ox oy oz\n+x +y45 +z45", "Y", 45)!;
+    expect(cells.map(c => [c.kind, c.axis, c.roll])).toEqual([
+      ["pin", "X", 0], ["pin", "Y", 0], ["pin", "Z", 0],
+      ["axle", "X", 0], ["axle", "Y", 45], ["axle", "Z", 45],
+    ]);
+    const text = technicPattern({ ...initialTechnicRecipe(), cells });
+    expect(text.split("\n")[0]).toBe("ox   oy   oz");
+    expect(parseTechnicPattern(text, "Z", 0)).toEqual(cells);
+  });
+  it("mixes spaced or compact new tokens with legacy cells, including CRLF and uppercase axes", () => {
+    expect(parseTechnicPattern("#oX+Y45\r\n. o +", "Z", 45)).toEqual([
+      { x: 0, y: 1, kind: "solid", axis: "Z", roll: 45 }, { x: 1, y: 1, kind: "pin", axis: "X", roll: 0 },
+      { x: 2, y: 1, kind: "axle", axis: "Y", roll: 45 }, { x: 1, y: 0, kind: "pin", axis: "Z", roll: 45 },
+      { x: 2, y: 0, kind: "axle", axis: "Z", roll: 45 },
+    ]);
+  });
+  it("counts cells rather than text characters for pattern limits", () => {
+    const line = Array(32).fill("+x45").join(" ");
+    expect(parseTechnicPattern(Array(8).fill(line).join("\n"), "Z", 0)).toHaveLength(256);
+    expect(parseTechnicPattern(Array(9).fill(line).join("\n"), "Z", 0)).toBeNull();
+    expect(parseTechnicPattern(Array(33).fill("ox").join(" "), "Z", 0)).toBeNull();
+  });
+  it.each(["ox oy\n+z", "ox90", "+z90", "o x", "ox\n\noy", "#x", "ox +y45 ?"])("rejects malformed oriented patterns: %s", text => {
+    expect(parseTechnicPattern(text, "Z", 0)).toBeNull();
   });
   it.each(["", "..", "o\n##", "#?", "#".repeat(33), Array(17).fill("#".repeat(16)).join("\n")])("rejects invalid or oversized patterns: %s", text => {
     expect(parseTechnicPattern(text, "Z", 0)).toBeNull();

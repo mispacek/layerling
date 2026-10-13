@@ -9,6 +9,7 @@ Dosavadní modelovací nástroje fungují dál. Editor dílku využívá aktuál
 2. **Vybrat** vybírá buňku kliknutím nebo více buněk tažením obdélníku. Shift přidá/odebere buňku z výběru. V pravém panelu změňte typ, směr otvoru X/Y/Z nebo natočení kříže 0°/45° celého výběru.
    Náhled Z ukazuje profil otvoru shora; vodorovné otvory X/Y jsou vyznačeny čárkovaným průchodem a dvojicí směrových šipek. U křížového otvoru je vidět také natočení profilu. Písmeno osy je jen doplňkový popisek.
 3. **Přidat** kreslí zvolenou buňku kliknutím nebo tažením, i v prázdném prostoru za obrysem. **Odebrat** odstraní materiál v buňce.
+   Klávesami **X / Y / Z** měníte směr otvoru pro další kreslení. V režimu Vybrat mění směr vybraných buněk, v režimu Nastavit směr razítka. Při psaní do polí ani s Ctrl/Alt/Meta se tato zkratka nepoužívá; Ctrl+Z/Y zůstává historií.
 4. Šipky posouvají viditelnou část rastru; při přidání na jeho hranici se okno po uvolnění tlačítka posune o jednu buňku. Velikost buněk se nemění.
 5. **Vytvořit těleso** vytvoří skutečnou uzavřenou polygonovou síť a vloží ji do projektu v jednom kroku historie. **Zrušit** nechá původní projekt beze změny.
 6. Dílek znovu otevřete pravým tlačítkem → **Upravit Lego dílek**, nebo výběrem dílku a stejným příkazem v nabídce **Tvary**.
@@ -26,9 +27,15 @@ Nový dílek se v této etapě vytváří u počátku základní pracovní rovin
 
 ## Generátor
 
-Rozbalte **Generátor z předlohy**. Značky: `#` plná buňka, `o` otvor pro pin, `+` otvor pro osu, `.` prázdná.
-Řádky odpovídají pohledu shora: nahoře je kladný směr Y. Všechny řádky musí mít stejnou délku.
-Použití předlohy nahradí rozmístění aktivního patra a použije aktuální směr a natočení otvorů. Původní levý dolní počátek předlohy se zachová.
+Rozbalte **Generátor z předlohy**. Značky: `#` plná buňka, `.` prázdná; `ox`, `oy`, `oz` otvor pro pin v daném směru; `+x`, `+y`, `+z` otvor pro osu s křížem 0°; `+x45`, `+y45`, `+z45` s křížem 45°.
+Každá značka představuje jednu buňku. Oddělujte je mezerami; při automatickém zobrazení se sloupce zarovnají. Původní kompaktní zápis `#o.+` zůstává platný: samostatné `o` a `+` převezmou aktuální směr a natočení. Explicitní značky tato nastavení nepřebírají, takže smíšené směry zůstanou zachované i po opakovaném použití textu.
+Řádky odpovídají pohledu shora: nahoře je kladný směr Y. Všechny řádky musí mít stejný počet buněk, nikoli znaků.
+Použití předlohy nahradí rozmístění aktivního patra. Původní levý dolní počátek předlohy se zachová. Textový formát popisuje typ, směr a natočení otvoru; nenahrazuje `.lyl` pro uložení jednotlivých korekcí a zaoblení.
+
+```text
+ox   oy   oz
++x   +y45 +z
+```
 Maximální předloha je 32 × 32 a celkem 256 obsazených buněk. Ruční kreslení podporuje souřadnice −128 až 128 buněk.
 
 ## Geometrie a rozměry

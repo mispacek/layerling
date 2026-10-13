@@ -23,6 +23,12 @@ V **3D náhledu** je aktivní patro červené, vybrané buňky oranžové a osta
 
 Otáčení výběru o 90° a kontrola oddělených částí jsou další plánované kroky, dosud nejsou implementované.
 
+### Klávesy a textová předloha
+
+**X / Y / Z** nastavují směr otvoru při přidávání, výběru nebo razítkování. V textových, číselných a výběrových polích ani při zadávání přes IME se zkratky nepoužijí. Ctrl+Z/Y zůstává historií a Ctrl+X obvyklou zkratkou pro vyjmutí textu. Kliknutí do rastru vrátí fokus kreslení, i pokud jste předtím upravovali text.
+
+Textový generátor automaticky vypisuje směr každé díry: `ox/oy/oz` pro pin, `+x/+y/+z` pro osu 0°, `+x45/+y45/+z45` pro osu 45°. Značky oddělte mezerami; každý řádek musí mít stejný počet buněk. Staré `o/+` stále přebírají směr a natočení nástroje, explicitní značky je zachovají nezávisle na něm. Použití textu mění pouze aktivní patro; natočení není přenášeno do ostatních pater. Podrobný příklad je v [základním návodu](technic-first-version.cs.md#generátor).
+
 ## Rozměry a geometrie
 
 - Výška všech pater je společná, výchozí 8 mm; mění se v **Úpravách pro tisk**. Nejvýše 32 pater a 256 obsazených buněk celkem.
@@ -48,3 +54,10 @@ Lokální export: `apps/web/.next-export/`; logy v ignorovaném `node_modules/te
 - Skutečný WebGL náhled rozlišuje oranžový výběr, červené aktivní patro a šedá ostatní patra, bez chyb shaderu v konzoli. Zvýraznění funguje na sjednocené geometrii, včetně povrchů velkých trojúhelníků přes více buněk.
 - Na šířce 390 px ověřena kopie a Zpět; dokument nepřesahuje vodorovně. Fyzický tisk, offline obnovení a nasazení na WEDOS nebyly ověřeny.
 - Finální exportní log: ignorovaný `node_modules/technic-transfer-export.log`; screenshot: `.codex-run/technic-transfer.png`.
+
+### Ověření kláves a orientovaných předloh (13. 10. 2026)
+
+- 85 cílených jednotkových a 34 geometrických testů prošlo; překlady CS/EN/DE mají shodné klíče a parametry. Statický export prošel včetně TypeScript kontroly a obou CAD workerů, otisk `b13f1628a204d36d`.
+- V projektu **Lego – směry otvorů a text** na portu 3001 ověřeno psaní X do textového pole bez změny nástroje, předloha `ox oy oz / +x +y45 +z45`, kreslení dalších tří otvorů přes X/Y/Z a Ctrl+Z/Y. Opakované použití explicitního textu s jiným směrem a natočením nástroje zachovalo původní orientace. Po uložení a obnovení stránky zůstalo 9 buněk, 32 × 24 × 8 mm, a text se obnovil se všemi směry a kříži 0°/45°. Konzole bez chyb.
+- Starý zápis a limit počtu buněk nezávislý na délce značek jsou ověřené automaticky. Fyzický tisk a nasazení na WEDOS nebyly ověřeny.
+- Log: ignorovaný `node_modules/technic-pattern-export.log`; screenshot: `.codex-run/technic-pattern-directions.png`.

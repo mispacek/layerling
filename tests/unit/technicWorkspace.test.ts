@@ -35,6 +35,63 @@ async function render(onApply = vi.fn(async (_recipe: TechnicRecipe) => {}), onC
   return { onApply, onCancel };
 }
 describe("construction workspace draft", () => {
+  it("uses X/Y/Z while adding holes and keeps Ctrl+Z/Y as undo/redo", async () => {
+    const { onApply } = await render(); await button(t("technic.mode.add"));
+    const editor = host.querySelector('.technic-workspace')!;
+    for (const [key, position] of [["x", "1,1"], ["Y", "1,2"], ["z", "2,1"]]) {
+      await act(async () => editor.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true })));
+      await click(`[data-cell="${position}"]`);
+    }
+    await act(async () => editor.dispatchEvent(new KeyboardEvent("keydown", { key: "z", ctrlKey: true, bubbles: true })));
+    expect(host.querySelectorAll('.technic-cell.filled')).toHaveLength(22);
+    await act(async () => editor.dispatchEvent(new KeyboardEvent("keydown", { key: "y", ctrlKey: true, bubbles: true })));
+    expect(host.querySelectorAll('.technic-cell.filled')).toHaveLength(23);
+    await button(t("technic.done"));
+    const cells = onApply.mock.calls[0][0].cells;
+    expect(cells.find(c => c.x === 1 && c.y === 1)?.axis).toBe("X");
+    expect(cells.find(c => c.x === 1 && c.y === 2)?.axis).toBe("Y");
+    expect(cells.find(c => c.x === 2 && c.y === 1)?.axis).toBe("Z");
+  });
+  it("does not intercept axis keys in text/number/select fields, modifiers or IME composition", async () => {
+    await render(); await button(t("technic.mode.add"));
+    for (const element of [...host.querySelectorAll('textarea, input, select')]) {
+      await act(async () => element.dispatchEvent(new KeyboardEvent("keydown", { key: "x", bubbles: true, cancelable: true })));
+    }
+    const editor = host.querySelector('.technic-workspace')!;
+    for (const options of [{ ctrlKey: true }, { metaKey: true }, { altKey: true }, { isComposing: true }]) {
+      await act(async () => editor.dispatchEvent(new KeyboardEvent("keydown", { key: "x", bubbles: true, ...options })));
+    }
+    const z = [...host.querySelectorAll('button')].find(b => b.textContent === "Z" && b.hasAttribute('aria-pressed'))!;
+    expect(z.getAttribute('aria-pressed')).toBe("true");
+  });
+  it("focuses the canvas when drawing after typing and changes only selected holes in selection mode", async () => {
+    const { onApply } = await render();
+    const text = host.querySelector<HTMLTextAreaElement>('textarea')!;
+    await act(async () => text.focus());
+    const c = host.querySelector('[data-cell="0,0"]')!;
+    await act(async () => c.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true, button: 0, buttons: 1 })));
+    await act(async () => c.dispatchEvent(new MouseEvent("pointerup", { bubbles: true, buttons: 0 })));
+    expect(document.activeElement).toBe(host.querySelector('.technic-workspace'));
+    await act(async () => document.activeElement!.dispatchEvent(new KeyboardEvent("keydown", { key: "x", bubbles: true })));
+    await button(t("technic.done"));
+    expect(onApply.mock.calls[0][0].cells.filter(c => c.axis === "X")).toHaveLength(1);
+  });
+  it("applies mixed oriented patterns only in the active floor and writes explicit directions back to text", async () => {
+    const { onApply } = await render(); await button(t("technic.duplicateLayer"));
+    const textarea = host.querySelector<HTMLTextAreaElement>('textarea')!;
+    await act(async () => {
+      Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, "value")!.set!.call(textarea, "ox oy\n+z45 +x");
+      textarea.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    await button(t("technic.applyPattern"));
+    expect(textarea.value).toContain("+z45"); expect(textarea.value).toContain("ox");
+    await button(t("technic.done"));
+    const r = onApply.mock.calls[0][0];
+    expect(r.cells.filter(c => !c.z)).toEqual(initial.cells);
+    expect(r.cells.filter(c => c.z === 1).map(c => [c.kind, c.axis, c.roll])).toEqual([
+      ["pin", "X", 0], ["pin", "Y", 0], ["axle", "Z", 45], ["axle", "X", 0],
+    ]);
+  });
   it("copies a selection into a new floor in one undo step and retains the target selection", async () => {
     const { onApply } = await render(); await click('[data-cell="0,0"]');
     await button(t("technic.axle")); await button("X"); await button("45°");

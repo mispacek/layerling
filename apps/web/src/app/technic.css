@@ -50,6 +50,7 @@
 .technic-preview-colors { display: flex; flex-wrap: wrap; gap: 5px 10px; margin: 6px 8px 0; font-size: 11px; }
 .technic-preview-colors > span { display: inline-flex; align-items: center; gap: 4px; }
 .technic-preview-colors i { width: 9px; height: 9px; border-radius: 2px; }
+.technic-key-hint { color: var(--muted-strong); font-size: 11px; }
 .technic-preview .technic-preview-fit { bottom: 76px; }
 .technic-field-pair, .technic-measurements { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .technic-panel-content input:not([type="range"]), .technic-panel-content select { width: 100%; min-width: 0; margin-top: 5px; padding: 7px; border: 1px solid var(--border-strong); border-radius: 6px; color: var(--foreground); background: var(--background); font: inherit; }

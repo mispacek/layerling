@@ -109,14 +109,29 @@ export function initialTechnicRecipe(): TechnicRecipe {
   return { version: 1, pitch: 8, height: 8, holeAdjustment: 0, cells };
 }
 
-/** Pattern rows run from back to front, like the top-view editor. */
+/** One token per cell; legacy o/+ inherit the brush, oriented tokens are explicit. */
 export function parseTechnicPattern(text: string, axis: TechnicCell["axis"], roll: TechnicCell["roll"]): TechnicCell[] | null {
-  const rows = text.trim().split(/\r?\n/).map(row => row.trim());
-  if (!rows.length || rows.length > 32 || !rows[0].length || rows[0].length > 32
-    || rows.some(row => row.length !== rows[0].length || /[^#o+.]/.test(row))) return null;
+  const lines = text.trim().split(/\r?\n/);
+  if (!text.trim() || lines.length > 32) return null;
+  const rows: string[][] = [], token = /[#.]|o[xyz]?|\+[xyz]?(?:45|0)?/iy;
+  for (const line of lines) {
+    const row: string[] = [];
+    for (let pos = 0; pos < line.length;) {
+      if (/\s/.test(line[pos])) { pos++; continue; }
+      token.lastIndex = pos;
+      const match = token.exec(line);
+      if (!match || row.length >= 32) return null;
+      row.push(match[0].toLowerCase()); pos = token.lastIndex;
+    }
+    if (!row.length || (rows.length && row.length !== rows[0].length)) return null;
+    rows.push(row);
+  }
   const cells: TechnicCell[] = [];
-  rows.forEach((row, y) => [...row].forEach((char, x) => {
-    if (char !== ".") cells.push({ x, y: rows.length - 1 - y, kind: char === "#" ? "solid" : char === "o" ? "pin" : "axle", axis, roll });
+  rows.forEach((row, y) => row.forEach((value, x) => {
+    if (value === ".") return;
+    const direction = /[xyz]/.test(value[1] ?? "") ? value[1].toUpperCase() as TechnicCell["axis"] : axis;
+    const rotation = value === "#" || value === "o" || value === "+" ? roll : value.endsWith("45") ? 45 : 0;
+    cells.push({ x, y: rows.length - 1 - y, kind: value === "#" ? "solid" : value.startsWith("o") ? "pin" : "axle", axis: direction, roll: rotation });
   }));
   return cells.length && cells.length <= TECHNIC_CELL_LIMIT ? cells : null;
 }
@@ -126,9 +141,11 @@ export function technicPattern(recipe: TechnicRecipe) {
   const b = technicBounds(recipe);
   if (b.maxX - b.minX >= 32 || b.maxY - b.minY >= 32) return "";
   const cells = new Map(recipe.cells.map(c => [technicCellKey(c.x, c.y), c]));
+  const symbol = (c: TechnicCell) => c.kind === "solid" ? "#" : `${c.kind === "pin" ? "o" : "+"}${c.axis.toLowerCase()}${c.kind === "axle" && c.roll === 45 ? "45" : ""}`;
+  const width = Math.max(...recipe.cells.map(c => symbol(c).length));
   return Array.from({ length: b.maxY - b.minY + 1 }, (_, row) =>
     Array.from({ length: b.maxX - b.minX + 1 }, (_, col) => {
       const c = cells.get(technicCellKey(b.minX + col, b.maxY - row));
-      return !c ? "." : c.kind === "solid" ? "#" : c.kind === "pin" ? "o" : "+";
-    }).join("")).join("\n");
+      return (c ? symbol(c) : ".").padEnd(width);
+    }).join(" ").trimEnd()).join("\n");
 }

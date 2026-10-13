@@ -277,10 +277,16 @@ export function TechnicWorkspace({ initial, initialRoundingOpen = false, workspa
   return <div className="technic-workspace" ref={root} tabIndex={-1} onKeyDown={event => {
     // Draft shortcuts stay here; the project's history is untouched until Done.
     event.stopPropagation();
+    const editing = event.target instanceof Element && !!event.target.closest("input, textarea, select, [contenteditable]:not([contenteditable='false'])");
+    const key = event.key.toLowerCase();
+    if (!busy && !editing && !event.nativeEvent.isComposing && !event.ctrlKey && !event.metaKey && !event.altKey
+      && ["x", "y", "z"].includes(key) && mode !== "remove" && settings.kind !== "solid") {
+      event.preventDefault(); change({ axis: key.toUpperCase() as TechnicCell["axis"] }); return;
+    }
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s") event.preventDefault();
     if (event.key === "Escape") { event.preventDefault(); if (placement) setPlacement(null); else onCancel(); }
     else if ((event.ctrlKey || event.metaKey) && ["z", "y"].includes(event.key.toLowerCase())
-      && !(event.target instanceof HTMLTextAreaElement || event.target instanceof HTMLInputElement)) {
+      && !editing) {
       event.preventDefault(); if (event.key.toLowerCase() === "y" || event.shiftKey) redo(); else undo();
     }
   }}>
@@ -319,6 +325,7 @@ export function TechnicWorkspace({ initial, initialRoundingOpen = false, workspa
               aria-label={`X ${Number((x * measurements.pitch).toFixed(2))}, Y ${Number((y * measurements.pitch).toFixed(2))}: ${c ? t(`technic.${c.kind}`) : t("technic.empty")}${c && c.kind !== "solid" ? ` · ${t("technic.axis")}: ${c.axis}${c.kind === "axle" ? ` · ${c.roll}°` : ""}` : ""}`}
               onPointerDown={e => { if (e.button === 0) {
                 e.preventDefault();
+                root.current?.focus({ preventScroll: true });
                 if (mode === "select" && !placement) selectionStroke.current = { start: { x, y }, base: e.shiftKey ? selected : [] };
                 else if (mode !== "select") paintStroke.current = { recipe: recipeRef.current, layer: activeLayer };
                 paint(x, y, e.shiftKey);
@@ -389,7 +396,7 @@ export function TechnicWorkspace({ initial, initialRoundingOpen = false, workspa
         <div className="technic-module-list">{(["solid", "pin", "axle"] as const).map(kind =>
           <button key={kind} disabled={busy || mode === "remove" || mode === "set"} aria-pressed={settings.kind === kind} onClick={() => change({ kind })}>
             <span className="technic-module-icon" aria-hidden="true">{kind === "solid" ? "■" : kind === "pin" ? "⊙" : "⊞"}</span>{t(`technic.${kind}`)}</button>)}</div>
-        <label>{t("technic.axis")}</label>
+        <label>{t("technic.axis")} <span className="technic-key-hint">{t("technic.axisKeys")}</span></label>
         <div className="technic-mode-buttons">{(["X", "Y", "Z"] as const).map(axis =>
           <button key={axis} disabled={busy || settings.kind === "solid" || mode === "remove"} aria-pressed={settings.axis === axis} onClick={() => change({ axis })}>{axis}</button>)}</div>
         <label>{t("technic.roll")}</label>
