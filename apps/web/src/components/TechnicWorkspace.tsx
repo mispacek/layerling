@@ -6,14 +6,16 @@ import { t } from "@/lib/i18n";
 import { EdgeModifierSlider } from "@/components/workplane/EdgeModifierPanel";
 import { DEFAULT_WORKPLANE_WORKSPACE } from "@/lib/workplaneSettings";
 import type { WorkplaneWorkspaceSettings } from "@/types/layerling";
-import { DEFAULT_TECHNIC_CORNER_RADIUS, TECHNIC_CELL_LIMIT, parseTechnicPattern, technicBounds, technicCellKey, technicCorners, technicPattern, technicRounding, type TechnicCell, type TechnicRecipe, type TechnicRounding } from "@/lib/technicRecipe";
+import { DEFAULT_TECHNIC_CORNER_RADIUS, TECHNIC_CELL_LIMIT, TECHNIC_LAYER_LIMIT, technicLayer, technicLayerCount, technicLayerRecipe, parseTechnicPattern, technicBounds, technicCellKey, technicCorners, technicPattern, technicRounding, type TechnicCell, type TechnicRecipe, type TechnicRounding } from "@/lib/technicRecipe";
 import { DEFAULT_TECHNIC_MEASUREMENTS, TECHNIC_MEASUREMENT_RANGES, technicMeasurements, loadTechnicProfiles, saveTechnicProfile, type TechnicMeasurements, type TechnicPrintProfile } from "@/lib/technicMeasurements";
 import { technicRectangle, transformTechnicSelection } from "@/lib/technicSelection";
 import { TECHNIC_TEMPLATES, technicTemplate, technicCalibration, type TechnicTemplate } from "@/lib/technicTemplates";
+import { appendTechnicLayer, removeTechnicLayer } from "@/lib/technicLayers";
 import { TechnicPreview } from "./TechnicPreview";
 import { parseMeasurementInput } from "@/lib/measurementUnits";
 import { selectWholeValue } from "@/lib/numberField";
 
+type DraftSnapshot = { recipe: TechnicRecipe; layer: number };
 type Mode = "select" | "add" | "remove" | "set";
 
 function fittedGridView(recipe: TechnicRecipe, columns: number, rows: number) {
@@ -83,16 +85,22 @@ export function TechnicWorkspace({ initial, initialRoundingOpen = false, workspa
 }) {
   const [recipe, setRecipe] = useState(() => structuredClone(initial));
   const recipeRef = useRef(recipe);
-  const [past, setPast] = useState<TechnicRecipe[]>([]);
-  const [future, setFuture] = useState<TechnicRecipe[]>([]);
+  const [layer, setLayer] = useState(() => Math.min(...initial.cells.map(technicLayer)));
+  const activeLayer = Math.min(layer, technicLayerCount(recipe) - 1);
+  const activeLayerRef = useRef(activeLayer); activeLayerRef.current = activeLayer;
+  const layerCount = technicLayerCount(recipe);
+  const layerRecipe = useMemo(() => technicLayerRecipe(recipe, activeLayer), [recipe, activeLayer]);
+  const [neighbours, setNeighbours] = useState(true);
+  const [past, setPast] = useState<DraftSnapshot[]>([]);
+  const [future, setFuture] = useState<DraftSnapshot[]>([]);
   const [mode, setMode] = useState<Mode>("select");
   const [roundingOpen, setRoundingOpen] = useState(initialRoundingOpen);
-  const [brush, setBrush] = useState<Omit<TechnicCell, "x" | "y">>({ kind: "pin", axis: "Z", roll: 0 });
+  const [brush, setBrush] = useState<Omit<TechnicCell, "x" | "y" | "z">>({ kind: "pin", axis: "Z", roll: 0 });
   const [selected, setSelected] = useState<string[]>([]);
   const [placement, setPlacement] = useState<"move" | "copy" | null>(null);
   const [hover, setHover] = useState<{ x: number; y: number } | null>(null);
   const selectionStroke = useRef<{ start: { x: number; y: number }; base: string[] } | null>(null);
-  const paintStroke = useRef<TechnicRecipe | null>(null);
+  const paintStroke = useRef<DraftSnapshot | null>(null);
   const finishRef = useRef<() => void>(() => {});
   const [preview, setPreview] = useState(false);
   const [profiles, setProfiles] = useState<TechnicPrintProfile[]>([]);
@@ -103,22 +111,22 @@ export function TechnicWorkspace({ initial, initialRoundingOpen = false, workspa
   const [templateDepth, setTemplateDepth] = useState(5);
   const [calibrationStep, setCalibrationStep] = useState(0.1);
   const [calibrationAxis, setCalibrationAxis] = useState<TechnicCell["axis"]>("Z");
-  const [view, setView] = useState(() => fittedGridView(initial, 12, 10));
+  const [view, setView] = useState(() => fittedGridView(technicLayerRecipe(initial, activeLayer), 12, 10));
   const [size, setSize] = useState({ columns: 12, rows: 10 });
-  const [pattern, setPattern] = useState(() => technicPattern(initial));
+  const [pattern, setPattern] = useState(() => technicPattern(technicLayerRecipe(initial, activeLayer)));
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const root = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLDivElement>(null);
   const pendingPan = useRef({ x: 0, y: 0 });
-  const selectedCells = recipe.cells.filter(c => selected.includes(technicCellKey(c.x, c.y)));
+  const selectedCells = recipe.cells.filter(c => selected.includes(technicCellKey(c.x, c.y, technicLayer(c))));
   const cell = selectedCells[0];
   const settings = mode === "select" && cell ? cell : brush;
   const bounds = recipe.cells.length ? technicBounds(recipe) : null;
-  const corners = useMemo(() => technicCorners(recipe), [recipe]);
+  const corners = useMemo(() => technicCorners(layerRecipe), [layerRecipe]);
   const radius = recipe.cornerRadius ?? DEFAULT_TECHNIC_CORNER_RADIUS;
   const rounding = technicRounding(settings);
-  const anyRounded = recipe.cells.some(c => technicRounding(c) !== "none");
+  const anyRounded = layerRecipe.cells.some(c => technicRounding(c) !== "none");
   const measurements = technicMeasurements(recipe);
   const ghost = placement && hover ? transformTechnicSelection(recipe, selected, { kind: placement,
     dx: hover.x - Math.min(...selectedCells.map(c => c.x)), dy: hover.y - Math.min(...selectedCells.map(c => c.y)) })?.selection : null;
@@ -137,7 +145,8 @@ export function TechnicWorkspace({ initial, initialRoundingOpen = false, workspa
       const columns = Math.max(3, Math.min(24, Math.floor((width - 16) / 44)));
       const rows = Math.max(4, Math.min(24, Math.floor((height - 16) / 44)));
       setSize({ columns, rows });
-      setView(fittedGridView(recipeRef.current, columns, rows));
+      const slice = technicLayerRecipe(recipeRef.current, activeLayerRef.current);
+      setView(fittedGridView(slice.cells.length ? slice : recipeRef.current, columns, rows));
     });
     observer.observe(node);
     return () => observer.disconnect();
@@ -146,41 +155,41 @@ export function TechnicWorkspace({ initial, initialRoundingOpen = false, workspa
   function commit(next: TechnicRecipe) {
     if (JSON.stringify(next) === JSON.stringify(recipeRef.current)) return;
     const previous = recipeRef.current;
-    if (!paintStroke.current) setPast(p => [...p.slice(-99), previous]);
+    if (!paintStroke.current) setPast(p => [...p.slice(-99), { recipe: previous, layer: activeLayer }]);
     setFuture([]);
     recipeRef.current = next;
     setRecipe(next);
-    setPattern(technicPattern(next));
+    setPattern(technicPattern(technicLayerRecipe(next, Math.min(activeLayer, technicLayerCount(next) - 1))));
     setError("");
   }
   function undo() {
-    if (busy || !past.length) return;
+    if (busy || paintStroke.current || !past.length) return;
     const previous = past[past.length - 1];
     const current = recipeRef.current;
-    setFuture(f => [current, ...f]);
+    setFuture(f => [{ recipe: current, layer: activeLayer }, ...f]);
     setPast(p => p.slice(0, -1));
-    recipeRef.current = previous; setRecipe(previous); setPattern(technicPattern(previous)); setError(""); setPlacement(null);
+    recipeRef.current = previous.recipe; setRecipe(previous.recipe); chooseLayer(previous.layer, previous.recipe); setError("");
   }
   function redo() {
-    if (busy || !future.length) return;
+    if (busy || paintStroke.current || !future.length) return;
     const next = future[0];
     const current = recipeRef.current;
-    setPast(p => [...p, current]); setFuture(f => f.slice(1));
-    recipeRef.current = next; setRecipe(next); setPattern(technicPattern(next)); setError(""); setPlacement(null);
+    setPast(p => [...p, { recipe: current, layer: activeLayer }]); setFuture(f => f.slice(1));
+    recipeRef.current = next.recipe; setRecipe(next.recipe); chooseLayer(next.layer, next.recipe); setError("");
   }
   function finishStroke() {
     selectionStroke.current = null;
     const start = paintStroke.current; paintStroke.current = null;
-    if (start && start !== recipeRef.current) setPast(p => [...p.slice(-99), start]);
+    if (start && start.recipe !== recipeRef.current) setPast(p => [...p.slice(-99), start]);
     pan(pendingPan.current.x, pendingPan.current.y); pendingPan.current = { x: 0, y: 0 };
   }
   finishRef.current = finishStroke;
   function paint(x: number, y: number, shift = false) {
     if (busy) return;
     if (Math.abs(x) > 128 || Math.abs(y) > 128) { setError(t("technic.error.recipe")); return; }
-    const key = technicCellKey(x, y);
+    const key = technicCellKey(x, y, activeLayer);
     const current = recipeRef.current;
-    const target = current.cells.find(c => technicCellKey(c.x, c.y) === key);
+    const target = current.cells.find(c => technicCellKey(c.x, c.y, technicLayer(c)) === key);
     if (mode === "set" && !target) return;
     if (mode === "select") {
       if (placement) {
@@ -190,7 +199,7 @@ export function TechnicWorkspace({ initial, initialRoundingOpen = false, workspa
         commit(result.recipe); setSelected(result.selection); setPlacement(null); return;
       }
       setSelected(s => shift ? target ? s.includes(key) ? s.filter(k => k !== key) : [...s, key] : s : target ? [key] : []);
-      if (target) { const { x: _x, y: _y, ...sample } = target; setBrush(sample); }
+      if (target) { const { x: _x, y: _y, z: _z, ...sample } = target; setBrush(sample); }
       return;
     }
     if (mode === "set") {
@@ -199,10 +208,10 @@ export function TechnicWorkspace({ initial, initialRoundingOpen = false, workspa
       pendingPan.current = { x: 0, y: 0 };
       return;
     }
-    const remaining = current.cells.filter(c => technicCellKey(c.x, c.y) !== key);
+    const remaining = current.cells.filter(c => technicCellKey(c.x, c.y, technicLayer(c)) !== key);
     if (mode === "add") {
       if (remaining.length >= TECHNIC_CELL_LIMIT) { setError(t("technic.error.limit")); return; }
-      remaining.push({ x, y, ...brush });
+      remaining.push({ x, y, ...(activeLayer ? { z: activeLayer } : {}), ...brush });
     }
     commit({ ...current, cells: remaining });
     // Pan only AFTER pointer-up: moving cells under a held pointer would paint
@@ -214,11 +223,28 @@ export function TechnicWorkspace({ initial, initialRoundingOpen = false, workspa
   }
   function change(patch: Partial<typeof brush>) {
     setBrush(b => ({ ...b, ...patch }));
-    if (mode === "select" && cell) commit({ ...recipeRef.current, cells: recipeRef.current.cells.map(c => selected.includes(technicCellKey(c.x, c.y)) ? { ...c, ...patch } : c) });
+    if (mode === "select" && cell) commit({ ...recipeRef.current, cells: recipeRef.current.cells.map(c => selected.includes(technicCellKey(c.x, c.y, technicLayer(c))) ? { ...c, ...patch } : c) });
+  }
+  function chooseLayer(next: number, draft = recipeRef.current) {
+    finishStroke();
+    const z = Math.max(0, Math.min(technicLayerCount(draft) - 1, next));
+    setLayer(z); activeLayerRef.current = z;
+    setSelected([]); setPlacement(null); setHover(null);
+    const slice = technicLayerRecipe(draft, z);
+    setPattern(technicPattern(slice));
+    setView(fittedGridView(slice.cells.length ? slice : draft, size.columns, size.rows));
+  }
+  function appendLayer(copy = false) {
+    const next = appendTechnicLayer(recipeRef.current, copy ? activeLayer : undefined);
+    if (!next) { setError(t("technic.error.layerLimit")); return; }
+    commit(next); chooseLayer(technicLayerCount(next) - 1, next); setPreview(true);
   }
   function replaceDraft(next: TechnicRecipe) {
-    commit(next); setSelected([]); setPlacement(null);
-    setView(fittedGridView(next, size.columns, size.rows));
+    const cells = [...recipeRef.current.cells.filter(c => technicLayer(c) !== activeLayer),
+      ...next.cells.map(c => ({ ...c, ...(activeLayer ? { z: activeLayer } : {}) }))];
+    if (cells.length > TECHNIC_CELL_LIMIT) { setError(t("technic.error.limit")); return; }
+    const combined = { ...recipeRef.current, cells };
+    commit(combined); chooseLayer(activeLayer, combined);
     // On a narrow screen the panel is below the drawing. Show the result after
     // replacing a pattern instead of leaving the pupil at the bottom of its controls.
     root.current?.scrollTo?.({ top: 0 });
@@ -250,7 +276,7 @@ export function TechnicWorkspace({ initial, initialRoundingOpen = false, workspa
     <section className="technic-drawing" aria-label={t("technic.canvas")}>
       <div className="technic-view-tools">
         <strong>{t("technic.topView")}</strong><span>{t("technic.pitchValue", { pitch: measurements.pitch })}</span>
-        <button aria-pressed={preview} disabled={busy} onClick={() => setPreview(p => !p)}>{t("technic.preview")}</button>
+        <button className="technic-preview-toggle" aria-pressed={preview} disabled={busy} onClick={() => setPreview(p => !p)}>{t("technic.preview")}</button>
         <button title={t("editor.tool.undo")} aria-label={t("editor.tool.undo")} disabled={busy || !past.length} onClick={undo}><Undo2 size={17} /></button>
         <button title={t("editor.tool.redo")} aria-label={t("editor.tool.redo")} disabled={busy || !future.length} onClick={redo}><Redo2 size={17} /></button>
         <button title={t("technic.panLeft")} aria-label={t("technic.panLeft")} disabled={busy} onClick={() => pan(-4, 0)}><ArrowLeft size={17} /></button>
@@ -258,20 +284,32 @@ export function TechnicWorkspace({ initial, initialRoundingOpen = false, workspa
         <button title={t("technic.panUp")} aria-label={t("technic.panUp")} disabled={busy} onClick={() => pan(0, 4)}><ArrowUp size={17} /></button>
         <button title={t("technic.panDown")} aria-label={t("technic.panDown")} disabled={busy} onClick={() => pan(0, -4)}><ArrowDown size={17} /></button>
       </div>
+      <div className="technic-layer-bar" aria-label={t("technic.layers")}>
+        <button disabled={busy || activeLayer === 0} aria-label={t("technic.layerDown")} onClick={() => chooseLayer(activeLayer - 1)}><ArrowDown size={16} /></button>
+        <label>{t("technic.activeLayer")}<select aria-label={t("technic.activeLayer")} disabled={busy} value={activeLayer} onChange={e => chooseLayer(Number(e.target.value))}>
+          {Array.from({ length: layerCount }, (_, z) => <option key={z} value={z}>{t("technic.layerOption", { layer: z + 1, height: Number((z * measurements.height).toFixed(2)), count: recipe.cells.filter(c => technicLayer(c) === z).length })}</option>)}
+        </select></label>
+        <button disabled={busy || activeLayer === layerCount - 1} aria-label={t("technic.layerUp")} onClick={() => chooseLayer(activeLayer + 1)}><ArrowUp size={16} /></button>
+        <button disabled={busy || layerCount >= TECHNIC_LAYER_LIMIT} onClick={() => appendLayer()}>{t("technic.addLayer")}</button>
+        <label className="technic-neighbours"><input type="checkbox" checked={neighbours} onChange={e => setNeighbours(e.target.checked)} />{t("technic.neighbourLayers")}</label>
+      </div>
       <div className="technic-views">
       <div className="technic-canvas" ref={canvas}>
         <div className="technic-grid" style={{ gridTemplateColumns: `repeat(${size.columns}, 44px)` }}>
           {Array.from({ length: size.columns * size.rows }, (_, index) => {
             const x = view.x + index % size.columns, y = view.y - Math.floor(index / size.columns);
-            const key = technicCellKey(x, y), c = recipe.cells.find(c => c.x === x && c.y === y);
+            const key = technicCellKey(x, y, activeLayer), c = recipe.cells.find(c => c.x === x && c.y === y && technicLayer(c) === activeLayer);
+            const below = neighbours ? recipe.cells.find(c => c.x === x && c.y === y && technicLayer(c) === activeLayer - 1) : undefined;
+            const above = neighbours ? recipe.cells.find(c => c.x === x && c.y === y && technicLayer(c) === activeLayer + 1) : undefined;
+            const neighbour = above ?? below;
             return <button type="button" key={key} disabled={busy || Math.abs(x) > 128 || Math.abs(y) > 128} data-cell={key}
-              className={`technic-cell ${c ? `filled ${c.kind}` : ""} ${selected.includes(key) ? "selected" : ""} ${ghost?.includes(key) ? "technic-ghost" : ""}`}
+              className={`technic-cell ${c ? `filled ${c.kind}` : ""} ${!c && below ? "layer-below" : ""} ${!c && above ? "layer-above" : ""} ${selected.includes(key) ? "selected" : ""} ${ghost?.includes(key) ? "technic-ghost" : ""}`}
               title={`X ${Number((x * measurements.pitch).toFixed(2))} mm, Y ${Number((y * measurements.pitch).toFixed(2))} mm${c ? ` · ${t(`technic.${c.kind}`)} · ${c.axis}` : ""}${c?.holeOffset !== undefined ? ` · Δ ${c.holeOffset.toFixed(2)} mm` : ""}`}
               aria-label={`X ${Number((x * measurements.pitch).toFixed(2))}, Y ${Number((y * measurements.pitch).toFixed(2))}: ${c ? t(`technic.${c.kind}`) : t("technic.empty")}${c && c.kind !== "solid" ? ` · ${t("technic.axis")}: ${c.axis}${c.kind === "axle" ? ` · ${c.roll}°` : ""}` : ""}`}
               onPointerDown={e => { if (e.button === 0) {
                 e.preventDefault();
                 if (mode === "select" && !placement) selectionStroke.current = { start: { x, y }, base: e.shiftKey ? selected : [] };
-                else if (mode !== "select") paintStroke.current = recipeRef.current;
+                else if (mode !== "select") paintStroke.current = { recipe: recipeRef.current, layer: activeLayer };
                 paint(x, y, e.shiftKey);
               } }}
               onPointerEnter={e => {
@@ -279,12 +317,14 @@ export function TechnicWorkspace({ initial, initialRoundingOpen = false, workspa
                 if (e.buttons !== 1) return;
                 if (mode !== "select") paint(x, y);
                 else if (selectionStroke.current) setSelected([...new Set([...selectionStroke.current.base,
-                  ...technicRectangle(recipeRef.current.cells, selectionStroke.current.start, { x, y })])]);
+                  ...technicRectangle(recipeRef.current.cells, selectionStroke.current.start, { x, y }, activeLayer)])]);
               }}
               onClick={e => { if (e.detail === 0) paint(x, y, e.shiftKey); }}>
               {c ? <>{c.kind !== "solid" ? <TechnicHolePreview cell={c} recipe={recipe} /> : null}
                 {c.kind !== "solid" ? <small>{c.axis}</small> : null}</> : x === 0 && y === 0 ? <small>0,0</small> : null}
               {c?.holeOffset !== undefined ? <span className="technic-sample">{c.holeOffset > 0 ? "+" : ""}{c.holeOffset.toFixed(2)}</span> : null}
+              {!c && neighbour ? <span className="technic-neighbour-preview" aria-hidden="true">{neighbour.kind === "solid" ? "■" : <TechnicHolePreview cell={neighbour} recipe={recipe} />}</span> : null}
+              {!c && (above || below) ? <span className="technic-layer-ghost-label" aria-hidden="true">{below ? "↓" : ""}{above ? "↑" : ""}</span> : null}
             </button>;
           })}
           <svg className="technic-corner-overlay" aria-hidden="true" viewBox={`0 0 ${size.columns * 44} ${size.rows * 44}`}>
@@ -298,14 +338,22 @@ export function TechnicWorkspace({ initial, initialRoundingOpen = false, workspa
           </svg>
         </div>
       </div>
-      {preview ? <TechnicPreview recipe={recipe} triangleLimit={workspace.booleanTriangleLimit} /> : null}
+      {preview ? <TechnicPreview recipe={recipe} activeLayer={activeLayer} triangleLimit={workspace.booleanTriangleLimit} /> : null}
       </div>
-      <p className="technic-caption">{t(placement ? "technic.placeSelection" : `technic.hint.${mode}`)} · X → · Y ↑ · Z ⊙
+      <p className="technic-caption">{t("technic.editLayerOnly", { layer: activeLayer + 1 })}<br />{t(placement ? "technic.placeSelection" : `technic.hint.${mode}`)} · X → · Y ↑ · Z ⊙
         <span className="technic-preview-legend">{t("technic.holeLegend")}</span></p>
     </section>
     <aside className="technic-panel" aria-label="Lego Compatible">
-      <header><div><strong>Lego Compatible</strong><p className="technic-muted">{t("technic.stats", { count: recipe.cells.length, width: Number((bounds?.width ?? 0).toFixed(2)), depth: Number((bounds?.depth ?? 0).toFixed(2)), height: measurements.height })}</p></div><button aria-label={t("common.cancel")} onClick={onCancel}><X size={18} /></button></header>
+      <header><div><strong>Lego Compatible</strong><p className="technic-muted">{t("technic.stats", { count: recipe.cells.length, width: Number((bounds?.width ?? 0).toFixed(2)), depth: Number((bounds?.depth ?? 0).toFixed(2)), height: bounds?.height ?? 0 })}</p></div><button aria-label={t("common.cancel")} onClick={onCancel}><X size={18} /></button></header>
       <div className="technic-panel-content">
+        <div className="technic-layer-actions">
+          <button disabled={busy || !layerRecipe.cells.length || layerCount >= TECHNIC_LAYER_LIMIT} onClick={() => appendLayer(true)}>{t("technic.duplicateLayer")}</button>
+          <button disabled={busy || layerCount <= 1} onClick={() => {
+            const next = removeTechnicLayer(recipeRef.current, activeLayer);
+            if (next) { commit(next); chooseLayer(Math.min(activeLayer, technicLayerCount(next) - 1), next); }
+          }}>{t("technic.removeLayer")}</button>
+        </div>
+        <p className="technic-muted">{t("technic.layersHelp")}</p>
         <div className="technic-mode-buttons technic-edit-modes">{(["select", "add", "remove", "set"] as const).map(value =>
           <button key={value} disabled={busy} aria-pressed={mode === value} onClick={() => { setMode(value); setPlacement(null); }}>{t(`technic.mode.${value}`)}</button>)}</div>
         <p className="technic-muted">{mode === "select" && cell ? selectedCells.length > 1 ? t("technic.selectionCount", { count: selectedCells.length }) : t("technic.selection", { x: cell.x, y: cell.y }) : t(mode === "set" ? "technic.stampSettings" : "technic.brush")}</p>
@@ -314,7 +362,7 @@ export function TechnicWorkspace({ initial, initialRoundingOpen = false, workspa
           <button disabled={busy} aria-pressed={placement === "move"} onClick={() => setPlacement("move")}>{t("technic.move")}</button>
           <button disabled={busy} onClick={() => mirror("mirrorX")}>{t("technic.mirrorX")}</button>
           <button disabled={busy} onClick={() => mirror("mirrorY")}>{t("technic.mirrorY")}</button>
-          <button disabled={busy} onClick={() => { commit({ ...recipe, cells: recipe.cells.filter(c => !selected.includes(technicCellKey(c.x, c.y))) }); setSelected([]); setPlacement(null); }}>{t("technic.deleteSelection")}</button>
+          <button disabled={busy} onClick={() => { commit({ ...recipe, cells: recipe.cells.filter(c => !selected.includes(technicCellKey(c.x, c.y, technicLayer(c)))) }); setSelected([]); setPlacement(null); }}>{t("technic.deleteSelection")}</button>
         </div> : null}
         {mode === "set" ? <p className="technic-muted">{t("technic.stampHelp")}</p> : null}
         <div className="technic-module-list">{(["solid", "pin", "axle"] as const).map(kind =>
@@ -334,13 +382,13 @@ export function TechnicWorkspace({ initial, initialRoundingOpen = false, workspa
           </select></label>
           <EdgeModifierSlider label={t("technic.cornerRadius")} value={radius} min={0.2} max={Math.min(4, measurements.pitch / 2 - measurements.bodyInset)} step={0.1}
             workspace={workspace} disabled={busy} onChange={value => commit({ ...recipe, cornerRadius: value })} />
-          <button disabled={busy || !recipe.cells.length || rounding === "none"} onClick={() => {
-            commit({ ...recipe, cells: recipe.cells.map(c => ({ ...c, rounded: undefined, rounding })) });
-          }}>{t("technic.roundAll")}</button>
+          <button disabled={busy || !layerRecipe.cells.length || rounding === "none"} onClick={() => {
+            commit({ ...recipe, cells: recipe.cells.map(c => technicLayer(c) === activeLayer ? { ...c, rounded: undefined, rounding } : c) });
+          }}>{t("technic.roundLayer")}</button>
           {anyRounded ? <button disabled={busy} onClick={() => {
             setBrush(b => ({ ...b, rounded: undefined, rounding: "none" }));
-            commit({ ...recipe, cells: recipe.cells.map(c => ({ ...c, rounded: undefined, rounding: "none" })) });
-          }}>{t("technic.unroundAll")}</button> : null}
+            commit({ ...recipe, cells: recipe.cells.map(c => technicLayer(c) === activeLayer ? { ...c, rounded: undefined, rounding: "none" } : c) });
+          }}>{t("technic.unroundLayer")}</button> : null}
           <p className="technic-muted">{t("technic.roundHelp")}</p>
         </details>
         <details><summary>{t("technic.catalog")}</summary>
@@ -348,7 +396,7 @@ export function TechnicWorkspace({ initial, initialRoundingOpen = false, workspa
           <div className="technic-template-list">{TECHNIC_TEMPLATES.map(kind => {
             const sample = technicTemplate(kind, 5, 3, "Z")!;
             return <button key={kind} disabled={busy} aria-pressed={template === kind} onClick={() => setTemplate(kind)}>
-              <svg viewBox="-1 -1 52 32" aria-hidden="true">{sample.map(c => <g key={technicCellKey(c.x, c.y)}>
+              <svg viewBox="-1 -1 52 32" aria-hidden="true">{sample.map(c => <g key={technicCellKey(c.x, c.y, technicLayer(c))}>
                 <rect x={c.x * 10} y={(2 - c.y) * 10} width="9" height="9" rx={kind === "plate" ? 0 : 2} />
                 {c.kind === "pin" ? <circle cx={c.x * 10 + 4.5} cy={(2 - c.y) * 10 + 4.5} r="2" />
                   : c.kind === "axle" ? <path d={`M ${c.x * 10 + 2} ${(2 - c.y) * 10 + 4.5} h 5 M ${c.x * 10 + 4.5} ${(2 - c.y) * 10 + 2} v 5`} /> : null}
@@ -371,7 +419,7 @@ export function TechnicWorkspace({ initial, initialRoundingOpen = false, workspa
           <button disabled={busy} onClick={() => {
             const cells = parseTechnicPattern(pattern, brush.axis, brush.roll);
             if (!cells) { setError(t("technic.error.pattern")); return; }
-            const b = recipe.cells.length ? technicBounds(recipe) : { minX: 0, minY: 0 };
+            const b = layerRecipe.cells.length ? technicBounds(layerRecipe) : recipe.cells.length ? technicBounds(recipe) : { minX: 0, minY: 0 };
             const shifted = cells.map(c => ({ ...c, x: c.x + b.minX, y: c.y + b.minY,
               rounding: technicRounding(brush) }));
             if (shifted.some(c => Math.abs(c.x) > 128 || Math.abs(c.y) > 128)) { setError(t("technic.error.recipe")); return; }
@@ -412,7 +460,7 @@ export function TechnicWorkspace({ initial, initialRoundingOpen = false, workspa
           <label>{t("technic.calibrationStep")}<TechnicNumberField min={0.01} max={0.4} step={0.01} value={calibrationStep} disabled={busy} onChange={setCalibrationStep} /></label>
           <label>{t("technic.axis")}<select value={calibrationAxis} disabled={busy} onChange={e => setCalibrationAxis(e.target.value as TechnicCell["axis"])}>{(["X", "Y", "Z"] as const).map(axis => <option key={axis}>{axis}</option>)}</select></label>
           <button disabled={busy} onClick={() => {
-            const next = technicCalibration(recipe, calibrationStep, calibrationAxis);
+            const next = technicCalibration(layerRecipe, calibrationStep, calibrationAxis);
             if (!next) { setError(t("technic.error.recipe")); return; }
             replaceDraft(next);
           }}>{t("technic.makeCalibration")}</button>

@@ -3,14 +3,16 @@ import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { buildTechnicShape } from "@/lib/technicBuilder";
-import { type TechnicRecipe } from "@/lib/technicRecipe";
+import { technicBounds, type TechnicRecipe } from "@/lib/technicRecipe";
+import { technicMeasurements } from "@/lib/technicMeasurements";
 import { t } from "@/lib/i18n";
 
 /** Read-only preview of the same geometry used by Done/STL, with the editor's mouse bindings. */
-export function TechnicPreview({ recipe, triangleLimit }: { recipe: TechnicRecipe; triangleLimit: number }) {
+export function TechnicPreview({ recipe, activeLayer = 0, triangleLimit }: { recipe: TechnicRecipe; activeLayer?: number; triangleLimit: number }) {
   const stage = useRef<HTMLDivElement>(null);
   const update = useRef<((positions: number[]) => void) | null>(null);
   const fit = useRef<() => void>(() => {});
+  const planeUpdate = useRef<((recipe: TechnicRecipe, layer: number) => void) | null>(null);
   const [status, setStatus] = useState<"technic.building" | "technic.previewUnavailable" | "technic.error.recipe" | "technic.error.geometry" | "">("technic.building");
   useEffect(() => {
     const host = stage.current!;
@@ -34,12 +36,26 @@ export function TechnicPreview({ recipe, triangleLimit }: { recipe: TechnicRecip
     const mesh = new THREE.Mesh(new THREE.BufferGeometry(), material);
     const edgeMaterial = new THREE.LineBasicMaterial({ color: "#430b0f", transparent: true, opacity: 0.8 });
     const edges = new THREE.LineSegments(new THREE.BufferGeometry(), edgeMaterial);
-    scene.add(mesh, edges);
+    const planeMaterial = new THREE.MeshBasicMaterial({ color: 0x5da7f5, transparent: true, opacity: 0.12, side: THREE.DoubleSide, depthWrite: false });
+    const plane = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), planeMaterial);
+    plane.rotation.x = -Math.PI / 2; plane.visible = false;
+    scene.add(mesh, edges, plane);
     let fitted = false;
     const draw = () => renderer.render(scene, camera);
+    planeUpdate.current = (r, layer) => {
+      if (!r.cells.length) { plane.visible = false; draw(); return; }
+      const b = technicBounds(r), m = technicMeasurements(r);
+      plane.geometry.dispose(); plane.geometry = new THREE.PlaneGeometry(b.width + m.pitch, b.depth + m.pitch);
+      plane.position.y = layer * m.height - b.baseY + 0.01;
+      plane.visible = true; draw();
+    };
     fit.current = () => {
-      const sphere = mesh.geometry.boundingSphere;
-      if (!sphere || sphere.radius <= 0) return;
+      if (!mesh.geometry.getAttribute("position")?.count) return;
+      mesh.updateMatrixWorld(true); plane.updateMatrixWorld(true);
+      const box = new THREE.Box3().setFromObject(mesh);
+      if (plane.visible) box.union(new THREE.Box3().setFromObject(plane));
+      const sphere = box.getBoundingSphere(new THREE.Sphere());
+      if (sphere.radius <= 0) return;
       controls.target.copy(sphere.center);
       const verticalAngle = THREE.MathUtils.degToRad(camera.fov) / 2;
       const angle = Math.min(verticalAngle, Math.atan(Math.tan(verticalAngle) * camera.aspect));
@@ -64,11 +80,12 @@ export function TechnicPreview({ recipe, triangleLimit }: { recipe: TechnicRecip
     };
     const observer = new ResizeObserver(resize); observer.observe(host); resize();
     return () => {
-      update.current = null; fit.current = () => {}; observer.disconnect(); controls.dispose();
+      update.current = null; planeUpdate.current = null; fit.current = () => {}; observer.disconnect(); controls.dispose();
       canvas.removeEventListener("pointerdown", pan, { capture: true });
-      mesh.geometry.dispose(); edges.geometry.dispose(); material.dispose(); edgeMaterial.dispose(); renderer.dispose(); renderer.forceContextLoss(); canvas.remove();
+      mesh.geometry.dispose(); edges.geometry.dispose(); plane.geometry.dispose(); material.dispose(); edgeMaterial.dispose(); planeMaterial.dispose(); renderer.dispose(); renderer.forceContextLoss(); canvas.remove();
     };
   }, []);
+  useEffect(() => { planeUpdate.current?.(recipe, activeLayer); }, [recipe, activeLayer]);
   useEffect(() => {
     let cancelled = false;
     setStatus("technic.building");

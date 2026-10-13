@@ -25,7 +25,7 @@ Práce byla zastavena na žádost uživatele kvůli vypnutí počítače. Při n
 - Kalibrační dílek se šesti otvory a třemi korekcemi; u X/Y jsou řady oddělené, aby otvory zůstaly průchozí.
 - Zachování počátku při změně výšky i na otočeném/zrcadleném tělese; CS/EN/DE texty a aktualizovaná dokumentace.
 
-Více pater, různé výšky jednotlivých buněk a další konektory jsou odložené do dalších etap dle dohody.
+V této etapě byla patra odložená. Na následnou žádost uživatele jsou nyní implementovaná v [samostatné vícepatrové etapě](technic-multilayer.cs.md). Různé výšky jednotlivých buněk a další konektory zůstávají odložené.
 
 ## Ověření před přerušením
 

@@ -19,6 +19,9 @@ function stlUsesLayerlingYUp(buffer: ArrayBuffer, position: THREE.BufferAttribut
   // Our own ASCII STL exports are already Y-up. Preserve those, including tall
   // models where geometry alone cannot reveal an up axis.
   const header = stlHeader(buffer);
+  // Our binary exporter explicitly writes Z-up. The flatness heuristic below
+  // must not reinterpret a tall part's narrow depth as its height.
+  if (header.startsWith("binary stl (z-up coordinates)")) return false;
   if (header.includes("layerling")) return true;
 
   let minY = Number.POSITIVE_INFINITY;

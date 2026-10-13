@@ -9,6 +9,22 @@ import { quaternionForShape } from "@/lib/editorBooleans";
 import { DEFAULT_TECHNIC_MEASUREMENTS } from "@/lib/technicMeasurements";
 
 describe("optional Lego Compatible recipes", () => {
+  it.each([false, true])("preserves the 3D recipe origin when the lowest floor is removed (mirrorY=%s)", mirrorY => {
+    const r: import("@/lib/technicRecipe").TechnicRecipe = { ...initialTechnicRecipe(), version: 2, layerCount: 2,
+      cells: [{ x: 0, y: 0, kind: "solid", axis: "Z", roll: 0 }, { x: 0, y: 0, z: 1, kind: "solid", axis: "Z", roll: 0 }] };
+    const previous = sceneShape({ id: "old", kind: "mesh", name: "test", color: "#f00", x: 30, z: -12, elevation: 4,
+      width: 8, depth: 8, height: 16, rotation: 20, rotationX: 30, technicRecipe: r });
+    previous.mirrorY = mirrorY;
+    const next = sceneShape({ id: "new", kind: "mesh", name: "test", color: "#f00", width: 8, depth: 8, height: 8,
+      technicRecipe: { ...r, cells: [r.cells[1]] } });
+    const replaced = replaceTechnicShape(previous, next);
+    const origin = (s: typeof previous) => {
+      const b = technicBounds(s.technicRecipe!);
+      return new Vector3(-b.centerX, -b.centerY * (s.mirrorY ? -1 : 1), -b.centerZ)
+        .applyQuaternion(quaternionForShape(s)).add(new Vector3(s.x, (s.elevation ?? 0) + s.height / 2, s.z));
+    };
+    expect(origin(previous).distanceTo(origin(replaced))).toBeLessThan(1e-8);
+  });
   it.each([false, true])("keeps the recipe's base origin when changing height on a tilted part (mirrorY=%s)", mirrorY => {
     const recipe = initialTechnicRecipe();
     const previous = sceneShape({ id: "old", kind: "mesh", name: "test", color: "#f00", x: 30, z: -12, elevation: 4,

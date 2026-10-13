@@ -2,6 +2,7 @@ import { beforeAll, describe, expect, it, vi } from "vitest";
 import manifoldModule from "manifold-3d";
 import { rememberManifoldRuntime } from "@/lib/manifoldHandle";
 import { buildTechnicShape } from "@/lib/technicBuilder";
+import { canEditTechnic } from "@/lib/technicBuilder";
 import { initialTechnicRecipe, type TechnicCell, type TechnicRecipe } from "@/lib/technicRecipe";
 import { DEFAULT_TECHNIC_MEASUREMENTS } from "@/lib/technicMeasurements";
 import { technicCalibration } from "@/lib/technicTemplates";
@@ -31,6 +32,80 @@ async function bodyFor(r: TechnicRecipe) {
   return { shape, body, dispose: () => [...new Set([...created, body])].reverse().forEach(disposeManifold) };
 }
 describe("real Lego Compatible bodies", () => {
+  it("keeps an eroded footprint connected across floors with the configured layer height", async () => {
+    const r: TechnicRecipe = { ...recipe([cell("solid"), { ...cell("solid"), z: 1 }]), version: 2, layerCount: 2,
+      measurements: { ...DEFAULT_TECHNIC_MEASUREMENTS, pitch: 8.1, height: 9, bodyInset: 0.1 } };
+    const { body, shape, dispose } = await bodyFor(r);
+    try {
+      expect(shape.height).toBe(18); expect(body.volume()).toBeCloseTo(7.9 * 7.9 * 18, 3);
+      const parts = body.decompose(); expect(parts).toHaveLength(1); parts.forEach(disposeManifold);
+    } finally { dispose(); }
+  });
+  it("unites stacked floors into one closed 3D body", async () => {
+    const r: TechnicRecipe = { ...recipe([cell("solid"), { ...cell("solid"), z: 1 }]), version: 2, layerCount: 2 };
+    const { body, shape, dispose } = await bodyFor(r);
+    try {
+      expect(body.status()).toBe("NoError"); expect(body.volume()).toBeCloseTo(1024, 4);
+      expect(shape).toMatchObject({ width: 8, depth: 8, height: 16 }); expect(canEditTechnic(shape)).toBe(true);
+      const components = body.decompose(); expect(components).toHaveLength(1); components.forEach(disposeManifold);
+    } finally { dispose(); }
+  });
+  it("joins vertical pin holes and makes recesses only on exposed ends", async () => {
+    const r: TechnicRecipe = { ...recipe([cell("pin"), { ...cell("pin"), z: 1 }]), version: 2, layerCount: 2 };
+    const { body, dispose } = await bodyFor(r);
+    try {
+      const removed = circleArea(4.95) * 16 + (circleArea(6.4) - circleArea(4.95)) * 2 * 0.89;
+      expect(body.volume()).toBeCloseTo(1024 - removed, 3);
+      expect(body.rayCast([0, -1, 0], [0, 17, 0])).toHaveLength(0);
+      expect(body.rayCast([-6, 8.1, 2.8], [6, 8.1, 2.8])).toHaveLength(2);
+    } finally { dispose(); }
+  });
+  it("does not over-drill a solid floor above a vertical hole", async () => {
+    const r: TechnicRecipe = { ...recipe([cell("pin"), { ...cell("solid"), z: 1 }]), version: 2, layerCount: 2 };
+    const { body, dispose } = await bodyFor(r);
+    try {
+      const removed = circleArea(4.95) * 8 + (circleArea(6.4) - circleArea(4.95)) * 0.89;
+      expect(body.volume()).toBeCloseTo(1024 - removed, 3);
+      const hits = body.rayCast([0, 6, 0], [0, 9, 0]); expect(hits).toHaveLength(1);
+      expect(hits[0].position[1]).toBeCloseTo(8, 4);
+    } finally { dispose(); }
+  });
+  it("rounds one floor without nicking the straight corners of the next floor", async () => {
+    const cells = initialTechnicRecipe().cells.map(c => ({ ...c, kind: "solid" as const, rounding: "outer" as const }));
+    const r: TechnicRecipe = { ...recipe([...cells, ...cells.map(c => ({ ...c, z: 1, rounding: "none" as const }))]), version: 2, layerCount: 2, cornerRadius: 2 };
+    const { body, dispose } = await bodyFor(r);
+    try {
+      const removed = 4 * (4 - circleArea(4) / 4) * 8;
+      expect(body.volume()).toBeCloseTo(40 * 512 - removed, 3);
+      expect(body.rayCast([-27.9, -1, 19.9], [-27.9, 7.9, 19.9])).toHaveLength(0);
+      expect(body.rayCast([-27.9, 8.1, 19.9], [-27.9, 17, 19.9]).length).toBeGreaterThan(0);
+    } finally { dispose(); }
+  });
+  it("adds inner rounding only to the selected floor's concave corner", async () => {
+    const cells = [cell("solid"), cell("solid", "Z", 1), cell("solid", "Z", 0, 1)];
+    const r: TechnicRecipe = { ...recipe([...cells, ...cells.map(c => ({ ...c, z: 1, rounding: "inner" as const }))]), version: 2, layerCount: 2, cornerRadius: 2 };
+    const { body, dispose } = await bodyFor(r);
+    try {
+      expect(body.volume()).toBeCloseTo(6 * 512 + (4 - circleArea(4) / 4) * 8, 3);
+      expect(body.rayCast([0.2, -1, -0.2], [0.2, 7.9, -0.2])).toHaveLength(0);
+      expect(body.rayCast([0.2, 8.1, -0.2], [0.2, 17, -0.2]).length).toBeGreaterThan(0);
+    } finally { dispose(); }
+  });
+  it("preserves multi-floor recipes, per-cell rounding, elevation and history in .lyl and exports full-height STL", async () => {
+    const r: TechnicRecipe = { ...recipe([{ ...cell("solid"), z: 1 }, { ...cell("axle", "X", 0, 0, 45), z: 2, rounding: "outer" }]), version: 2, layerCount: 3 };
+    const shape = await buildTechnicShape(r, 300_000);
+    expect(shape).toMatchObject({ height: 16, elevation: 8 });
+    const data = await exportLylProject({ projectName: "Floors", createdAt: 1_700_000_000_000, modifiedAt: 1_700_000_000_000,
+      shapes: [shape], history: [editorHistoryEntry([], []), editorHistoryEntry([shape], [shape.id])], historyIndex: 1,
+      assets: [], workspace: DEFAULT_WORKPLANE_WORKSPACE, snapGrid: DEFAULT_SNAP_GRID, placementElevation: 0 });
+    const restored = await importLylProject(data);
+    expect(restored.shapes[0].technicRecipe).toEqual(shape.technicRecipe);
+    expect(restored.history[1].shapes[0].technicRecipe).toEqual(shape.technicRecipe);
+    expect(canEditTechnic(restored.shapes[0])).toBe(true);
+    const stl = exportMeshesToStl([meshForShape(shape)]);
+    const imported = importedShapeFromStl("floors.stl", stl);
+    expect(imported.height).toBeCloseTo(16, 4); expect(imported.width).toBeCloseTo(8, 4);
+  });
   it("erodes the united outline without splitting adjoining cells or changing hole pitch", async () => {
     const r = { ...recipe([cell("solid"), cell("solid", "Z", 1)]), measurements: { ...DEFAULT_TECHNIC_MEASUREMENTS, pitch: 8.1, height: 9, bodyInset: 0.1 } };
     const { body, shape, dispose } = await bodyFor(r);

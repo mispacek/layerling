@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { TechnicWorkspace } from "@/components/TechnicWorkspace";
 import { initialTechnicRecipe, type TechnicRecipe } from "@/lib/technicRecipe";
 import { t } from "@/lib/i18n";
+vi.mock("@/components/TechnicPreview", () => ({ TechnicPreview: () => null }));
 
 let host: HTMLDivElement, root: Root;
 let resizeGrid: (entries: { contentRect: { width: number; height: number } }[]) => void;
@@ -34,6 +35,35 @@ async function render(onApply = vi.fn(async (_recipe: TechnicRecipe) => {}), onC
   return { onApply, onCancel };
 }
 describe("construction workspace draft", () => {
+  it("adds and paints an independent floor; undo/redo restore both the recipe and active floor", async () => {
+    const { onApply } = await render();
+    await button(t("technic.addLayer"));
+    expect(host.querySelector<HTMLSelectElement>('select[aria-label="' + t("technic.activeLayer") + '"]')!.value).toBe("1");
+    expect(host.querySelectorAll(".technic-cell.filled")).toHaveLength(0);
+    expect(host.querySelectorAll(".technic-cell.layer-below").length).toBeGreaterThan(0);
+    await button(t("technic.mode.add")); await button(t("technic.solid")); await click('[data-cell="0,0,1"]');
+    await click(`button[aria-label="${t("editor.tool.undo")}"]`);
+    await click(`button[aria-label="${t("editor.tool.undo")}"]`);
+    expect(host.querySelector<HTMLSelectElement>('.technic-layer-bar select')!.value).toBe("0");
+    expect(host.querySelectorAll(".technic-cell.filled")).toHaveLength(20);
+    await click(`button[aria-label="${t("editor.tool.redo")}"]`);
+    expect(host.querySelector<HTMLSelectElement>('.technic-layer-bar select')!.value).toBe("1");
+    await click(`button[aria-label="${t("editor.tool.redo")}"]`);
+    await button(t("technic.done"));
+    expect(onApply.mock.calls[0][0]).toMatchObject({ version: 2, layerCount: 2 });
+    expect(onApply.mock.calls[0][0].cells.at(-1)).toMatchObject({ x: 0, y: 0, z: 1, kind: "solid" });
+  });
+  it("keeps the source floor unchanged when applying a template and rounding its duplicate", async () => {
+    const { onApply } = await render(); await button(t("technic.duplicateLayer"));
+    await button(t("technic.template.plate")); await button(t("technic.useTemplate"));
+    await click('[data-cell="0,0,1"]');
+    await act(async () => { const select = host.querySelector<HTMLSelectElement>('.technic-rounding select')!; select.value = "outer"; select.dispatchEvent(new Event("change", { bubbles: true })); });
+    await button(t("technic.roundLayer")); await button(t("technic.done"));
+    const r = onApply.mock.calls[0][0];
+    expect(r.cells.filter(c => !c.z)).toEqual(initial.cells);
+    expect(r.cells.filter(c => c.z === 1)).toHaveLength(35);
+    expect(r.cells.filter(c => c.z === 1).every(c => c.kind === "solid" && c.rounding === "outer")).toBe(true);
+  });
   it("uses available narrow-grid space for the part instead of leaving two empty margin columns", async () => {
     await render();
     await act(async () => resizeGrid([{ contentRect: { width: 370, height: 240 } }]));

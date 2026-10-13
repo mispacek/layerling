@@ -22,17 +22,19 @@ Předloha zůstává v lokálním projektu i v souboru `.lyl`, včetně historie
 Přesuny, otočení a zrcadlení zachovají možnost opětovné úpravy; rozšiřování zachovává světovou polohu původního počátku rastru.
 Nový dílek se v této etapě vytváří u počátku základní pracovní roviny. Potom jej lze běžnými nástroji posunout a otočit.
 
+**Patra:** přepínač nad rastrem vybírá aktivní patro. Lze přidat prázdné patro, duplikovat aktuální nebo ho odebrat; odebrání posune vyšší patra dolů. Průsvitné sousední patro a modrá rovina v 3D náhledu usnadňují orientaci. Kreslení, výběr, šablony i zaoblení mění pouze aktivní patro. Podrobnosti jsou v [návodu k vícepatrovému editoru](technic-multilayer.cs.md).
+
 ## Generátor
 
 Rozbalte **Generátor z předlohy**. Značky: `#` plná buňka, `o` otvor pro pin, `+` otvor pro osu, `.` prázdná.
 Řádky odpovídají pohledu shora: nahoře je kladný směr Y. Všechny řádky musí mít stejnou délku.
-Použití předlohy nahradí rozmístění a použije aktuální směr a natočení otvorů. Původní levý dolní počátek předlohy se zachová.
+Použití předlohy nahradí rozmístění aktivního patra a použije aktuální směr a natočení otvorů. Původní levý dolní počátek předlohy se zachová.
 Maximální předloha je 32 × 32 a celkem 256 obsazených buněk. Ruční kreslení podporuje souřadnice −128 až 128 buněk.
 
 ## Geometrie a rozměry
 
-- Výchozí rozteč je **8 mm**, výška **8 mm**. Rozteč a společnou výšku lze upravit v části **Úpravy pro tisk**; samostatná patra nejsou implementovaná.
-- Plné buňky se nejprve sjednotí. Teprve potom se odečtou otvory; mezi sousedními buňkami nevznikají mezery.
+- Výchozí rozteč je **8 mm**, výška každého patra **8 mm**. Rozteč a společnou výšku pater lze upravit v části **Úpravy pro tisk**. Nejvýše 32 pater a 256 obsazených buněk celkem.
+- Buňky se sjednotí a otvory i zaoblení vypočítají pro každé patro zvlášť; potom se patra sjednotí do výsledného tělesa. Otvor jednoho patra neodebírá materiál ze sousedního.
 - Základní průměr otvoru pro pin je **4,95 mm**, vstupní rozšíření **6,4 mm** hluboké **0,89 mm**.
 - Křížový otvor je průnik kruhového profilu 4,95 mm se dvěma pásy šířky **2,02 mm**. Konce ramen tak odpovídají kruhovému profilu.
 - Vstupní rozšíření pro pin vzniká pouze na vnějších čelech. Spojené buňky se souosými otvory nemají vnitřní rozšíření ani přepážku.
@@ -46,7 +48,7 @@ Maximální předloha je 32 × 32 a celkem 256 obsazených buněk. Ruční kresl
 
 **Katalog šablon** obsahuje nosník, nosník s křížovými otvory na koncích, nosníky L/T, obdélníkový rám, rám I a plnou destičku.
 Zvolte šířku/hloubku v buňkách a použijte šablonu. Všechny její buňky zůstávají upravitelné. Nejde o přesné repliky originálních dílů; inspirace katalogem [PartDesigner](https://github.com/marian42/partdesigner/blob/master/src/editor/Catalog.ts).
-Použití šablony nebo kalibrace nahradí návrh v editoru; Zpět jej obnoví. Projekt se změní teprve po **Vytvořit těleso**.
+Použití šablony nebo kalibrace nahradí pouze aktivní patro; Zpět jej obnoví. Projekt se změní teprve po **Vytvořit těleso**.
 
 **Kalibrační dílek** vytvoří tři kruhové a tři křížové otvory s korekcemi −krok, 0, +krok. Výchozí krok je 0,1 mm a lze jej měnit.
 Pro Z jde o destičku 24 × 16 × 8 mm při výchozích rozměrech. U X/Y jsou dvě řady oddělené a spojené po straně, aby všech šest otvorů zůstalo průchozích (24 × 32 nebo 32 × 24 mm).
@@ -59,21 +61,20 @@ Před sériovým tiskem je nutný zkušební tisk a ověření spojení s konkr�
 
 ## Hranice první verze
 
-Jedna vrstva buněk, tři typy buněk, jeden otvor v každé buňce a dvě natočení křížového profilu.
+Více pater buněk se společnou výškou, tři typy buněk, jeden otvor v každé buňce a dvě natočení křížového profilu.
 Výsledek je běžná polygonová síť pro dosavadní modelování a export; tato verze negeneruje analytický STEP/BRep model.
-Více výškových vrstev, různé výšky jednotlivých buněk, vystupující piny/osy, kulové čepy a poloviční rozteče zatím nejsou implementované.
-Tyto prvky patří do další etapy; stavbu do pater jsme nyní odložili. Budoucí ovládání počítá s aktivním patrem a průsvitnými sousedními patry.
+Různé výšky jednotlivých buněk, vystupující piny/osy, kulové čepy a poloviční rozteče zatím nejsou implementované.
 
 Pokud se dílek běžným editorem roztáhne, zúží, upraví jeho síť nebo použijí úpravy hran/BRep, editor předlohy se zablokuje.
 Tím se již provedené úpravy neztratí regenerováním původní předlohy. Běžné modelování zůstává dostupné; Zpět vrátí předchozí upravitelný stav.
 Zaoblení rohů obrysu nyní zůstává v předloze a při její změně se přepočítá podle sousedních buněk. Horní a spodní hrany se tímto nástrojem nezaoblují.
 
 ## Nastavit a zaoblení rohů
-Každá buňka má vlastní volbu **Bez zaoblení / Vnější / Vnitřní / Vnější i vnitřní**. „Zaoblit celý dílek“ nanese aktuální volbu na všechny buňky; „Nastavit“ ji přenáší na kliknuté buňky. Starší `rounded: true` zachová obě zaoblení. Označení mřížky a jednotek je nyní **Lego**, uložené identifikátory zůstávají stejné.
+Každá buňka má vlastní volbu **Bez zaoblení / Vnější / Vnitřní / Vnější i vnitřní**. **Zaoblit aktivní patro** nanese aktuální volbu na jeho buňky; **Nastavit** ji přenáší na kliknuté buňky. Starší `rounded: true` zachová obě zaoblení. Označení mřížky a jednotek je **Lego**, uložené identifikátory zůstávají stejné.
 
 V režimu **Vybrat** zvolte vzorovou buňku a upravte její směr, natočení a zaoblení. Přepněte na **Nastavit** a klikáním nebo tažením přenášejte tato nastavení na další obsazené buňky. Typ buňky zůstává zachovaný, prázdné buňky se nepřidávají.
 
-V části **Zaoblení rohů** lze zaoblit vybranou buňku nebo celý dílek. Poloměr 0,2–4 mm je společný. Zaoblení se počítá na sjednoceném obrysu: vnější rohy se oříznou, vnitřní rohy se vyplní obloukem, společné rovné stěny zůstanou spojené. Průchozí otvory pokračují přes materiál přidaný vnitřním zaoblením.
+V části **Zaoblení rohů** lze zaoblit vybranou buňku nebo aktivní patro. Poloměr 0,2–4 mm je společný. Zaoblení se počítá na sjednoceném obrysu daného patra: vnější rohy se oříznou, vnitřní rohy se vyplní obloukem, společné rovné stěny zůstanou spojené. Průchozí otvory pokračují přes materiál přidaný vnitřním zaoblením.
 
 Tlačítko **Zaoblení** v běžném 3D editoru u upravitelného Lego dílku otevře tuto část generátoru, takže jej neblokuje limit CAD úprav polygonových sítí 4 000 trojúhelníků. Parametry zaoblení se ukládají do `.lyl`; staré předlohy se načítají bez zaoblení.
 
@@ -81,7 +82,7 @@ Tlačítko **Zaoblení** v běžném 3D editoru u upravitelného Lego dílku ote
 
 Zdrojové moduly: `technicRecipe.ts`, `technicBuilder.ts`, `technicMeasurements.ts`, `technicSelection.ts`, `technicTemplates.ts`, `TechnicWorkspace.tsx`, `TechnicPreview.tsx`, `technic.css`.
 Integrace používá dosavadní `commitShapes`, kontrolu změny projektu před dokončením asynchronního výpočtu a obvyklou serializaci `.lyl`.
-Import kontroluje verzi, počet buněk, rozsah souřadnic, duplicity a rozměrové korekce. Starší čtečky mohou zobrazit uloženou síť bez editoru předlohy.
+Import kontroluje verzi, počet buněk a pater, rozsah souřadnic, duplicity a rozměrové korekce. Staré předlohy verze 1 se načtou jako jedno patro. Vícepatrová předloha používá verzi 2; pro její `.lyl` je nutná aktualizovaná aplikace. STL zůstává běžnou přenositelnou sítí.
 
 Testy:
 

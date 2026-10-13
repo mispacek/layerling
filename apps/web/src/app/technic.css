@@ -19,6 +19,17 @@
 .technic-workspace button:disabled { cursor: default; opacity: .45; }
 .technic-workspace button[aria-pressed="true"] { border-color: var(--primary); box-shadow: inset 0 0 0 1px var(--primary); }
 .technic-view-tools button, .technic-panel header button { display: grid; place-items: center; min-width: 32px; min-height: 32px; }
+.technic-view-tools .technic-preview-toggle { padding: 8px 12px; line-height: 1.25; white-space: nowrap; }
+.technic-layer-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 8px 12px; border-bottom: 1px solid var(--border); font-size: 12px; }
+.technic-layer-bar > button { display: flex; align-items: center; min-height: 32px; padding: 6px 10px; }
+.technic-layer-bar > label { display: flex; align-items: center; gap: 6px; }
+.technic-layer-bar select { max-width: 240px; min-height: 32px; padding: 5px 8px; border: 1px solid var(--border-strong); border-radius: 6px; color: var(--foreground); background: var(--panel); font: inherit; }
+.technic-layer-actions { display: flex; gap: 6px; }
+.technic-layer-actions button { flex: 1; padding: 7px; font-size: 12px; }
+.technic-layer-ghost-label { opacity: .5; font-size: 18px; pointer-events: none; }
+.technic-neighbour-preview { position: absolute; inset: 2px; display: grid; place-items: center; opacity: .25; pointer-events: none; }
+.technic-grid .technic-cell.layer-below { background-image: repeating-linear-gradient(135deg, transparent 0 6px, var(--border-strong) 6px 8px); }
+.technic-grid .technic-cell.layer-above { box-shadow: inset 0 0 0 6px var(--border-strong); }
 .technic-canvas { flex: 1; min-height: 180px; overflow: auto; padding: 8px; }
 .technic-views { display: flex; flex: 1; min-height: 0; min-width: 0; }
 .technic-preview { display: flex; flex-direction: column; width: 40%; min-width: 200px; position: relative; border-left: 1px solid var(--border); }
@@ -80,13 +91,13 @@
 .technic-error { color: #d33b36; font-size: 12px; line-height: 1.5; }
 @media (max-width: 720px) {
   .technic-workspace { flex-direction: column; overflow: auto; }
-  .technic-drawing { flex: none; height: 390px; }
+  .technic-drawing { flex: none; height: 480px; }
   .technic-panel { width: 100%; min-height: 430px; border-left: 0; border-top: 1px solid var(--border-strong); }
   .technic-panel-content { overflow: visible; }
   .technic-preview { width: 42%; min-width: 140px; }
 }
 @media (max-width: 480px) {
-  .technic-drawing { height: 600px; }
+  .technic-drawing { height: 700px; }
   .technic-views { flex-direction: column; }
   .technic-preview { width: 100%; min-width: 0; height: 220px; flex: none; border-left: 0; border-top: 1px solid var(--border); }
 }
