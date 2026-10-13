@@ -859,6 +859,71 @@ function handle_move(string $root, string $folder, string $requestedTarget): voi
 }
 
 /**
+ * Giving a project another file name inside its own folder (#265): the file is renamed, its picture
+ * goes with it, and nothing else changes - the revision stays the file's own, the bytes stay as they are.
+ */
+function handle_rename_file(string $root, string $folder, string $requestedName): void
+{
+    if (!same_origin()) {
+        fail('Shared projects only accept same-origin changes', 403);
+    }
+    $requested = (string) ($_GET['fileName'] ?? '');
+    if ($requested === '') {
+        fail('Shared project name is required', 400);
+    }
+    $fileName = existing_project_file_name($requested);
+    if ($fileName !== $requested) {
+        fail('Invalid shared project name', 400);
+    }
+
+    $newFileName = safe_project_file_name($requestedName);
+    if ($newFileName === $fileName) {
+        fail('The project already has that name', 409);
+    }
+
+    $filePath = $folder . DIRECTORY_SEPARATOR . $fileName;
+    $newPath = $folder . DIRECTORY_SEPARATOR . $newFileName;
+    acquire_lock($filePath);
+
+    $currentStat = regular_file_stat($filePath);
+    if ($currentStat === null) {
+        fail('Shared project was not found', 404);
+    }
+    $currentRevision = revision_for($currentStat);
+    $expectedRevision = unquote_etag($_SERVER['HTTP_IF_MATCH'] ?? null);
+    if ($expectedRevision === null) {
+        fail('Reload shared projects before renaming so the current revision can be verified', 428, ['currentRevision' => $currentRevision]);
+    }
+    if ($expectedRevision !== $currentRevision) {
+        fail('The shared project changed after you loaded it. Refresh the shared projects list and try again.', 409, ['currentRevision' => $currentRevision]);
+    }
+    if (regular_file_stat($newPath) !== null || is_dir($newPath)) {
+        fail('A project of that name is already in this folder', 409);
+    }
+    acquire_lock($newPath);
+    if (!@rename($filePath, $newPath)) {
+        fail('The project could not be renamed', 500);
+    }
+
+    $renamedStat = regular_file_stat($newPath);
+    if ($renamedStat === null) {
+        fail('The project vanished right after it was renamed', 500);
+    }
+    $renamedRevision = revision_for($renamedStat);
+    $thumbnail = thumbnail_path($folder, $fileName, $currentRevision);
+    $hasThumbnail = false;
+    if (regular_file_stat($thumbnail) !== null) {
+        $hasThumbnail = @rename($thumbnail, thumbnail_path($folder, $newFileName, $renamedRevision));
+    }
+
+    $record = project_record($newFileName, $renamedStat, $hasThumbnail, folder_key($root, $folder));
+    send_json([
+        'project'     => $record,
+        'renamedFrom' => $fileName,
+    ], 200, ['ETag' => '"' . $record['revision'] . '"']);
+}
+
+/**
  * Duplicating a project inside its own folder.
  *
  * The file is copied, not repacked: the duplicate carries exactly the geometry
@@ -1008,6 +1073,10 @@ switch ($method) {
         $copyTo = $_GET['copyTo'] ?? null;
         if ($copyTo !== null && $copyTo !== '') {
             handle_copy($root, $folder, (string) $copyTo);
+        }
+        $renameFileTo = $_GET['renameFileTo'] ?? null;
+        if ($renameFileTo !== null && $renameFileTo !== '') {
+            handle_rename_file($root, $folder, (string) $renameFileTo);
         }
         handle_save($root, $folder);
         break;

@@ -1,6 +1,6 @@
 "use client";
 
-import { Archive, Clock3, Copy, EllipsisVertical, FolderInput, FolderKanban, FolderPlus, FolderUp, Grid3X3, List, Pencil, Plus, RefreshCw, Search, SlidersHorizontal, Sparkles, Trash2, X } from "lucide-react";
+import { Archive, Clock3, Copy, EllipsisVertical, FolderInput, FolderKanban, FolderPlus, FolderUp, Grid3X3, List, Pencil, Plus, RefreshCw, Search, Server, SlidersHorizontal, Sparkles, Trash2, X } from "lucide-react";
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type DragEvent } from "react";
 import { AppFooter } from "@/components/AppFooter";
 import { LanguageSwitch } from "@/components/LanguageSwitch";
@@ -1339,6 +1339,23 @@ export default function Home() {
     }
   }, [openLylProjectFromFile]);
 
+  /** Takes designs out of this browser for good: the card, the shapes and the thumbnail. */
+  const removeWorkingCopies = useCallback(async (projectIds: string[]) => {
+    if (!projectIds.length) return;
+    // A save on its way out may still be writing; removing first would let it bring the design back.
+    await Promise.all(projectIds.map((projectId) => (projectShapeSaveQueuesRef.current[projectId] ?? Promise.resolve()).catch(() => undefined)));
+    setProjects((current) => current.filter((project) => !projectIds.includes(project.id)));
+    setProjectShapesById((current) => {
+      const next = { ...current };
+      projectIds.forEach((projectId) => delete next[projectId]);
+      return next;
+    });
+    projectIds.forEach((projectId) => {
+      if (!STATIC_EXPORT_BUILD) void fetch(`/api/project-thumbnail?projectId=${encodeURIComponent(projectId)}`, { method: "DELETE" });
+      void deleteProjectShapes(projectId).catch(() => setDashboardNotice(t("notice.projectShapesDeleteFailed")));
+    });
+  }, []);
+
   const deleteSharedProject = useCallback(async (sharedProject: SharedProject) => {
     setDashboardNotice(t("notice.deletingShared", { name: sharedProject.name }));
     try {
@@ -1351,20 +1368,18 @@ export default function Home() {
         throw new Error(payload.error ?? "Could not delete shared project");
       }
       setSharedProjects((current) => current.filter((project) => project.fileName !== sharedProject.fileName));
-      // The working copy in this browser outlives the file on the server, so it
-      // is let go of its binding - otherwise it would stay hidden for good.
-      setProjects((current) => current.map((project) => {
-        const binding = project.sharedProject;
-        if (!binding || binding.fileName !== sharedProject.fileName || (binding.path ?? "") !== (sharedProject.path ?? "")) return project;
-        const { sharedProject: _gone, ...rest } = project;
-        return rest;
-      }));
+      // The working copy in this browser is only a mirror of the server file, and the file was
+      // deleted on purpose: the copy goes too, or it would turn up again among the browser designs
+      // without a thumbnail (#265).
+      await removeWorkingCopies(projects
+        .filter((project) => project.sharedProject?.fileName === sharedProject.fileName && (project.sharedProject?.path ?? "") === (sharedProject.path ?? ""))
+        .map((project) => project.id));
       setDashboardNotice(t("notice.deletedShared", { name: sharedProject.name }));
     } catch (error) {
       setDashboardNotice(error instanceof Error ? localizedError(error.message) : t("notice.deleteSharedFailed"));
       await refreshSharedProjects();
     }
-  }, [refreshSharedProjects]);
+  }, [projects, refreshSharedProjects, removeWorkingCopies]);
 
   /** Dropping a project on a folder: the file changes place, nothing else. */
   const moveSharedProject = useCallback(async (sharedProject: SharedProject, targetPath: string) => {
@@ -1624,9 +1639,8 @@ export default function Home() {
   }, [refreshSharedProjects]);
 
   /**
-   * Removing a folder from the server. What was inside is gone from there, so
-   * every working copy that pointed into it becomes an ordinary browser
-   * project again rather than a card nobody can see.
+   * Removing a folder from the server. What was inside is gone from there, and
+   * so is every working copy that pointed into it.
    */
   const deleteStoreFolder = useCallback(async (folderPath: string, recursive: boolean) => {
     if (!folderPath) return;
@@ -1638,20 +1652,20 @@ export default function Home() {
       const response = await fetch(`${SHARED_PROJECTS_ENDPOINT}?${query.toString()}`, { method: "DELETE" });
       const payload = await response.json().catch(() => ({})) as { error?: string; deleted?: boolean };
       if (!response.ok || !payload.deleted) throw new Error(payload.error ?? t("notice.folderDeleteFailed"));
-      setProjects((current) => current.map((project) => {
-        const binding = project.sharedProject;
-        const where = binding?.path ?? "";
-        if (!binding || (where !== folderPath && !where.startsWith(`${folderPath}/`))) return project;
-        const { sharedProject: _gone, ...rest } = project;
-        return rest;
-      }));
+      // What was inside is gone from the server, and so are the working copies of it here (#265).
+      await removeWorkingCopies(projects
+        .filter((project) => {
+          const where = project.sharedProject?.path ?? "";
+          return Boolean(project.sharedProject) && (where === folderPath || where.startsWith(`${folderPath}/`));
+        })
+        .map((project) => project.id));
       await refreshSharedProjects();
       setDashboardNotice(t("notice.deletedFolder", { name: folderName }));
     } catch (error) {
       setDashboardNotice(error instanceof Error ? localizedError(error.message) : t("notice.folderDeleteFailed"));
       await refreshSharedProjects();
     }
-  }, [refreshSharedProjects]);
+  }, [projects, refreshSharedProjects, removeWorkingCopies]);
 
   // Every design of this browser as its own .lyl, together in one ZIP, and
   // the custom shapes of this browser in a folder beside them.
@@ -1975,6 +1989,37 @@ export default function Home() {
     setProjects((current) =>
       current.map((project) => (project.id === projectId ? { ...project, name: nextName, updatedAt: Date.now() } : project)),
     );
+    const binding = projects.find((project) => project.id === projectId)?.sharedProject;
+    if (binding && nextName !== binding.fileName.replace(/\.(lyl|skf)$/i, "")) void renameSharedProjectFile(projectId, binding, nextName);
+  };
+
+  /**
+   * A design on the server is shown under its file name, so renaming it renames the file too, and
+   * the working copy follows with the file's new name and revision (#265). A name that is taken
+   * leaves the file as it is; the name inside the design still changes.
+   */
+  const renameSharedProjectFile = async (projectId: string, binding: NonNullable<DashboardProject["sharedProject"]>, name: string) => {
+    try {
+      const query = new URLSearchParams(storeQuery(binding.path ?? "", binding.fileName));
+      query.set("renameFileTo", name);
+      const response = await fetch(`${SHARED_PROJECTS_ENDPOINT}?${query.toString()}`, {
+        method: "POST",
+        headers: { "If-Match": `"${binding.revision}"` },
+      });
+      const payload = await response.json().catch(() => ({})) as { project?: SharedProject; error?: string };
+      if (!response.ok || !payload.project) throw new Error(payload.error ?? "Could not rename the shared project");
+      const renamed = payload.project;
+      setProjects((current) => current.map((project) => (
+        project.id === projectId && project.sharedProject
+          ? { ...project, sharedProject: { ...project.sharedProject, fileName: renamed.fileName, revision: renamed.revision } }
+          : project
+      )));
+      setSharedProjects((current) => current.map((project) => (
+        project.fileName === binding.fileName && (project.path ?? "") === (binding.path ?? "") ? { ...project, ...renamed } : project
+      )));
+    } catch (error) {
+      setDashboardNotice(error instanceof Error ? localizedError(error.message) : t("notice.renameSharedFailed"));
+    }
   };
 
   if (!mounted) {
@@ -2923,6 +2968,19 @@ function Dashboard({
                             <Copy size={16} />
                             <span>{t("common.duplicate")}</span>
                           </button>
+                          {sharedProjectsEnabled ? (
+                            <button
+                              type="button"
+                              role="menuitem"
+                              onClick={() => {
+                                setOpenProjectMenuId(null);
+                                onSendProjectToServer(project.id);
+                              }}
+                            >
+                              <Server size={16} />
+                              <span>{t("dashboard.sendToServer")}</span>
+                            </button>
+                          ) : null}
                           <button
                             className="delete"
                             type="button"

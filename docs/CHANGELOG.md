@@ -6,6 +6,10 @@ code still carries it - so a lower number further down is older, not newer.
 
 ## Unreleased
 
+## 1.66.7
+
+- **Put a design on the server from its menu:** The menu of a design card in this browser has a new entry, **Put on the server**, for the shared folder you have open, as dragging the card onto the server tile does. Asked for by ucito in the forum, who moved a whole backup over.
+- **Server designs: renaming and deleting (#265):** A design in the server folder is shown under its file name, but renaming it in the editor only changed the name inside the design, so the overview kept the old one. Renaming now renames the file on the server too, in both the Node and the PHP store (a new `renameFileTo`), and the working copy follows. And a design or folder deleted on the server took only the file with it: the working copy in the browser was let go of its binding and turned up again among the browser designs, without a thumbnail. It is removed with the file now. A design exported to the server under another name carries that name inside as well, so it no longer opens under the old one. Reported by ucito on GitHub.
 ## 1.66.6
 
 - **Mirror in the right-click menu:** Right-click a selection and choose **Mirror**, as well as pressing M or using the ribbon: the three arrows for left-right, front-back and top-bottom appear. Asked for in a discussion by someone who could not find the tool.

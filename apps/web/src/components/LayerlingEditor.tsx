@@ -9733,9 +9733,12 @@ export function LayerlingEditor({
       const exportedHistory = view
         ? editorHistoryBranch(historyRef.current, view.index, historyLimit)
         : editorHistoryForExport(historyRef.current, historyIndexRef.current, historyLimit);
+      // A design written to the server under another name carries that name inside too, or it
+      // would open under the old one while the overview shows the file name (#265).
+      const packageName = target === "shared" ? exportName.trim().replace(/\.(lyl|skf)$/i, "") || projectName : projectName;
       const bytes = await exportLylProject({
         projectId: projectInfoRef.current.projectId,
-        projectName,
+        projectName: packageName,
         createdAt: projectCreatedAt,
         modifiedAt: projectModifiedAt,
         shapes: view ? view.shapes : shapesRef.current,

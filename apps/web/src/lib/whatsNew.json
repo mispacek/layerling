@@ -1,5 +1,20 @@
 [
   {
+    "version": "1.66.7",
+    "items": [
+      {
+        "title": {
+          "de": "Serverentwürfe: umbenennen, löschen, auf den Server legen",
+          "en": "Server designs: rename, delete, put on the server"
+        },
+        "body": {
+          "de": "Benennst du einen Entwurf im Serverordner um, wird jetzt auch seine Datei auf dem Server umbenannt, und die Übersicht zeigt den neuen Namen. Löschst du einen Entwurf oder Ordner auf dem Server, geht seine Arbeitskopie im Browser mit, statt später ohne Vorschaubild wieder aufzutauchen. Ein Export unter anderem Namen trägt diesen Namen auch im Entwurf. Und im Menü eines Entwurfs aus diesem Browser legt „Auf den Server legen“ ihn in den offenen Serverordner.",
+          "en": "Rename a design in the server folder and its file on the server is renamed too, so the overview shows the new name. Delete a design or folder on the server and its working copy in this browser goes with it, instead of turning up again later without a thumbnail. An export under another name carries that name inside the design as well. And in the menu of a design from this browser, “Put on the server” puts it into the open server folder."
+        }
+      }
+    ]
+  },
+  {
     "version": "1.66.6",
     "items": [
       {

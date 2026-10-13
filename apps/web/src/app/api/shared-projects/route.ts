@@ -485,6 +485,57 @@ async function moveProject(root: string, folder: string, requestedTarget: string
 }
 
 /**
+ * Giving a project another file name inside its own folder (#265): the file is renamed, its picture
+ * goes with it, and nothing else changes - the revision stays the file's own, the bytes stay as they are.
+ */
+async function renameProjectFile(root: string, folder: string, requestedName: string, request: Request) {
+  const requestUrl = new URL(request.url);
+  const requested = requestUrl.searchParams.get("fileName") ?? "";
+  if (!requested) throw new RequestFailure("Shared project name is required", 400);
+  const fileName = existingProjectFileName(requested);
+  if (fileName !== requested) throw new RequestFailure("Invalid shared project name", 400);
+
+  const newFileName = safeProjectFileName(requestedName);
+  if (newFileName === fileName) throw new RequestFailure("The project already has that name", 409);
+
+  const filePath = path.join(folder, fileName);
+  const newPath = path.join(folder, newFileName);
+  const sourceLock = await acquireLock(filePath);
+  try {
+    const currentStat = await regularFileStat(filePath);
+    if (!currentStat) throw new RequestFailure("Shared project was not found", 404);
+    const currentRevision = revisionForStat(currentStat);
+    const expectedRevision = unquoteEtag(request.headers.get("if-match"));
+    if (!expectedRevision) {
+      throw new RequestFailure("Reload shared projects before renaming so the current revision can be verified", 428, { currentRevision });
+    }
+    if (expectedRevision !== currentRevision) {
+      throw new RequestFailure("The shared project changed after you loaded it. Refresh the shared projects list and try again.", 409, { currentRevision });
+    }
+    if (await fs.stat(newPath).then(() => true, () => false)) {
+      throw new RequestFailure("A project of that name is already in this folder", 409);
+    }
+    await fs.rename(filePath, newPath);
+
+    const renamedStat = await fs.stat(newPath);
+    const renamedRevision = revisionForStat(renamedStat);
+    const thumbnail = sharedThumbnailPath(folder, fileName, currentRevision);
+    let hasThumbnail = false;
+    if (await regularFileStat(thumbnail)) {
+      hasThumbnail = await fs.rename(thumbnail, sharedThumbnailPath(folder, newFileName, renamedRevision)).then(() => true, () => false);
+    }
+    const record = projectRecord(newFileName, renamedStat, hasThumbnail, folderKey(root, folder));
+    return NextResponse.json(
+      { project: record, renamedFrom: fileName },
+      { headers: { "Cache-Control": "no-store", ETag: `"${record.revision}"` } },
+    );
+  } finally {
+    await sourceLock.handle.close().catch(() => undefined);
+    await fs.unlink(sourceLock.lockPath).catch(() => undefined);
+  }
+}
+
+/**
  * Duplicating a project inside its own folder.
  *
  * The file is copied, not repacked: the duplicate carries exactly the geometry
@@ -652,6 +703,8 @@ export async function POST(request: Request) {
     if (moveTo !== null) return await moveProject(root, folder, moveTo, request);
     const copyTo = requestUrl.searchParams.get("copyTo");
     if (copyTo) return await copyProject(root, folder, copyTo, request);
+    const renameFileTo = requestUrl.searchParams.get("renameFileTo");
+    if (renameFileTo) return await renameProjectFile(root, folder, renameFileTo, request);
 
     const declaredLength = Number(request.headers.get("content-length") ?? 0);
     const multipartRequest = request.headers.get("content-type")?.toLowerCase().startsWith("multipart/form-data") ?? false;
