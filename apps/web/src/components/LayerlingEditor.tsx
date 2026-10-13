@@ -1,6 +1,7 @@
 "use client";
 
 import { GuideHelpLink } from "@/components/GuideHelpLink";
+import { TechnicModuleIcon } from "@/components/TechnicModuleIcon";
 import { AlertTriangle, Check, Percent, Circle as CircleIcon, CloudUpload, Download, Eye, EyeOff, FilePlus2, FolderOpen, Hexagon as HexagonIcon, Info, ListTree, Pencil, Pentagon as PentagonIcon, Search, Square as SquareIcon, Star as StarIcon, Triangle as TriangleIcon, X } from "lucide-react";
 import { ObjectListPanel } from "@/components/workplane/ObjectListPanel";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
@@ -12406,7 +12407,7 @@ function SecondaryToolbar({
               <div className="shape-menu-subtitle">Lego Compatible</div>
               <div className="shape-menu-list">
                 <button className="shape-menu-item" type="button" onClick={() => { setShapesOpen(false); onTechnic(); }}>
-                  <span aria-hidden="true">⊞</span><span>{t("technic.new")}</span>
+                  <TechnicModuleIcon className="technic-catalog-icon" kind="builder" /><span>{t("technic.new")}</span>
                 </button>
                 {onEditTechnic ? <button className="shape-menu-item" type="button" disabled={!technicEditable}
                   title={technicEditable ? t("technic.edit") : t("technic.error.modified")}

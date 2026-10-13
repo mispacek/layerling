@@ -32,6 +32,17 @@ async function bodyFor(r: TechnicRecipe) {
   return { shape, body, dispose: () => [...new Set([...created, body])].reverse().forEach(disposeManifold) };
 }
 describe("real Lego Compatible bodies", () => {
+  it("uses 4 mm for new parts while preserving 1 mm rounding in legacy recipes without a radius", async () => {
+    const fresh = { ...initialTechnicRecipe(), cells: [{ ...cell("solid"), rounding: "outer" as const }] };
+    const { cornerRadius: _radius, ...legacy } = fresh;
+    for (const [r, radius] of [[fresh, 4], [legacy, 1]] as const) {
+      const { body, dispose } = await bodyFor(r);
+      try {
+        expect(body.status()).toBe("NoError");
+        expect(body.volume()).toBeCloseTo(512 - (4 * radius ** 2 - circleArea(radius * 2)) * 8, 2);
+      } finally { dispose(); }
+    }
+  });
   it("keeps an eroded footprint connected across floors with the configured layer height", async () => {
     const r: TechnicRecipe = { ...recipe([cell("solid"), { ...cell("solid"), z: 1 }]), version: 2, layerCount: 2,
       measurements: { ...DEFAULT_TECHNIC_MEASUREMENTS, pitch: 8.1, height: 9, bodyInset: 0.1 } };

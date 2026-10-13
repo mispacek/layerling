@@ -12,6 +12,7 @@ import { technicRectangle, transformTechnicSelection, transferTechnicSelection }
 import { TECHNIC_TEMPLATES, technicTemplate, technicCalibration, type TechnicTemplate } from "@/lib/technicTemplates";
 import { appendTechnicLayer, removeTechnicLayer } from "@/lib/technicLayers";
 import { TechnicPreview } from "./TechnicPreview";
+import { TechnicModuleIcon } from "./TechnicModuleIcon";
 import { parseMeasurementInput } from "@/lib/measurementUnits";
 import { selectWholeValue } from "@/lib/numberField";
 
@@ -395,7 +396,7 @@ export function TechnicWorkspace({ initial, initialRoundingOpen = false, workspa
         {mode === "set" ? <p className="technic-muted">{t("technic.stampHelp")}</p> : null}
         <div className="technic-module-list">{(["solid", "pin", "axle"] as const).map(kind =>
           <button key={kind} disabled={busy || mode === "remove" || mode === "set"} aria-pressed={settings.kind === kind} onClick={() => change({ kind })}>
-            <span className="technic-module-icon" aria-hidden="true">{kind === "solid" ? "■" : kind === "pin" ? "⊙" : "⊞"}</span>{t(`technic.${kind}`)}</button>)}</div>
+            <TechnicModuleIcon className="technic-module-icon" kind={kind} />{t(`technic.${kind}`)}</button>)}</div>
         <label>{t("technic.axis")} <span className="technic-key-hint">{t("technic.axisKeys")}</span></label>
         <div className="technic-mode-buttons">{(["X", "Y", "Z"] as const).map(axis =>
           <button key={axis} disabled={busy || settings.kind === "solid" || mode === "remove"} aria-pressed={settings.axis === axis} onClick={() => change({ axis })}>{axis}</button>)}</div>

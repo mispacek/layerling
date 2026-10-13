@@ -88,7 +88,8 @@
 .technic-muted { font-size: 12px; line-height: 1.45; color: var(--muted-strong); margin: 10px 0; }
 .technic-module-list { display: grid; gap: 5px; }
 .technic-module-list button { display: flex; align-items: center; gap: 10px; padding: 8px 10px; text-align: left; font-size: 13px; }
-.technic-module-icon { width: 28px; text-align: center; font: 24px Arial, sans-serif; }
+.technic-module-icon { display: block; width: 34px; height: 34px; flex-shrink: 0; }
+.technic-catalog-icon { display: block; width: 40px; height: 40px; flex-shrink: 0; }
 .technic-panel details { margin-top: 10px; border-top: 1px solid var(--border); padding-top: 10px; }
 .technic-panel summary { cursor: pointer; font-size: 13px; }
 .technic-rounding select { width: 100%; margin-top: 6px; padding: 8px; border: 1px solid var(--border-strong); border-radius: 6px; color: var(--foreground); background: var(--panel); }

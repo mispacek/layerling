@@ -4,6 +4,7 @@ export type TechnicRounding = "none" | "outer" | "inner" | "both";
 export type TechnicCell = { x: number; y: number; z?: number; kind: "solid" | "pin" | "axle"; axis: "X" | "Y" | "Z"; roll: 0 | 45; rounded?: boolean; rounding?: TechnicRounding; holeOffset?: number };
 // pitch/height retain the legacy format marker. Actual dimensions are optional for old files.
 export type TechnicRecipe = { version: 1 | 2; pitch: 8; height: 8; holeAdjustment: number; cells: TechnicCell[]; layerCount?: number; cornerRadius?: number; meshFingerprint?: string; measurements?: TechnicMeasurements };
+// Fallback for saved recipes without a radius; new recipes store 4 mm explicitly.
 export const DEFAULT_TECHNIC_CORNER_RADIUS = 1;
 export const TECHNIC_CELL_LIMIT = 256;
 export const TECHNIC_LAYER_LIMIT = 32;
@@ -106,7 +107,7 @@ export function initialTechnicRecipe(): TechnicRecipe {
   for (let y = 0; y < 5; y++) for (let x = 0; x < 7; x++) {
     if (x === 0 || x === 6 || y === 0 || y === 4) cells.push({ x, y, kind: "pin", axis: "Z", roll: 0 });
   }
-  return { version: 1, pitch: 8, height: 8, holeAdjustment: 0, cells };
+  return { version: 1, pitch: 8, height: 8, holeAdjustment: 0, cornerRadius: 4, cells };
 }
 
 /** One token per cell; legacy o/+ inherit the brush, oriented tokens are explicit. */
