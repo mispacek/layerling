@@ -5,15 +5,14 @@ export function TechnicModuleIcon({ kind, ...props }: SVGProps<SVGSVGElement> & 
   kind: "builder" | "solid" | "pin" | "axle";
 }) {
   return <svg viewBox="0 0 48 48" aria-hidden="true" focusable="false" {...props}>
-    {kind === "builder" ? <g stroke="#777" strokeWidth="0.7" strokeLinejoin="round">
-      <path d="M4 14 33 4 44 12 15 22Z" fill="#eee" />
-      <path d="M4 14 15 22V38L4 30Z" fill="#aaa" />
-      <path d="M15 22 44 12V28L15 38Z" fill="#c8c8c8" />
-      <g transform="matrix(1 -.345 0 1 15 22)" fill="#454545" stroke="#f1f1f1" strokeWidth="1.2">
-        <circle cx="6" cy="8" r="3.6" />
-        <circle cx="15" cy="8" r="3.6" />
-        <circle cx="24" cy="8" r="3.6" />
-      </g>
+    {kind === "builder" ? <g transform="matrix(1 -.4 0 1 9 24)" stroke="#777" strokeWidth="0.6" strokeLinejoin="round">
+      <path d="M1 -8H25A6 6 0 0 1 31 -2L36 6A6 6 0 0 1 30 12H6A6 6 0 0 1 0 6L-5 -2A6 6 0 0 1 1 -8Z" fill="#aaa" />
+      <path d="M1 -8H25A6 6 0 0 1 31 -2L36 6A6 6 0 0 0 30 0H6Z" fill="#d3d3d3" />
+      <rect width="36" height="12" rx="6" fill="#e3e3e3" />
+      {[6, 18, 30].map(cx => <g key={cx}>
+        <circle cx={cx} cy="6" r="4.9" fill="#aaa" stroke="#f8f8f8" strokeWidth="0.7" />
+        <circle cx={cx} cy="6" r="3.8" fill="#454545" stroke="#d8d8d8" strokeWidth="0.5" />
+      </g>)}
     </g> : <g stroke="#777" strokeWidth="0.7" strokeLinejoin="round">
       <path d="M5 16 24 6 43 16 24 26Z" fill="#eee" />
       <path d="M5 16 24 26V42L5 32Z" fill="#aaa" />
