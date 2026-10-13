@@ -49,6 +49,7 @@ Tím se již provedené úpravy neztratí regenerováním původní předlohy. B
 Zaoblení rohů obrysu nyní zůstává v předloze a při její změně se přepočítá podle sousedních buněk. Horní a spodní hrany se tímto nástrojem nezaoblují.
 
 ## Nastavit a zaoblení rohů
+Každá buňka má vlastní volbu **Bez zaoblení / Vnější / Vnitřní / Vnější i vnitřní**. „Zaoblit celý dílek“ nanese aktuální volbu na všechny buňky; „Nastavit“ ji přenáší na kliknuté buňky. Starší `rounded: true` zachová obě zaoblení. Označení mřížky a jednotek je nyní **Lego**, uložené identifikátory zůstávají stejné.
 
 V režimu **Vybrat** zvolte vzorovou buňku a upravte její směr, natočení a zaoblení. Přepněte na **Nastavit** a klikáním nebo tažením přenášejte tato nastavení na další obsazené buňky. Typ buňky zůstává zachovaný, prázdné buňky se nepřidávají.
 

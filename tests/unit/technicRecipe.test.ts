@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { initialTechnicRecipe, parseTechnicPattern, technicBounds, technicPattern, technicMeshFingerprint, validTechnicRecipe } from "@/lib/technicRecipe";
+import { initialTechnicRecipe, parseTechnicPattern, technicBounds, technicPattern, technicMeshFingerprint, technicCorners, validTechnicRecipe } from "@/lib/technicRecipe";
 import { sceneShape } from "@/lib/shapeCatalog";
 import { canonicalizeShape } from "@/lib/workplaneShapes";
 import { projectShapesFingerprint } from "@/lib/editorHistory";
@@ -8,6 +8,13 @@ import { Vector3 } from "three";
 import { quaternionForShape } from "@/lib/editorBooleans";
 
 describe("optional Lego Compatible recipes", () => {
+  it("supports individual choices and retains legacy rounding", () => {
+    const r = initialTechnicRecipe(); r.cells = r.cells.map(c => ({ ...c, rounded: true }));
+    expect(technicCorners(r)).toHaveLength(8);
+    r.cells = r.cells.map(c => ({ ...c, rounding: "none" })); r.cells[0] = { ...r.cells[0], rounding: "outer" };
+    expect(technicCorners(r).map(c => c.kind)).toEqual(["convex"]);
+    expect(validTechnicRecipe({ ...r, cells: [{ ...r.cells[0], rounding: "invalid" }] })).toBe(false);
+  });
   it("starts with a 7 × 5 frame and an empty 5 × 3 centre", () => {
     const r = initialTechnicRecipe();
     expect(validTechnicRecipe(r)).toBe(true);

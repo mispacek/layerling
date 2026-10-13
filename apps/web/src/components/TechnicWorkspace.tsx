@@ -6,7 +6,7 @@ import { t } from "@/lib/i18n";
 import { EdgeModifierSlider } from "@/components/workplane/EdgeModifierPanel";
 import { DEFAULT_WORKPLANE_WORKSPACE } from "@/lib/workplaneSettings";
 import type { WorkplaneWorkspaceSettings } from "@/types/layerling";
-import { DEFAULT_TECHNIC_CORNER_RADIUS, TECHNIC_CELL_LIMIT, parseTechnicPattern, technicBounds, technicCellKey, technicCorners, technicPattern, type TechnicCell, type TechnicRecipe } from "@/lib/technicRecipe";
+import { DEFAULT_TECHNIC_CORNER_RADIUS, TECHNIC_CELL_LIMIT, parseTechnicPattern, technicBounds, technicCellKey, technicCorners, technicPattern, technicRounding, type TechnicCell, type TechnicRecipe, type TechnicRounding } from "@/lib/technicRecipe";
 
 type Mode = "select" | "add" | "remove" | "set";
 
@@ -58,7 +58,8 @@ export function TechnicWorkspace({ initial, initialRoundingOpen = false, workspa
   const bounds = recipe.cells.length ? technicBounds(recipe) : null;
   const corners = useMemo(() => technicCorners(recipe), [recipe]);
   const radius = recipe.cornerRadius ?? DEFAULT_TECHNIC_CORNER_RADIUS;
-  const allRounded = recipe.cells.length > 0 && recipe.cells.every(c => c.rounded);
+  const rounding = technicRounding(settings);
+  const anyRounded = recipe.cells.some(c => technicRounding(c) !== "none");
 
   useEffect(() => { root.current?.focus(); }, []);
   useEffect(() => {
@@ -111,7 +112,7 @@ export function TechnicWorkspace({ initial, initialRoundingOpen = false, workspa
     }
     if (mode === "set") {
       commit({ ...current, cells: current.cells.map(c => c === target ? { ...c, axis: brush.axis, roll: brush.roll,
-        ...(brush.rounded !== undefined || c.rounded !== undefined ? { rounded: brush.rounded ?? false } : {}) } : c) });
+        rounded: undefined, rounding: technicRounding(brush) } : c) });
       pendingPan.current = { x: 0, y: 0 };
       return;
     }
@@ -211,14 +212,19 @@ export function TechnicWorkspace({ initial, initialRoundingOpen = false, workspa
           <button key={roll} disabled={busy || settings.kind !== "axle" || mode === "remove"} aria-pressed={settings.roll === roll} onClick={() => change({ roll })}>{roll}°</button>)}</div>
         <details className="technic-rounding" open={roundingOpen} onToggle={e => setRoundingOpen(e.currentTarget.open)}>
           <summary>{t("technic.rounding")}</summary>
-          <label className="technic-check"><input type="checkbox" checked={Boolean(settings.rounded)} disabled={busy || mode === "remove"}
-            onChange={e => change({ rounded: e.target.checked })} />{t("technic.roundCell")}</label>
+          <label>{t("technic.roundCell")}<select aria-label={t("technic.roundCell")} value={rounding} disabled={busy || mode === "remove"}
+            onChange={e => change({ rounded: undefined, rounding: e.target.value as TechnicRounding })}>
+            {(["none", "outer", "inner", "both"] as const).map(value => <option key={value} value={value}>{t(`technic.round.${value}`)}</option>)}
+          </select></label>
           <EdgeModifierSlider label={t("technic.cornerRadius")} value={radius} min={0.2} max={4} step={0.1}
             workspace={workspace} disabled={busy} onChange={value => commit({ ...recipe, cornerRadius: value })} />
-          <button disabled={busy || !recipe.cells.length} onClick={() => {
-            setBrush(b => ({ ...b, rounded: !allRounded }));
-            commit({ ...recipe, cells: recipe.cells.map(c => ({ ...c, rounded: !allRounded })) });
-          }}>{t(allRounded ? "technic.unroundAll" : "technic.roundAll")}</button>
+          <button disabled={busy || !recipe.cells.length || rounding === "none"} onClick={() => {
+            commit({ ...recipe, cells: recipe.cells.map(c => ({ ...c, rounded: undefined, rounding })) });
+          }}>{t("technic.roundAll")}</button>
+          {anyRounded ? <button disabled={busy} onClick={() => {
+            setBrush(b => ({ ...b, rounded: undefined, rounding: "none" }));
+            commit({ ...recipe, cells: recipe.cells.map(c => ({ ...c, rounded: undefined, rounding: "none" })) });
+          }}>{t("technic.unroundAll")}</button> : null}
           <p className="technic-muted">{t("technic.roundHelp")}</p>
         </details>
         <details><summary>{t("technic.pattern")}</summary>
@@ -229,7 +235,7 @@ export function TechnicWorkspace({ initial, initialRoundingOpen = false, workspa
             if (!cells) { setError(t("technic.error.pattern")); return; }
             const b = recipe.cells.length ? technicBounds(recipe) : { minX: 0, minY: 0 };
             const shifted = cells.map(c => ({ ...c, x: c.x + b.minX, y: c.y + b.minY,
-              ...(brush.rounded ? { rounded: true } : {}) }));
+              rounding: technicRounding(brush) }));
             if (shifted.some(c => Math.abs(c.x) > 128 || Math.abs(c.y) > 128)) { setError(t("technic.error.recipe")); return; }
             commit({ ...recipe, cells: shifted }); setSelected(null); setView({ x: b.minX - 2, y: b.minY + cells.reduce((max, c) => Math.max(max, c.y), 0) + 2 });
           }}>{t("technic.applyPattern")}</button>

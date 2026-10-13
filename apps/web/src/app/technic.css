@@ -50,6 +50,7 @@
 .technic-module-icon { width: 28px; text-align: center; font: 24px Arial, sans-serif; }
 .technic-panel details { margin-top: 10px; border-top: 1px solid var(--border); padding-top: 10px; }
 .technic-panel summary { cursor: pointer; font-size: 13px; }
+.technic-rounding select { width: 100%; margin-top: 6px; padding: 8px; border: 1px solid var(--border-strong); border-radius: 6px; color: var(--foreground); background: var(--panel); }
 .technic-panel textarea { width: 100%; color: var(--foreground); background: var(--background); border: 1px solid var(--border-strong); border-radius: 6px; padding: 8px; }
 .technic-panel textarea { height: 130px; resize: vertical; font: 13px monospace; }
 .technic-panel details > button { padding: 7px 12px; margin-top: 6px; font-size: 12px; }

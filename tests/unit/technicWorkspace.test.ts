@@ -32,12 +32,12 @@ describe("construction workspace draft", () => {
   it("samples and stamps orientation and rounding while preserving cell types and empty space", async () => {
     const { onApply } = await render();
     await click('[data-cell="0,0"]'); await button(t("technic.axle")); await button("X"); await button("45°");
-    await click('.technic-rounding input[type="checkbox"]');
+    await act(async () => { const select = host.querySelector<HTMLSelectElement>('.technic-rounding select')!; select.value = "outer"; select.dispatchEvent(new Event("change", { bubbles: true })); });
     await button(t("technic.mode.set")); await click('[data-cell="1,0"]'); await click('[data-cell="-1,0"]');
     await button(t("technic.done"));
     const result = onApply.mock.calls[0][0];
     expect(result.cells).toHaveLength(20);
-    expect(result.cells.find(c => c.x === 1 && c.y === 0)).toMatchObject({ kind: "pin", axis: "X", roll: 45, rounded: true });
+    expect(result.cells.find(c => c.x === 1 && c.y === 0)).toMatchObject({ kind: "pin", axis: "X", roll: 45, rounding: "outer" });
     expect(result.cells.find(c => c.x === -1)).toBeUndefined();
   });
   it("does not move cells under a held pointer when painting at the visible boundary", async () => {

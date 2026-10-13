@@ -29,6 +29,17 @@ async function bodyFor(r: TechnicRecipe) {
   return { shape, body, dispose: () => [...new Set([...created, body])].reverse().forEach(disposeManifold) };
 }
 describe("real Lego Compatible bodies", () => {
+  it.each(["outer", "inner", "both"] as const)("builds only the requested %s rounding", async rounding => {
+    const r = initialTechnicRecipe();
+    r.cornerRadius = 2; r.cells = r.cells.map(c => ({ ...c, kind: "solid", rounding }));
+    const { body, dispose } = await bodyFor(r);
+    try {
+      const delta = 4 * (4 - circleArea(4) / 4) * 8;
+      expect(body.volume()).toBeCloseTo(20 * 512 + (rounding === "outer" ? -delta : rounding === "inner" ? delta : 0), 3);
+      expect(body.rayCast([-27.9, -1, 19.9], [-27.9, 9, 19.9]).length > 0).toBe(rounding === "inner");
+      expect(body.rayCast([-19.8, -1, 11.8], [-19.8, 9, 11.8]).length > 0).toBe(rounding !== "outer");
+    } finally { dispose(); }
+  });
   it.each([1, 4])("rounds real outline corners at radius %s without changing dimensions", async radius => {
     const { body, shape, dispose } = await bodyFor({ ...recipe([{ ...cell("solid"), rounded: true }]), cornerRadius: radius });
     try {

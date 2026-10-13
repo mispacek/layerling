@@ -1,5 +1,6 @@
 /** A sparse, editable construction recipe. Model axes are X/right, Y/back, Z/up. */
-export type TechnicCell = { x: number; y: number; kind: "solid" | "pin" | "axle"; axis: "X" | "Y" | "Z"; roll: 0 | 45; rounded?: boolean };
+export type TechnicRounding = "none" | "outer" | "inner" | "both";
+export type TechnicCell = { x: number; y: number; kind: "solid" | "pin" | "axle"; axis: "X" | "Y" | "Z"; roll: 0 | 45; rounded?: boolean; rounding?: TechnicRounding };
 export type TechnicRecipe = { version: 1; pitch: 8; height: 8; holeAdjustment: number; cells: TechnicCell[]; cornerRadius?: number; meshFingerprint?: string };
 export const DEFAULT_TECHNIC_CORNER_RADIUS = 1;
 export const TECHNIC_CELL_LIMIT = 256;
@@ -16,7 +17,8 @@ export function validTechnicRecipe(value: unknown): value is TechnicRecipe {
   for (const c of r.cells) {
     if (!c || !Number.isInteger(c.x) || !Number.isInteger(c.y) || Math.abs(c.x) > 128 || Math.abs(c.y) > 128
       || !["solid", "pin", "axle"].includes(c.kind) || !["X", "Y", "Z"].includes(c.axis) || ![0, 45].includes(c.roll)
-      || (c.rounded !== undefined && typeof c.rounded !== "boolean")) return false;
+      || (c.rounded !== undefined && typeof c.rounded !== "boolean")
+      || (c.rounding !== undefined && !["none", "outer", "inner", "both"].includes(c.rounding))) return false;
     const key = technicCellKey(c.x, c.y);
     if (keys.has(key)) return false;
     keys.add(key);
@@ -25,18 +27,21 @@ export function validTechnicRecipe(value: unknown): value is TechnicRecipe {
 }
 
 export type TechnicCorner = { x: number; y: number; sx: -1 | 1; sy: -1 | 1; kind: "convex" | "concave" };
+/** Keep previously saved rounded:true cells unchanged, unless explicitly overridden. */
+export const technicRounding = (cell: Pick<TechnicCell, "rounding" | "rounded">): TechnicRounding => cell.rounding ?? (cell.rounded ? "both" : "none");
 /** Only corners of the UNITED outline are rounded; shared cell faces remain straight. */
 export function technicCorners(recipe: TechnicRecipe): TechnicCorner[] {
   const occupied = new Set(recipe.cells.map(c => technicCellKey(c.x, c.y)));
   const corners: TechnicCorner[] = [];
   for (const cell of recipe.cells) {
-    if (!cell.rounded) continue;
+    const rounding = technicRounding(cell);
+    if (rounding === "none") continue;
     for (const sx of [-1, 1] as const) for (const sy of [-1, 1] as const) {
       const beside = occupied.has(technicCellKey(cell.x + sx, cell.y));
       const above = occupied.has(technicCellKey(cell.x, cell.y + sy));
       const diagonal = occupied.has(technicCellKey(cell.x + sx, cell.y + sy));
       const kind = !beside && !above ? "convex" : beside && above && !diagonal ? "concave" : null;
-      if (kind) corners.push({ x: cell.x * 8 + sx * 4, y: cell.y * 8 + sy * 4, sx, sy, kind });
+      if (kind && (rounding === "both" || rounding === (kind === "convex" ? "outer" : "inner"))) corners.push({ x: cell.x * 8 + sx * 4, y: cell.y * 8 + sy * 4, sx, sy, kind });
     }
   }
   return corners;
