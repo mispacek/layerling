@@ -28,7 +28,7 @@ export const creatableShapeKinds = [
  * `threadProfiles.ts` und `threadGeometry.ts`; ein Test schlaegt fehl, sobald
  * diese Ansage davon abweicht.
  */
-export const threadProfiles = ["v", "trapezoidal", "round", "whitworth"];
+export const threadProfiles = ["v", "trapezoidal", "round", "whitworth", "custom"];
 
 export const threadSizeNames = [
   "M2", "M2.5", "M3", "M4", "M5", "M6", "M8", "M10", "M12",
@@ -88,11 +88,13 @@ export const shapeSettingSchema = {
   threadRole: { type: "string", enum: ["rod", "screw", "nut", "bore"], description: "Thread only. A bore becomes a cutter that threads the part it is grouped with." },
   threadHead: { type: "string", enum: ["cylinder", "countersunk", "hex"], description: "Thread only, and only for a screw." },
   threadHand: { type: "string", enum: ["right", "left"], description: "Thread only." },
-  threadProfile: { type: "string", enum: threadProfiles, description: "Thread only: tooth shape. \"v\" is the sharp 60-degree ISO default (M, UNC, UNF); trapezoidal and round both leave a flat crest and root, which prints more reliably; \"whitworth\" is the 55-degree profile with rounded crest and root of the G pipe threads (ISO 228-1)." },
+  threadProfile: { type: "string", enum: threadProfiles, description: "Thread only: tooth shape. \"v\" is the sharp 60-degree ISO default (M, UNC, UNF); trapezoidal and round both leave a flat crest and root, which prints more reliably; \"whitworth\" is the 55-degree profile with rounded crest and root of the G pipe threads (ISO 228-1); \"custom\" is a symmetric trapezoid whose depth and flank angle you set with threadDepth and threadFlankAngle." },
   threadDiameter: { type: "number", description: "Thread only, in millimetres: 6 is an M6, 20.955 a G1/2 pipe thread. Width and depth follow it, they are not set separately. For a standard size, threadSize is simpler." },
   threadPitch: { type: "number", description: "Thread only, in millimetres per turn: an M6 runs 1.0 as standard." },
   threadClearance: { type: "number", description: "Thread only, for nuts and tapped holes: how much room the thread leaves so a printed pair still turns." },
   threadAxialClearance: { type: "number", description: "Thread only, for nuts and tapped holes: extra play along the axis (mm, 0 to 1 but at most a fifth of the pitch, default 0): each tooth of the part gets this much thinner while the diameter stays. Add it to a small threadClearance for a thread that turns freely without rattling sideways." },
+  threadDepth: { type: "number", description: "Thread only, with threadProfile \"custom\": the thread depth in millimetres, outer minus core radius, so the core diameter is threadDiameter minus twice this. Default is the V thread's depth at the pitch (0.54 of it); at least a tenth of the pitch, at most 40 % of the diameter, and not so deep that the two flanks would take more than nine tenths of the pitch at the flank angle." },
+  threadFlankAngle: { type: "number", description: "Thread only, with threadProfile \"custom\": the angle between the two flanks of a tooth in degrees, 10 to 90, default 60 (the V thread; 30 is a trapezoid thread). At 90 or less no flank is flatter than 45 degrees to the horizontal, so the thread prints without supports." },
   threadBoltClearance: { type: "number", description: "Thread only, for rods and screws: how much thinner in diameter (mm, 0 to 1, default 0) the bolt is built, so a printed bolt fits a metal nut. Try 0.2 to 0.3." },
   threadQuality: { type: "number", description: "Thread only: columns around the circumference." },
   threadChamfer: { type: "number", description: "Thread only: the break at the ends that leads the first turn in. On a nut, tapped hole and rod it is the top end (and the bottom end too, unless threadChamferBottom is given); on a screw it is the tip. On a nut or tapped hole the 45 degree cone reaches down to the thread core." },
@@ -334,6 +336,7 @@ export const tools = [
         name: { type: "string" },
         color: { type: "string" },
         hole: { type: "boolean" },
+        makeEllipse: { type: "boolean", description: "Cylinder only: make it an ellipse - the same body, but width and depth can then differ (a cylinder always stays round). Not for a cylinder with an edge treatment or a wall, or a turned, imported or grouped one. Pass width and depth in the same call to set them." },
         transparent: { type: "boolean" },
         multicolor: { type: "boolean", description: "Groups only: show every part in its own colour (Tinkercad's Multicolor) instead of the group colour." },
         rotationPivot: {
@@ -873,13 +876,15 @@ export const tools = [
   },
   {
     name: "layerling_estimate_print",
-    description: "Estimate the material a print needs, like the Material box in the editor's export window: volume, weight and length of 1.75 mm filament, worked out as if printed solid (with walls and infill the slicer shows less, so this is the upper bound). Counts what an STL export would hold: visible solid bodies only, groups with their holes taken off, overlapping bodies counted once. Without ids it takes the selection, or the whole design when nothing is selected. Returns volumeMm3, volumeCm3, grams, filamentMeters, the material and its density, solids (bodies counted) and unionFailed (overlaps that could not be joined and so count twice).",
+    description: "Estimate the material a print needs, like the Material box in the editor's export window: volume, weight and length of 1.75 mm filament, for a solid body (the upper bound) and, in `estimate`, a rough guess with walls and infill as the export window shows it - default 2 walls and 15 % infill; the slicer's own settings decide the real number. Counts what an STL export would hold: visible solid bodies only, groups with their holes taken off, overlapping bodies counted once. Without ids it takes the selection, or the whole design when nothing is selected. Returns volumeMm3, volumeCm3, grams, filamentMeters (all for a solid body), estimate (infillPercent, walls, printedVolumeMm3, grams, filamentMeters with the infill), the material and its density, solids (bodies counted) and unionFailed (overlaps that could not be joined and so count twice).",
     inputSchema: {
       ...editorTargetSchema,
       properties: {
         ...editorTargetSchema.properties,
         ids: { type: "array", items: { type: "string" }, description: "Objects to weigh. Left out: the selection, or the whole design." },
         material: { type: "string", enum: ["pla", "petg", "abs", "asa", "tpu", "pa"], description: "Filament for the weight, default pla (1.24 g/cm3); pa is nylon." },
+        infillPercent: { type: "number", minimum: 0, maximum: 100, description: "Infill for `estimate`, in percent. Default 15." },
+        walls: { type: "integer", minimum: 1, maximum: 6, description: "Number of walls (lines) for `estimate`. Default 2." },
       },
     },
   },
@@ -984,6 +989,18 @@ export const tools = [
         ...editorTargetSchema.properties,
         axis: { type: "string", enum: ["x", "y", "z"], description: "Cutting axis. Defaults to the axis of the section view." },
         offset: { type: "number", description: "Where the plane cuts, in mm: an x position, a height above the plate or a z position. Defaults to the section view's position, or the middle of the design." },
+      },
+    },
+  },
+  {
+    name: "layerling_export_drawing",
+    description: "Make the editor's \"Drawing\" export: front, top and right-side views in first-angle layout on an ISO sheet at 1:1, with the overall size of each view, hidden edges and a table of the round bores that run parallel to a view axis (diameter and position from the lower-left corner of the view). Same bodies as the export: visible solids only, holes already taken off. ids limits it to those objects (loose holes still cut them); without ids it is the whole design. Returns sheet (\"ISO A3\" and so on, or \"custom\"), widthMm and heightMm of the sheet, views (id F, T or R, size, bore count), bores (id, view, diameterMm, xMm, yMm) and, by format, svg (the drawing as SVG text, the default) or pdfBase64 (the vector PDF, base64). Threads, depths, tolerances and bores at an angle are not dimensioned. Fails with a message when there is no visible solid or the design is too complex (over 100,000 triangles, 200 bores, 5,080 mm).",
+    inputSchema: {
+      ...editorTargetSchema,
+      properties: {
+        ...editorTargetSchema.properties,
+        ids: { type: "array", items: { type: "string" }, description: "Objects to draw. Defaults to the whole design." },
+        format: { type: "string", enum: ["svg", "pdf"], description: "svg returns the drawing as text, pdf as base64. Defaults to svg." },
       },
     },
   },

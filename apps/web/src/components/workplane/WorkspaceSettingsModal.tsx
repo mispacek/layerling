@@ -91,7 +91,13 @@ const WORKSPACE_SIZE_PRESETS = [
   { label: "2000 x 2000 mm", width: 2000, depth: 2000 },
   { label: "Custom", width: 200, depth: 200 },
 ];
-const PRINTER_VENDORS = [...new Set(PRINTER_PRESETS.map((preset) => preset.vendor))];
+// Alphabetical, numbers counted as numbers (Ender 3 before Ender 10): the list of the slicer is in no order a person could search by (#305).
+const PRINTER_COLLATOR = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
+const PRINTER_VENDORS = [...new Set(PRINTER_PRESETS.map((preset) => preset.vendor))].sort(PRINTER_COLLATOR.compare);
+const PRINTERS_BY_VENDOR = new Map(PRINTER_VENDORS.map((vendor) => [
+  vendor,
+  PRINTER_PRESETS.filter((preset) => preset.vendor === vendor).sort((a, b) => PRINTER_COLLATOR.compare(a.model, b.model)),
+]));
 const GRID_BLOCK_PRESETS = ["1 mm", "2.5 mm", "5 mm", "10 mm", "20 mm", "50 mm", "100 mm", "Custom"] as const;
 /** Nur die freie Wahl wird uebersetzt; Masse bleiben Masse. */
 const THEME_LABEL_KEYS: Record<AppThemePreference, MessageKey> = {
@@ -1089,7 +1095,7 @@ export function WorkspaceSettingsModal({
                       <option value="">{t("workspace.printerNone")}</option>
                       {PRINTER_VENDORS.map((vendor) => (
                         <optgroup key={vendor} label={vendor}>
-                          {PRINTER_PRESETS.filter((preset) => preset.vendor === vendor).map((preset) => (
+                          {(PRINTERS_BY_VENDOR.get(vendor) ?? []).map((preset) => (
                             <option key={preset.id} value={preset.id}>{`${preset.vendor} ${preset.model}`}</option>
                           ))}
                         </optgroup>

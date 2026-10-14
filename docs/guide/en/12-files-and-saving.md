@@ -23,7 +23,7 @@ You back up a single design in the editor: {{ui:editor.export}}, choose the form
 
 Click {{ui:editor.export}} or press [[Ctrl]]+[[E]].
 
-![The export window with the formats STL, 3MF, OBJ, STEP, SVG, PNG and LYL.](shot:export-panel)
+![The export window with the formats STL, 3MF, OBJ, STEP, SVG, PNG, LYL and 2D.](shot:export-panel)
 
 At the top is the file name, below it you choose the format. With something selected, only the selection is exported, otherwise the whole design. If the selection leaves out visible parts, a note in the window says so plainly, and {{ui:export.selectAll}} selects everything visible in one click. Once the file is written, the window closes by itself; if the export fails, it stays open with the message.
 
@@ -36,6 +36,7 @@ At the top is the file name, below it you choose the format. With something sele
 | **SVG** | laser cutter and plotter | A clean top view in millimetres, including holes and curved outlines. |
 | **PNG** | forum posts, print sites, questions | A picture of the view as it is, at twice the resolution and without handles, selection frames and dimensions. {{ui:export.png.plate}} and {{ui:export.png.transparent}} are chosen in the window. Turn and zoom first until the picture is right; the selection does not matter here. |
 | **LYL** | layerling itself | The editable design with everything that belongs to it. |
+| **2D** | workshop, lathe and mill, documentation | A drawing at 1:1 as PDF or SVG: front, top and right-side views on an ISO sheet. See below. |
 
 **STL into your own folder (Chrome and Edge).** There the first STL export of a design opens your system's save dialog, so you pick the folder and the name yourself and can replace an existing file. After that every STL export of the design writes into that same file without a dialog; the export window shows which file, and **Save as…** next to the export button picks another. The dialog remembers its own folder, apart from the one for designs, so the slicer files can stay with the slicer. After the page is reloaded the design forgets its STL file and the next export asks again. Firefox and Safari download the file as before.
 
@@ -43,9 +44,19 @@ A hole you have not grouped is taken out of every body it reaches when you expor
 
 STEP only carries exact CAD bodies. What cannot be written exactly, such as a mesh imported as STL, is left out. The message after the export names those bodies and says why. For the printer, use STL or 3MF, which carry everything.
 
+### A drawing for the workshop
+
+Choose the format **2D** (hover over it and it says Drawing) and, below the file name, PDF or SVG. With something selected, only the selection is drawn, otherwise the whole visible design; holes you have not grouped still cut the parts they reach.
+
+layerling draws the front, top and right-side views in first-angle layout (the right side to the left of the front view, the top view below it) on the smallest ISO sheet that fits, from A4 to A0, or a larger one if the part needs it. It is always at 1:1. Each view carries its overall width and height, and edges you cannot see are dashed. Round bores that run parallel to a view direction get a centre cross and a label (F1, T1, R1), and a table at the bottom lists their diameter and position, measured from the lower-left corner of the view. The title block in the lower-right corner holds the name, scale, units, date and sheet number. The words on the sheet follow the interface language.
+
+Print at 100 % or "actual size", or the lengths will not match. What the drawing does not do: threads, depths, tolerances and bores at an angle are not dimensioned, and the sizes come from the model as a mesh, so they are nominal. A very detailed part (over 100,000 triangles) or more than 200 bores is refused with a message; choose fewer objects then.
+
+The projection is based on the drawing work of Cadverix-3D by WC3D.
+
 ### How much filament does it take?
 
-For STL, 3MF, OBJ and STEP the {{ui:export.estimateTitle}} box shows the volume, weight and length of 1.75 mm filament of what is exported. It counts like the file: visible bodies only, holes taken off, overlaps only once. On the right you pick the filament - PLA, PETG, ABS, ASA, TPU or PA (nylon) - and the weight follows its density. It is worked out as solid, as if printed with 100 % infill. With walls and infill the slicer shows less; the number is the upper bound, good for comparing and for whether the spool will last.
+For STL, 3MF, OBJ and STEP the {{ui:export.estimateTitle}} box shows the volume, weight and length of 1.75 mm filament of what is exported. It counts like the file: visible bodies only, holes taken off, overlaps only once. On the right you pick the filament - PLA, PETG, ABS, ASA, TPU or PA (nylon) - and the weight follows its density. The volume is the body's own. Weight and filament are a rough estimate for a print with walls and infill: you set the {{ui:export.estimateInfillLabel}} (15 % to begin with) and the {{ui:export.estimateWallsLabel}} (2) under the heading, and the box says what it counted and what the same part would weigh solid. Your slicer's own settings decide the real number, so take it as a guide: good for comparing designs and for whether the spool will last. At 100 % infill the box counts the part as solid, the upper bound.
 
 ## Importing
 
@@ -76,6 +87,8 @@ If layerling stops with an error, a window with the error message shows instead 
 ## Shared designs on a server
 
 When layerling runs on your own computer or web server, it can offer a shared folder in which all users keep designs. On the start page it then appears as {{ui:dashboard.sharedProjects}}. You create folders there, move designs by dragging and search across the whole folder. A design that lives there saves itself back to it. A design from this browser goes onto the server by dragging its card onto the server tile, or with {{ui:dashboard.sendToServer}} in the card's menu. A backup you open lands in this browser first, like any design you open; put the designs on the server from there. The start page shows a design by its file name, so renaming a design, on its card or at the top of the editor, renames the file on the server too. Deleting a design or a folder removes it for good, together with its working copy in this browser. Custom shapes kept on the server sit in its folder `Custom shapes`, see [Shapes](chapter:shapes).
+
+Two things make that quicker: {{ui:dashboard.sendAllToServer}} on the start page puts every design of this browser on the server in one go, and ticking {{ui:dashboard.newOnServer}} makes every new design start in the server folder, so it is saved there from the first change on. The tick is kept in this browser. A design that cannot go - its name is taken on the server, say - stays in the browser, and the message says how many.
 
 That is not simultaneous editing: whoever opens a file works on a copy of their own. If somebody else has changed the file in the meantime, layerling refuses to overwrite it.
 

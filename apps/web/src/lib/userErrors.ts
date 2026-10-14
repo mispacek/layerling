@@ -18,6 +18,12 @@ type ErrorRule = {
 export const ERROR_RULES: ErrorRule[] = [
   // A design from a newer layerling with something this one does not know yet (lylProject.ts).
   { pattern: /^This design was saved with layerling ([\d.]+), newer than this layerling ([\d.]+)/, key: "error.newerDesign", values: (m) => ({ saved: m[1], current: m[2] }) },
+  // Drawing export (drawingExport.ts, drawingProjection.ts)
+  { pattern: /more than 200 circular holes/i, key: "error.drawingTooManyHoles" },
+  { pattern: /drawing exceeds 5,080 mm/i, key: "error.drawingTooLarge" },
+  { pattern: /Drawing views support up to 100,000 triangles/i, key: "error.drawingTooManyTriangles" },
+  { pattern: /view has too many drawing edges/i, key: "error.drawingTooManyEdges" },
+  { pattern: /view has no solid geometry/i, key: "error.drawingNoGeometry" },
   // History view (also the answers the AI bridge gives while it is open)
   { pattern: /The history view is open/i, key: "error.historyViewOpen" },
   { pattern: /no earlier state to look at/i, key: "error.noEarlierState" },

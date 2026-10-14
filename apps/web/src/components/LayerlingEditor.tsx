@@ -127,7 +127,7 @@ import { hasOneToOneCadComponentMapping } from "@/lib/cadModifierGroups";
 import { cadModifierHelicalGearForShape, cadModifierProfileForShape, cadModifierSpringForShape, cadModifierThreadForShape, cadProfileExpectation, cadProfileSegmentCount, textGlyphProfiles, withinExactProfileLimit } from "@/lib/cadProfileExtrusion";
 import { DEFAULT_OVERHANG_ANGLE, normalizeOverhangAngle, overhangArea } from "@/lib/overhang";
 import { sectionMeasurement, sectionPointToWorld, snapSectionPoint } from "@/lib/sectionMeasure";
-import { DEFAULT_PRINT_MATERIAL, PRINT_MATERIAL_DENSITY, PRINT_MATERIALS, FILAMENT_DIAMETER_MM, normalizePrintMaterial, printEstimate, type PrintMaterial } from "@/lib/printEstimate";
+import { DEFAULT_INFILL_PERCENT, DEFAULT_PRINT_MATERIAL, DEFAULT_WALLS, INFILL_CHOICES, PRINT_MATERIAL_DENSITY, PRINT_MATERIALS, FILAMENT_DIAMETER_MM, WALL_CHOICES, normalizeInfillPercent, normalizePrintMaterial, normalizeWalls, printEstimate, printEstimateWithInfill, type PrintMaterial } from "@/lib/printEstimate";
 import { CAD_MODIFIER_MAX_SHARP_ANGLE, CAD_MODIFIER_REQUEST_TIMEOUT_MS, CAD_MODIFIER_PREPARE_TRIANGLE_LIMIT, cadModifierPrepareTimeoutMs, cadModifierTimeoutMessage, cadModifierUserErrorMessage, cadModifierWorkerFailureMessage, cadModifierCandidateEdge, defaultCadModifierTangentChain, rescueSharpAngleForEdges, selectableCadModifierEdge, type CadModifierRequestPhase } from "@/lib/cadModifierRuntime";
 import { createCadPreviewQueue } from "@/lib/cadPreviewQueue";
 import { cloneWorkplaneShapeSnapshot, compactEdgeTreatmentHistory, edgeTreatmentAppliedFrame, restoreShapeBeforeEdgeTreatment } from "@/lib/edgeTreatmentHistory";
@@ -202,12 +202,14 @@ import {
   type PlacementWorkplane,
 } from "@/lib/placementWorkplane";
 import { localizedError } from "@/lib/userErrors";
+import { alignNaturalCenter, type AlignPoint } from "@/lib/alignCenter";
+import { cylinderToEllipsePatch } from "@/lib/cylinderToEllipse";
 import { sketchBodyStretch, stretchedSketchProfile } from "@/lib/sketchResize";
 import { silhouetteSketchProfile } from "@/lib/sketchCadProfile";
 import { svgSketchMatchesMesh } from "@/lib/svgSketch";
 import { DEFAULT_SKETCH_STROKE, normalizeSketchStroke, strokedSketchProfile } from "@/lib/sketchStroke";
 import { topCadModifierEdgeIds } from "@/lib/topEdges";
-import { placeSketchShape } from "@/lib/sketchPlacement";
+import { movedWithEditedOutline, placeSketchShape, sketchBodyAnchor, type SketchAnchor } from "@/lib/sketchPlacement";
 import { meshSlicePath, planeCutsMesh } from "@/lib/sketchSlice";
 import { BUG_REPORT_FILE, bugReportText, rememberBugReportEvent, type BugReportEvent } from "@/lib/bugReport";
 import { formatLengthMm, lengthDisplayUnit } from "@/lib/measurementUnits";
@@ -219,10 +221,11 @@ import { getSectionBounds, sectionAxisLetter, sectionPlacementWorkplane, type Se
 import { projectSectionPoint, SECTION_VIEW_FACE, sectionSvgDocument, sliceMeshContours } from "@/lib/sectionSvg";
 import type { AlignAxis, AlignHandleStatus, AlignTarget, GridSize, ParametricSource, ProjectAsset, ShapeAsset, ShapeCustomization, ShapeKind, SketchImage, SketchOperation, SketchPoint, SketchProfile, SketchRevolveSettings, SketchSegment, ShellEdges, ShellOpenings, ShellSide, WorkplaneNote, WorkplaneShape, WorkplaneWorkspaceSettings } from "@/types/layerling";
 import { type Vec3, type MeshData, type Cuboid, type ShapeUpdatePatch, type ManifoldSolid, MIN_SHAPE_DIMENSION, resetManifoldRuntime, cleanModelDimension, getManifoldRuntime, meshForShape, appendMeshData, formatTriangleCount, shapeAabb, boundsForShapes, boundsForCuboids, meshAabb, boundsForPositions, quantizedPointKey } from "@/lib/editorMeshCore";
-import { cloneAsGroupChild, meshDataToManifoldMesh, shapeToManifoldSolid, splitShapesByPlane, unionOverlappingExportMeshes, exportBodiesWithLooseHoles, exportSolidVolume, type ExportSolidVolume, PRINT_MATERIAL_STORAGE_KEY, formatEstimateNumber, formatSectionOffset, SECTION_SEEN_FROM_KEYS, expandBundles, visibleExportShapes, multicolorExportSolids, exportFaceColors, colorSeparatedExportMeshes, disposeManifold, canIntersectShapes, buildIntersectionShapeFromSelection, groupedShape, quaternionForShape, rotationFromQuaternion, ARROW_KEYS, cleanShapePatch, restoreGroupedChildren, buildGroupedShapeFromSelection } from "@/lib/editorBooleans";
+import { cloneAsGroupChild, meshDataToManifoldMesh, shapeToManifoldSolid, splitShapesByPlane, unionOverlappingExportMeshes, exportBodiesWithLooseHoles, exportSolidVolume, type ExportSolidVolume, PRINT_MATERIAL_STORAGE_KEY, PRINT_INFILL_STORAGE_KEY, PRINT_WALLS_STORAGE_KEY, formatEstimateNumber, formatSectionOffset, SECTION_SEEN_FROM_KEYS, expandBundles, visibleExportShapes, multicolorExportSolids, exportFaceColors, colorSeparatedExportMeshes, disposeManifold, canIntersectShapes, buildIntersectionShapeFromSelection, groupedShape, quaternionForShape, rotationFromQuaternion, ARROW_KEYS, cleanShapePatch, restoreGroupedChildren, buildGroupedShapeFromSelection } from "@/lib/editorBooleans";
 import { booleanAutomationScene } from "@/lib/editorAutomation";
 import { debugShapeSummary, mcpPivotRequest, compactShapeSummary, mcpShapeSummary, mcpSketchFillProfile, mcpTextFont } from "@/lib/editorMcpSummary";
 import { emptySketchProfile, cadShapeFromSketchProfile, shapeFromRevolvedSketchProfile, shapeFromCadMesh, sketchReferenceShapeOnWorkplane, defaultMcpSketchProfile } from "@/lib/editorSketchCad";
+import { drawingLabelsInLanguage } from "@/lib/drawingLabels";
 import { offersTextLayers, textLayerStack, layeredTextShape, nameTagSource, nameTagsFor, offersIconLayers, iconLayerStack, iconTagArea, layeredIconShape, iconTagCopies, svgIconArea, iconTagFromSvg } from "@/lib/editorTextTags";
 
 export { importedShapeFromObj, importedShapeFromStl, importedShapeFromSvg };
@@ -245,6 +248,7 @@ const HISTORY_VIEW_MCP_ACTIONS = new Set([
   "set_section_view",
   "show_workplane",
   "export_section_svg",
+  "export_drawing",
   "capture_image",
   "set_history_view",
   "clear_history",
@@ -269,8 +273,8 @@ export type HistoryProjectRequest = {
   /** Das Bild der Arbeitsflaeche in diesem Stand, fuer die Karte in der Uebersicht. */
   thumbnailDataUrl: string | null;
 };
-type ExportFormat = "stl" | "3mf" | "obj" | "step" | "svg" | "png" | "lyl";
-type DirectExportFormat = Exclude<ExportFormat, "step" | "png" | "lyl">;
+type ExportFormat = "stl" | "3mf" | "obj" | "step" | "svg" | "png" | "lyl" | "drawing";
+type DirectExportFormat = Exclude<ExportFormat, "step" | "png" | "lyl" | "drawing">;
 type ViewImageOptions = { plate: boolean; transparent: boolean };
 type LylHistoryLimit = EditorHistoryExportLimit;
 /** "file" writes into the file the design is tied to (asking for one the first time), "fileAs" always asks (#251). */
@@ -1612,7 +1616,7 @@ const ALIGN_EPSILON = 0.0005;
 const ALIGN_AXES: AlignAxis[] = ["x", "y", "z"];
 const ALIGN_TARGETS: AlignTarget[] = ["min", "center", "max"];
 
-function alignCoordinate(bounds: Cuboid, axis: AlignAxis, target: AlignTarget) {
+function alignCoordinate(bounds: Cuboid, axis: AlignAxis, target: AlignTarget, natural: AlignPoint | null = null, axes: AlignAxes | null = null) {
   const min = axis === "x" ? bounds.minX : axis === "y" ? bounds.minY : bounds.minZ;
   const max = axis === "x" ? bounds.maxX : axis === "y" ? bounds.maxY : bounds.maxZ;
   if (target === "min") {
@@ -1620,6 +1624,12 @@ function alignCoordinate(bounds: Cuboid, axis: AlignAxis, target: AlignTarget) {
   }
   if (target === "max") {
     return max;
+  }
+  // The middle of a pentagon or a star is not the middle of its box (#268).
+  if (natural) {
+    if (!axes) return natural[axis];
+    const direction = axes[axis];
+    return natural.x * direction.x + natural.y * direction.y + natural.z * direction.z;
   }
   return (min + max) / 2;
 }
@@ -1651,22 +1661,24 @@ function alignmentStatuses(selection: WorkplaneShape[], anchorId: string | null,
   }
 
   const boundsById = new Map(selection.map((shape) => [shape.id, axes ? frameAabb(shape, axes) : meshAabb(shape)]));
+  const naturalById = new Map(selection.map((shape) => [shape.id, alignNaturalCenter(shape)]));
   const anchorBounds = anchorId ? boundsById.get(anchorId) ?? null : null;
   const referenceBounds = anchorBounds ?? boundsForCuboids(Array.from(boundsById.values()));
+  const referenceNatural = anchorBounds && anchorId ? naturalById.get(anchorId) ?? null : null;
 
   return ALIGN_AXES.flatMap((axis) =>
     ALIGN_TARGETS.map((target) => {
-      const targetValue = alignCoordinate(referenceBounds, axis, target);
+      const targetValue = alignCoordinate(referenceBounds, axis, target, referenceNatural, axes);
       const aligned = selection.every((shape) => {
         const bounds = boundsById.get(shape.id);
-        return bounds ? Math.abs(alignCoordinate(bounds, axis, target) - targetValue) <= ALIGN_EPSILON : true;
+        return bounds ? Math.abs(alignCoordinate(bounds, axis, target, naturalById.get(shape.id) ?? null, axes) - targetValue) <= ALIGN_EPSILON : true;
       });
       const wouldMove = selection.some((shape) => {
         if (shape.locked || shape.id === anchorId) {
           return false;
         }
         const bounds = boundsById.get(shape.id);
-        return bounds ? Math.abs(alignCoordinate(bounds, axis, target) - targetValue) > ALIGN_EPSILON : false;
+        return bounds ? Math.abs(alignCoordinate(bounds, axis, target, naturalById.get(shape.id) ?? null, axes) - targetValue) > ALIGN_EPSILON : false;
       });
       const label = alignmentLabel(axis, target);
       return {
@@ -1691,9 +1703,11 @@ function alignedShapesForSelection(
 ) {
   const selected = new Set(selectedIds);
   const boundsById = new Map(selectedShapes.map((shape) => [shape.id, axes ? frameAabb(shape, axes) : meshAabb(shape)]));
+  const naturalById = new Map(selectedShapes.map((shape) => [shape.id, alignNaturalCenter(shape)]));
   const anchorBounds = anchorId ? boundsById.get(anchorId) ?? null : null;
   const referenceBounds = anchorBounds ?? boundsForCuboids(Array.from(boundsById.values()));
-  const targetValue = alignCoordinate(referenceBounds, axis, target);
+  const referenceNatural = anchorBounds && anchorId ? naturalById.get(anchorId) ?? null : null;
+  const targetValue = alignCoordinate(referenceBounds, axis, target, referenceNatural, axes);
   let moved = 0;
 
   const nextShapes = shapes.map((shape) => {
@@ -1704,7 +1718,7 @@ function alignedShapesForSelection(
     if (!bounds) {
       return shape;
     }
-    const delta = targetValue - alignCoordinate(bounds, axis, target);
+    const delta = targetValue - alignCoordinate(bounds, axis, target, naturalById.get(shape.id) ?? null, axes);
     if (Math.abs(delta) <= ALIGN_EPSILON) {
       return shape;
     }
@@ -1945,7 +1959,8 @@ function cylinderWrappedShape(shape: WorkplaneShape, diameter: number, inward: b
 }
 
 function canWrapAroundCylinder(shape: WorkplaneShape | null | undefined) {
-  return Boolean(shape && !shape.locked && shape.groupOperation !== "bundle" && !isNonSolidShapeKind(shape.kind));
+  // A shape that is wrapped already is a mesh of the wrapped thing: wrapping that again gave nonsense (#329).
+  return Boolean(shape && !shape.locked && !shape.cylinderWrap && shape.groupOperation !== "bundle" && !isNonSolidShapeKind(shape.kind));
 }
 
 
@@ -2250,6 +2265,8 @@ function applyMcpThreadSettings(
     threadClearance: settings.clearance,
     threadBoltClearance: settings.boltClearance,
     threadAxialClearance: settings.axialClearance,
+    threadDepth: settings.depth,
+    threadFlankAngle: settings.flankAngle,
     threadQuality: settings.quality,
     threadHeadHeight: settings.headHeight,
     threadChamfer: settings.chamfer,
@@ -2505,6 +2522,7 @@ export function LayerlingEditor({
     setOpenGroups(levels);
   }, []);
   const [stepExporting, setStepExporting] = useState(false);
+  const [drawingExporting, setDrawingExporting] = useState(false);
   const [lylExporting, setLylExporting] = useState(false);
   const [alignMode, setAlignMode] = useState(false);
   const [alignAnchorId, setAlignAnchorId] = useState<string | null>(null);
@@ -3896,6 +3914,12 @@ export function LayerlingEditor({
     [commitNotes, setNotice],
   );
 
+  const removeAllReferencePoints = useCallback(() => {
+    const points = referencePoints(notesRef.current);
+    if (points.length === 0) return;
+    commitNotes(notesRef.current.filter((note) => note.kind !== "point"), t("status.pointsRemoved", { count: points.length }));
+  }, [commitNotes]);
+
   const markSelectionPoints = useCallback(
     (spot: ReferencePointSpot) => {
       const box = unionReferenceBoxes(selectedShapes.filter((shape) => !shape.hole).map(meshAabb));
@@ -4097,6 +4121,9 @@ export function LayerlingEditor({
     [],
   );
 
+  /** Where the edited body's middle is in the sketch, when the sketch of an existing body was opened (#291). */
+  const sketchEditAnchorRef = useRef<SketchAnchor | null>(null);
+
   const beginSketch = useCallback((
     operation: SketchOperation,
     profile?: SketchProfile,
@@ -4137,18 +4164,17 @@ export function LayerlingEditor({
     }
     const operation = selectedShape.sketchOperation ?? (selectedShape.sketchRevolve ? "revolve" : "extrude");
     let editWorkplane: PlacementWorkplane | undefined;
+    sketchEditAnchorRef.current = null;
     if (operation === "extrude") {
       const quaternion = quaternionForShape(selectedShape);
       const normal = new THREE.Vector3(0, 1, 0).applyQuaternion(quaternion).normalize();
       const xAxis = new THREE.Vector3(1, 0, 0).applyQuaternion(quaternion).normalize();
       const zAxis = new THREE.Vector3(0, 0, 1).applyQuaternion(quaternion).normalize();
-      const points = selectedShape.sketchProfile.points;
-      const profileCenterX = points.length
-        ? (Math.min(...points.map((point) => point.x)) + Math.max(...points.map((point) => point.x))) / 2
-        : 0;
-      const profileCenterZ = points.length
-        ? (Math.min(...points.map((point) => point.z)) + Math.max(...points.map((point) => point.z))) / 2
-        : 0;
+      // The sketch is drawn over the body: the point of the outline under the body's middle goes there.
+      const anchor = sketchBodyAnchor(selectedShape);
+      sketchEditAnchorRef.current = anchor;
+      const profileCenterX = anchor.x;
+      const profileCenterZ = anchor.z;
       const origin = new THREE.Vector3(
         selectedShape.x,
         (selectedShape.elevation ?? 0) + selectedShape.height / 2,
@@ -4182,6 +4208,7 @@ export function LayerlingEditor({
 
   const cancelSketch = useCallback(() => {
     setSketchActive(false);
+    sketchEditAnchorRef.current = null;
     setSketchActivePointId(null);
     setSketchSelection(null);
     setSketchMeasureStart(null);
@@ -4777,6 +4804,19 @@ export function LayerlingEditor({
         setNotice(t("status.buildingSketch"), true);
         const extrusion = await cadShapeFromSketchProfile(sketchProfile, height, existing);
         resolved = placeSketchShape(extrusion, activeSketchWorkplane, existing);
+        if (existing && resolved) {
+          // Put the body where its outline is: it is centred on the new outline, and the edit may have moved that middle.
+          const quaternion = quaternionForShape(existing);
+          const xAxis = new THREE.Vector3(1, 0, 0).applyQuaternion(quaternion);
+          const zAxis = new THREE.Vector3(0, 0, 1).applyQuaternion(quaternion);
+          resolved = movedWithEditedOutline(
+            resolved,
+            existing,
+            sketchEditAnchorRef.current ?? sketchBodyAnchor(existing),
+            { x: extrusion.x, z: extrusion.z },
+            { x: [xAxis.x, xAxis.y, xAxis.z], z: [zAxis.x, zAxis.y, zAxis.z] },
+          );
+        }
       }
     } catch (error) {
       setNotice(error instanceof Error ? localizedError(error.message) : t(sketchOperation === "revolve" ? "status.sketchCannotRevolve" : "status.sketchCannotExtrude"));
@@ -4800,6 +4840,7 @@ export function LayerlingEditor({
     setSketchStrokePanelOpen(false);
     setSketchRevolvePreview(null);
     setEditingSketchShapeId(null);
+    sketchEditAnchorRef.current = null;
     setToolbarMode("geometry");
   }, [activeSketchWorkplane, commitShapes, editingSketchShapeId, shapes, sketchOperation, sketchProfile, sketchRevolveSettings]);
 
@@ -5832,7 +5873,7 @@ export function LayerlingEditor({
     setShellTool(null);
     if (refuseLockedSelection()) return;
     if (selectedShapes.length !== 1 || !selectedShape || selectedShape.locked || selectedShape.hole || isNonSolidShapeKind(selectedShape.kind)) {
-      setNotice(t("status.selectOneSolid", { kind }));
+      setNotice(t("status.selectOneSolid", { kind: t(kind === "chamfer" ? "editor.tool.chamfer" : "editor.tool.fillet") }));
       return;
     }
     if (selectedShape.groupOperation === "bundle") {
@@ -5930,7 +5971,7 @@ export function LayerlingEditor({
       preview: null,
       componentPreviews: [],
     });
-    setNotice(t("status.preparingEdges", { kind }), true);
+    setNotice(t("status.preparingEdges", { kind: t(kind === "chamfer" ? "editor.tool.chamfer" : "editor.tool.fillet") }), true);
     const parts: CadModifierMeshPart[] = partInputs.map((part) => {
       if (part.brep) return { brep: part.brep, brepTransform: part.brepTransform, hole: Boolean(part.shape.hole) };
       if (part.thread) return cadModifierThreadMeshPart(part.thread, part.profileMesh, sendStepMeshes, Boolean(part.shape.hole));
@@ -7356,7 +7397,7 @@ export function LayerlingEditor({
       return;
     }
     if (!canWrapAroundCylinder(selectedShape)) {
-      setNotice(t(selectedShape.locked ? "status.objectLocked" : "status.selectOneToWrap"));
+      setNotice(t(selectedShape.locked ? "status.objectLocked" : selectedShape.cylinderWrap ? "status.alreadyWrapped" : "status.selectOneToWrap"));
       return;
     }
     const wrapped = cylinderWrappedShape(selectedShape, diameter, inward);
@@ -8178,6 +8219,12 @@ export function LayerlingEditor({
         if (typeof params.color === "string") patch.color = params.color;
         if (typeof params.name === "string") patch.name = params.name;
         if (typeof params.hole === "boolean") patch.hole = params.hole;
+        if (params.makeEllipse === true) {
+          // A cylinder is round; as an ellipse it is the same body with a free length and width.
+          const asEllipse = cylinderToEllipsePatch(target);
+          if (!asEllipse) throw new Error("Only a plain cylinder can be made an ellipse: not one with a chamfer, a fillet or a wall, nor a turned, imported or grouped one");
+          Object.assign(patch, asEllipse);
+        }
         if (typeof params.locked === "boolean") patch.locked = params.locked;
         if (typeof params.hidden === "boolean") patch.hidden = params.hidden;
         if (typeof params.transparent === "boolean") patch.transparent = params.transparent || undefined;
@@ -8229,6 +8276,8 @@ export function LayerlingEditor({
             threadClearance: threaded.threadClearance,
             threadBoltClearance: threaded.threadBoltClearance,
             threadAxialClearance: threaded.threadAxialClearance,
+            threadDepth: threaded.threadDepth,
+            threadFlankAngle: threaded.threadFlankAngle,
             threadQuality: threaded.threadQuality,
             threadHeadHeight: threaded.threadHeadHeight,
             threadChamfer: threaded.threadChamfer,
@@ -8729,6 +8778,7 @@ export function LayerlingEditor({
         const target = findShape(params.id) ?? (selectedIdsRef.current.length === 1 ? findShape(selectedIdsRef.current[0]) : null);
         if (!target) throw new Error("Select one object to wrap");
         if (target.locked) throw new Error("Unlock the object before wrapping it");
+        if (target.cylinderWrap) throw new Error("This object is already wrapped around a cylinder: undo the wrapping, or wrap the flat original again");
         if (!canWrapAroundCylinder(target)) throw new Error("This object cannot be wrapped; a bundle or a measuring tool has no body of its own");
         const diameter = mcpNumber(params.diameter, Number.NaN);
         if (!Number.isFinite(diameter) || diameter <= 0) throw new Error("diameter must be a positive number of millimetres");
@@ -9088,9 +9138,22 @@ export function LayerlingEditor({
           throw new Error(`material must be one of ${PRINT_MATERIALS.join(", ")}`);
         }
         const material = normalizePrintMaterial(params.material);
+        if (params.infillPercent !== undefined && !(typeof params.infillPercent === "number" && params.infillPercent >= 0 && params.infillPercent <= 100)) {
+          throw new Error("infillPercent must be a number from 0 to 100");
+        }
+        if (params.walls !== undefined && !(typeof params.walls === "number" && Number.isInteger(params.walls) && params.walls >= 1 && params.walls <= 6)) {
+          throw new Error("walls must be a whole number from 1 to 6");
+        }
         const volume = await exportSolidVolume(source);
         if (volume.solids === 0) throw new Error("Nothing to estimate: no visible solid body");
         const estimate = printEstimate(volume.volumeMm3, material);
+        const withInfill = printEstimateWithInfill(
+          volume.volumeMm3,
+          { sideMm2: volume.sideMm2, flatMm2: volume.flatMm2 },
+          material,
+          params.infillPercent === undefined ? DEFAULT_INFILL_PERCENT : (params.infillPercent as number),
+          params.walls === undefined ? DEFAULT_WALLS : (params.walls as number),
+        );
         return {
           scope: requestedIds.length ? "ids" : pickIds.length ? "selection" : "design",
           material,
@@ -9103,7 +9166,14 @@ export function LayerlingEditor({
           solids: volume.solids,
           bodies: volume.bodies,
           unionFailed: volume.unionFailed,
-          note: "Solid, without infill: the slicer shows less with walls and infill.",
+          note: "volumeMm3, grams and filamentMeters are for a solid body, the upper bound. `estimate` is a rough guess with the walls and the infill, as the export window shows it; the slicer's own settings decide the real number.",
+          estimate: {
+            infillPercent: withInfill.infillPercent,
+            walls: withInfill.walls,
+            printedVolumeMm3: Number(withInfill.printed.volumeMm3.toFixed(1)),
+            grams: Number(withInfill.printed.grams.toFixed(2)),
+            filamentMeters: Number(withInfill.printed.filamentMeters.toFixed(3)),
+          },
         };
       }
 
@@ -9211,6 +9281,37 @@ export function LayerlingEditor({
           hiddenSkipped: built.hiddenCount,
           svg: built.result.svg,
         };
+      }
+
+      if (command.action === "export_drawing") {
+        // The drawing the export window makes: three views at 1:1 with the overall sizes and the round
+        // bores, from the same bodies as the export. ids limit it to those objects (holes still cut).
+        const ids = Array.isArray(params.ids) ? params.ids.filter((id): id is string => typeof id === "string") : [];
+        const format = params.format === undefined ? "svg" : mcpString(params.format, "svg").toLowerCase();
+        if (format !== "svg" && format !== "pdf") throw new Error("format must be svg or pdf");
+        const all = currentShapes();
+        const chosen = ids.length ? all.filter((shape) => ids.includes(shape.id)) : all;
+        if (ids.length && chosen.length === 0) throw new Error("None of the ids is an object in this design");
+        const { drawing, hiddenNote } = await buildDrawing({ shapes: chosen, selection: ids.length > 0 }, all, projectName);
+        if (!drawing) throw new Error(t(hiddenNote ? "status.exportOnlyHidden" : "status.addSolidBeforeExport"));
+        const { drawingToSvg, drawingToPdf, drawingBoreRows } = await import("@/lib/drawingExport");
+        const round = (value: number) => Number(value.toFixed(3));
+        const result: Record<string, unknown> = {
+          sheet: drawing.paper ?? "custom",
+          widthMm: round(drawing.width),
+          heightMm: round(drawing.height),
+          views: drawing.views.map((view) => ({ id: view.id, name: view.name, widthMm: round(view.projection.width), heightMm: round(view.projection.height), bores: view.holes.length })),
+          bores: drawingBoreRows(drawing).map((row) => ({ id: row.id, view: row.view, diameterMm: round(row.diameter), xMm: round(row.x), yMm: round(row.y) })),
+          format,
+        };
+        if (format === "svg") result.svg = drawingToSvg(drawing);
+        else {
+          const bytes = drawingToPdf(drawing);
+          let binary = "";
+          for (let index = 0; index < bytes.length; index += 8192) binary += String.fromCharCode(...bytes.subarray(index, index + 8192));
+          result.pdfBase64 = btoa(binary);
+        }
+        return result;
       }
 
       if (command.action === "set_workplane") {
@@ -9733,6 +9834,48 @@ export function LayerlingEditor({
       })
       .catch((error: unknown) => failNotice(label, error));
   }, [bedPrinter, exportSource, projectId, projectName]);
+
+  /**
+   * The drawing of a set of bodies, from the same bodies as the export (visible solids, holes taken
+   * off). `drawing` is null when there is no solid in it. Loose holes count even when only the part
+   * they cut is chosen.
+   */
+  const buildDrawing = useCallback(async (source: { shapes: WorkplaneShape[]; selection: boolean }, allShapes: WorkplaneShape[], title: string) => {
+    const scopedShapes = source.selection
+      ? [...source.shapes, ...allShapes.filter((shape) => shape.hole && !source.shapes.some((selected) => selected.id === shape.id))]
+      : source.shapes;
+    const { visible, hiddenNote } = visibleExportShapes(scopedShapes);
+    if (!visible.some((shape) => !shape.hole && !isNonSolidShapeKind(shape.kind))) return { drawing: null, hiddenNote };
+    const { generateDrawing } = await import("@/lib/drawingExport");
+    const { meshes, holeCutsFailed } = await exportBodiesWithLooseHoles(visible);
+    if (holeCutsFailed) throw new Error(t("status.drawingHoleCutFailed"));
+    return { drawing: generateDrawing(meshes, title, drawingLabelsInLanguage()), hiddenNote };
+  }, []);
+
+  const exportDrawingDesign = useCallback(async (exportName: string, format: "svg" | "pdf") => {
+    if (drawingExporting) return;
+    const source = exportSource();
+    setDrawingExporting(true);
+    setNotice(t("status.buildingDrawing"), true);
+    try {
+      const title = exportName.trim() || projectName;
+      const { drawing, hiddenNote } = await buildDrawing(source, shapes, title);
+      if (!drawing) {
+        setNotice(hiddenNote ? t("status.exportOnlyHidden") : t(source.selection ? "status.selectSolidBeforeExport" : "status.addSolidBeforeExport"));
+        return;
+      }
+      const { drawingToSvg, drawingToPdf } = await import("@/lib/drawingExport");
+      const filename = projectExportFileName(`${title} drawing`, format);
+      if (format === "svg") await downloadTextFile(filename, drawingToSvg(drawing), "image/svg+xml;charset=utf-8");
+      else await downloadBlobFile(filename, new Blob([drawingToPdf(drawing) as BlobPart], { type: "application/pdf" }));
+      setTopPanel(null);
+      setNotice(t("status.exportedDrawing", { format: format.toUpperCase() }) + hiddenNote);
+    } catch (error) {
+      setNotice(error instanceof Error ? localizedError(error.message) : t("status.drawingFailed"), true);
+    } finally {
+      setDrawingExporting(false);
+    }
+  }, [buildDrawing, drawingExporting, exportSource, projectName, shapes]);
 
   const exportStepDesign = useCallback(async (exportName: string) => {
     if (stepExporting) {
@@ -10633,13 +10776,13 @@ export function LayerlingEditor({
 
       if (shortcut && key === "e" && !event.shiftKey && !event.altKey) {
         event.preventDefault();
-        setTopPanel("export");
+        setTopPanel((panel) => (panel === "export" ? null : "export"));
         return;
       }
 
       if (shortcut && key === "i" && !event.shiftKey && !event.altKey) {
         event.preventDefault();
-        setTopPanel("import");
+        setTopPanel((panel) => (panel === "import" ? null : "import"));
         return;
       }
 
@@ -10866,6 +11009,7 @@ export function LayerlingEditor({
         { key: "markCenter", label: t("contextMenu.markCenter"), separated: true, onSelect: () => markSelectionPoints("center") },
         { key: "markCorners", label: t("contextMenu.markCorners"), onSelect: () => markSelectionPoints("corners") },
         { key: "markMidpoints", label: t("contextMenu.markMidpoints"), onSelect: () => markSelectionPoints("midpoints") },
+        ...(referencePoints(notes).length > 0 ? [{ key: "removePoints", label: t("contextMenu.removeAllPoints", { count: referencePoints(notes).length }), danger: true, onSelect: removeAllReferencePoints }] : []),
       );
     }
     items.push(
@@ -11222,6 +11366,8 @@ export function LayerlingEditor({
               : null}
           onMateFacePick={mateTool ? pickMateFace : pickHolePatternFace}
           onNoteAdd={addNote}
+          onAddReferencePoints={addReferencePoints}
+          onRemoveAllReferencePoints={removeAllReferencePoints}
           onNoteUpdate={updateNote}
           onNoteRemove={removeNote}
           onNoteModeChange={setNoteMode}
@@ -11507,6 +11653,8 @@ export function LayerlingEditor({
           stlFileName={topPanel === "export" ? linkedStlFile(projectId ?? "")?.name ?? null : null}
           onExportLyl={exportLylDesign}
           onExportStep={exportStepDesign}
+          onExportDrawing={exportDrawingDesign}
+          drawingExporting={drawingExporting}
           onExportImage={exportViewImage}
           sharedProjectsEnabled={sharedProjectsEnabled}
           lylExporting={lylExporting}
@@ -12951,6 +13099,8 @@ function TopActionPanel({
   stlFileName = null,
   onExportLyl,
   onExportStep,
+  onExportDrawing,
+  drawingExporting,
   onExportImage,
   sharedProjectsEnabled,
   lylExporting,
@@ -12980,6 +13130,8 @@ function TopActionPanel({
   stlFileName?: string | null;
   onExportLyl: (exportName: string, historyLimit: LylHistoryLimit, target?: LylExportTarget) => void;
   onExportStep: (exportName: string) => void;
+  onExportDrawing: (exportName: string, format: "svg" | "pdf") => void;
+  drawingExporting: boolean;
   onExportImage: (exportName: string, options: ViewImageOptions) => void;
   sharedProjectsEnabled: boolean;
   lylExporting: boolean;
@@ -12993,6 +13145,7 @@ function TopActionPanel({
   const [keepSvgPage, setKeepSvgPage] = useState(false);
   useEffect(() => setKeepSvgPage(readKeepSvgPage()), []);
   const [exportFormat, setExportFormat] = useState<ExportFormat>("stl");
+  const [drawingFormat, setDrawingFormat] = useState<"svg" | "pdf">("pdf");
   const [exportName, setExportName] = useState(projectName);
   const previousProjectNameRef = useRef(projectName);
   // Starts at the history setting from the workspace settings, so a project
@@ -13022,8 +13175,22 @@ function TopActionPanel({
     }
   });
   const [printVolume, setPrintVolume] = useState<ExportSolidVolume | null>(null);
+  const [printInfill, setPrintInfill] = useState<number>(() => {
+    try {
+      return normalizeInfillPercent(window.localStorage.getItem(PRINT_INFILL_STORAGE_KEY));
+    } catch {
+      return DEFAULT_INFILL_PERCENT;
+    }
+  });
+  const [printWalls, setPrintWalls] = useState<number>(() => {
+    try {
+      return normalizeWalls(window.localStorage.getItem(PRINT_WALLS_STORAGE_KEY));
+    } catch {
+      return DEFAULT_WALLS;
+    }
+  });
   const [imageOptions, setImageOptions] = useState<ViewImageOptions>({ plate: true, transparent: false });
-  const showPrintEstimate = panel === "export" && exportFormat !== "svg" && exportFormat !== "png" && exportFormat !== "lyl" && shapeCount > 0;
+  const showPrintEstimate = panel === "export" && exportFormat !== "drawing" && exportFormat !== "svg" && exportFormat !== "png" && exportFormat !== "lyl" && shapeCount > 0;
   // A picture shows the view as it is, not the selection, so the notes about what goes along do not apply.
   const exportsBodies = exportFormat !== "lyl" && exportFormat !== "png";
   useEffect(() => {
@@ -13050,12 +13217,38 @@ function TopActionPanel({
       // Ohne Speicher gilt die Wahl nur bis zum Schliessen.
     }
   };
-  const estimate = printVolume ? printEstimate(printVolume.volumeMm3, printMaterial) : null;
+  const choosePrintInfill = (value: string) => {
+    const infill = normalizeInfillPercent(value);
+    setPrintInfill(infill);
+    try {
+      window.localStorage.setItem(PRINT_INFILL_STORAGE_KEY, String(infill));
+    } catch {
+      // Without storage the choice holds until the window closes.
+    }
+  };
+  const choosePrintWalls = (value: string) => {
+    const walls = normalizeWalls(value);
+    setPrintWalls(walls);
+    try {
+      window.localStorage.setItem(PRINT_WALLS_STORAGE_KEY, String(walls));
+    } catch {
+      // See above.
+    }
+  };
+  // Volume is the body's own; weight and filament count the walls and the infill, the solid numbers stand under them.
+  const estimate = printVolume
+    ? printEstimateWithInfill(printVolume.volumeMm3, { sideMm2: printVolume.sideMm2, flatMm2: printVolume.flatMm2 }, printMaterial, printInfill, printWalls)
+    : null;
   const lylHistoryStop = (index: number) => ({ "--stop": index / (lylHistoryLimits.length - 1) }) as CSSProperties;
   useLanguage();
   const title = panel === "export" ? t("panel.export") : t("panel.import");
 
   const exportDetails: Record<ExportFormat, { label: string; description: string; note: string }> = {
+    drawing: {
+      label: t("export.drawing.label"),
+      description: t("export.drawing.description"),
+      note: t("export.drawing.note"),
+    },
     stl: {
       label: "STL",
       description: t("export.stl.description"),
@@ -13094,7 +13287,9 @@ function TopActionPanel({
   };
   const selectedExport = exportDetails[exportFormat];
   const runSelectedExport = () => {
-    if (exportFormat === "step") onExportStep(exportName);
+    if (drawingExporting || stepExporting || lylExporting) return;
+    if (exportFormat === "drawing") onExportDrawing(exportName, drawingFormat);
+    else if (exportFormat === "step") onExportStep(exportName);
     else if (exportFormat === "png") onExportImage(exportName, imageOptions);
     else if (exportFormat === "lyl") onExportLyl(exportName, lylHistoryLimit, lylFileAccessSupported() ? "fileAs" : "download");
     else onExport(exportFormat, exportName);
@@ -13179,10 +13374,10 @@ function TopActionPanel({
                 onChange={(event) => setExportName(event.target.value)}
                 onFocus={(event) => event.currentTarget.select()}
                 onKeyDown={(event) => {
-                  if (event.key === "Enter" && (shapeCount > 0 || !exportsBodies) && !stepExporting && !lylExporting) runSelectedExport();
+                  if (event.key === "Enter" && (shapeCount > 0 || !exportsBodies) && !stepExporting && !lylExporting && !drawingExporting) runSelectedExport();
                 }}
               />
-              <span>.{exportFormat}</span>
+              <span>.{exportFormat === "drawing" ? drawingFormat : exportFormat}</span>
             </div>
           </section>
 
@@ -13198,20 +13393,33 @@ function TopActionPanel({
                   : t(scopeLabel === "selected" ? "export.scopeSelected" : "export.scopeTotal", { count: shapeCount })}</span>
             </div>
             <div className="export-format-slider" data-format={exportFormat} role="radiogroup" aria-label={t("export.formatLabel")}>
-              {(["stl", "3mf", "obj", "step", "svg", "png", "lyl"] as const).map((format) => (
+              {(["stl", "3mf", "obj", "step", "svg", "png", "lyl", "drawing"] as const).map((format) => (
                 <button
                   key={format}
                   type="button"
                   role="radio"
                   aria-checked={exportFormat === format}
                   aria-label={`${exportDetails[format].label}: ${exportDetails[format].description}`}
+                  title={format === "drawing" ? exportDetails[format].label : undefined}
                   onClick={() => setExportFormat(format)}
                 >
-                  {exportDetails[format].label}
+                  {format === "drawing" ? t("export.drawing.short") : exportDetails[format].label}
                 </button>
               ))}
             </div>
           </section>
+
+          {exportFormat === "drawing" ? (
+            <section className="export-setting-section">
+              <label>
+                <strong>{t("export.drawing.fileFormat")}</strong>{" "}
+                <select aria-label={t("export.drawing.fileFormat")} value={drawingFormat} onChange={(event) => setDrawingFormat(event.target.value as "svg" | "pdf")}>
+                  <option value="pdf">PDF</option>
+                  <option value="svg">SVG</option>
+                </select>
+              </label>
+            </section>
+          ) : null}
 
           {exportsBodies && selectionLeavesOut ? (
             <div className="export-holes-only-warning export-selection-note" role="status">
@@ -13262,24 +13470,53 @@ function TopActionPanel({
                   ))}
                 </select>
               </div>
+              <div className="print-estimate-settings">
+                <label htmlFor="export-print-infill">
+                  <span>{t("export.estimateInfillLabel")}</span>
+                  <select id="export-print-infill" className="print-estimate-material" value={printInfill} onChange={(event) => choosePrintInfill(event.currentTarget.value)}>
+                    {INFILL_CHOICES.map((percent) => (
+                      <option key={percent} value={percent}>{percent} %</option>
+                    ))}
+                  </select>
+                </label>
+                <label htmlFor="export-print-walls" hidden={printInfill === 100}>
+                  <span>{t("export.estimateWallsLabel")}</span>
+                  <select id="export-print-walls" className="print-estimate-material" value={printWalls} onChange={(event) => choosePrintWalls(event.currentTarget.value)}>
+                    {WALL_CHOICES.map((count) => (
+                      <option key={count} value={count}>{count}</option>
+                    ))}
+                  </select>
+                </label>
+              </div>
               {estimate ? (
                 <dl className="print-estimate-values">
                   <div>
                     <dt>{t("export.estimateVolume")}</dt>
-                    <dd>{formatEstimateNumber(estimate.volumeCm3, estimate.volumeCm3 < 10 ? 2 : 1)} cm³</dd>
+                    <dd>{formatEstimateNumber(estimate.solid.volumeCm3, estimate.solid.volumeCm3 < 10 ? 2 : 1)} cm³</dd>
                   </div>
                   <div>
                     <dt>{t("export.estimateWeight")}</dt>
-                    <dd>{formatEstimateNumber(estimate.grams, estimate.grams < 10 ? 1 : 0)} g</dd>
+                    <dd>{formatEstimateNumber(estimate.printed.grams, estimate.printed.grams < 10 ? 1 : 0)} g</dd>
                   </div>
                   <div>
                     <dt>{t("export.estimateFilament")}</dt>
-                    <dd>{formatEstimateNumber(estimate.filamentMeters, estimate.filamentMeters < 10 ? 2 : 1)} m</dd>
+                    <dd>{formatEstimateNumber(estimate.printed.filamentMeters, estimate.printed.filamentMeters < 10 ? 2 : 1)} m</dd>
                   </div>
                 </dl>
               ) : (
                 <span className="print-estimate-busy">{t("export.estimateBusy")}</span>
               )}
+              {estimate ? (
+                <span className="print-estimate-note print-estimate-infill">
+                  {estimate.infillPercent === 100
+                    ? t("export.estimateSolidNote")
+                    : t("export.estimateInfill", {
+                      walls: estimate.walls,
+                      infill: estimate.infillPercent,
+                      grams: formatEstimateNumber(estimate.solid.grams, estimate.solid.grams < 10 ? 1 : 0),
+                    })}
+                </span>
+              ) : null}
               {printVolume && printVolume.unionFailed > 0 ? (
                 <span className="print-estimate-note">{t("export.estimateOverlap")}</span>
               ) : null}
@@ -13353,17 +13590,19 @@ function TopActionPanel({
                   className="export-shared-button"
                   type="button"
                   onClick={() => onExportLyl(exportName, lylHistoryLimit, "shared")}
-                  disabled={lylExporting || stepExporting}
+                  disabled={lylExporting || stepExporting || drawingExporting}
                 >
                   <CloudUpload />
                   <span>{t("export.saveToShared")}</span>
                 </button>
               ) : null}
-              <button className="export-primary-button" onClick={runSelectedExport} disabled={(shapeCount === 0 && exportsBodies) || stepExporting || lylExporting}>
+              <button className="export-primary-button" onClick={runSelectedExport} disabled={(shapeCount === 0 && exportsBodies) || stepExporting || lylExporting || drawingExporting}>
                 <Download />
                 {exportFormat === "lyl" ? (lylExporting ? t("export.savingProject") : t("export.saveProject")) : null}
                 <span hidden={exportFormat === "lyl"}>
-                {stepExporting && exportFormat === "step"
+                {drawingExporting && exportFormat === "drawing"
+                  ? t("status.buildingDrawing")
+                  : stepExporting && exportFormat === "step"
                   ? t("export.buildingStep")
                   : t("export.run", { format: selectedExport.label })}
                 </span>

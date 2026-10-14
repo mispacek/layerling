@@ -225,10 +225,10 @@ export function TransformOverlay({
           onPointerDown={(event) => event.stopPropagation()}
           onFocus={(event) => selectWholeValue(event.currentTarget)}
           onChange={(event) => onEditingDimensionChange(event.target.value)}
-          onBlur={onCommitDimensionEdit}
+          onBlur={() => onCommitDimensionEdit()}
           onKeyDown={(event) => {
             if (event.key === "Enter") {
-              onCommitDimensionEdit();
+              onCommitDimensionEdit(event.altKey);
             }
             if (event.key === "Escape") {
               onCancelDimensionEdit();
@@ -255,7 +255,7 @@ export function TransformOverlay({
             onCommitCornerEdit();
           }}
           onKeyDown={(event) => {
-            if (event.key === "Enter") onCommitCornerEdit();
+            if (event.key === "Enter") onCommitCornerEdit(event.altKey);
             if (event.key === "Escape") onCancelCornerEdit();
           }}
         />

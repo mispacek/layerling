@@ -51,6 +51,16 @@ async function readEnvironment() {
   return { ...file, ...process.env };
 }
 
+const PRINTER_ICON = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>';
+
+/** The link to the whole guide for printing, with a printer in front: in the chapter list and on the overview. */
+function printLink(strings, className = "") {
+  return `<p class="print-link${className ? ` ${className}` : ""}"><a href="/${strings.dir}/${PRINT_ALL_PAGE}">${PRINTER_ICON}<span>${escapeHtml(strings.printAll)}</span></a></p>`;
+}
+
+/** The page with every chapter in a row, for printing; one in each guide folder. */
+export const PRINT_ALL_PAGE = "print-all.html";
+
 const SOURCE_CODE = "https://github.com/henmedia/layerling";
 
 /**
@@ -93,6 +103,8 @@ export function slugify(text) {
   return text
     .toLowerCase()
     .replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/ß/g, "ss")
+    // Other accents lose their mark, so Dutch "geïmporteerde" reads "geimporteerde", not "ge-mporteerde".
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     .replace(/<[^>]*>/g, "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
@@ -416,7 +428,35 @@ footer.note { max-width: 1100px; margin: 0 auto; padding: 0 16px 12px; color: va
   .bar-inner { flex-wrap: wrap; }
   .guide-search { order: 5; flex: 1 1 100%; }
 }
-@media print { .bar, nav.chapters, .pager { display: none; } .shell { display: block; } }
+.print-link { margin: 0 0 14px; }
+.print-link a, nav.chapters .print-link a { display: flex; align-items: center; gap: 9px; padding: 9px 12px; border: 1px solid var(--accent); border-radius: 8px; background: var(--tint); color: var(--accent); font-weight: 700; line-height: 1.3; text-decoration: none; }
+.print-link a:hover, .print-link a:focus-visible, nav.chapters .print-link a:hover, nav.chapters .print-link a:focus-visible { background: var(--accent); color: var(--accent-ink); }
+.print-link svg { flex: none; }
+.print-link.in-page { margin: 0 0 22px; max-width: 360px; }
+.print-actions { margin: 0 0 24px; }
+.print-actions button { padding: 8px 16px; border: 0; border-radius: 8px; background: var(--accent); color: var(--accent-ink); font: inherit; font-weight: 700; cursor: pointer; }
+.print-chapter { margin-top: 56px; padding-top: 8px; border-top: 1px solid var(--edge); }
+.print-chapter > h2 { margin-top: 20px; font-size: 28px; }
+.print-contents { margin: 0 0 24px; padding-left: 22px; columns: 2; column-gap: 32px; }
+.print-contents li { break-inside: avoid; }
+@media (max-width: 560px) { .print-contents { columns: 1; } }
+@media print {
+  @page { margin: 16mm 14mm; }
+  :root, :root[data-theme="dark"], :root[data-theme="dark"][data-palette="graphite"] {
+    color-scheme: light;
+    --ground: #ffffff; --card: #ffffff; --ink: #1a1a1a; --muted: #5c5c5c; --edge: #cfcfcf;
+    --accent: #8a4d04; --tint: #f1f1f1; --code: #f1f1f1;
+  }
+  body { font-size: 11pt; line-height: 1.55; }
+  .bar, nav.chapters, .pager, .print-actions { display: none; }
+  .shell { display: block; padding: 0; }
+  main { max-width: none; }
+  h2, h3, h4 { break-after: avoid; }
+  figure, table, pre, aside.tip { break-inside: avoid; }
+  figure img { max-height: 120mm; width: auto; max-width: 100%; }
+  .print-all .site-footer, .print-all footer.note { display: none; }
+  .print-chapter { margin-top: 0; padding-top: 0; border-top: 0; break-before: page; }
+}
 `;
 
 /**
@@ -571,7 +611,7 @@ function searchForm(strings, language) {
 
 export const THEME_SCRIPT = `try{var t=localStorage.getItem("layerling.theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t;else if(t==="graphite"){document.documentElement.dataset.theme="dark";document.documentElement.dataset.palette="graphite"}}catch(e){}`;
 
-function pageShell({ language, title, description, path, alternates, chapters, current, body, languageLinks, footer, englishPath }) {
+function pageShell({ language, title, description, path, alternates, chapters, current, body, languageLinks, footer, englishPath, noindex = false, bodyClass = "" }) {
   const strings = GUIDE_LANGUAGES[language];
   const nav = chapters
     .map((chapter) => `<li><a href="/${strings.dir}/${chapter.slug}.html"${chapter.slug === current ? ' aria-current="page"' : ""}>${escapeHtml(chapter.title)}</a></li>`)
@@ -587,7 +627,7 @@ function pageShell({ language, title, description, path, alternates, chapters, c
     <title>${escapeHtml(title)}</title>
     <meta name="description" content="${escapeHtml(description)}">
     <link rel="canonical" href="${SITE}${englishPath ?? path}">
-    ${englishPath ? '<meta name="robots" content="noindex">\n    ' : ""}${alternateLinks}
+    ${englishPath || noindex ? '<meta name="robots" content="noindex">\n' : ""}${alternateLinks}
     <meta property="og:title" content="${escapeHtml(title)}">
     <meta property="og:description" content="${escapeHtml(description)}">
     <meta property="og:image" content="${SITE}/assets/layerling/layerling-social.png">
@@ -595,7 +635,7 @@ function pageShell({ language, title, description, path, alternates, chapters, c
     <script>${THEME_SCRIPT}</script>
     <style>${STYLE}</style>
   </head>
-  <body>
+  <body${bodyClass ? ` class="${bodyClass}"` : ""}>
     <header class="bar"><div class="bar-inner">
       <a class="brand" href="/${strings.dir}/index.html"><img src="/assets/layerling/layerling-logo.svg" alt=""><span class="brand-text"><b>layerling</b><span class="brand-note">${escapeHtml(strings.home)}</span></span></a>
       ${searchForm(strings, language)}
@@ -603,7 +643,7 @@ function pageShell({ language, title, description, path, alternates, chapters, c
       <a class="button" id="open-editor" href="/">${escapeHtml(strings.openEditor)}</a>
     </div><p class="editor-elsewhere" id="editor-elsewhere" role="status" hidden>${escapeHtml(strings.editorElsewhere)}</p></header>
     <div class="shell">
-      <nav class="chapters" aria-label="${escapeHtml(strings.chapters)}"><h2>${escapeHtml(strings.chapters)}</h2><ol>${nav}</ol></nav>
+      <nav class="chapters" aria-label="${escapeHtml(strings.chapters)}"><h2>${escapeHtml(strings.chapters)}</h2>${printLink(strings)}<ol>${nav}</ol></nav>
       <main>
 ${body}
       </main>
@@ -623,6 +663,36 @@ function languageMenu(links, language, strings) {
     .map((entry) => `<li><a href="${escapeHtml(entry.href)}" hreflang="${entry.htmlLang}" lang="${entry.htmlLang}"${entry.code === language ? ' aria-current="true"' : ""}>${escapeHtml(entry.name)}</a></li>`)
     .join("");
   return `<details class="lang-menu"><summary aria-label="${escapeHtml(strings.languageMenu)}">${escapeHtml(LANGUAGE_INFO[language].name)}</summary><ul>${items}</ul></details>`;
+}
+
+/**
+ * Every chapter one after the other on one page, for printing the guide or saving it as a PDF. The
+ * chapters keep their text; what changes is that their anchors are prefixed with the chapter (two
+ * chapters may use the same heading), links between chapters point into the page, the headings sit one
+ * level lower under the chapter's own title, and the pictures load at once - a printout needs them all.
+ */
+export function renderPrintAll({ language, chapters, printable, footer, languageLinks }) {
+  const strings = GUIDE_LANGUAGES[language];
+  const dir = strings.dir;
+  const slugs = new Set(chapters.map((chapter) => chapter.slug));
+  const inPage = (html, slug) => html
+    .replace(/<(\/?)h([2-5])\b/g, (_, close, level) => `<${close}h${Number(level) + 1}`)
+    .replace(/ id="([^"]+)"/g, (_, id) => ` id="${slug}--${id}"`)
+    .replace(/ href="#([^"]+)"/g, (_, id) => ` href="#${slug}--${id}"`)
+    .replace(new RegExp(` href="/${dir}/([\\w-]+)\\.html(?:#([^"]*))?"`, "g"), (whole, target, anchor) =>
+      slugs.has(target) ? ` href="#${anchor ? `${target}--${anchor}` : `chapter-${target}`}"` : whole)
+    .replace(/ loading="lazy"/g, "");
+  const contents = chapters.map((chapter, position) => `<li><a href="#chapter-${chapter.slug}">${escapeHtml(chapter.title)}</a></li>`).join("");
+  const sections = printable.map(({ chapter, html }, position) => {
+    const notice = chapter.fallback ? `<p class="not-translated" role="note" lang="${strings.htmlLang}">${escapeHtml(strings.notTranslated)}</p>\n` : "";
+    return `<section class="print-chapter" id="chapter-${chapter.slug}">\n<h2>${position + 1}. ${escapeHtml(chapter.title)}</h2>\n<p class="lead">${escapeHtml(chapter.summary)}</p>\n${notice}${inPage(html, chapter.slug)}\n</section>`;
+  }).join("\n");
+  const body = `<h1>${escapeHtml(strings.printAllTitle)}</h1>\n<p class="lead">${escapeHtml(strings.printAllLead)}</p>\n<p class="print-actions"><button type="button" id="print-now">${escapeHtml(strings.printButton)}</button></p>\n<h2 class="print-contents-title">${escapeHtml(strings.printContents)}</h2>\n<ol class="print-contents">${contents}</ol>\n${sections}`;
+  return pageShell({
+    language, title: `${strings.printAllTitle} - ${strings.site}`, description: strings.printAllLead, path: `/${dir}/${PRINT_ALL_PAGE}`,
+    alternates: {}, chapters, current: "", footer: `${footer}\n    <script>document.getElementById("print-now").addEventListener("click",function(){window.print();});</script>`,
+    body, languageLinks, noindex: true, bodyClass: "print-all",
+  });
 }
 
 /** The chapters of one language, in reading order, each with its number prefix as pairing key. */
@@ -713,6 +783,7 @@ export async function buildGuide({ log = console.log } = {}) {
     });
 
     const searchIndex = [];
+    const printable = [];
     for (const [position, chapter] of chapters.entries()) {
       const context = {
         language,
@@ -752,10 +823,13 @@ export async function buildGuide({ log = console.log } = {}) {
         current: chapter.slug, body, footer, languageLinks: languageLinksFor(chapter.number), englishPath,
       });
       await writeFile(join(outputRoot, `${chapter.slug}.html`), page);
+      printable.push({ chapter, html: rendered.html });
       searchIndex.push(...searchEntries({ title: chapter.title, summary: chapter.summary, html: rendered.html, path }));
       // A page that only shows English text is no page of its own for a search engine.
       if (!chapter.fallback) result.pages.push({ path, alternates });
     }
+
+    await writeFile(join(outputRoot, PRINT_ALL_PAGE), renderPrintAll({ language, chapters, printable, footer, languageLinks: LANGUAGE_CODES.map((code) => ({ code, name: LANGUAGE_INFO[code].name, htmlLang: GUIDE_LANGUAGES[code].htmlLang, href: `/${GUIDE_LANGUAGES[code].dir}/${PRINT_ALL_PAGE}` })) }));
 
     const cards = chapters
       .map((chapter) => `<li><a href="/${strings.dir}/${chapter.slug}.html"><b>${escapeHtml(chapter.title)}</b><span>${escapeHtml(chapter.summary)}</span></a></li>`)
@@ -765,7 +839,7 @@ export async function buildGuide({ log = console.log } = {}) {
     const indexPage = pageShell({
       language, title: strings.site, description: strings.overviewLead, path: indexPath,
       alternates: indexAlternates, chapters, current: "", footer,
-      body: `<h1>${escapeHtml(strings.site)}</h1>\n<p class="lead">${escapeHtml(strings.overviewLead)}</p>\n<ul class="cards">${cards}</ul>`,
+      body: `<h1>${escapeHtml(strings.site)}</h1>\n<p class="lead">${escapeHtml(strings.overviewLead)}</p>\n${printLink(strings, "in-page")}\n<ul class="cards">${cards}</ul>`,
       languageLinks: languageLinksFor(null),
     });
     await writeFile(join(outputRoot, "index.html"), indexPage);

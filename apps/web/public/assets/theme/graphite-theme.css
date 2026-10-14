@@ -720,6 +720,10 @@ html[data-theme="dark"]:where([data-palette="graphite"]) .whats-new-earlier:hove
   border-color: #e3b77c;
 }
 
+:where(html[data-theme="dark"][data-palette="graphite"]) .dashboard-new-on-server input {
+  accent-color: #c9731d;
+}
+
 :where(html[data-theme="dark"][data-palette="graphite"]) .dashboard-select select {
   border: 0;
   outline: 0;
@@ -2130,10 +2134,18 @@ html:where([data-theme="dark"][data-palette="graphite"])[data-toolbar-size="larg
   border: 1px solid #e1e1e1;
 }
 
+:where(html[data-theme="dark"][data-palette="graphite"]) .print-estimate-settings label {
+  color: #737373;
+}
+
 :where(html[data-theme="dark"][data-palette="graphite"]) .print-estimate-values dt,
 :where(html[data-theme="dark"][data-palette="graphite"]) .print-estimate-busy,
 :where(html[data-theme="dark"][data-palette="graphite"]) .print-estimate-note {
   color: #737373;
+}
+
+:where(html[data-theme="dark"][data-palette="graphite"]) .print-estimate-infill {
+  color: #555555;
 }
 
 :where(html[data-theme="dark"][data-palette="graphite"]) .print-estimate-values dd {
@@ -2173,6 +2185,22 @@ html:where([data-theme="dark"][data-palette="graphite"])[data-toolbar-size="larg
 
 :where(html[data-theme="dark"][data-palette="graphite"]) .export-format-slider button[aria-checked="true"] {
   color: #9f5508;
+}
+
+@media (max-width: 480px) {
+  :where(html[data-theme="dark"][data-palette="graphite"]) .export-format-slider button {
+    border: 1px solid transparent;
+  }
+
+  :where(html[data-theme="dark"][data-palette="graphite"]) .export-format-slider button[aria-checked="true"] {
+    background: #fff;
+    border-color: #ddab78;
+  }
+
+  html[data-theme="dark"]:where([data-palette="graphite"]) .export-format-slider button[aria-checked="true"] {
+    background: #3a3a3a;
+    border-color: #606060;
+  }
 }
 
 :where(html[data-theme="dark"][data-palette="graphite"]) .lyl-history-range-control::before {
@@ -3362,6 +3390,19 @@ html[data-theme="dark"]:where([data-palette="graphite"]) .inspector-bundle-note 
   box-shadow: 0 1px 4px rgba(44, 44, 44, 0.12);
 }
 
+:where(html[data-theme="dark"][data-palette="graphite"]) .tape-mark {
+  color: #2d2d2d;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(207, 207, 207, 0.96);
+  box-shadow: 0 1px 4px rgba(44, 44, 44, 0.12);
+}
+
+:where(html[data-theme="dark"][data-palette="graphite"]) .tape-mark:hover,
+:where(html[data-theme="dark"][data-palette="graphite"]) .tape-mark:focus-visible {
+  color: #ad5900;
+  border-color: #ad5900;
+}
+
 :where(html[data-theme="dark"][data-palette="graphite"]) .corner-ruler-arm {
   stroke: #5a3917;
 }
@@ -3802,10 +3843,23 @@ html[data-theme="dark"]:where([data-palette="graphite"]) .rotation-angle-badge {
 }
 
 :where(html[data-theme="dark"][data-palette="graphite"]) .shape-inspector {
+  scrollbar-color: #bbbbbb transparent;
   color: #404040;
   background: rgba(246, 246, 246, 0.96);
   border-left: 1px solid #e0e0e0;
   box-shadow: -2px 0 10px rgba(64, 64, 64, 0.08);
+}
+
+:where(html[data-theme="dark"][data-palette="graphite"]) .shape-inspector::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+:where(html[data-theme="dark"][data-palette="graphite"]) .shape-inspector::-webkit-scrollbar-thumb {
+  background: #bbbbbb;
+}
+
+:where(html[data-theme="dark"][data-palette="graphite"]) .shape-inspector::-webkit-scrollbar-thumb:hover {
+  background: #909090;
 }
 
 :where(html[data-theme="dark"][data-palette="graphite"]) .shape-inspector-header {
@@ -5960,6 +6014,18 @@ html[data-theme="dark"]:where([data-palette="graphite"]) .shape-inspector {
   box-shadow: -3px 0 14px rgba(0, 0, 0, 0.28);
 }
 
+html[data-theme="dark"]:where([data-palette="graphite"]) .shape-inspector {
+  scrollbar-color: #4c4c4c transparent;
+}
+
+html[data-theme="dark"]:where([data-palette="graphite"]) .shape-inspector::-webkit-scrollbar-thumb {
+  background: #4c4c4c;
+}
+
+html[data-theme="dark"]:where([data-palette="graphite"]) .shape-inspector::-webkit-scrollbar-thumb:hover {
+  background: #515151;
+}
+
 html[data-theme="dark"]:where([data-palette="graphite"]) .shape-inspector.floating {
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
 }
@@ -6545,10 +6611,15 @@ html[data-theme="dark"]:where([data-palette="graphite"]) .print-estimate-values 
   color: #e4e4e4;
 }
 
+html[data-theme="dark"]:where([data-palette="graphite"]) .print-estimate-settings label,
 html[data-theme="dark"]:where([data-palette="graphite"]) .print-estimate-values dt,
 html[data-theme="dark"]:where([data-palette="graphite"]) .print-estimate-busy,
 html[data-theme="dark"]:where([data-palette="graphite"]) .print-estimate-note {
   color: #757575;
+}
+
+html[data-theme="dark"]:where([data-palette="graphite"]) .print-estimate-infill {
+  color: #909090;
 }
 
 html[data-theme="dark"]:where([data-palette="graphite"]) .export-file-input-wrap > span,

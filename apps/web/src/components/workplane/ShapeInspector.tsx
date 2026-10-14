@@ -4,7 +4,7 @@ import { displayY, displayYTurn, insideZ, insideZTurn } from "@/lib/displayAxes"
 import { GuideHelpLink } from "@/components/GuideHelpLink";
 import { guideChapterForShape, guideSectionForShape } from "@/lib/guideLinks";
 import { ChevronDown, ChevronUp, Cylinder, Eye, EyeOff, FolderOpen, Grid3x3, Layers, Lock, Minus, Pencil, Plus, RotateCcw, Split, Tags, Unlock } from "lucide-react";
-import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type Dispatch, type ReactNode, type SetStateAction } from "react";
+import { Fragment, createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type Dispatch, type ReactNode, type SetStateAction } from "react";
 import {
   DEFAULT_GEAR_HELIX_ANGLE,
   DEFAULT_GEAR_HELIX_QUALITY,
@@ -62,6 +62,11 @@ import {
   normalizeThreadClearance,
   normalizeThreadBoltClearance,
   normalizeThreadAxialClearance,
+  normalizeThreadDepth,
+  normalizeThreadFlankAngle,
+  threadDepthLimits,
+  MIN_THREAD_FLANK_ANGLE,
+  MAX_THREAD_FLANK_ANGLE,
   threadAxialClearanceLimit,
   MIN_THREAD_BOLT_CLEARANCE,
   MAX_THREAD_BOLT_CLEARANCE,
@@ -153,6 +158,7 @@ import { displayStepFromMillimeters, formatFractionalInches, showsInchFractions,
 import { t, type MessageKey } from "@/lib/i18n";
 import { localizedError } from "@/lib/userErrors";
 import { displayShapeName, makeShapeFromAsset, renamedShapeName } from "@/lib/shapeCatalog";
+import { cylinderToEllipsePatch } from "@/lib/cylinderToEllipse";
 import { shapeDefaultsAsset, shapeDefaultsFromShape } from "@/lib/shapeDefaults";
 import { MAX_SCREW_HOLE_ANGLE, MIN_SCREW_HOLE_ANGLE, normalizeScrewHoleAngle, normalizeScrewHoleHeadDepth, normalizeScrewHoleShaft } from "@/lib/screwHoleGeometry";
 import { MAX_TEARDROP_TIP_ANGLE, MIN_TEARDROP_TIP_ANGLE, normalizeTeardropTipAngle, teardropHeightForTipAngle, teardropTipAngle } from "@/lib/teardropGeometry";
@@ -190,7 +196,7 @@ import {
   springWireLimits,
 } from "@/lib/springGeometry";
 import { regularPolygonAspect } from "@/lib/regularPolygonFootprint";
-import { DEFAULT_TAPER_DIMENSION_MAX, MAX_HIGH_RESOLUTION_SIDES, MAX_HIGH_RESOLUTION_STEPS, customSnapGridLabel, shapeDimensionLimit, snapGridOptions } from "@/lib/workplaneSettings";
+import { DEFAULT_TAPER_DIMENSION_MAX, MAX_HIGH_RESOLUTION_SIDES, MAX_HIGH_RESOLUTION_STEPS, customSnapGridLabel, shapeDimensionLimit, snapGridOptions, snapGridStep } from "@/lib/workplaneSettings";
 import type { BentTubeInnerProfile, BentTubeProfile, CustomSnapGrid, GearType, GridSize, MeasurementAccuracy, ShapeCustomization, SketchProfile, SketchStroke, SketchStrokeAlign, SketchStrokeJoin, ThreadHead, ThreadProfile, ThreadRole, WorkplaneShape, WorkplaneWorkspaceSettings } from "@/types/layerling";
 import { selectWholeValue } from "@/lib/numberField";
 import { formulaMatchesValue, formulaToRemember, withFieldFormula, type FieldFormulas } from "@/lib/fieldFormulas";
@@ -272,6 +278,7 @@ const THREAD_PROFILE_OPTIONS: Array<{ value: ThreadProfile; label: MessageKey }>
   { value: "trapezoidal", label: "thread.profileTrapezoidal" },
   { value: "round", label: "thread.profileRound" },
   { value: "whitworth", label: "thread.profileWhitworth" },
+  { value: "custom", label: "thread.profileCustom" },
 ];
 
 type RangePropertyConfig = {
@@ -346,7 +353,7 @@ const RELATIVE_SIZE_PROPERTY_IDS = new Set(["width", "height", "length", "diamet
 const ROTATION_PROPERTY_IDS = new Set(["rotateX", "rotateY", "rotateZ"]);
 
 function propertyUsesLengthUnit(key: string) {
-  return ["textLineWidth", "letterSize", "iconWidth", "keyringDiameter", "positionX", "positionY", "positionZ", "pivotX", "pivotY", "pivotZ", "radius", "length", "width", "height", "bevel", "topRadius", "baseRadius", "thickness", "toothSize", "toothWidth", "gearBacklash", "centerHole", "slotSmallEnd", "slotCentreDistance", "sketchLineWidth", "topLength", "topWidth", "bottomLength", "bottomWidth", "diameter", "pitch", "clearance", "axialClearance", "boltClearance", "threadLength", "headHeight", "chamfer", "chamferBottom", "headChamfer", "wire", "starOuterSize", "starInnerSize", "starOuterFillet", "starInnerFillet", "heartTipFillet", "crescentThickness", "crescentTipFillet", "honeycombCellSize", "honeycombWallThickness", "honeycombFrameWidth", "cornerFillet", "topBottomFillet", "bentTubeSize", "bentTubeWall", "bentTubeSegmentLength", "bentTubeBendRadius", "dovetailNeckWidth", "dovetailClearance", "hingePinDiameter", "hingeLeafThickness", "hingeClearance", "screwHoleShaft", "screwHoleHeadDepth", "knurlDepth", "knurlChamfer", "loftBottomWidth", "loftBottomDepth", "loftTopWidth", "loftTopDepth", "loftBottomCorner", "loftTopCorner", "loftOffsetX", "loftOffsetZ", "loftWall"].includes(key);
+  return ["textLineWidth", "letterSize", "iconWidth", "keyringDiameter", "positionX", "positionY", "positionZ", "pivotX", "pivotY", "pivotZ", "radius", "length", "width", "height", "bevel", "topRadius", "baseRadius", "thickness", "toothSize", "toothWidth", "gearBacklash", "centerHole", "slotSmallEnd", "slotCentreDistance", "sketchLineWidth", "topLength", "topWidth", "bottomLength", "bottomWidth", "diameter", "pitch", "clearance", "axialClearance", "boltClearance", "threadDepth", "threadCoreDiameter", "threadLength", "headHeight", "chamfer", "chamferBottom", "headChamfer", "wire", "starOuterSize", "starInnerSize", "starOuterFillet", "starInnerFillet", "heartTipFillet", "crescentThickness", "crescentTipFillet", "honeycombCellSize", "honeycombWallThickness", "honeycombFrameWidth", "cornerFillet", "topBottomFillet", "bentTubeSize", "bentTubeWall", "bentTubeSegmentLength", "bentTubeBendRadius", "dovetailNeckWidth", "dovetailClearance", "hingePinDiameter", "hingeLeafThickness", "hingeClearance", "screwHoleShaft", "screwHoleHeadDepth", "knurlDepth", "knurlChamfer", "loftBottomWidth", "loftBottomDepth", "loftTopWidth", "loftTopDepth", "loftBottomCorner", "loftTopCorner", "loftOffsetX", "loftOffsetZ", "loftWall"].includes(key);
 }
 
 /**
@@ -1325,6 +1332,10 @@ function getShapePropertiesWithAppLimits(shape: WorkplaneShape, onUpdate: ShapeI
       next.clearance = normalizeThreadClearance(next.clearance);
       next.boltClearance = normalizeThreadBoltClearance(next.boltClearance);
       next.axialClearance = normalizeThreadAxialClearance(next.axialClearance, next.pitch);
+      // The own profile keeps its proportions when the pitch changes: the depth goes with it, unless it is set in the same step.
+      if (patch.pitch !== undefined && patch.depth === undefined && settings.profile === "custom") next.depth = settings.depth * (next.pitch / settings.pitch);
+      next.flankAngle = normalizeThreadFlankAngle(next.flankAngle);
+      next.depth = normalizeThreadDepth(next.depth, next.pitch, next.diameter, next.flankAngle);
       next.quality = normalizeThreadQuality(next.quality);
       next.chamfer = normalizeThreadChamfer(next.chamfer, { role: next.role, diameter: next.diameter, pitch: next.pitch, profile: next.profile });
       next.chamferLow = normalizeThreadChamfer(next.chamferLow, { role: next.role, diameter: next.diameter, pitch: next.pitch, profile: next.profile });
@@ -1348,6 +1359,9 @@ function getShapePropertiesWithAppLimits(shape: WorkplaneShape, onUpdate: ShapeI
         threadClearance: next.clearance,
         threadBoltClearance: next.boltClearance,
         threadAxialClearance: next.axialClearance,
+        // Only an own profile has them; a shape that had set them keeps them while another profile is chosen.
+        threadDepth: next.profile === "custom" ? next.depth : shape.threadDepth,
+        threadFlankAngle: next.profile === "custom" ? next.flankAngle : shape.threadFlankAngle,
         threadQuality: next.quality,
         threadHeadHeight: next.headHeight,
         threadChamfer: next.chamfer,
@@ -1493,6 +1507,40 @@ function getShapePropertiesWithAppLimits(shape: WorkplaneShape, onUpdate: ShapeI
         onChange: (profile) => applyThread({ profile: normalizeThreadProfile(profile) }),
       },
     );
+    if (settings.profile === "custom") {
+      const depthLimits = threadDepthLimits(settings.pitch, settings.diameter, settings.flankAngle);
+      // Depth and core diameter are one measure said two ways: core = diameter - 2 x depth.
+      properties.push(
+        {
+          id: "threadFlankAngle",
+          label: t("prop.threadFlankAngle"),
+          value: settings.flankAngle,
+          min: MIN_THREAD_FLANK_ANGLE,
+          max: MAX_THREAD_FLANK_ANGLE,
+          step: 1,
+          hint: t("thread.flankAngleHint"),
+          onChange: (flankAngle) => applyThread({ flankAngle }),
+        },
+        {
+          id: "threadDepth",
+          label: t("prop.threadDepth"),
+          value: settings.depth,
+          min: depthLimits.min,
+          max: depthLimits.max,
+          step: 0.05,
+          onChange: (depth) => applyThread({ depth }),
+        },
+        {
+          id: "threadCoreDiameter",
+          label: t("prop.threadCoreDiameter"),
+          value: settings.diameter - 2 * settings.depth,
+          min: settings.diameter - 2 * depthLimits.max,
+          max: settings.diameter - 2 * depthLimits.min,
+          step: 0.05,
+          onChange: (core) => applyThread({ depth: (settings.diameter - core) / 2 }),
+        },
+      );
+    }
     if (settings.role === "bore" || settings.role === "nut") {
       properties.push({
         id: "clearance",
@@ -2005,6 +2053,12 @@ function getShapeProperties(shape: WorkplaneShape, onUpdate: ShapeInspectorUpdat
   });
 }
 
+/**
+ * The snap step in mm (0 when the grid is off). A length slider dragged with the mouse snaps to it, so a
+ * height comes out in whole millimetres instead of 0.81 steps of one pixel; typing and the arrow keys stay exact.
+ */
+const SliderSnapContext = createContext(0);
+
 export function ShapeInspector({
   shape,
   snap,
@@ -2111,7 +2165,7 @@ export function ShapeInspector({
   const textFillMore = shape.kind === "text" ? properties.filter((property) => TEXT_FILL_MORE_IDS.has(property.id)) : [];
   const textFillEnd = primaryProperties.reduce((end, property, index) => (TEXT_FILL_IN_VIEW_IDS.has(property.id) ? index + 1 : end), 0);
   const threadProperties = isThread
-    ? properties.filter((property) => ["pitch", "threadsPerInch", "threadHand", "threadProfile", "clearance", "axialClearance", "boltClearance", "chamfer", "chamferBottom", "quality"].includes(property.id))
+    ? properties.filter((property) => ["pitch", "threadsPerInch", "threadHand", "threadProfile", "threadFlankAngle", "threadDepth", "threadCoreDiameter", "clearance", "axialClearance", "boltClearance", "chamfer", "chamferBottom", "quality"].includes(property.id))
     : [];
   const gearTeethProperties = shape.kind === "gear"
     ? properties.filter((property) => ["gearProfile", "teeth", "gearModule", "gearPressureAngle", "gearBacklash", "gearRim", "toothSize", "toothWidth"].includes(property.id))
@@ -2280,6 +2334,7 @@ export function ShapeInspector({
   }, [editingName]);
 
   return (
+    <SliderSnapContext.Provider value={snapGridStep(snap)}>
     <aside
       ref={inspectorRef}
       className={`shape-inspector ${isSketchRevolve ? "sketch-revolve-inspector" : ""} ${shape.kind === "gear" ? "gear-inspector" : ""} ${minimized ? "minimized" : ""} ${movable.moved ? "floating" : ""} ${movable.dragging ? "moving" : ""}`}
@@ -2498,6 +2553,21 @@ export function ShapeInspector({
 
       {onTextTags && shape.kind === "text" ? (
         <NameListCard key={`names-${shape.id}`} shapeId={shape.id} disabled={locked} onTextTags={onTextTags} onInteractionActiveChange={onInteractionActiveChange} />
+      ) : null}
+
+      {cylinderToEllipsePatch(shape) ? (
+        <button
+          className="inspector-action-button"
+          type="button"
+          disabled={locked}
+          title={t("inspector.makeEllipseHint")}
+          onClick={() => {
+            const patch = cylinderToEllipsePatch(shape);
+            if (patch) onUpdate(patch);
+          }}
+        >
+          <span>{t("inspector.makeEllipse")}</span>
+        </button>
       ) : null}
 
       <div className={`property-card ${propertiesOpen ? "" : "collapsed"}`}>
@@ -2764,6 +2834,7 @@ export function ShapeInspector({
         </>
       ) : null}
     </aside>
+    </SliderSnapContext.Provider>
   );
 }
 
@@ -3499,6 +3570,8 @@ function PropertyResetButton({ onClick }: { onClick: () => void }) {
     <button
       type="button"
       className="property-reset"
+      // Out of the Tab order: Tab goes from one value to the next (#300).
+      tabIndex={-1}
       title={t("inspector.resetProperty")}
       aria-label={t("inspector.resetProperty")}
       // Inside a label: neither focus nor the label's own click should reach the slider.
@@ -3648,6 +3721,14 @@ function RangeProperty({
   onInteractionActiveChange,
 }: RangePropertyConfig & { workspace: WorkplaneWorkspaceSettings; disabled?: boolean; onReset?: () => void; formula?: string; onFormula?: (text: string | null | undefined) => void; onInteractionActiveChange?: (active: boolean) => void }) {
   const holdInteraction = useInteractionHold(onInteractionActiveChange);
+  const snapStepMm = useContext(SliderSnapContext);
+  const draggingSliderRef = useRef(false);
+  // Firefox sends one last value after the pointer is up, so a drag ends a moment later than the pointer does.
+  const sliderReleaseTimerRef = useRef<number | undefined>(undefined);
+  const endSliderDrag = () => {
+    window.clearTimeout(sliderReleaseTimerRef.current);
+    sliderReleaseTimerRef.current = window.setTimeout(() => { draggingSliderRef.current = false; }, 120);
+  };
   const allowsAboveSliderMax = ["length", "width", "height", "starOuterSize", "starInnerSize", "crescentThickness", "honeycombCellSize", "honeycombWallThickness", "honeycombFrameWidth", "bentTubeSize", "bentTubeBendRadius"].includes(id) || id.endsWith("Length") || id.endsWith("Width");
   const isLength = propertyUsesLengthUnit(id);
   const accuracy = workspace.accuracy;
@@ -3689,7 +3770,12 @@ function RangeProperty({
     holdInteraction(false);
   };
   const handleSliderChange = (nextValue: number) => {
-    const next = clamp(Number.isFinite(nextValue) ? nextValue : controlMin, controlMin, controlMax);
+    let next = clamp(Number.isFinite(nextValue) ? nextValue : controlMin, controlMin, controlMax);
+    // Dragged with the mouse on a long slider: onto the snap grid (not for a short one, which the grid would only make coarse).
+    if (draggingSliderRef.current && isLength && snapStepMm > 0 && max - min >= snapStepMm * 20) {
+      const snappedMm = Math.round(toModelValue(next) / snapStepMm) * snapStepMm;
+      next = clamp(millimetersToDisplay(clamp(snappedMm, min, max), workspace), controlMin, controlMax);
+    }
     onChange(clamp(toModelValue(next), min, max));
     setDraft(formatShown(next));
   };
@@ -3730,6 +3816,8 @@ function RangeProperty({
       <div className="range-control">
         <input
           type="range"
+          // Out of the Tab order: the number field above is the keyboard's way in, and Tab goes on to the next value (#300).
+          tabIndex={-1}
           min={controlMin}
           max={controlMax}
           step={controlStep}
@@ -3737,9 +3825,19 @@ function RangeProperty({
           disabled={disabled}
           onFocus={() => holdInteraction(true)}
           onBlur={() => holdInteraction(false)}
-          onPointerDown={() => holdInteraction(true)}
-          onPointerUp={() => holdInteraction(false)}
-          onPointerCancel={() => holdInteraction(false)}
+          onPointerDown={() => {
+            window.clearTimeout(sliderReleaseTimerRef.current);
+            draggingSliderRef.current = true;
+            holdInteraction(true);
+          }}
+          onPointerUp={() => {
+            endSliderDrag();
+            holdInteraction(false);
+          }}
+          onPointerCancel={() => {
+            endSliderDrag();
+            holdInteraction(false);
+          }}
           onChange={(event) => handleSliderChange(Number(event.currentTarget.value))}
         />
       </div>

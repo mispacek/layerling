@@ -180,6 +180,8 @@ async function callTool(name, args) {
       return bridgeCommand("show_workplane", args);
     case "layerling_export_section_svg":
       return bridgeCommand("export_section_svg", args);
+    case "layerling_export_drawing":
+      return bridgeCommand("export_drawing", args);
     case "layerling_import_file":
       return bridgeCommand("import_file", args);
     case "layerling_add_font":

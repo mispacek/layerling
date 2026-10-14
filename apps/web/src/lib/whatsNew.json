@@ -1,5 +1,333 @@
 [
   {
+    "version": "1.72.3",
+    "items": [
+      {
+        "title": {
+          "de": "Skizze: Auswahl frei drehen",
+          "en": "Sketch: turn a selection freely",
+          "cs": "Náčrt: plynulé otáčení výběru"
+        },
+        "body": {
+          "de": "Über dem Rahmen um eine Auswahl in der Skizze sitzt jetzt ein runder Griff. Du ziehst daran, und alles, was ausgewählt ist, dreht sich um seine Mitte, mit dem Winkel als Zahl darüber; mit Umschalt springt er in 15°-Schritten. Das geht auch für einzelne Linien, Kurven und mehrere Umrisse zusammen. R dreht weiter einen geschlossenen Umriss um 45°.",
+          "en": "There is now a round handle above the frame round a selection in the sketch. Drag it and everything selected turns about its middle, with the angle shown as a number over it; with Shift it moves in steps of 15°. That works for single lines, curves and several outlines together. R still turns a closed outline by 45°.",
+          "cs": "Nad rámečkem výběru v náčrtu je nový kruhový úchyt. Tažením otočíte celý výběr kolem jeho středu; aktuální úhel se zobrazuje nad ním. Se Shiftem otáčíte po 15°. Funguje pro jednotlivé čáry, křivky i více obrysů najednou. Klávesa R nadále otáčí uzavřený obrys o 45°."
+        }
+      },
+      {
+        "title": {
+          "de": "Zoom ins Leere kippt die Ansicht nicht mehr",
+          "en": "Zooming into the empty no longer tips the view",
+          "cs": "Přibližování do prázdna už nenaklání pohled"
+        },
+        "body": {
+          "de": "Seit der letzten Version fährt die Kamera beim Hineinzoomen auf den Hintergrund weiter nach vorn. Nahe an der hinteren Kante der Platte schaute sie dabei plötzlich steil nach unten. Die Blickrichtung bleibt jetzt, wie sie war.",
+          "en": "Since the last version the camera goes on forward when you zoom in on the background. Close to the back edge of the plate it suddenly looked steeply down. The direction of view now stays as it was.",
+          "cs": "Od minulé verze kamera při přibližování nad pozadím pokračuje vpřed. U zadního okraje podložky se ale pohled náhle naklonil prudce dolů. Nyní zachovává původní směr."
+        }
+      },
+      {
+        "title": {
+          "de": "Bezugspunkte: alle löschen, Karten einzeln bewegen",
+          "en": "Reference points: delete all, move cards one by one",
+          "cs": "Referenční body: odstranit všechny a přesouvat karty jednotlivě"
+        },
+        "body": {
+          "de": "In einer Bezugspunkt-Karte und im Rechtsklickmenü gibt es jetzt „Alle löschen“, das alle Punkte auf einmal entfernt. Die Karten lassen sich einzeln wegziehen statt alle zusammen, und die zuletzt angefasste Karte liegt vorn, so dass keine mehr hinter einer anderen verschwindet. Außerdem lässt sich eine Form, die schon um einen Zylinder gewickelt ist, nicht noch einmal wickeln.",
+          "en": "A reference point card and the right-click menu now have \"Delete all\", which takes every point away at once. The cards can be dragged away one by one instead of all together, and the card touched last stands in front, so none hides behind another. Also, a shape that is already wrapped around a cylinder cannot be wrapped a second time.",
+          "cs": "Karta referenčního bodu a nabídka pravého tlačítka nově obsahují příkaz Odstranit všechny. Karty lze přesouvat samostatně a naposledy použitá karta se zobrazí vpředu. Tvar obtočený kolem válce už navíc nelze omylem obtočit podruhé."
+        }
+      }
+    ]
+  },
+  {
+    "version": "1.72.2",
+    "items": [
+      {
+        "title": {
+          "de": "Gewindeloch auf der Seite ohne Stützen",
+          "en": "A threaded hole on its side, without supports",
+          "cs": "Vodorovný závitový otvor bez podpěr"
+        },
+        "body": {
+          "de": "Beim Ausrichten zählt als Mitte einer Tropfenbohrung jetzt die Mitte ihres runden Teils, nicht die ihres Kastens mit der Spitze. So lässt sich eine Tropfenbohrung vom Kerndurchmesser genau auf ein Gewindeloch legen: Beide zusammen ergeben ein Gewinde, dessen Oberseite eine Spitze hat und ohne Stützen druckt. Die Anleitung im Kapitel zu Gewinden beschreibt die Schritte.",
+          "en": "In Align, the middle of a teardrop hole is now the middle of its round part, not of its box with the tip. A teardrop of the thread's core diameter therefore lies exactly on a tapped hole: together they give a thread whose top has a point and prints without supports. The chapter on threads in the guide has the steps.",
+          "cs": "Příkaz Zarovnat nyní používá střed kruhové části kapkovitého otvoru místo středu jeho ohraničujícího kvádru. Kapkovitý otvor o průměru jádra závitu tak přesně dosedne na závitový otvor. Jejich spojením vznikne otvor s hrotem nahoře, který lze tisknout bez podpěr. Postup najdete v kapitole příručky o závitech."
+        }
+      },
+      {
+        "title": {
+          "de": "Vom Zylinder zur Ellipse",
+          "en": "From cylinder to ellipse",
+          "cs": "Z válce na elipsu"
+        },
+        "body": {
+          "de": "Ein Zylinder bleibt absichtlich rund, mit einem Durchmesser. Wer später doch ein Oval will, klickt jetzt bei einem Zylinder auf „Zur Ellipse machen“: Die Form wird eine Ellipse, derselbe Körper, deren Länge und Breite du einzeln einstellst. Bei einem Zylinder mit Fase, Verrundung oder Wand geht das nicht, weil er seinen exakten Körper verlöre.",
+          "en": "A cylinder stays round on purpose, with one diameter. If you want an oval after all, click \"Make it an ellipse\" on a cylinder: the shape becomes an Ellipse, the same body, and you set its length and width one by one. It does not work for a cylinder with a chamfer, a fillet or a wall, which would lose its exact body.",
+          "cs": "Válec si záměrně zachovává kruhový průřez a jediný průměr. Pokud potřebujete ovál, použijte Změnit na elipsu. Těleso zůstane stejné, ale délku a šířku lze nastavit samostatně. Volba není dostupná pro válec se zkosením, zaoblením nebo dutinou, protože by přišel o svou přesnou CAD geometrii."
+        }
+      },
+      {
+        "title": {
+          "de": "Alt+Enter: Größe um die Mitte",
+          "en": "Alt+Enter: resize round the middle",
+          "cs": "Alt+Enter: změna rozměrů vůči středu"
+        },
+        "body": {
+          "de": "Tippst du eine Größe in eine der Zahlen neben der Form, wächst die Form von der gegenüberliegenden Kante aus. Mit Alt+Enter statt Enter wächst sie jetzt um ihre Mitte, für Breite und Länge. So bleibt eine Form, die an einer anderen ausgerichtet war, ausgerichtet, auch wenn du mehrmals probierst.",
+          "en": "When you type a size into one of the numbers beside a shape, the shape grows from the opposite edge. With Alt+Enter instead of Enter it now grows round its middle, for width and length. A shape that was aligned with another stays aligned, however often you try.",
+          "cs": "Při zadání rozměru vedle tělesa se velikost běžně mění od protějšího okraje. Potvrdíte-li údaj pomocí Alt+Enter, délka nebo šířka se změní souměrně vůči středu. Zarovnání s jiným tělesem tak zůstane zachované i při opakovaných úpravách."
+        }
+      },
+      {
+        "title": {
+          "de": "Zoomen ins Leere und Schieber in Firefox",
+          "en": "Zooming into the empty, and sliders in Firefox",
+          "cs": "Přibližování do prázdna a posuvníky ve Firefoxu"
+        },
+        "body": {
+          "de": "Zeigt der Mauszeiger beim Hineinzoomen über die Platte hinaus auf den Hintergrund, bleibt die Kamera nicht mehr an ihrer nächsten Entfernung hängen, sondern fährt weiter nach vorn. Und in Firefox springt ein Längenschieber beim Loslassen nicht mehr auf einen krummen Wert, sondern bleibt auf dem Raster.",
+          "en": "When you zoom in with the pointer past the plate, on the background, the camera no longer stops at its closest distance but goes on forward. And in Firefox a length slider no longer jumps to a crooked value when you let go, but stays on the grid.",
+          "cs": "Při přibližování nad pozadím mimo podložku se kamera už nezastaví v nejbližší vzdálenosti, ale pokračuje vpřed. Ve Firefoxu také posuvník délky po uvolnění nepřeskočí na necelou hodnotu a zachová krok přichytávání."
+        }
+      }
+    ]
+  },
+  {
+    "version": "1.72.1",
+    "items": [
+      {
+        "title": {
+          "de": "Bezugspunkt in der Mitte einer Messung",
+          "en": "A reference point at the middle of a measurement",
+          "cs": "Referenční bod ve středu měření"
+        },
+        "body": {
+          "de": "Unter der Zahl jeder Maßband-Messung sitzt jetzt ein kleiner Fadenkreuz-Knopf. Er setzt einen Bezugspunkt in die Mitte der Messung: nach einem Klick auf den Rand einer runden Bohrung in ihren Mittelpunkt, auch bei einem importierten Netz. Eine Form, die du ziehst, rastet mit ihrer Mitte an dem Punkt ein, und so sitzt eine neue Aussparung genau auf einer vorhandenen, ohne Zahlen einzutippen.",
+          "en": "Under the number of every tape measurement there is now a small crosshair button. It puts a reference point in the middle of the measurement: after a click on the rim of a round hole, in its centre, on an imported mesh too. A shape you drag snaps to the point with its centre, so a new pocket sits exactly on an existing hole without typing numbers.",
+          "cs": "Pod hodnotou každého měření je nové tlačítko se zaměřovacím křížem. Umístí referenční bod do středu měření, například do středu kruhového otvoru, a to i u importované polygonové sítě. Přesouvané těleso se na bod přichytí svým středem, takže novou kapsu umístíte přesně na existující otvor bez zadávání souřadnic."
+        }
+      },
+      {
+        "title": {
+          "de": "Skizze: Ziehen am Rahmen trifft ganze Werte",
+          "en": "Sketch: stretching by the frame lands on whole values",
+          "cs": "Náčrt: roztažení rámečku dodržuje krok přichytávání"
+        },
+        "body": {
+          "de": "Wenn du in der Skizze einen Umriss an den Griffen seines Rahmens größer oder kleiner ziehst, rastet jetzt die Kante selbst am Raster ein. Vorher kamen krumme Maße wie 24,83 heraus, weil der Griff etwas neben der Kante sitzt und dieser Abstand nicht auf dem Raster lag.",
+          "en": "When you stretch an outline in the sketch by the handles of its frame, the edge itself now snaps to the grid. Before, you got crooked sizes like 24.83, because the handle sits a little off the edge and that gap was not on the grid.",
+          "cs": "Při změně velikosti obrysu pomocí rámečku se nově k mřížce přichytává samotná hrana. Dříve vznikaly rozměry jako 24,83, protože úchyt leží kousek od hrany a tento odstup nebyl násobkem kroku mřížky."
+        }
+      }
+    ]
+  },
+  {
+    "version": "1.72.0",
+    "items": [
+      {
+        "title": {
+          "de": "Entwürfe gleich auf den Server",
+          "en": "Designs straight to the server",
+          "cs": "Projekty rovnou na server"
+        },
+        "body": {
+          "de": "Wo der gemeinsame Serverordner eingerichtet ist, hat die Startseite zwei neue Bedienelemente: „Alle auf den Server legen“ bringt alle Entwürfe dieses Browsers auf einmal dorthin, und mit dem Haken „Neue Entwürfe auf dem Server“ beginnt jeder neue Entwurf gleich im Serverordner. So geht beim Wechsel des Geräts oder beim Löschen der Browserdaten nichts verloren.",
+          "en": "Where the shared server folder is set up, the start page has two new controls: “Put all on the server” moves every design of this browser there in one go, and with the tick “New designs on the server” each new design starts in the server folder. So nothing is lost when you change devices or clear the browser data.",
+          "cs": "Pokud je nastavena sdílená složka na serveru, úvodní stránka nabízí dvě nové volby. Přesunout vše na server přesune všechny projekty z prohlížeče najednou. Po zapnutí Nové projekty ukládat na server vznikne každý nový projekt přímo v serverové složce. Projekty tak zůstanou dostupné při změně zařízení i vymazání dat prohlížeče."
+        }
+      },
+      {
+        "title": {
+          "de": "Ausrichten zentriert auch Dreiecke und Sterne richtig",
+          "en": "Align centres triangles and stars properly",
+          "cs": "Správné zarovnání středu trojúhelníků a hvězd"
+        },
+        "body": {
+          "de": "Eine Bohrung, die du mit „Ausrichten“ auf ein Dreieck, Fünfeck oder einen Stern mittig gesetzt hast, saß neben der Mitte der Form, weil das Ausrichten die Mitte des Kastens um die Form nahm. Jetzt zählt die eigene Mitte der Form; die Ränder links, rechts, vorn und hinten bleiben am Kasten.",
+          "en": "A hole you centred on a triangle, a pentagon or a star with “Align” sat beside the middle of the shape, because Align took the middle of the box round it. Now it is the shape's own middle; the edges - left, right, front and back - stay on the box.",
+          "cs": "Otvor vystředěný na trojúhelník, pětiúhelník nebo hvězdu býval posunutý, protože Zarovnat používalo střed ohraničujícího kvádru. Nově používá vlastní střed tvaru. Zarovnání levého, pravého, předního a zadního okraje nadále vychází z ohraničujícího kvádru."
+        }
+      },
+      {
+        "title": {
+          "de": "Eine Materialschätzung nahe an der Wirklichkeit",
+          "en": "A material estimate near the real number",
+          "cs": "Odhad materiálu bližší skutečnosti"
+        },
+        "body": {
+          "de": "Im Exportfenster kannst du jetzt Füllung (zu Beginn 15 %) und Wände (2) einstellen. Gewicht und Filament werden daraus geschätzt, statt das Teil massiv zu rechnen, und liegen so meist nahe an dem, was ein Slicer zeigt. Das Volumen bleibt das des Körpers, und bei 100 % Füllung rechnet das Feld wie bisher massiv.",
+          "en": "In the export window you can now set the infill (15 % to begin with) and the walls (2). Weight and filament are worked out from them instead of counting the part as solid, so they come out near what a slicer shows. The volume stays the body's own, and at 100 % infill the box counts solid as before.",
+          "cs": "Při exportu lze nastavit výplň, výchozí je 15 %, a počet perimetrů, výchozí jsou 2. Hmotnost a délka filamentu se počítají podle těchto hodnot místo plného tělesa, takže se více blíží sliceru. Objem nadále označuje objem tělesa; při 100% výplni se počítá plný tisk jako dříve."
+        }
+      },
+      {
+        "title": {
+          "de": "Die ganze Anleitung zum Drucken",
+          "en": "The whole guide, to print",
+          "cs": "Celá příručka pro tisk"
+        },
+        "body": {
+          "de": "In der Anleitung gibt es unter der Kapitelliste den Link „Ganze Anleitung zum Drucken“: alle Kapitel hintereinander, mit Inhaltsverzeichnis und Bildern, jedes Kapitel auf einer neuen Seite. Mit Strg+P druckst du sie oder speicherst sie als PDF; wenn du nur einen Teil brauchst, wählst du im Druckdialog die Seitenzahlen.",
+          "en": "Under the chapter list of the guide there is a link, \"Whole guide, to print\": all chapters one after the other, with a table of contents and the pictures, each chapter on a new page. Press Ctrl+P to print it or save it as a PDF; if you only need a part, choose its page numbers in the print dialog.",
+          "cs": "Pod seznamem kapitol příručky je nová volba Vytisknout celou příručku. Otevře všechny kapitoly za sebou včetně obsahu a obrázků, každou kapitolu na nové stránce. Pomocí Ctrl+P můžete příručku vytisknout nebo uložit do PDF. Pro tisk části zvolte rozsah stránek."
+        }
+      }
+    ]
+  },
+  {
+    "version": "1.71.0",
+    "items": [
+      {
+        "title": {
+          "de": "layerling spricht jetzt Niederländisch",
+          "en": "layerling speaks Dutch now",
+          "cs": "Layerling nově umí nizozemsky"
+        },
+        "body": {
+          "de": "Die Oberfläche und die ganze Anleitung gibt es auf Niederländisch (Nederlands). Die Sprache wird nach deinem Browser gewählt und lässt sich in der Sprachliste ändern. Wer Fehler in einem Wort findet, kann sie in einem kleinen Pull Request verbessern.",
+          "en": "The interface and the whole user guide are available in Dutch (Nederlands). The language is chosen from your browser and can be changed in the language list. If you find a wrong word, a small pull request fixes it.",
+          "cs": "Rozhraní i celá uživatelská příručka upstreamu jsou dostupné v nizozemštině. Jazyk lze změnit v jazykové nabídce. V naší verzi zůstává výchozí čeština; doplňky LEGO, které zatím nemají nizozemský překlad, používají anglické texty."
+        }
+      }
+    ]
+  },
+  {
+    "version": "1.70.0",
+    "items": [
+      {
+        "title": {
+          "de": "Eine Skizze bearbeiten verschiebt den Körper nicht mehr",
+          "en": "Editing a sketch no longer moves the body",
+          "cs": "Úprava náčrtu už neposouvá těleso"
+        },
+        "body": {
+          "de": "Wer eine Skizze öffnete, einen Punkt oder Kurvengriff nach außen zog und abschloss, sah den Körper seitlich rutschen, und beim nächsten Öffnen lag die Skizze daneben. Jetzt bleibt alles, was du nicht angefasst hast, an seinem Platz, und die Skizze liegt genau über dem Körper, auch bei Kurven.",
+          "en": "If you opened a sketch, pulled a point or a curve handle outward and finished, the body slid sideways, and the next time you opened it the sketch lay beside it. Now everything you did not touch stays where it was, and the sketch lies exactly over the body, curves included.",
+          "cs": "Po vytažení bodu nebo úchytu křivky v otevřeném náčrtu se těleso někdy posunulo stranou. Při příštím otevření pak náčrt ležel vedle něj. Nyní vše, čeho se úprava nedotkla, zůstává na místě a náčrt přesně překrývá těleso včetně křivek."
+        }
+      },
+      {
+        "title": {
+          "de": "Zeichnung für die Werkstatt",
+          "en": "Drawing for the workshop",
+          "cs": "Výkres pro dílnu"
+        },
+        "body": {
+          "de": "Exportieren → 2D macht aus dem Entwurf eine Zeichnung im Maßstab 1:1: Vorder-, Drauf- und Seitenansicht auf einem ISO-Blatt, mit Gesamtmaßen, verdeckten Kanten und einer Tabelle der runden Bohrungen, als PDF oder SVG. Zum Ausdrucken oder für Drehbank und Fräse.",
+          "en": "Export → 2D turns the design into a drawing at 1:1: front, top and side views on an ISO sheet, with overall sizes, hidden edges and a table of the round bores, as PDF or SVG. To print, or to take to the lathe and mill.",
+          "cs": "Export → 2D vytvoří výkres v měřítku 1:1: nárys, půdorys a bokorys na formátu ISO, s celkovými rozměry, skrytými hranami a tabulkou kruhových otvorů. Výstupem je PDF nebo SVG pro tisk či práci u soustruhu a frézky."
+        }
+      },
+      {
+        "title": {
+          "de": "Das Maßband misst auch den Durchmesser",
+          "en": "The tape measure measures diameters too",
+          "cs": "Měření zvládá i průměry"
+        },
+        "body": {
+          "de": "Im Menü des Maßbands gibt es den Schalter „Ganze Kanten messen“. Ist er aus, setzt ein Klick auf eine runde Kante, etwa eine Bohrung, einen Punkt darauf, und der Gegenpunkt rastet ein: Der Durchmesser kommt exakt heraus. Mit Alt kehrst du den Schalter für einen Klick um.",
+          "en": "The tape measure's menu has a switch “Measure whole edges”. With it off, a click on a round edge, a bore for example, puts a point on it, and the point across snaps in: the diameter is exact. Alt turns the switch round for one click.",
+          "cs": "Nabídka měření obsahuje přepínač Měřit celé hrany. Při vypnutí umístí kliknutí na kruhovou hranu měřicí bod a protilehlý bod se přichytí, takže průměr vyjde přesně. Alt režim pro jedno kliknutí obrátí."
+        }
+      },
+      {
+        "title": {
+          "de": "21 weitere Drucker, 221 insgesamt",
+          "en": "21 more printers, 221 in all",
+          "cs": "Dalších 21 tiskáren, celkem 221"
+        },
+        "body": {
+          "de": "Neu in der Druckerliste sind Goofoo und große Maschinen wie die Elegoo OrangeStorm Giga, dazu RatRig, Volumic, Wanhao, Vivedino und Tronxy, jeweils mit Bauplatte und Höhe aus OrcaSlicer.",
+          "en": "New in the printer list are Goofoo and large machines such as the Elegoo OrangeStorm Giga, plus RatRig, Volumic, Wanhao, Vivedino and Tronxy, each with its build plate and height from OrcaSlicer.",
+          "cs": "Do seznamu přibyly tiskárny Goofoo i velké stroje jako Elegoo OrangeStorm Giga, dále RatRig, Volumic, Wanhao, Vivedino a Tronxy. Rozměry podložek a tiskové výšky vycházejí z profilů OrcaSliceru."
+        }
+      }
+    ]
+  },
+  {
+    "version": "1.69.0",
+    "items": [
+      {
+        "title": {
+          "de": "Ein Gewindeprofil nach deinem Maß",
+          "en": "A thread profile of your own",
+          "cs": "Vlastní profil závitu"
+        },
+        "body": {
+          "de": "Unter „Profil“ eines Gewindes gibt es jetzt „Eigenes (Trapez)“: Du stellst Flankenwinkel, Gewindetiefe und Kerndurchmesser selbst ein. Bei 90° oder weniger ist keine Flanke flacher als 45°, das Gewinde druckt sich also ohne Stützen. Tiefe und Kerndurchmesser sind ein Maß auf zwei Arten.",
+          "en": "Under a thread's “Profile” there is now “Custom (trapezoid)”: you set the flank angle, the thread depth and the core diameter yourself. At 90° or less no flank is flatter than 45°, so the thread prints without supports. Depth and core diameter are one measure said two ways.",
+          "cs": "U závitu je nová volba profilu Vlastní (lichoběžníkový). Umožňuje zadat vrcholový úhel, hloubku a průměr jádra závitu. Při úhlu nejvýše 90° není žádný bok mírnější než 45°, takže se závit tiskne bez podpěr. Hloubka a průměr jádra jsou dva způsoby zadání téhož rozměru."
+        }
+      },
+      {
+        "title": {
+          "de": "Ein Block mit Tasche lässt sich aushöhlen",
+          "en": "A block with a pocket can be hollowed",
+          "cs": "Vytvoření dutiny v tělese s kapsou"
+        },
+        "body": {
+          "de": "Ein Block mit einem Loch, das nicht ganz hindurchgeht, ließ sich mit offener Oberseite nicht aushöhlen. Jetzt geht es, auch mit offener Unterseite, an beiden Enden und mit einem Loch ganz hindurch.",
+          "en": "A block with a hole that does not go all the way through could not be hollowed with its top open. Now it can, also with the bottom open, both ends open and a hole right through.",
+          "cs": "V kvádru se slepým otvorem dříve nešlo vytvořit dutinu otevřenou nahoře. Nyní to funguje i s otevřeným spodkem, s oběma konci otevřenými a s průchozím otvorem."
+        }
+      },
+      {
+        "title": {
+          "de": "Text aus LightBurn kommt vollständig an",
+          "en": "Text from LightBurn comes in whole",
+          "cs": "Úplný import textu z LightBurnu"
+        },
+        "body": {
+          "de": "Eine SVG mit Text aus LightBurn verlor beim Import die Hälfte der Buchstaben. Punkte auf geraden Kanten stören nicht mehr. Ein Buchstabe, dessen Umriss an sich selbst entlangläuft, muss im Zeichenprogramm noch zusammengefügt werden.",
+          "en": "An SVG with text made in LightBurn lost half of its letters on import. Points along straight edges no longer get in the way. A letter whose outline runs along itself still has to be joined in the drawing program.",
+          "cs": "Při importu SVG s textem z LightBurnu mizela část písmen. Nadbytečné body na přímých hranách už nevadí. Písmeno, jehož obrys se překrývá sám se sebou, je nadále potřeba sjednotit v kreslicím programu."
+        }
+      },
+      {
+        "title": {
+          "de": "200 Drucker, alphabetisch sortiert",
+          "en": "200 printers, in alphabetical order",
+          "cs": "200 tiskáren v abecedním pořadí"
+        },
+        "body": {
+          "de": "Zehn Drucker sind dazugekommen (Creality, Elegoo, Anycubic, Sovol, Flashforge), und die Liste in den Arbeitsbereich-Einstellungen ist alphabetisch sortiert, Zahlen als Zahlen gezählt.",
+          "en": "Ten printers have been added (Creality, Elegoo, Anycubic, Sovol, Flashforge), and the list in the workspace settings is in alphabetical order, numbers counted as numbers.",
+          "cs": "Přibylo deset tiskáren značek Creality, Elegoo, Anycubic, Sovol a Flashforge. Seznam v nastavení pracovní plochy je seřazen abecedně a čísla se řadí podle číselné hodnoty."
+        }
+      },
+      {
+        "title": {
+          "de": "Schieber rasten am Raster ein, Zoom am Rand springt nicht mehr",
+          "en": "Sliders snap to the grid, zooming at the edge no longer jumps",
+          "cs": "Posuvníky dodržují mřížku a přiblížení u okraje neposkakuje"
+        },
+        "body": {
+          "de": "Ein Schieber für eine Länge, etwa die Höhe, rastet beim Ziehen mit der Maus am Fangraster ein, so dass ganze Millimeter herauskommen. Und das Mausrad zoomt nahe am oberen Rand der Ansicht wieder hinein, statt weit herauszuspringen.",
+          "en": "A slider for a length, the height for example, snaps to the snap grid while you drag it with the mouse, so whole millimetres come out. And the mouse wheel zooms in again near the top edge of the view, instead of jumping far out.",
+          "cs": "Při tažení posuvníku délky, například výšky, se hodnota přichytává podle zvoleného kroku. Lze tak snadno nastavovat celé milimetry. Kolečko myši také u horního okraje pohledu opět přibližuje místo náhlého oddálení."
+        }
+      }
+    ]
+  },
+  {
+    "version": "1.68.1",
+    "items": [
+      {
+        "title": {
+          "de": "Gesperrte Objekte zeigen es und bleiben stehen",
+          "en": "Locked objects show it and hold still",
+          "cs": "Zamčené objekty jsou zřetelně označené a chráněné"
+        },
+        "body": {
+          "de": "Ein gesperrtes Objekt zeigt graue Griffe und ein Schloss neben dem Z-Pfeil; die Maße siehst du beim Überfahren der Griffe weiterhin. Werkzeuge und Tasten, die es ändern würden, sind ausgegraut oder melden „Objekt gesperrt“, und es lässt sich nicht mehr löschen. Ist ein gesperrtes Objekt in der Auswahl, ändert sich auch an den anderen nichts.",
+          "en": "A locked object shows grey handles and a padlock beside the Z arrow; hovering a handle still shows its sizes. Tools and keys that would change it are greyed out or say \"Object locked\", and it can no longer be deleted. With a locked object in the selection, the others stay unchanged too.",
+          "cs": "Zamčený objekt má neaktivní šedé úchyty a ikonu zámku u šipky Z. Při najetí na úchyt se dál zobrazí rozměry. Nástroje pro změnu objektu jsou neaktivní nebo oznámí „Objekt je zamčen“; objekt nelze ani smazat. Pokud výběr obsahuje zamčený objekt, zůstanou beze změny také ostatní vybrané objekty."
+        }
+      }
+    ]
+  },
+  {
     "version": "1.68.0",
     "items": [
       {

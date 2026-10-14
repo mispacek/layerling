@@ -7,6 +7,7 @@ import {
   parseEnv,
   parseFrontMatter,
   renderFooter,
+  renderPrintAll,
   readChapters,
   readShortcutGroups,
   renderBlocks,
@@ -18,9 +19,9 @@ import { tools } from "../../scripts/layerling-mcp-tools.mjs";
 import { GUIDE_CHAPTERS, GUIDE_SECTIONS, guideChapterForShape, guideHref, guideSectionForShape } from "@/lib/guideLinks";
 
 const root = join(__dirname, "..", "..");
-const LANGUAGES = ["de", "en"] as const;
+const LANGUAGES = ["de", "en", "nl"] as const;
 
-async function contextFor(language: "de" | "en") {
+async function contextFor(language: (typeof LANGUAGES)[number]) {
   return {
     language,
     messages: await loadMessages(language),
@@ -127,11 +128,12 @@ describe("guide footer", () => {
 });
 
 describe("guide content", () => {
-  it("has the same chapters in both languages", async () => {
-    const [de, en] = await Promise.all(LANGUAGES.map((language) => readChapters(language)));
+  it("has the same chapters in every language", async () => {
+    const [de, en, nl] = await Promise.all(LANGUAGES.map((language) => readChapters(language)));
     expect(de.length).toBeGreaterThan(10);
     expect(en.map((chapter: { number: string }) => chapter.number)).toEqual(de.map((chapter: { number: string }) => chapter.number));
-    for (const chapter of [...de, ...en]) {
+    expect(nl.map((chapter: { number: string }) => chapter.number)).toEqual(en.map((chapter: { number: string }) => chapter.number));
+    for (const chapter of [...de, ...en, ...nl]) {
       expect(chapter.title, chapter.file).not.toBe(chapter.slug);
       expect(chapter.summary, chapter.file).not.toBe("");
     }
@@ -148,14 +150,17 @@ describe("guide content", () => {
         expect(html, where).not.toMatch(/\{\{|\}\}/);
         for (const target of context.references.chapters) expect(slugs.has(target), `${where}: chapter ${target}`).toBe(true);
         for (const shot of context.references.shots) {
-          expect(existsSync(join(root, "docs", "guide", "images", language, `${shot}.webp`)), `${where}: picture ${shot}`).toBe(true);
+          // A language without pictures of its own shows the English ones.
+          const own = join(root, "docs", "guide", "images", language);
+          const pictures = existsSync(own) ? own : join(root, "docs", "guide", "images", "en");
+          expect(existsSync(join(pictures, `${shot}.webp`)), `${where}: picture ${shot}`).toBe(true);
         }
       }
     }
   });
 
-  it("shows the same pictures in both languages", async () => {
-    const shots = async (language: "de" | "en") => {
+  it("shows the same pictures in every language", async () => {
+    const shots = async (language: (typeof LANGUAGES)[number]) => {
       const names = new Set<string>();
       for (const chapter of await readChapters(language)) {
         for (const match of chapter.body.matchAll(/\(shot:([\w-]+)\)/g)) names.add(match[1]);
@@ -163,6 +168,7 @@ describe("guide content", () => {
       return [...names].sort();
     };
     expect(await shots("en")).toEqual(await shots("de"));
+    expect(await shots("nl")).toEqual(await shots("en"));
   });
 
   it("has a scene for every picture", async () => {
@@ -175,9 +181,9 @@ describe("guide content", () => {
     }
   });
 
-  it("names every MCP tool in the AI chapter, in both languages", async () => {
+  it("names every MCP tool in the AI chapter, in every language", async () => {
     for (const language of LANGUAGES) {
-      const chapter = (await readChapters(language)).find((entry: { slug: string }) => entry.slug === (language === "de" ? "ki-mit-mcp" : "ai-with-mcp"));
+      const chapter = (await readChapters(language)).find((entry: { slug: string }) => entry.slug === GUIDE_CHAPTERS.ai[language]);
       expect(chapter, language).toBeDefined();
       for (const tool of tools) expect(chapter.body, `${language}: ${tool.name}`).toContain(`\`${tool.name}\``);
     }
@@ -237,5 +243,42 @@ describe("guide content", () => {
     expect(guideChapterForShape({ kind: "thread" })).toBe("threads");
     expect(guideChapterForShape({ kind: "box", groupedShapes: [{}] })).toBe("solids");
     expect(guideChapterForShape({ kind: "cylinder" })).toBe("shapes");
+  });
+});
+
+describe("the whole guide on one page", () => {
+  const chapters = [
+    { slug: "shapes", title: "Shapes", summary: "What there is", fallback: false },
+    { slug: "solids", title: "Solids", summary: "Holes and bodies", fallback: true },
+  ];
+  const printable = [
+    { chapter: chapters[0], html: '<h2 id="box">Box</h2><p>See <a href="#box">above</a>, <a href="/guide/solids.html#holes">holes</a> and <a href="/guide/solids.html">solids</a>.</p><h3 id="size">Size</h3><figure><img src="/guide/img/a.webp" loading="lazy"></figure>' },
+    { chapter: chapters[1], html: '<h2 id="box">Box again</h2><h3 id="holes">Holes</h3>' },
+  ];
+  const html = renderPrintAll({ language: "en", chapters, printable, footer: "", languageLinks: [] });
+
+  it("keeps two chapters' equal anchors apart and points links between chapters into the page", () => {
+    expect(html).toContain('id="shapes--box"');
+    expect(html).toContain('id="solids--box"');
+    expect(html).toContain('href="#shapes--box"');
+    expect(html).toContain('href="#solids--holes"');
+    expect(html).toContain('href="#chapter-solids"');
+    expect(html).toContain('id="chapter-shapes"');
+    const ids = [...html.matchAll(/ id="([^"]+)"/g)].map((match) => match[1]);
+    expect(new Set(ids).size).toBe(ids.length);
+    const anchors = [...html.matchAll(/ href="#([^"]+)"/g)].map((match) => match[1]);
+    for (const anchor of anchors) expect(ids, anchor).toContain(anchor);
+  });
+
+  it("sets the headings one level below the chapter's own title and loads every picture at once", () => {
+    expect(html).toContain("<h2>1. Shapes</h2>");
+    expect(html).toContain('<h3 id="shapes--box">Box</h3>');
+    expect(html).toContain('<h4 id="shapes--size">Size</h4>');
+    expect(html).not.toContain('loading="lazy"');
+  });
+
+  it("is no page for a search engine, and says when a chapter is not translated", () => {
+    expect(html).toContain('<meta name="robots" content="noindex">');
+    expect(html).toContain("not translated");
   });
 });

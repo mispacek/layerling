@@ -385,10 +385,11 @@ export type TransformOverlayProps = {
   onBeginLiftEdit: (handleKey: string, x: number, y: number) => void;
   onBeginCornerEdit: (handleKey: string) => void;
   onEditingCornerChange: (axis: "width" | "depth", value: string) => void;
-  onCommitCornerEdit: () => void;
+  /** Alt+Enter: the size grows round the middle instead of from the opposite edge. */
+  onCommitCornerEdit: (aroundCenter?: boolean) => void;
   onCancelCornerEdit: () => void;
   onEditingDimensionChange: (value: string) => void;
-  onCommitDimensionEdit: () => void;
+  onCommitDimensionEdit: (aroundCenter?: boolean) => void;
   onCancelDimensionEdit: () => void;
   onBeginRotationEdit: (handleKey: string, x: number, y: number) => void;
   onEditingRotationChange: (value: string) => void;

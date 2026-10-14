@@ -21,6 +21,8 @@ import { isSketchPrimitive, type SketchPrimitive } from "@/lib/sketchPrimitives"
 import { mirrorSign, resizedImportedMeshPositions } from "@/lib/workplaneShapes";
 import { DEFAULT_SNAP_GRID, DEFAULT_WORKPLANE_WORKSPACE, keyboardNudgeCoarseFactor, keyboardNudgeStep, normalizeSnapGrid, normalizeWorkspaceSettings, snapGridStep as snapStep, orbitControlsZoomSpeed, zoomDistanceScale } from "@/lib/workplaneSettings";
 import type { GridSize, SketchImage, SketchOperation, SketchPoint, SketchProfile, SketchSegment, SketchStroke, SketchStrokeAlign, SketchStrokeCap, SketchStrokeJoin, WorkplaneShape, WorkplaneWorkspaceSettings } from "@/types/layerling";
+import { resizePointerOnGrid } from "@/lib/sketchFrameResize";
+import { dragRotationDegrees, rotateSketchPointsAbout, sketchPointsPivot } from "@/lib/sketchRotation";
 import { calibrateImage, centreImage, cropImage, imageAngleTo, imageCorners, imageCropViewBox, imageHandlePositions, imageRotateHandle, imageToWorld, normalizeImageRotation, resizeImage, rotateImage, uncropImage } from "@/lib/sketchImageTransform";
 import { DEFAULT_SKETCH_STROKE, SKETCH_STROKE_ALIGNS, SKETCH_STROKE_CAPS, SKETCH_STROKE_JOINS } from "@/lib/sketchStroke";
 import { selectWholeValue } from "@/lib/numberField";
@@ -102,6 +104,7 @@ type PointerAction =
   | { kind: "marquee"; pointerId: number; origin: { x: number; z: number }; current: { x: number; z: number }; clientX: number; clientY: number }
   | { kind: "move-image"; pointerId: number; imageId: string; origin: { x: number; z: number }; current: { x: number; z: number }; start: SketchImage }
   | { kind: "resize-image"; pointerId: number; imageId: string; handle: ResizeHandle; current: { x: number; z: number }; start: SketchImage }
+  | { kind: "rotate-selection"; pointerId: number; pivot: { x: number; z: number }; start: { x: number; z: number }; current: { x: number; z: number }; startPoints: SketchPoint[]; snap: boolean }
   | { kind: "rotate-image"; pointerId: number; imageId: string; startAngle: number; current: { x: number; z: number }; start: SketchImage; snap: boolean }
   | { kind: "crop-image"; pointerId: number; imageId: string; handle: ResizeHandle; current: { x: number; z: number }; start: SketchImage };
 
@@ -632,6 +635,11 @@ export function SketchWorkspace({
       const resizedById = new Map(resized.map((point) => [point.id, point]));
       return { ...profile, points: profile.points.map((point) => resizedById.get(point.id) ?? point) };
     }
+    if (pointerAction?.kind === "rotate-selection") {
+      const turned = rotateSketchPointsAbout(pointerAction.startPoints, pointerAction.pivot, dragRotationDegrees(pointerAction.pivot, pointerAction.start, pointerAction.current, pointerAction.snap ? 15 : 0));
+      const turnedById = new Map(turned.map((point) => [point.id, point]));
+      return { ...profile, points: profile.points.map((point) => turnedById.get(point.id) ?? point) };
+    }
     if (pointerAction?.kind === "move-point") {
       const source = profile.points.find((point) => point.id === pointerAction.pointId);
       if (!source) return profile;
@@ -1059,11 +1067,16 @@ export function SketchWorkspace({
       const lockOrigin = pointerAction.kind === "move-point" || pointerAction.kind === "move-selection" || pointerAction.kind === "bezier"
         ? pointerAction.origin
         : null;
+      // A frame handle stands off its edge: the edge is what lands on the grid, not the pointer.
+      const unsnapped = pointerAction.kind === "resize-selection" && pointerAction.grab ? unsnappedPointFromEvent(event) : null;
+      const current = unsnapped && pointerAction.kind === "resize-selection" && pointerAction.grab
+        ? resizePointerOnGrid(unsnapped, pointerAction.grab, snapStep(snap), workspace.width / 2, workspace.depth / 2)
+        : event.shiftKey && lockOrigin ? constrainToAxis(lockOrigin, point) : point;
       setPointerAction({
         ...pointerAction,
-        current: event.shiftKey && lockOrigin ? constrainToAxis(lockOrigin, point) : point,
+        current,
         ...(pointerAction.kind === "resize-selection" ? { proportional: event.shiftKey } : {}),
-        ...(pointerAction.kind === "rotate-image" ? { snap: event.shiftKey } : {}),
+        ...(pointerAction.kind === "rotate-image" || pointerAction.kind === "rotate-selection" ? { snap: event.shiftKey } : {}),
       } as PointerAction);
     }
   };
@@ -1131,6 +1144,9 @@ export function SketchWorkspace({
       }, t("sketch.imageMoved"));
     } else if (action.kind === "resize-image") {
       onUpdateImage(action.imageId, resizeImage(action.start, action.handle, action.current), t("sketch.imageResized"));
+    } else if (action.kind === "rotate-selection") {
+      const degrees = dragRotationDegrees(action.pivot, action.start, action.current, action.snap ? 15 : 0);
+      if (Math.abs(degrees) > 1e-6) onTransformPoints(rotateSketchPointsAbout(action.startPoints, action.pivot, degrees), t("sketch.shapeRotated"));
     } else if (action.kind === "rotate-image") {
       onUpdateImage(action.imageId, rotateImage(action.start, action.startAngle, action.current, action.snap), t("sketch.imageRotated"));
     } else if (action.kind === "crop-image") {
@@ -1943,6 +1959,46 @@ export function SketchWorkspace({
                     }}
                   />
                 ))}
+                {selectionFrame && selected?.kind === "multiple" && !selected.imageIds?.length ? (() => {
+                  // A round handle above the frame turns the selection about its middle (#330).
+                  const centreX = (selectionFrame.minX + selectionFrame.maxX) / 2;
+                  // Above the width figure that stands over the frame, so the two do not cover each other.
+                  const handleAt = { x: centreX, z: selectionFrame.minZ - 54 * screenUnit };
+                  const turning = pointerAction?.kind === "rotate-selection" ? pointerAction : null;
+                  const turnLabel = turning ? `${Math.round(dragRotationDegrees(turning.pivot, turning.start, turning.current, turning.snap ? 15 : 0) * 10) / 10}°` : null;
+                  const pill = turnLabel ? dimensionPillSize(turnLabel, screenUnit, 18) : null;
+                  return (
+                    <g className="sketch-image-rotate">
+                      <line x1={centreX} y1={selectionFrame.minZ} x2={handleAt.x} y2={handleAt.z} pointerEvents="none" />
+                      <circle
+                        data-sketch-entity="selection-rotate-handle"
+                        className="sketch-image-rotate-handle"
+                        cx={handleAt.x}
+                        cy={handleAt.z}
+                        r={handleSize / 2}
+                        onPointerDown={(event) => {
+                          if (event.button === 1) {
+                            beginPan(event);
+                            return;
+                          }
+                          if (event.button !== 0 || selected?.kind !== "multiple") return;
+                          const startPoints = selected.pointIds.map((id) => profile.points.find((entry) => entry.id === id)).filter((entry): entry is SketchPoint => Boolean(entry)).map((entry) => ({ ...entry }));
+                          const point = unsnappedPointFromEvent(event);
+                          if (!point || startPoints.length < 1) return;
+                          beginEntityDrag(event, { kind: "rotate-selection", pointerId: event.pointerId, pivot: sketchPointsPivot(startPoints), start: point, current: point, startPoints, snap: event.shiftKey });
+                        }}
+                      >
+                        <title>{t("sketch.rotateSelection")}</title>
+                      </circle>
+                      {pill && turnLabel ? (
+                        <g className="sketch-geometry-dimension" pointerEvents="none" transform={`translate(${handleAt.x} ${handleAt.z - 24 * screenUnit})`}>
+                          <rect x={-pill.width / 2} y={-pill.height / 2} width={pill.width} height={pill.height} rx={pill.radius} />
+                          <text y={5 * screenUnit} fontSize={13 * screenUnit}>{turnLabel}</text>
+                        </g>
+                      ) : null}
+                    </g>
+                  );
+                })() : null}
               </g>
             );
           })() : null}

@@ -21,7 +21,7 @@
     <a href="#layerling-mcp-skill"><img alt="Von einer KI steuerbar" src="https://img.shields.io/badge/KI--steuerbar-MCP--Server-16c0d4"></a>
   </p>
 
-  <p><a href="README.md">English</a> · <strong>Deutsch</strong></p>
+  <p><a href="README.md">English</a> · <strong>Deutsch</strong> · <a href="README.nl.md">Nederlands</a></p>
 </div>
 
 <p align="center">
@@ -71,11 +71,11 @@ Ein vollständiges CAD-Paket ist es nicht: Es gibt keine parametrische Zeitleist
 - **Flächen aneinanderlegen und Winkel sehen** – das Werkzeug legt eine Fläche eines Teils an eine Fläche eines anderen, berührend oder bündig, auf Wunsch mit Abstand; ein gedrehter Körper zeigt seine Winkel um X, Y und Z unter der Auswahl, und die Karte „Drehung“ in seinen Einstellungen nimmt sie als Zahlen.
 - **Fangen an anderen Formen** – beim Verschieben rastet eine Form mit Kante oder Mitte an Kanten und Mitten der Formen ringsum ein, eine Hilfslinie zeigt woran. So sitzen Teile bündig, ohne Zahlen zu tippen. Alt während des Ziehens hält das kurz an; Umschalt hält die Bewegung auf einer Achse, und mit Alt zu Beginn ziehst du wie in Tinkercad eine Kopie.
 - **Auf Flächen absetzen** – wie Cruise in Tinkercad: Eine neue Form legt sich auf die Fläche unter dem Zeiger, auch auf eine schräge, und C nimmt die Auswahl auf und setzt sie so auf eine andere Fläche.
-- **Bezugspunkte** – Körper mit der rechten Maustaste anklicken und Mitte, Ecken oder Kantenmitten mit Punkten markieren, die nichts druckt und an denen gezogene Formen einrasten; Punkte lassen sich ziehen oder per Koordinate eintippen und werden mit dem Entwurf gespeichert.
+- **Bezugspunkte** – Körper mit der rechten Maustaste anklicken und Mitte, Ecken oder Kantenmitten mit Punkten markieren, die nichts druckt und an denen gezogene Formen einrasten; Punkte lassen sich ziehen oder per Koordinate eintippen und werden mit dem Entwurf gespeichert. Das Maßband kann die Mitte einer Messung markieren, etwa den Mittelpunkt einer runden Bohrung.
 - **Befehlssuche** – mit Strg+K ein Werkzeug, eine Form oder einen Befehl eintippen („Verrunden“, „Spiegeln“, „Zylinder“) und direkt dorthin springen; sie versteht deutsche und englische Wörter und zeigt die Tastenkürzel dazu.
 - **Verlaufsansicht** – mit einem Schieber auf jeden früheren Stand des Projekts zurückschauen, ohne etwas zu ändern; diesen Stand exportieren oder als neues Projekt anlegen. Von @rmpel.
 - **Millimeter oder Zoll** – mit Imperial erscheinen alle Maße in Zoll, als Bruch wie in Tinkercad (1 5/8) oder als Dezimalzahl, das Raster rastet von 1/64 bis 1 Zoll, und das Gitter der Platte ist in Zoll gezeichnet.
-- **Die Platte deines Druckers** – wähl einen von 190 gängigen Druckern, dann bekommt die Platte seine Größe. Name und Bauraum stehen in der Ecke der Arbeitsfläche (ein Schalter in den Einstellungen blendet das und den Namen des Entwurfs aus), und eine Warnung erscheint, wenn ein Körper über den Rand ragt.
+- **Die Platte deines Druckers** – wähl einen von über 220 gängigen Druckern, dann bekommt die Platte seine Größe. Name und Bauraum stehen in der Ecke der Arbeitsfläche (ein Schalter in den Einstellungen blendet das und den Namen des Entwurfs aus), und eine Warnung erscheint, wenn ein Körper über den Rand ragt.
 - **Überhänge und Filament** – „Überhänge zeigen“ schraffiert jede Fläche, die steiler als 45° (oder der Winkel deines Druckers) überhängt und Stützen bräuchte, und das Exportfenster nennt Volumen, Gewicht und Meter Filament, bevor du slicst.
 - **Formen-Bibliothek** – Quader, Zylinder, Kapseln (auf Wunsch mit einem kleineren Ende, etwa für eine Riemenabdeckung), Kugeln, Kegel, Pyramiden, Keile, Text, Dächer, Halbkugeln, Tori, Rohre, Übergänge (Loft) von einem Umriss zum anderen, etwa eckig auf rund, auch verdreht oder mit geneigtem oberen Ende, mit oder ohne Wand, Mehrkante von drei bis vierundzwanzig Seiten, Federn, ein druckbares Scharnier, Rändelungen für Griffe (gerade, gekreuzt oder rund) und mehr.
 - **Gewinde, die passen** – Gewindestangen, Schrauben mit Zylinder-, Senk- oder Sechskantkopf, Sechskantmuttern und Gewindelöcher. M2 bis M12 liegen bereit, dazu UNC und UNF von #4 bis ein Zoll und die Whitworth-Rohrgewinde G1/16 bis G4 (ISO 228-1); Durchmesser und Steigung lassen sich auch frei wählen, Linksgewinde ebenso. Bei einer Zoll- oder G-Größe fragt das Feld nach Gängen je Zoll statt nach Millimetern. Die Enden bekommen auf Wunsch eine Fase, und das Gewindeloch ist eine Aussparung: in ein Teil ziehen, gruppieren, fertig.
@@ -100,6 +100,7 @@ Ein vollständiges CAD-Paket ist es nicht: Es gibt keine parametrische Zeitleist
 - **Eigene Schriften** – jede TrueType-, OpenType- oder WOFF-Schrift für Text, in Chrome und Edge auch eine auf dem Computer installierte. Ein Entwurf behält nur die Umrisse der benutzten Buchstaben und öffnet sich deshalb überall. Arabisch und Hebräisch laufen von rechts nach links, arabische Buchstaben verbinden sich.
 - **Eigene Modelle mitbringen** – STL, OBJ, 3MF, STEP oder SVG importieren und darum herum konstruieren. Ein SVG kommt als Skizzenkörper: als Fläche, als Kontur außen oder innen an seinen Linien, als Silhouette ohne Löcher oder rundum verbreitert - zusammen ein Ausstecher aus einer Datei oder die Schichten eines mehrfarbigen Logos. Die Textform hat dieselben Füllmodi, und die Formen-Bibliothek hat ein Namensschild: ein Text in farbigen Schichten für den Mehrfarbdruck, auf Wunsch mit Schlüsselringloch und gerundeter oder abgeschrägter Kante an den Buchstaben, und ein Symbolschild: ein SVG-Symbol in denselben farbigen Schichten, mit Anzahl und „so viele wie passen“, um eine Platte zu füllen. Eine farbige OBJ – aus layerling oder aus Tinkercad als ZIP mit ihrer `.mtl` – oder eine farbige 3MF, auch ein Slicer-Projekt, kommt als ein Körper je Farbe, eine 3MF mit mehreren Objekten als ein Körper je Objekt.
 - **Exportieren, was dein Slicer will** – STL, 3MF mit Namen und Farben oder OBJ mit Farben, für die Auswahl oder die ganze Szene (Ausgeblendetes bleibt draußen), dazu STEP, wenn der Entwurf in ein vollwertiges CAD weiterreisen soll. PNG speichert ein sauberes Bild der Ansicht, in doppelter Auflösung und auf Wunsch mit durchsichtigem Hintergrund.
+- **Zeichnung exportieren** – ein Teil auswählen oder die Auswahl für den ganzen sichtbaren Entwurf aufheben, dann **Exportieren → Zeichnung → PDF oder SVG** wählen. Erstellt Vorder-, Drauf- und rechte Seitenansicht in Erstwinkelprojektion auf einem gerahmten Zeichnungsblatt mit Zonennummern und Schriftfeld unten rechts, mit Gesamtmaßen, verdeckten Kanten und Tabellen für Durchmesser und Positionen achsparalleler runder Bohrungen. Maßstab 1:1 in Millimetern; das Blatt wächst mit dem Entwurf. Bei **100 % / tatsächlicher Größe** drucken. Bohrungspositionen beziehen sich auf die linke untere Ecke der Gesamtmaße jeder Ansicht. Schräge oder unrunde Bohrungen, Gewinde, Tiefen und Toleranzen werden nicht automatisch bemaßt. Die Projektion basiert auf der Zeichnungsarbeit aus [Cadverix-3D](https://github.com/WC3D/Cadverix-3D).
 - **Hinweis auf Updates** – im veröffentlichten Programm bemerkt eine offene Seite eine neue Version selbst und bietet an, zu speichern und neu zu laden, samt Liste des Neuen.
 - **Projekte als Datei** – ein ganzes Projekt samt Verlauf, Skizzen und Gruppen als `.lyl` sichern und anderswo weiterbauen. In Chrome und Edge wählst du den Ordner selbst, und Strg+S speichert wieder in genau diese Datei; andere Browser laden sie herunter. Ältere `.skf`-Dateien aus früheren Fassungen öffnen sich weiterhin; gespeichert wird dann als `.lyl` daneben.
 - **Fehlerbericht** – ein Link in der Fußzeile speichert ein ZIP mit dem Entwurf als `.lyl` und einem Text mit Version, Browser und den letzten Meldungen, fertig zum Anhängen im Forum oder bei GitHub, die eine bloße `.lyl` ablehnen.
@@ -120,8 +121,9 @@ Ein vollständiges CAD-Paket ist es nicht: Es gibt keine parametrische Zeitleist
 
 Von anderen gemacht, nicht von diesem Projekt:
 
-- [Layerling – Playlist](https://www.youtube.com/playlist?list=PLCsBmX2kOGWs) – Making Layers (Englisch). Eine Reihe zu layerling: eine Einführung für Tinkercad-Umsteiger und die Skizzenwerkzeuge.
+- [The PERFECT FREE CAD Program Between Tinkercad and Fusion 360!](https://youtu.be/GIoG-IHPXyg) – Print N Repeat (Englisch). Ein Video über layerling als kostenloses CAD-Programm zwischen Tinkercad und Fusion 360.
 - [Meet Layerling Free Browser Based CAD that EXTENDS Tinkercad!](https://youtu.be/979_Ohy9ESM) – HL ModTech (Englisch). Ein Blick auf layerling von einem Tinkercad-Nutzer.
+- [Layerling – Playlist](https://www.youtube.com/playlist?list=PLCsBmX2kOGWs) – Making Layers (Englisch). Eine Reihe zu layerling: eine Einführung für Tinkercad-Umsteiger und die Skizzenwerkzeuge.
 - [Tinkercad Too Basic? Fusion 360 Too Much? Meet Layerling for 3D Printing](https://youtu.be/kzV7fQ3rXhw) – 3D Jesus | 3D Printing & Design (Englisch). Ein erster Test von layerling ganz ohne Anleitung.
 
 ## Loslegen
@@ -178,7 +180,7 @@ Dann selbst `http://127.0.0.1:3000/` öffnen. `Strg+C` in diesem Fenster beendet
 
 ### Docker
 
-Um layerling auf einem Rechner, NAS (Synology, Unraid usw.) oder Heimserver ohne Node.js zu betreiben, nimmst du das fertige Image **`ghcr.io/henmedia/layerling`**. Jedes Release veröffentlicht es für amd64 und arm64 (Raspberry Pi, ARM-NAS), unter seiner Versionsnummer und als `latest`. Die App lauscht auf Port **3000**.
+Um layerling auf einem Rechner, NAS (Synology, Unraid usw.) oder Heimserver ohne Node.js zu betreiben, nimmst du das fertige Image **`henmedia/layerling`** auf Docker Hub (auch unter **`ghcr.io/henmedia/layerling`**, dasselbe Image). Jedes Release veröffentlicht es für amd64 und arm64 (Raspberry Pi, ARM-NAS), unter seiner Versionsnummer und als `latest`. Die App lauscht auf Port **3000**.
 
 Am schnellsten geht es mit einem einzigen Befehl:
 
@@ -186,7 +188,7 @@ Am schnellsten geht es mit einem einzigen Befehl:
 docker run -d --name layerling -p 3000:3000 --restart unless-stopped ghcr.io/henmedia/layerling:latest
 ```
 
-Auf einem NAS mit Container-Verwaltung (Synology Container Manager, Unraid, Portainer) trägst du das Image `ghcr.io/henmedia/layerling:latest` ein und gibst Port 3000 frei. Zum Aktualisieren das Image neu holen und den Container neu anlegen (oder Watchtower das erledigen lassen).
+Auf einem NAS mit Container-Verwaltung (Synology Container Manager, Unraid, Portainer) suchst du in der Registrierung (Docker Hub) nach `henmedia/layerling` oder trägst `henmedia/layerling:latest` ein und gibst Port 3000 frei. Zum Aktualisieren das Image neu holen und den Container neu anlegen (oder Watchtower das erledigen lassen).
 
 Die Image-Tags sind reine Versionsnummern **ohne „v“**: `ghcr.io/henmedia/layerling:1.42.0`, das GitHub-Release heißt dagegen `v1.42.0`. Ein Pull holt nur das neue Image; ein vorhandener Container läuft mit dem alten weiter, bis er entfernt und neu angelegt wird:
 
@@ -224,10 +226,12 @@ Das Image führt `next start` im Produktionsmodus aus, die MCP-Brücke ist dort 
 gemeinsamen Projektordner ein beschreibbares Verzeichnis einbinden und in `compose.yml` `LAYERLING_SHARED_PROJECTS_DIR`
 auf den Pfad im Container setzen, an dem es eingebunden ist, etwa `./shared-projects:/shared-projects` mit
 `LAYERLING_SHARED_PROJECTS_DIR: "/shared-projects"` (siehe [Gemeinsame Entwürfe im Netz](#gemeinsame-entwürfe-im-netz)).
-Nach einer Änderung `docker compose up -d` ausführen: `docker compose restart` behält die alte Einstellung.
+Der Container läuft als der Benutzer mit der Nummer 999, und dieser muss in den Ordner schreiben dürfen: `sudo chown 999:999 ./shared-projects`, oder dem Dienst `user: "1000:1000"` hinzufügen (deine eigenen Benutzer- und Gruppennummern, `id -u` und `id -g` zeigen sie), dann läuft der Container als du. Ohne das erscheint der Ordner auf der Startseite, aber es lässt sich nichts darin speichern. Nach einer Änderung `docker compose up -d` ausführen: `docker compose restart` behält die alte Einstellung.
 `docker exec <Container> printenv LAYERLING_SHARED_PROJECTS_DIR` zeigt die tatsächlich verwendete.
 
 Das Farbschema, das Leute beim ersten Besuch bekommen, legst du mit `LAYERLING_DEFAULT_THEME` fest: `system`, `light`, `dark` oder `graphite` (auf demselben Weg, in `compose.yml` oder in der Umgebung von `npm run start`). Wer layerling schon geöffnet hat, behält das Schema, das sein Browser bereits hat, und jeder kann es weiter mit dem Umschalter ändern. Ohne die Einstellung folgt das Schema dem System. Eine Kopie, die als reine Dateien ausgeliefert wird, hat keinen Server, der sie lesen könnte, dort gilt sie nicht.
+
+Ist der gemeinsame Ordner eingerichtet, lässt `LAYERLING_NEW_DESIGNS_ON_SERVER` neue Entwürfe auf dem Server beginnen: `true` ist der Anfangswert für alle, die noch nicht gewählt haben (sie können **Neue Entwürfe auf dem Server** auf der Startseite abwählen), `always` gilt für alle und sperrt den Haken. Es wird auf demselben Weg gesetzt, und eine als reine Dateien ausgelieferte Kopie hat keinen Server, der es lesen könnte.
 
 ### Statisches Hosting: reine Dateien auf einem Webserver
 
@@ -248,9 +252,12 @@ Drei Dinge zu wissen:
 
 ### Gemeinsame Entwürfe im Netz
 
+layerling selbst besteht nur aus Dateien, der gemeinsame Ordner braucht also etwas auf dem Server, das schreiben kann. Es gibt zwei Wege, und du brauchst nur einen: **Node oder Docker** (dieser Abschnitt, mit `LAYERLING_SHARED_PROJECTS_DIR`) oder **ein gewöhnlicher Webserver mit PHP** (der Ordner `store`, weiter unten). Ein Webserver, der die Dateien nur ausliefert – `npx serve`, nginx oder Apache ohne PHP –, zeigt layerling ganz normal, hat aber keinen Serverordner.
+
 Betreibst du layerling mit `npm run dev` oder `npm run start` auf einem Rechner, den andere im Browser öffnen, kann es
-einen gemeinsamen Ordner für `.lyl`-Projekte anbieten. Setze dazu vor dem Start `LAYERLING_SHARED_PROJECTS_DIR` auf ein
-Verzeichnis:
+einen gemeinsamen Ordner für `.lyl`-Projekte anbieten. `npm run start` liefert aus, was `npm run build` gebaut hat, führe das also
+einmal vorher aus. Setze vor dem Start `LAYERLING_SHARED_PROJECTS_DIR` auf ein Verzeichnis, in das der Benutzer schreiben darf, der
+layerling startet (ein Ordner unter `/srv` gehört oft root, lege einen eigenen an oder ändere den Besitzer):
 
 ```bash
 LAYERLING_SHARED_PROJECTS_DIR=/srv/layerling-projekte npm run start
@@ -261,6 +268,8 @@ diesem Ordner: **Neuer Entwurf** legt einen darin an, **Neuer Ordner** einen Unt
 Überschrift sagt, wo du bist. Eine `..`-Kachel führt wieder hinaus. Entwürfe wandern per Ziehen auf einen Ordner, auf
 diese Kachel oder auf einen Schritt der Pfadzeile – oder über **Verschieben nach …** in ihrem Menü. Ein Entwurf aus dem
 Browser kommt genauso auf den Server: seine Kachel auf den Serverordner ziehen.
+
+Zwei Schaltflächen auf der Startseite ersparen das Verschieben von Hand: **Alle auf den Server legen** legt alle Entwürfe dieses Browsers auf einmal in den Serverordner, und der Haken **Neue Entwürfe auf dem Server** lässt jeden neuen Entwurf gleich im Serverordner beginnen, sodass er sich dort ab der ersten Änderung sichert. Ein Entwurf, dessen Name auf dem Server schon vergeben ist, bleibt im Browser.
 
 Das Suchfeld oben durchsucht den **ganzen** Serverordner, nicht nur den, in dem du gerade stehst. Jeder Treffer sagt,
 in welchem Ordner er liegt, und dieser Ordner ist ein Knopf: ein Klick, und du bist dort, die Suche ist beendet.

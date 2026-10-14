@@ -104,6 +104,7 @@ const SHORTCUT_GROUPS: ShortcutGroup[] = [
       { combos: ["Shift"], label: "shortcuts.axisLockDrag" },
       { combos: ["Alt+Drag"], label: "shortcuts.duplicateDrag" },
       { combos: ["Alt"], label: "shortcuts.pauseObjectSnap" },
+      { combos: ["Alt+Enter"], label: "shortcuts.sizeAroundCenter" },
     ],
   },
   {

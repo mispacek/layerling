@@ -40,6 +40,7 @@ const MORE = [
   ["welcome.moreSearchTitle", "welcome.moreSearchBody"],
   ["welcome.moreSimplifyTitle", "welcome.moreSimplifyBody"],
   ["welcome.moreHistoryTitle", "welcome.moreHistoryBody"],
+  ["welcome.moreDrawingTitle", "welcome.moreDrawingBody"],
   ["welcome.moreLookTitle", "welcome.moreLookBody"],
 ] as const satisfies ReadonlyArray<readonly [MessageKey, MessageKey]>;
 

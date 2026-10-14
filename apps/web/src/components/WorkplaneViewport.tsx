@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowDownToLine, ChevronLeft, ChevronRight, Crosshair, Cuboid, Download, Eye, EyeOff, FlipHorizontal, GripVertical, Home, Layers, Minus, MousePointer2, PanelsTopLeft, Plus, Rotate3d, RotateCcw, Ruler, RulerDimensionLine, Slice, Trash2, X } from "lucide-react";
+import { ArrowDownToLine, ChevronLeft, ChevronRight, Crosshair, Cuboid, Download, Eye, EyeOff, FlipHorizontal, GripVertical, Home, Layers, Minus, MousePointer2, PanelsTopLeft, Plus, Rotate3d, RotateCcw, Ruler, RulerDimensionLine, Slice, Spline, Trash2, X } from "lucide-react";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type Dispatch, type DragEvent, type MouseEvent as ReactMouseEvent, type MutableRefObject, type PointerEvent as ReactPointerEvent, type ReactNode, type SetStateAction, type WheelEvent as ReactWheelEvent } from "react";
 import { objectSnapOffset, shiftSnapBox, type ObjectSnapGuide, type SnapBox } from "@/lib/objectSnap";
 import { useMovablePanel, type MovablePanelOptions } from "@/lib/useMovablePanel";
@@ -136,12 +136,15 @@ import {
 import { cuboidCorners, pointAlongAxes, type AlignAxes, type FrameCuboid } from "@/lib/alignFrame";
 import type { AlignAxis, AlignHandleStatus, AlignTarget, GridSize, MeasurementAccuracy, ShapeAsset, WorkplaneNote, WorkplaneNoteAnchor, WorkplaneShape, WorkplaneWorkspaceSettings } from "@/types/layerling";
 import { referencePoints } from "@/lib/workplaneNotes";
+import { pivotKeptAhead, ZOOM_PIVOT_REACH_MM } from "@/lib/zoomPivot";
+import { measurementMiddle, type ReferencePosition } from "@/lib/referencePoints";
 import { planarFaceCentroid, planarFaceTriangles, type PivotPoint } from "@/lib/rotationPivot";
 import { outwardFaceNormal } from "@/lib/layFlat";
 import { OVERHANG_PLATE_TOLERANCE, overhangDownwardLimit } from "@/lib/overhangLimits";
 import { directionIsOwnShapeAxis, rotatedGeometryShapePatch, rotationPatchFromQuaternion as sharedRotationPatchFromQuaternion, signedDegrees } from "@/lib/geometryRotation";
 import type { CadModifierEdge } from "@/lib/cadModifierTypes";
-import { RENDER_LAYER_HELPERS, sharedShapeGeometryCache, sharedEdgesGeometryCache, sharedShapeMaterialCache, type PointCardOffset, type ShapeRenderRecord, type ThreeState, type MoveDimensionSession, type NoteOverlayState, type TapePoint, type TapeAttachment, type TapeEdgeAttachment, type TapeModel, type TapeOverlayState, type TapeCandidate, type RotationHandleSide, type RotationHandleSides, type DragItem, quaternionForShape, projectToScreen, syncMoveDimensionWorldLines, syncTransformGuideWorldLines, tapeShapeDimensions, tapePointWorld, tapeEdgeWorldPoints, syncTapeOverlay, syncNoteOverlay, NoteOverlay, TapeOverlay, type RulerDimensionOverlayItem, type RulerDimensionOverlayState, syncRulerDimensionOverlay, RulerDimensionOverlay, type CornerRulerInstance, type CornerRulerOverlayState, syncCornerRulerToolOverlay, CornerRulerToolOverlay, syncOriginDimensionWorldLines, shapeCenter, shapeLocalExtents, projectShapeExtent, projectShapesExtent, type OriginDimensionFrame, setObjectRenderLayer, freezeStaticObjectMatrices, formatMeasure, findShapeObject, trimSharedShapeGeometryCache, releaseSharedShapeGeometry, trimSharedShapeMaterialCache, releaseSharedShapeMaterials, disposeMaterialResource, disposeChildren, disposeObject } from "@/components/workplane/ViewportOverlays";
+import { circleOfEdgePoints, pointAcrossCircle, pointOnCircle } from "@/lib/tapeCircle";
+import { RENDER_LAYER_HELPERS, sharedShapeGeometryCache, sharedEdgesGeometryCache, sharedShapeMaterialCache, type PointCardOffset, type ShapeRenderRecord, type ThreeState, type MoveDimensionSession, type NoteOverlayState, type TapePoint, type TapeAttachment, type TapeEdgeAttachment, type TapeModel, type TapeOverlayState, type TapeCandidate, type RotationHandleSide, type RotationHandleSides, type DragItem, quaternionForShape, projectToScreen, syncMoveDimensionWorldLines, syncTransformGuideWorldLines, tapeShapeDimensions, tapePointWorld, tapeEdgeWorldPoints, tapeSegmentWorldPoints, syncTapeOverlay, syncNoteOverlay, NoteOverlay, TapeOverlay, type RulerDimensionOverlayItem, type RulerDimensionOverlayState, syncRulerDimensionOverlay, RulerDimensionOverlay, type CornerRulerInstance, type CornerRulerOverlayState, syncCornerRulerToolOverlay, CornerRulerToolOverlay, syncOriginDimensionWorldLines, shapeCenter, shapeLocalExtents, projectShapeExtent, projectShapesExtent, type OriginDimensionFrame, setObjectRenderLayer, freezeStaticObjectMatrices, formatMeasure, findShapeObject, trimSharedShapeGeometryCache, releaseSharedShapeGeometry, trimSharedShapeMaterialCache, releaseSharedShapeMaterials, disposeMaterialResource, disposeChildren, disposeObject } from "@/components/workplane/ViewportOverlays";
 
 const WORKPLANE_WIDTH = 200;
 const WORKPLANE_DEPTH = 140;
@@ -169,6 +172,11 @@ const CAMERA_MAX_DISTANCE = 9000;
  * the pointer (the middle of the screen for the buttons), or of the plate
  * when no body is there. The picture stays put, and the zoom can go on right
  * up to what is under the pointer, as close as the flat view enlarges.
+ *
+ * Where the pivot would lie outside what the camera clamp allows - the plate
+ * is a hit for a ray close to the horizon thousands of millimetres out - it
+ * stays put: the clamp pulls it back and carries the camera along, and the
+ * picture jumps far out (the forum, 14.10.2026).
  */
 function movePivotToDepthUnder(state: ThreeState, ndcX: number, ndcY: number) {
   if (!(state.camera instanceof THREE.PerspectiveCamera)) return;
@@ -181,11 +189,20 @@ function movePivotToDepthUnder(state: ThreeState, ndcX: number, ndcY: number) {
   ));
   state.raycaster.layers.mask = layers;
   const point = hit?.point ?? state.raycaster.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), new THREE.Vector3());
-  if (!point) return;
   const forward = state.camera.getWorldDirection(new THREE.Vector3());
+  // Nothing to zoom towards under the pointer (the sky, a spot past the plate): the pivot stays ahead of the camera.
+  const keepAhead = () => {
+    const limits = state.pivotLimits;
+    const ahead = pivotKeptAhead(state.camera.position, state.controls.target, forward, ZOOM_PIVOT_REACH_MM, limits ? { halfWidth: limits.halfWidth, halfDepth: limits.halfDepth, minY: CAMERA_MIN_TARGET_Y, maxY: CAMERA_MAX_TARGET_Y } : null);
+    if (ahead) state.controls.target.copy(ahead);
+  };
+  if (!point) { keepAhead(); return; }
   const depth = point.clone().sub(state.camera.position).dot(forward);
-  if (!(depth > 0) || depth > CAMERA_MAX_DISTANCE) return;
-  state.controls.target.copy(state.camera.position).addScaledVector(forward, depth);
+  if (!(depth > 0) || depth > CAMERA_MAX_DISTANCE) { keepAhead(); return; }
+  const target = state.camera.position.clone().addScaledVector(forward, depth);
+  const limits = state.pivotLimits;
+  if (limits && (Math.abs(target.x) > limits.halfWidth || Math.abs(target.z) > limits.halfDepth || target.y < CAMERA_MIN_TARGET_Y || target.y > CAMERA_MAX_TARGET_Y)) { keepAhead(); return; }
+  state.controls.target.copy(target);
 }
 
 /**
@@ -389,6 +406,10 @@ type WorkplaneViewportProps = {
   mateFacePick?: { shapeIds: string[] } | null;
   onMateFacePick?: (pick: LayFlatPick | null) => void;
   onNoteAdd?: (note: { x: number; y: number; z: number; anchor?: WorkplaneNoteAnchor }) => string | null;
+  /** Puts reference points in the scene; answers with the ids it made (none if they are there already). */
+  onAddReferencePoints?: (positions: ReferencePosition[]) => string[];
+  /** Deletes every reference point at once. */
+  onRemoveAllReferencePoints?: () => void;
   onNoteUpdate?: (id: string, patch: Partial<WorkplaneNote>, transient?: boolean) => void;
   onNoteRemove?: (id: string) => void;
   onNoteModeChange?: (active: boolean) => void;
@@ -455,6 +476,7 @@ function readMoveDimensionsEnabled() {
 
 const PROPORTION_LOCK_STORAGE_KEY = "layerling.editor.keepProportions";
 const POINT_CARD_OFFSET_STORAGE_KEY = "layerling.editor.pointCardOffset";
+const POINT_CARD_OFFSETS_STORAGE_KEY = "layerling.editor.pointCardOffsets";
 
 
 /** The card of a reference point, as far as the person has moved it from its pin. */
@@ -466,6 +488,19 @@ function readPointCardOffset(): PointCardOffset {
     // Without storage the card simply opens beside its pin.
   }
   return { x: 0, y: 0 };
+}
+
+/** Where each reference point's card stands off its pin, by point (#329); a point not moved yet uses the old shared offset. */
+function readPointCardOffsets(): Record<string, PointCardOffset> {
+  try {
+    const parsed = JSON.parse(window.localStorage.getItem(POINT_CARD_OFFSETS_STORAGE_KEY) ?? "null") as Record<string, Partial<PointCardOffset>> | null;
+    if (!parsed || typeof parsed !== "object") return {};
+    return Object.fromEntries(Object.entries(parsed)
+      .filter(([, offset]) => offset && Number.isFinite(offset.x) && Number.isFinite(offset.y))
+      .map(([id, offset]) => [id, { x: Number(offset.x), y: Number(offset.y) }]));
+  } catch {
+    return {};
+  }
 }
 
 function readProportionLock() {
@@ -915,6 +950,8 @@ function tapeShapeTopologyKey(shape: WorkplaneShape): string {
     threadClearance: shape.threadClearance,
     threadBoltClearance: shape.threadBoltClearance,
     threadAxialClearance: shape.threadAxialClearance,
+    threadDepth: shape.threadDepth,
+    threadFlankAngle: shape.threadFlankAngle,
     threadQuality: shape.threadQuality,
     threadHeadHeight: shape.threadHeadHeight,
     threadChamfer: shape.threadChamfer,
@@ -1158,6 +1195,8 @@ function shapeGeometrySignature(shape: WorkplaneShape): string {
     threadClearance: shape.threadClearance,
     threadBoltClearance: shape.threadBoltClearance,
     threadAxialClearance: shape.threadAxialClearance,
+    threadDepth: shape.threadDepth,
+    threadFlankAngle: shape.threadFlankAngle,
     threadQuality: shape.threadQuality,
     threadHeadHeight: shape.threadHeadHeight,
     threadChamfer: shape.threadChamfer,
@@ -1264,6 +1303,24 @@ function tapeAttachmentFromWorld(state: ThreeState, shapeId: string, world: THRE
 }
 
 
+/** How close, in pixels, the pointer has to come to the point across a circle for it to catch. */
+const TAPE_DIAMETER_SNAP_PIXELS = 16;
+
+/**
+ * With the first point of a measurement on a circular edge, the point across the circle catches the
+ * pointer when it comes near, so the distance is the exact diameter (#308).
+ */
+function diameterSnapCandidate(state: ThreeState, start: TapePoint, edge: TapeEdgeAttachment, localX: number, localY: number): TapeCandidate | null {
+  const circle = circleOfEdgePoints(tapeEdgeWorldPoints(state, edge));
+  if (!circle) return null;
+  const across = pointAcrossCircle(circle, tapePointWorld(state, start));
+  if (!across) return null;
+  const screen = projectToScreen(across, state);
+  if (Math.hypot(screen.x - localX, screen.y - localY) > TAPE_DIAMETER_SNAP_PIXELS) return null;
+  const attachment = tapeAttachmentFromWorld(state, edge.shapeId, across, "edge");
+  return attachment ? { x: across.x, y: across.y, z: across.z, attachment } : null;
+}
+
 function chainTapeLineSegments(segments: Array<[THREE.Vector3, THREE.Vector3]>) {
   if (segments.length <= 1) return segments.map(([a, b]) => [a, b]);
   const bounds = new THREE.Box3();
@@ -1276,6 +1333,37 @@ function chainTapeLineSegments(segments: Array<[THREE.Vector3, THREE.Vector3]>) 
   const unused = new Set(segments.map((_, index) => index));
   const paths: THREE.Vector3[][] = [];
 
+  // Which segments end near a point, by grid cell: a dense mesh has thousands of segments, and
+  // looking through all of them for every step of every path took seconds.
+  const cell = tolerance * 2;
+  const cellKey = (x: number, y: number, z: number) => `${x},${y},${z}`;
+  const grid = new Map<string, number[]>();
+  segments.forEach(([a, b], index) => {
+    [a, b].forEach((point) => {
+      const key = cellKey(Math.floor(point.x / cell), Math.floor(point.y / cell), Math.floor(point.z / cell));
+      const list = grid.get(key);
+      if (list) {
+        if (list[list.length - 1] !== index) list.push(index);
+      } else {
+        grid.set(key, [index]);
+      }
+    });
+  });
+  const near = (point: THREE.Vector3, into: Set<number>) => {
+    const cx = Math.floor(point.x / cell);
+    const cy = Math.floor(point.y / cell);
+    const cz = Math.floor(point.z / cell);
+    for (let dx = -1; dx <= 1; dx += 1) {
+      for (let dy = -1; dy <= 1; dy += 1) {
+        for (let dz = -1; dz <= 1; dz += 1) {
+          grid.get(cellKey(cx + dx, cy + dy, cz + dz))?.forEach((index) => {
+            if (unused.has(index)) into.add(index);
+          });
+        }
+      }
+    }
+  };
+
   while (unused.size > 0) {
     const firstIndex = unused.values().next().value as number;
     unused.delete(firstIndex);
@@ -1283,9 +1371,14 @@ function chainTapeLineSegments(segments: Array<[THREE.Vector3, THREE.Vector3]>) 
     let extended = true;
     while (extended) {
       extended = false;
-      for (const index of unused) {
+      const end = path[path.length - 1];
+      const start = path[0];
+      const candidates = new Set<number>();
+      near(end, candidates);
+      near(start, candidates);
+      // The lowest index that fits wins, as when every unused segment was tried in turn.
+      for (const index of [...candidates].sort((x, y) => x - y)) {
         const [a, b] = segments[index];
-        const end = path[path.length - 1];
         const endDirection = end.clone().sub(path[path.length - 2]).normalize();
         const endOther = a.distanceTo(end) <= tolerance ? b : b.distanceTo(end) <= tolerance ? a : null;
         if (endOther && Math.abs(endDirection.dot(endOther.clone().sub(end).normalize())) >= tangentLimit) {
@@ -1294,7 +1387,6 @@ function chainTapeLineSegments(segments: Array<[THREE.Vector3, THREE.Vector3]>) 
           extended = true;
           break;
         }
-        const start = path[0];
         const startDirection = start.clone().sub(path[1]).normalize();
         const startOther = a.distanceTo(start) <= tolerance ? b : b.distanceTo(start) <= tolerance ? a : null;
         if (startOther && Math.abs(startDirection.dot(startOther.clone().sub(start).normalize())) >= tangentLimit) {
@@ -1380,6 +1472,33 @@ function tapeEdgeMatchesTopology(state: ThreeState, edge: TapeEdgeAttachment) {
   });
 }
 
+const tapePathCache = new WeakMap<THREE.Object3D, { key: string; paths: THREE.Vector3[][] }>();
+
+/** The edge paths of a line in world space, chained where they run on; kept while the line and its matrix stay as they are. */
+function tapeWorldPaths(child: THREE.Line, position: THREE.BufferAttribute | THREE.InterleavedBufferAttribute): THREE.Vector3[][] {
+  const key = `${child.geometry.uuid}:${(position as THREE.BufferAttribute).version ?? 0}:${position.count}:${child.matrixWorld.elements.join(",")}`;
+  const cached = tapePathCache.get(child);
+  if (cached && cached.key === key) return cached.paths;
+  const paths: THREE.Vector3[][] = [];
+  if ((child as THREE.LineSegments).isLineSegments) {
+    const segments: Array<[THREE.Vector3, THREE.Vector3]> = [];
+    for (let index = 0; index + 1 < position.count; index += 2) {
+      segments.push([
+        new THREE.Vector3().fromBufferAttribute(position, index).applyMatrix4(child.matrixWorld),
+        new THREE.Vector3().fromBufferAttribute(position, index + 1).applyMatrix4(child.matrixWorld),
+      ]);
+    }
+    paths.push(...chainTapeLineSegments(segments));
+  } else {
+    const path: THREE.Vector3[] = [];
+    for (let index = 0; index < position.count; index += 1) path.push(new THREE.Vector3().fromBufferAttribute(position, index).applyMatrix4(child.matrixWorld));
+    if ((child as THREE.LineLoop).isLineLoop && path.length > 2) path.push(path[0].clone());
+    paths.push(path);
+  }
+  tapePathCache.set(child, { key, paths });
+  return paths;
+}
+
 function pickModelTapeCandidate(state: ThreeState, shapeIds: string[], clientX: number, clientY: number): TapeCandidate | null {
   const rect = state.renderer.domElement.getBoundingClientRect();
   const pointerX = clientX - rect.left;
@@ -1394,6 +1513,7 @@ function pickModelTapeCandidate(state: ThreeState, shapeIds: string[], clientX: 
   targets.forEach((target) => target.updateWorldMatrix(true, true));
   const vertexCandidates: Array<{ distance: number; candidate: TapeCandidate }> = [];
   const edgeCandidates: Array<{ distance: number; candidate: TapeCandidate }> = [];
+  const projected = new THREE.Vector3();
 
   targets.forEach((target) => {
     const shapeId = target.userData.shapeId as string;
@@ -1401,25 +1521,24 @@ function pickModelTapeCandidate(state: ThreeState, shapeIds: string[], clientX: 
       if (!(child instanceof THREE.Line) || !child.visible) return;
       const position = child.geometry.getAttribute("position");
       if (!position || position.count < 2) return;
-      const paths: THREE.Vector3[][] = [];
-      if ((child as THREE.LineSegments).isLineSegments) {
-        const segments: Array<[THREE.Vector3, THREE.Vector3]> = [];
-        for (let index = 0; index + 1 < position.count; index += 2) {
-          segments.push([
-            new THREE.Vector3().fromBufferAttribute(position, index).applyMatrix4(child.matrixWorld),
-            new THREE.Vector3().fromBufferAttribute(position, index + 1).applyMatrix4(child.matrixWorld),
-          ]);
-        }
-        paths.push(...chainTapeLineSegments(segments));
-      } else {
-        const path: THREE.Vector3[] = [];
-        for (let index = 0; index < position.count; index += 1) path.push(new THREE.Vector3().fromBufferAttribute(position, index).applyMatrix4(child.matrixWorld));
-        if ((child as THREE.LineLoop).isLineLoop && path.length > 2) path.push(path[0].clone());
-        paths.push(path);
-      }
+      // The chained edge paths only change with the line or its matrix, not with the pointer;
+      // rebuilding them on every move took seconds on a dense imported mesh.
+      const paths = tapeWorldPaths(child, position);
 
       paths.forEach((worldPoints, pathIndex) => {
         if (worldPoints.length < 2) return;
+        // One rect and one matrix update for the whole pick: projectToScreen reads the layout for every point.
+        const screens = worldPoints.map((point) => {
+          projected.copy(point).project(state.camera);
+          return { x: ((projected.x + 1) / 2) * rect.width, y: ((1 - projected.y) / 2) * rect.height };
+        });
+        // Anything near the pointer? Only then are the attachments of this path worth building.
+        const closeToPointer = screens.some((screen, index) => {
+          if (Math.hypot(pointerX - screen.x, pointerY - screen.y) <= 9) return true;
+          const next = screens[index + 1];
+          return next ? distanceToScreenSegment(pointerX, pointerY, screen.x, screen.y, next.x, next.y) <= 12 : false;
+        });
+        if (!closeToPointer) return;
         const attachments = worldPoints.map((point) => tapeAttachmentFromWorld(state, shapeId, point, "edge"));
         if (attachments.some((attachment) => !attachment)) return;
         const normalizedPoints = attachments.map((attachment) => (attachment as TapeAttachment).normalized);
@@ -1431,7 +1550,7 @@ function pickModelTapeCandidate(state: ThreeState, shapeIds: string[], clientX: 
         };
         const endpointIndexes = worldPoints[0].distanceToSquared(worldPoints[worldPoints.length - 1]) < 1e-10 ? [0] : [0, worldPoints.length - 1];
         endpointIndexes.forEach((index) => {
-          const screen = projectToScreen(worldPoints[index], state);
+          const screen = screens[index];
           const distance = Math.hypot(pointerX - screen.x, pointerY - screen.y);
           if (distance <= 9) {
             vertexCandidates.push({
@@ -1447,8 +1566,8 @@ function pickModelTapeCandidate(state: ThreeState, shapeIds: string[], clientX: 
         });
 
         for (let index = 0; index + 1 < worldPoints.length; index += 1) {
-          const aScreen = projectToScreen(worldPoints[index], state);
-          const bScreen = projectToScreen(worldPoints[index + 1], state);
+          const aScreen = screens[index];
+          const bScreen = screens[index + 1];
           const dx = bScreen.x - aScreen.x;
           const dy = bScreen.y - aScreen.y;
           const amount = dx * dx + dy * dy > 0.001 ? clamp(((pointerX - aScreen.x) * dx + (pointerY - aScreen.y) * dy) / (dx * dx + dy * dy), 0, 1) : 0;
@@ -2867,6 +2986,8 @@ export function WorkplaneViewport({
   mateFacePick = null,
   onMateFacePick,
   onNoteAdd,
+  onAddReferencePoints,
+  onRemoveAllReferencePoints,
   onNoteUpdate,
   onNoteRemove,
   onNoteModeChange,
@@ -2926,6 +3047,8 @@ export function WorkplaneViewport({
   const [editingCorner, setEditingCorner] = useState<EditingCorner>(null);
   const [editingRotation, setEditingRotation] = useState<EditingRotation>(null);
   const [tapeMode, setTapeMode] = useState(false);
+  // A click on an edge measures the whole edge (the length of a circle, say); off, it sets a point on the edge (#308).
+  const [tapeWholeEdges, setTapeWholeEdges] = useState(true);
   const [tapeDeleteMode, setTapeDeleteMode] = useState(false);
   const [tapeMoveMode, setTapeMoveMode] = useState(false);
   const [tapeToolsOpen, setTapeToolsOpen] = useState(false);
@@ -3012,19 +3135,28 @@ export function WorkplaneViewport({
     });
   }, []);
   const [pointCardOffset, setPointCardOffset] = useState<PointCardOffset>({ x: 0, y: 0 });
-  const changePointCardOffset = useCallback((offset: PointCardOffset, final: boolean) => {
-    setPointCardOffset(offset);
-    if (!final) return;
-    try {
-      window.localStorage.setItem(POINT_CARD_OFFSET_STORAGE_KEY, JSON.stringify(offset));
-    } catch {
-      // The card keeps its place for this session when storage is unavailable.
-    }
+  const [pointCardOffsets, setPointCardOffsets] = useState<Record<string, PointCardOffset>>({});
+  const changePointCardOffset = useCallback((noteId: string, offset: PointCardOffset, final: boolean) => {
+    setPointCardOffsets((current) => {
+      const next = { ...current };
+      // Back at its pin, a card needs no entry of its own and uses the default again.
+      if (offset.x === 0 && offset.y === 0 && final) delete next[noteId];
+      else next[noteId] = offset;
+      if (final) {
+        try {
+          window.localStorage.setItem(POINT_CARD_OFFSETS_STORAGE_KEY, JSON.stringify(next));
+        } catch {
+          // The card keeps its place for this session when storage is unavailable.
+        }
+      }
+      return next;
+    });
   }, []);
   const [proportionLock, setProportionLock] = useState(false);
   const proportionLockRef = useRef(false);
   useEffect(() => {
     setPointCardOffset(readPointCardOffset());
+    setPointCardOffsets(readPointCardOffsets());
   }, []);
   useEffect(() => {
     const stored = readProportionLock();
@@ -3061,6 +3193,7 @@ export function WorkplaneViewport({
   const alignOverlayRef = useRef<AlignOverlayState | null>(null);
   const mirrorOverlayRef = useRef<MirrorOverlayState | null>(null);
   const tapeModeRef = useRef(false);
+  const tapeWholeEdgesRef = useRef(true);
   const tapeDeleteModeRef = useRef(false);
   const tapeMoveModeRef = useRef(false);
   const tapePointDragRef = useRef<TapePointDragState | null>(null);
@@ -4611,7 +4744,7 @@ export function WorkplaneViewport({
   }, [cruiseAsset, setTapeActive]);
 
   const resolveTapeCandidate = useCallback(
-    (clientX: number, clientY: number, ignoredPointId?: string): TapeCandidate | null => {
+    (clientX: number, clientY: number, ignoredPointId?: string, wholeEdges: boolean = tapeWholeEdgesRef.current): TapeCandidate | null => {
       const state = threeRef.current;
       if (!state) return null;
 
@@ -4619,6 +4752,12 @@ export function WorkplaneViewport({
       const rect = state.renderer.domElement.getBoundingClientRect();
       const localX = clientX - rect.left;
       const localY = clientY - rect.top;
+      // The first point is on a circle: the point across it, which makes the diameter, catches the pointer first.
+      if (model.startPointId && model.startEdge && model.startPointId !== ignoredPointId) {
+        const start = model.points.find((point) => point.id === model.startPointId);
+        const across = start ? diameterSnapCandidate(state, start, model.startEdge, localX, localY) : null;
+        if (across) return across;
+      }
       const closestPoint = model.points.reduce<{ point: TapePoint; distance: number } | null>((closest, point) => {
         if (point.id === ignoredPointId) return closest;
         const screen = projectToScreen(tapePointWorld(state, point), state);
@@ -4662,7 +4801,21 @@ export function WorkplaneViewport({
       const selectedShapeIds = selectedIdsRef.current.filter((id) => shapesRef.current.some((shape) => shape.id === id && !shape.hidden));
       const targetShapeIds = selectedShapeIds.length > 0 ? selectedShapeIds : shapesRef.current.filter((shape) => !shape.hidden).map((shape) => shape.id);
       const modelCandidate = pickModelTapeCandidate(state, targetShapeIds, clientX, clientY);
-      if (modelCandidate) return modelCandidate;
+      if (modelCandidate) {
+        if (!modelCandidate.edge) return modelCandidate;
+        const onEdge = { ...modelCandidate, circleEdge: modelCandidate.edge, edge: wholeEdges ? modelCandidate.edge : undefined };
+        // With whole edges off the edge is only where a point goes. On a circle it goes on the true circle,
+        // not on a side of the polygon the edge is drawn as, so that a diameter measures exactly.
+        if (!wholeEdges && modelCandidate.attachment?.kind === "edge") {
+          const circle = circleOfEdgePoints(tapeEdgeWorldPoints(state, modelCandidate.edge));
+          if (circle) {
+            const placed = pointOnCircle(circle, new THREE.Vector3(modelCandidate.x, modelCandidate.y, modelCandidate.z));
+            const attachment = tapeAttachmentFromWorld(state, modelCandidate.edge.shapeId, placed, "edge");
+            if (attachment) return { ...onEdge, x: placed.x, y: placed.y, z: placed.z, attachment };
+          }
+        }
+        return onEdge;
+      }
 
       const raw = toRawPlanePoint(clientX, clientY, state.dragPlane);
       if (!raw) return null;
@@ -4740,7 +4893,7 @@ export function WorkplaneViewport({
       const point = existing ?? makePoint(candidate);
       const points = existing ? current.points : [...current.points, point];
       if (!current.startPointId) {
-        storeTapeModel({ ...current, points, startPointId: point.id, hover: { x: point.x, y: point.y, z: point.z, attachment: point.attachment } });
+        storeTapeModel({ ...current, points, startPointId: point.id, startEdge: candidate.circleEdge ?? null, hover: { x: point.x, y: point.y, z: point.z, attachment: point.attachment } });
         return;
       }
       if (current.startPointId === point.id) {
@@ -4761,11 +4914,11 @@ export function WorkplaneViewport({
   );
 
   const updateTapeHover = useCallback(
-    (clientX: number, clientY: number) => {
+    (clientX: number, clientY: number, altKey = false) => {
       if (!tapeModeRef.current) {
         return;
       }
-      const candidate = resolveTapeCandidate(clientX, clientY);
+      const candidate = resolveTapeCandidate(clientX, clientY, undefined, tapeWholeEdgesRef.current !== altKey);
       const current = tapeModelRef.current;
       const hover = candidate;
       if ((!current.hover && !hover) || (current.hover && hover
@@ -5560,7 +5713,9 @@ export function WorkplaneViewport({
     onInteractionActiveChange?.(false);
   }, [onInteractionActiveChange, onUpdateShape]);
 
-  const commitDimensionEdit = useCallback(() => {
+  const commitDimensionEdit = useCallback((aroundCenter = false) => {
+    // Alt+Enter (#327): no edge is held, so the shape grows round its middle.
+    if (aroundCenter) lastResizeAnchorRef.current = null;
     const edit = editingDimension;
     const id = selectedIdsRef.current[0];
     const shape = shapesRef.current.find((entry) => entry.id === id);
@@ -5640,7 +5795,8 @@ export function WorkplaneViewport({
     });
   }, [beginDimensionEdit, formulaForDimensionMark, rememberResizeAnchor]);
 
-  const commitCornerEdit = useCallback(() => {
+  const commitCornerEdit = useCallback((aroundCenter = false) => {
+    if (aroundCenter) lastResizeAnchorRef.current = null;
     const edit = editingCorner;
     const shape = shapesRef.current.find((entry) => entry.id === selectedIdsRef.current[0]);
     setEditingCorner(null);
@@ -6421,7 +6577,8 @@ export function WorkplaneViewport({
 
       if (tapeModeRef.current) {
         event.preventDefault();
-        const candidate = resolveTapeCandidate(event.clientX, event.clientY);
+        // Alt turns whole edges the other way round for this click.
+        const candidate = resolveTapeCandidate(event.clientX, event.clientY, undefined, tapeWholeEdgesRef.current !== event.altKey);
         if (candidate) {
           selectTapeCandidate(candidate);
         }
@@ -6909,7 +7066,7 @@ export function WorkplaneViewport({
         return;
       }
       if (tapeModeRef.current) {
-        updateTapeHover(event.clientX, event.clientY);
+        updateTapeHover(event.clientX, event.clientY, event.altKey);
         return;
       }
       if (tapeMoveModeRef.current) return;
@@ -7546,6 +7703,12 @@ export function WorkplaneViewport({
     onCancelCruise?.();
   }, [onCancelCruise, onWorkplaneModeChange, setTapeActive]);
 
+  const toggleTapeWholeEdges = useCallback(() => {
+    const next = !tapeWholeEdgesRef.current;
+    tapeWholeEdgesRef.current = next;
+    setTapeWholeEdges(next);
+  }, []);
+
   const activateTapeDelete = useCallback(() => {
     if (splitActiveRef.current) return;
     setTapeActive(false);
@@ -7792,6 +7955,21 @@ export function WorkplaneViewport({
     [storeTapeModel],
   );
 
+  /** A reference point in the middle of a measurement: the centre of a round edge or of a diameter (#323). */
+  const markTapeMiddle = useCallback(
+    (segmentId: string) => {
+      const state = threeRef.current;
+      if (!state || !onAddReferencePoints) return;
+      const worldPoints = tapeSegmentWorldPoints(state, tapeModelRef.current, segmentId);
+      const circle = worldPoints.length >= 4 ? circleOfEdgePoints(worldPoints) : null;
+      const middle = circle
+        ? { x: circle.center.x, y: circle.center.y, z: circle.center.z }
+        : measurementMiddle(worldPoints.map((point) => ({ x: point.x, y: point.y, z: point.z })));
+      if (middle) onAddReferencePoints([middle]);
+    },
+    [onAddReferencePoints],
+  );
+
   const handleTapeSegmentPointerDown = useCallback(
     (event: ReactPointerEvent<SVGElement>, segmentId: string) => {
       if (event.button !== 0) {
@@ -7808,7 +7986,7 @@ export function WorkplaneViewport({
       }
       event.preventDefault();
       event.stopPropagation();
-      const candidate = resolveTapeCandidate(event.clientX, event.clientY);
+      const candidate = resolveTapeCandidate(event.clientX, event.clientY, undefined, tapeWholeEdgesRef.current !== event.altKey);
       if (candidate) {
         selectTapeCandidate(candidate);
       }
@@ -8042,6 +8220,9 @@ export function WorkplaneViewport({
                   </button>
                   <button className={`tape-delete-button ${tapeDeleteMode ? "active" : ""}`} aria-label={t("camera.deleteMeasurement")} title={t("camera.deleteMeasurement")} aria-pressed={tapeDeleteMode} onClick={activateTapeDelete}>
                     <X size={20} strokeWidth={2.4} aria-hidden="true" />
+                  </button>
+                  <button className={tapeWholeEdges ? "active" : ""} aria-label={t("camera.tapeWholeEdges")} title={t("camera.tapeWholeEdgesHint")} aria-pressed={tapeWholeEdges} onClick={toggleTapeWholeEdges}>
+                    <Spline size={20} strokeWidth={2.25} aria-hidden="true" />
                   </button>
                   <button className="tape-clear-button" aria-label={t("camera.deleteAllMeasurements")} title={t("camera.deleteAllMeasurements")} onClick={requestClearTape}>
                     <Trash2 size={19} strokeWidth={2.25} aria-hidden="true" />
@@ -8384,7 +8565,9 @@ export function WorkplaneViewport({
               workspace={workspace}
               onPointChange={(id, patch) => onNoteUpdate?.(id, patch)}
               pointCardOffset={pointCardOffset}
+              pointCardOffsets={pointCardOffsets}
               onPointCardOffsetChange={changePointCardOffset}
+              onRemoveAllPoints={onRemoveAllReferencePoints}
             />
           ) : null}
           {!workplaneMode && !splitActive && alignOverlay ? (
@@ -8414,6 +8597,7 @@ export function WorkplaneViewport({
               onPointPointerMove={handleTapePointPointerMove}
               onPointPointerUp={handleTapePointPointerUp}
               onSegmentPointerDown={handleTapeSegmentPointerDown}
+              onMarkMiddle={onAddReferencePoints ? markTapeMiddle : undefined}
             />
           ) : null}
           {!workplaneMode && !splitActive && rulerDimensionOverlay && rulerDimensionOverlay.items.length > 0 ? (
@@ -9017,6 +9201,7 @@ function orbitCameraByDrag(state: ThreeState, dx: number, dy: number) {
 }
 
 function constrainCamera(state: ThreeState, workspace: WorkspaceSettings) {
+  state.pivotLimits = { halfWidth: workspace.width / 2, halfDepth: workspace.depth / 2 };
   const target = state.controls.target;
   const previousTarget = target.clone();
   target.x = clamp(target.x, -workspace.width / 2, workspace.width / 2);
@@ -11944,6 +12129,8 @@ function createShapeObject(
         threadClearance: shape.threadClearance,
         threadBoltClearance: shape.threadBoltClearance,
         threadAxialClearance: shape.threadAxialClearance,
+        threadDepth: shape.threadDepth,
+        threadFlankAngle: shape.threadFlankAngle,
         threadQuality: shape.threadQuality,
         threadHeadHeight: shape.threadHeadHeight,
         threadChamfer: shape.threadChamfer,

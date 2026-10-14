@@ -28,7 +28,7 @@ export const MCP_SHAPE_SETTING_KEYS = [
   "extrudeTwist", "extrudeTopOffsetX", "extrudeTopOffsetZ",
   "teeth", "toothSize", "toothWidth", "centerHoleSize", "gearType", "helixAngle", "helixQuality", "gearProfile", "gearPressureAngle", "gearBacklash", "gearRim",
   "threadRole", "threadHead", "threadHand", "threadProfile", "threadDiameter", "threadPitch",
-  "threadClearance", "threadBoltClearance", "threadAxialClearance", "threadQuality", "threadHeadHeight", "threadChamfer", "threadChamferBottom",
+  "threadClearance", "threadBoltClearance", "threadAxialClearance", "threadDepth", "threadFlankAngle", "threadQuality", "threadHeadHeight", "threadChamfer", "threadChamferBottom",
   "threadHeadChamfer",
   "springTurns", "springWire", "springQuality", "springHand",
   "starPoints", "starInnerSize", "starOuterFillet", "starInnerFillet", "starQuality",

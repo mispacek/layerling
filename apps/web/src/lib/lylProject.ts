@@ -32,7 +32,7 @@ function knownSchema(schema: unknown) {
 export const LYL_FORMAT_VERSION = 2;
 export const LYL_MINIMUM_READER_VERSION = 2;
 export const LYL_OLDEST_READABLE_FORMAT_VERSION = 1;
-export const LYL_CREATED_WITH_VERSION = "1.68.0";
+export const LYL_CREATED_WITH_VERSION = "1.72.3";
 export const LYL_MEDIA_TYPE = "application/vnd.layerling.project+zip";
 
 export const LYL_LIMITS = {
@@ -1332,6 +1332,14 @@ function validateShapeDefinition(definition: Record<string, unknown>, label: str
     if (definition.threadAxialClearance !== undefined) {
       const threadAxialClearance = finiteNumber(definition.threadAxialClearance, `${label}.threadAxialClearance`);
       if (threadAxialClearance < 0 || threadAxialClearance > 1) throw new Error(`${label}.threadAxialClearance is outside the supported range`);
+    }
+    if (definition.threadDepth !== undefined) {
+      const threadDepth = finiteNumber(definition.threadDepth, `${label}.threadDepth`);
+      if (threadDepth <= 0 || threadDepth > 480) throw new Error(`${label}.threadDepth is outside the supported range`);
+    }
+    if (definition.threadFlankAngle !== undefined) {
+      const threadFlankAngle = finiteNumber(definition.threadFlankAngle, `${label}.threadFlankAngle`);
+      if (threadFlankAngle < 10 || threadFlankAngle > 90) throw new Error(`${label}.threadFlankAngle is outside the supported range`);
     }
     if (definition.threadQuality !== undefined) {
       const threadQuality = finiteNumber(definition.threadQuality, `${label}.threadQuality`);

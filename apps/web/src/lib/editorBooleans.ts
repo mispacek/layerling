@@ -11,6 +11,7 @@ import { dropSplitSlivers, unionSplitManifoldComponents } from "@/lib/manifoldSp
 import { splitAxisLabel, splitPlaneIntersectsPoints, splitShapeFromWorldPositions, type ModelSplitPlane } from "@/lib/modelSplit";
 import { canonicalizeShape, cleanRotationDegrees, isNonSolidShapeKind, meshYawDegrees, mirrorSign, normalizeDegrees, resizedImportedCoordinates, resizedShapeSize, shapeDepth, shapeHasShapeDeform, shapeWidth, withHoleMode } from "@/lib/workplaneShapes";
 import { closedMeshVolume } from "@/lib/cadProfileExtrusion";
+import { meshSurfaceAreas } from "@/lib/printEstimate";
 import { createLocalId, derivedLocalId } from "@/lib/localIds";
 import { boundsOverlap, exportColorGroups, meshBounds, overlappingExportClusters } from "@/lib/exportUnion";
 import type { WorkplaneShape } from "@/types/layerling";
@@ -1071,15 +1072,21 @@ export async function exportBodiesWithLooseHoles(visible: readonly WorkplaneShap
 export async function exportSolidVolume(source: readonly WorkplaneShape[]) {
   const { visible } = visibleExportShapes(source);
   const { solids, meshes: cut, holeCutsFailed } = await exportBodiesWithLooseHoles(visible);
-  if (solids.length === 0) return { volumeMm3: 0, solids: 0, bodies: 0, unionFailed: 0 };
+  if (solids.length === 0) return { volumeMm3: 0, sideMm2: 0, flatMm2: 0, solids: 0, bodies: 0, unionFailed: 0 };
   const { meshes, gescheitert } = await unionOverlappingExportMeshes(solids, cut);
   const volumeMm3 = meshes.reduce((sum, mesh) => sum + Math.abs(closedMeshVolume(mesh.vertices, mesh.faces)), 0);
-  return { volumeMm3, solids: solids.length, bodies: meshes.length, unionFailed: gescheitert + holeCutsFailed };
+  // The surface, for the estimate with walls and infill (#320).
+  const areas = meshes.map((mesh) => meshSurfaceAreas(mesh.vertices, mesh.faces));
+  const sideMm2 = areas.reduce((sum, area) => sum + area.sideMm2, 0);
+  const flatMm2 = areas.reduce((sum, area) => sum + area.flatMm2, 0);
+  return { volumeMm3, sideMm2, flatMm2, solids: solids.length, bodies: meshes.length, unionFailed: gescheitert + holeCutsFailed };
 }
 
 export type ExportSolidVolume = Awaited<ReturnType<typeof exportSolidVolume>>;
 
 export const PRINT_MATERIAL_STORAGE_KEY = "layerling.printMaterial";
+export const PRINT_INFILL_STORAGE_KEY = "layerling.printInfill";
+export const PRINT_WALLS_STORAGE_KEY = "layerling.printWalls";
 
 export function formatEstimateNumber(value: number, digits: number) {
   return value.toLocaleString(numberLocale(), { minimumFractionDigits: digits, maximumFractionDigits: digits });

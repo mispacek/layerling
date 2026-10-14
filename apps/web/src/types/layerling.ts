@@ -128,6 +128,9 @@ export type ShapeCustomization = {
   /** Rod and screw: how much thinner (in diameter) the bolt comes out, for a metal nut. */
   threadBoltClearance?: number;
   threadAxialClearance?: number;
+  /** Own profile: the thread depth in mm (outer minus core radius) and the included flank angle in degrees. */
+  threadDepth?: number;
+  threadFlankAngle?: number;
   threadQuality?: number;
   threadHeadHeight?: number;
   threadChamfer?: number;
@@ -397,7 +400,7 @@ export type ThreadHand = "right" | "left";
  * Die Zahnform: scharfe ISO-Spitze, flache Trapezflanke, rundes Profil oder
  * das Whitworth-Profil der G-Rohrgewinde (55 Grad, Kuppe und Grund gerundet).
  */
-export type ThreadProfile = "v" | "trapezoidal" | "round" | "whitworth";
+export type ThreadProfile = "v" | "trapezoidal" | "round" | "whitworth" | "custom";
 
 export type SketchRevolveSettings = {
   startAngle: number;
@@ -582,6 +585,9 @@ export type WorkplaneShape = {
   /** Rod and screw: how much thinner (in diameter) the bolt comes out, for a metal nut. */
   threadBoltClearance?: number;
   threadAxialClearance?: number;
+  /** Own profile: the thread depth in mm (outer minus core radius) and the included flank angle in degrees. */
+  threadDepth?: number;
+  threadFlankAngle?: number;
   threadQuality?: number;
   threadHeadHeight?: number;
   threadChamfer?: number;

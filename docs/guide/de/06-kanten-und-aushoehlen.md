@@ -71,6 +71,8 @@ Die {{ui:shell.edges}} wirken nur dort, wo die Innenwände auseinanderlaufen - a
 
 Für jede offene Seite braucht der Körper ganz außen auf dieser Seite eine ebene Fläche. Kugeln und freie Formen lassen sich deshalb so nicht aushöhlen. Wenn die Wand zu dick für den Körper ist, meldet layerling das und bittet um eine dünnere.
 
+Auch ein Körper mit einer Tasche lässt sich aushöhlen, etwa ein Block mit einem Loch, das nicht ganz hindurchgeht (eine Gruppe aus einem Quader und einem hochgesetzten Loch), und zwar mit offener Oberseite: Auch die Wände um die Tasche werden ausgehöhlt, so dass zwischen der Außenwand und der Tasche ein Ring aus Hohlraum bleibt, oben offen, und unter dem Boden der Tasche ein dünner Hohlraum liegt.
+
 **Körper, die in einer Spitze enden,** etwa ein Kegel oder ein gedrehtes Dreieck, haben oben keine ebene Fläche, die offen bleiben könnte. Auch ein ganz geschlossener Hohlraum gelingt dort nicht, denn eine Spitze lässt sich nicht nach innen versetzen: Selbst mit 1 mm Wand kommt die Meldung, dass die Wände nicht so dick sein können. Zeichne die Wand dann vor dem Drehen ins Profil: Dupliziere den Umriss, verkleinere die Kopie gleichmäßig, setze sie in die Mitte des großen Umrisses und schneide mit ihr den großen aus, dann dreh das Ganze (Kapitel Skizzen, Abschnitt Rotieren). Der Abstand der beiden Umrisse ist die Wandstärke.
 
 Änderst du später die Größe des ausgehöhlten Körpers, höhlt layerling ihn in der neuen Größe gleich noch einmal aus. Die Wand bleibt so dick, wie du sie gewählt hast, auch bei runden Körpern. Ein Zylinder, den du dabei in eine Richtung mehr ziehst als in die andere, wird zur Ellipse.

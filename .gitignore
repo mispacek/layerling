@@ -22,6 +22,7 @@ apps/web/public/kontakt.php
 apps/web/public/anleitung/
 apps/web/public/guide/
 apps/web/public/prirucka/
+apps/web/public/handleiding/
 
 # Environment files
 .env

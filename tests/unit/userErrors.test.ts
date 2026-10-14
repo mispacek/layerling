@@ -23,6 +23,15 @@ describe("error messages for people", () => {
     expect(localizedError("OBJ contains a degenerate face")).toBe(MESSAGES_DE["error.objBroken"]);
   });
 
+  it("shows the refusals of the drawing export in German", () => {
+    setLanguage("de");
+    expect(localizedError("This drawing has more than 200 circular holes. Select a smaller part.")).toBe(MESSAGES_DE["error.drawingTooManyHoles"]);
+    expect(localizedError("The 1:1 drawing exceeds 5,080 mm. Select a smaller part.")).toBe(MESSAGES_DE["error.drawingTooLarge"]);
+    expect(localizedError("Drawing views support up to 100,000 triangles. Choose fewer or simpler objects.")).toBe(MESSAGES_DE["error.drawingTooManyTriangles"]);
+    expect(localizedError("This view has too many drawing edges. Choose fewer or simpler objects.")).toBe(MESSAGES_DE["error.drawingTooManyEdges"]);
+    expect(localizedError("This view has no solid geometry")).toBe(MESSAGES_DE["error.drawingNoGeometry"]);
+  });
+
   it("translates the texts of the server routes, with the folder and setting kept", () => {
     setLanguage("de");
     expect(localizedError("That folder name is not allowed")).toBe(MESSAGES_DE["error.folderNameNotAllowed"]);

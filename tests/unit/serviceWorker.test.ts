@@ -43,6 +43,8 @@ describe("offline copy of layerling", () => {
       "guide/img/editor-overview.webp",
     ]);
     expect(paths).toEqual(["/anleitung/formen.html", "/anleitung/index.html", "/guide/shapes.html"]);
+    // The page for printing the whole guide is big and opened by few.
+    expect(precachePaths(["anleitung/print-all.html", "guide/print-all.html", "handleiding/print-all.html", "guide/shapes.html"])).toEqual(["/guide/shapes.html"]);
   });
 
   /*

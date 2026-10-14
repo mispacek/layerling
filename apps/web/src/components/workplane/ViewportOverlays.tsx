@@ -51,6 +51,8 @@ export type ShapeRenderRecord = {
 };
 
 export type ThreeState = {
+  /** How far the orbit pivot may travel (the plate), as the camera clamp last saw it; the wheel zoom stays within it. */
+  pivotLimits?: { halfWidth: number; halfDepth: number };
   /** Colour set on top of light/dark; only the canvas reads it. */
   palette?: AppThemePalette;
   renderer: THREE.WebGLRenderer;
@@ -168,6 +170,8 @@ export type TapeModel = {
   points: TapePoint[];
   segments: TapeSegment[];
   startPointId: string | null;
+  /** The edge the first point lies on, while a measurement is under way: the diameter of a circle snaps from it (#308). */
+  startEdge?: TapeEdgeAttachment | null;
   hover: TapeCandidate | null;
 };
 
@@ -183,7 +187,10 @@ export type TapeCandidate = {
   z: number;
   pointId?: string;
   attachment?: TapeAttachment;
+  /** Set when a click would measure this whole edge. */
   edge?: TapeEdgeAttachment;
+  /** The edge the point lies on, whether or not a click measures all of it. */
+  circleEdge?: TapeEdgeAttachment;
 };
 
 export type RotationHandleSide = "near" | "right" | "far" | "left";
@@ -413,6 +420,17 @@ export function tapeEdgeWorldPoints(state: ThreeState, edge: TapeEdgeAttachment)
     const world = tapeAttachmentWorld(state, { shapeId: edge.shapeId, normalized });
     return world ? [world] : [];
   });
+}
+
+/** The points a measurement runs along: its whole edge, or the straight line between its two points. */
+export function tapeSegmentWorldPoints(state: ThreeState, model: TapeModel, segmentId: string) {
+  const segment = model.segments.find((candidate) => candidate.id === segmentId);
+  if (!segment) return [];
+  const edgePoints = segment.edge ? tapeEdgeWorldPoints(state, segment.edge) : [];
+  if (edgePoints.length >= 2) return edgePoints;
+  const start = model.points.find((point) => point.id === segment.startId);
+  const end = model.points.find((point) => point.id === segment.endId);
+  return start && end ? [tapePointWorld(state, start), tapePointWorld(state, end)] : [];
 }
 
 function tapePolylineLength(points: THREE.Vector3[]) {
@@ -759,11 +777,17 @@ export function NoteOverlay({
   workspace,
   onPointChange,
   pointCardOffset,
+  pointCardOffsets,
   onPointCardOffsetChange,
+  onRemoveAllPoints,
 }: {
   overlay: NoteOverlayState;
+  /** Where a card stands that was not moved on its own yet. */
   pointCardOffset: PointCardOffset;
-  onPointCardOffsetChange: (offset: PointCardOffset, final: boolean) => void;
+  /** The cards that were moved, by point. */
+  pointCardOffsets: Record<string, PointCardOffset>;
+  onPointCardOffsetChange: (noteId: string, offset: PointCardOffset, final: boolean) => void;
+  onRemoveAllPoints?: () => void;
   workspace: WorkplaneWorkspaceSettings;
   onPointChange: (noteId: string, patch: { x?: number; y?: number; z?: number }) => void;
   editingId: string | null;
@@ -778,6 +802,9 @@ export function NoteOverlay({
   onEditingIdChange: (noteId: string | null) => void;
 }) {
   const pointCardDrag = useRef<{ pointerId: number; startX: number; startY: number; origin: PointCardOffset } | null>(null);
+  // The card or pin touched last stands in front of the others, whatever its place in the list (#329).
+  const [frontId, setFrontId] = useState<string | null>(null);
+  const pointCount = overlay.notes.filter((note) => note.point).length;
   return (
     <div className="note-overlay" aria-label={t("editor.tool.note")}>
       {overlay.notes.map((note) => {
@@ -787,7 +814,8 @@ export function NoteOverlay({
           <div
             key={note.id}
             className={`note-pin-anchor ${open ? "open" : ""} ${note.flipped ? "flipped" : ""}`}
-            style={{ left: note.screenX, top: note.screenY }}
+            style={{ left: note.screenX, top: note.screenY, ...(frontId === note.id ? { zIndex: 6 } : {}) }}
+            onPointerDownCapture={() => setFrontId(note.id)}
           >
             <button
               type="button"
@@ -801,10 +829,12 @@ export function NoteOverlay({
             >
               {note.point ? <Crosshair size={15} strokeWidth={2.6} aria-hidden="true" /> : note.index}
             </button>
-            {open && note.point ? (
+            {open && note.point ? (() => {
+              const offset = pointCardOffsets[note.id] ?? pointCardOffset;
+              return (
               <div
                 className="note-card point-card"
-                style={{ transform: `translate(${pointCardOffset.x}px, ${pointCardOffset.y}px)` }}
+                style={{ transform: `translate(${offset.x}px, ${offset.y}px)` }}
                 onPointerDown={(event) => event.stopPropagation()}
               >
                 <strong
@@ -812,21 +842,21 @@ export function NoteOverlay({
                   title={t("panel.moveHint")}
                   onPointerDown={(event) => {
                     capturePointer(event.currentTarget, event.pointerId);
-                    pointCardDrag.current = { pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, origin: pointCardOffset };
+                    pointCardDrag.current = { pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, origin: offset };
                   }}
                   onPointerMove={(event) => {
                     const drag = pointCardDrag.current;
                     if (!drag || drag.pointerId !== event.pointerId) return;
-                    onPointCardOffsetChange({ x: drag.origin.x + event.clientX - drag.startX, y: drag.origin.y + event.clientY - drag.startY }, false);
+                    onPointCardOffsetChange(note.id, { x: drag.origin.x + event.clientX - drag.startX, y: drag.origin.y + event.clientY - drag.startY }, false);
                   }}
                   onPointerUp={(event) => {
                     const drag = pointCardDrag.current;
                     if (!drag || drag.pointerId !== event.pointerId) return;
                     pointCardDrag.current = null;
                     if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
-                    onPointCardOffsetChange({ x: drag.origin.x + event.clientX - drag.startX, y: drag.origin.y + event.clientY - drag.startY }, true);
+                    onPointCardOffsetChange(note.id, { x: drag.origin.x + event.clientX - drag.startX, y: drag.origin.y + event.clientY - drag.startY }, true);
                   }}
-                  onDoubleClick={() => onPointCardOffsetChange({ x: 0, y: 0 }, true)}
+                  onDoubleClick={() => onPointCardOffsetChange(note.id, { x: 0, y: 0 }, true)}
                 >
                   {t("point.title")}
                 </strong>
@@ -840,8 +870,12 @@ export function NoteOverlay({
                     <button type="button" className="note-action danger" onClick={() => onRemove(note.id)}>{t("common.delete")}</button>
                   </span>
                 </div>
+                {pointCount > 1 && onRemoveAllPoints ? (
+                  <button type="button" className="note-action danger point-delete-all" onClick={onRemoveAllPoints}>{t("point.deleteAll", { count: pointCount })}</button>
+                ) : null}
               </div>
-            ) : open ? (
+              );
+            })() : open ? (
               <div className="note-card" onPointerDown={(event) => event.stopPropagation()}>
                 <NoteText
                   value={note.text}
@@ -881,6 +915,7 @@ export function TapeOverlay({
   onPointPointerMove,
   onPointPointerUp,
   onSegmentPointerDown,
+  onMarkMiddle,
 }: {
   overlay: TapeOverlayState;
   startPointId: string | null;
@@ -891,6 +926,8 @@ export function TapeOverlay({
   onPointPointerMove: (event: ReactPointerEvent<SVGCircleElement>, pointId: string) => void;
   onPointPointerUp: (event: ReactPointerEvent<SVGCircleElement>, pointId: string) => void;
   onSegmentPointerDown: (event: ReactPointerEvent<SVGElement>, segmentId: string) => void;
+  /** Puts a reference point in the middle of a measurement (#323). */
+  onMarkMiddle?: (segmentId: string) => void;
 }) {
   return (
     <div className={`tape-overlay ${active ? "active" : ""} ${deleteMode ? "delete-mode" : ""} ${moveMode ? "move-mode" : ""}`} aria-label={t("aria.tapeMeasurements")}>
@@ -938,6 +975,20 @@ export function TapeOverlay({
           {segment.label}
         </span>
       ))}
+      {onMarkMiddle && !deleteMode ? overlay.segments.map((segment) => (
+        <button
+          key={`${segment.id}-mark`}
+          type="button"
+          className="tape-mark"
+          style={{ left: segment.labelX, top: segment.labelY + 24 }}
+          title={t("camera.tapeMarkMiddle")}
+          aria-label={t("camera.tapeMarkMiddle")}
+          onPointerDown={(event) => event.stopPropagation()}
+          onClick={() => onMarkMiddle(segment.id)}
+        >
+          <Crosshair size={13} aria-hidden="true" />
+        </button>
+      )) : null}
     </div>
   );
 }

@@ -76,7 +76,7 @@ The AI works with the same functions as you, through the same path as your opera
 | `layerling_layer_icon` | turns an SVG icon (the text of the file, or an extruded sketch body) into a layered icon tag for a multicolour print - the icon, wider rims, a plate without holes - or builds one again with a new width or layers; with a count it fills the plate with copies |
 | `layerling_measure_section` | measures on a cutting plane between two points that snap to the outline - wall thickness, gaps, fits |
 | `layerling_show_overhangs` | switches the overhang hatching on or off, sets the angle and reports for each body the area that would need supports |
-| `layerling_estimate_print` | estimates volume, weight and filament for the selection or the whole design, worked out as solid like the export window |
+| `layerling_estimate_print` | estimates volume, weight and filament for the selection or the whole design: for a solid body, and as a rough guess with walls and infill like the export window |
 | `layerling_add_reference_points` | marks reference points - on the centre, corners or edge middles of objects, or at exact positions - that shapes snap to |
 | `layerling_list_reference_points` | lists the reference points with their ids and positions |
 | `layerling_remove_reference_points` | deletes reference points by id, or all of them |
@@ -92,6 +92,7 @@ The AI works with the same functions as you, through the same path as your opera
 | `layerling_clear_history` | deletes every undo step for good, as the History view's "Delete history" button does; needs `confirm: true` |
 | `layerling_set_history_view` | looks back at an earlier state of the project, like the History view (the real design stays untouched; changing tools wait until it is closed) |
 | `layerling_export_section_svg` | returns the outlines on a cutting plane as an SVG at 1:1, from the same bodies as the export |
+| `layerling_export_drawing` | makes the workshop drawing of the "2D" export: three views at 1:1 on an ISO sheet with overall sizes and a table of the round bores, as SVG text or PDF |
 | `layerling_set_workplane` | puts the workplane on a side of a body or back on the base plate, and hides or shows it |
 | `layerling_capture_image` | takes a picture of the view: front, top, side, diagonally from a corner and more |
 

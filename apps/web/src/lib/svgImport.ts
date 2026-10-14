@@ -247,7 +247,35 @@ function cleanRingPoints(points: THREE.Vector2[]) {
   // first.
   const closeEnough = (extent * 1e-5) ** 2;
   if (cleaned.length > 3 && cleaned[0].distanceToSquared(cleaned[cleaned.length - 1]) <= closeEnough) cleaned.pop();
-  return cleaned;
+  return withoutStraightPoints(cleaned, extent * 1e-7);
+}
+
+/**
+ * A point that lies on the straight line between its two neighbours - font outlines, LightBurn and
+ * Inkscape text have many - adds nothing to the outline but makes the extrusion put a triangle of no
+ * area there, and a letter with such a triangle was left out of the import as no solid (#304, the
+ * letters of a LightBurn text). A spike that runs out and back along the same line goes with it.
+ * `tolerance` is how far from the line a point may lie and still count as on it.
+ */
+function withoutStraightPoints(points: THREE.Vector2[], tolerance: number) {
+  let result = points;
+  for (let pass = 0; pass < 8; pass += 1) {
+    const kept: THREE.Vector2[] = [];
+    for (let index = 0; index < result.length; index += 1) {
+      const point = result[index];
+      const before = kept.length ? kept[kept.length - 1] : result[result.length - 1];
+      const after = result[(index + 1) % result.length];
+      const line = after.clone().sub(before);
+      const length = line.length();
+      const offset = length > 0 ? Math.abs(line.cross(point.clone().sub(before))) / length : point.distanceTo(before);
+      // Never below a triangle: what is left after dropping this point is what is kept so far and what is still to come.
+      if (kept.length + (result.length - index - 1) >= 3 && offset <= tolerance) continue;
+      kept.push(point);
+    }
+    if (kept.length === result.length || kept.length < 3) return kept.length < 3 ? result : kept;
+    result = kept;
+  }
+  return result;
 }
 
 function ringSamplePoint(points: THREE.Vector2[]) {

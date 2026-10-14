@@ -15,8 +15,9 @@ import {
 import { MESSAGES_DE } from "@/lib/messages.de";
 import { MESSAGES_CS } from "@/lib/messages.cs";
 import { MESSAGES_EN } from "@/lib/messages.en";
+import { MESSAGES_NL } from "@/lib/messages.nl";
 
-const CATALOGUES = { en: MESSAGES_EN, de: MESSAGES_DE, cs: MESSAGES_CS } as const;
+const CATALOGUES = { en: MESSAGES_EN, de: MESSAGES_DE, cs: MESSAGES_CS, nl: MESSAGES_NL } as const;
 /** Czech has every interface sentence even while its guide chapters use English fallback. */
 const COMPLETE_LANGUAGES = LANGUAGES.filter((language) => LANGUAGE_INFO[language].complete || language === "cs");
 
