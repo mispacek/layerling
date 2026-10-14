@@ -19,7 +19,7 @@ import { tools } from "../../scripts/layerling-mcp-tools.mjs";
 import { GUIDE_CHAPTERS, GUIDE_SECTIONS, guideChapterForShape, guideHref, guideSectionForShape } from "@/lib/guideLinks";
 
 const root = join(__dirname, "..", "..");
-const LANGUAGES = ["de", "en", "nl"] as const;
+const LANGUAGES = ["de", "en", "nl", "cs"] as const;
 
 async function contextFor(language: (typeof LANGUAGES)[number]) {
   return {
@@ -238,7 +238,7 @@ describe("guide content", () => {
     // The new registry gives Czech its own guide shell; untranslated chapters keep English slugs.
     expect(guideHref("cs")).toBe("/prirucka/index.html");
     expect(guideHref("cs", "solids")).toBe("/prirucka/solids-and-holes.html");
-    expect(guideHref("cs", undefined, "hollowing")).toBe(guideHref("en", undefined, "hollowing").replace("/guide/", "/prirucka/"));
+    expect(guideHref("cs", undefined, "hollowing")).toBe("/prirucka/edges-and-hollowing.html#vytvareni-dutin");
     expect(guideChapterForShape({ kind: "text" })).toBe("text");
     expect(guideChapterForShape({ kind: "thread" })).toBe("threads");
     expect(guideChapterForShape({ kind: "box", groupedShapes: [{}] })).toBe("solids");

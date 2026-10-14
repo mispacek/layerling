@@ -93,8 +93,7 @@ export const LANGUAGE_INFO: Readonly<Record<Language, LanguageInfo>> = {
     legal: { imprint: "Údaje o provozovateli", privacy: "Ochrana osobních údajů" },
     keyNames: { Shift: "Shift", Delete: "Delete", Home: "Home", Click: "Kliknutí", RightClick: "Pravé tlačítko", Drag: "Tažení" },
     asciiUmlauts: false,
-    // The interface is complete (enforced in i18n.test.ts); guide chapters use English fallback.
-    complete: false,
+    complete: true,
     guide: {
       site: "Uživatelská příručka Layerlingu",
       home: "Uživatelská příručka",
