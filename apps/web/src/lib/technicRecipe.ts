@@ -105,7 +105,8 @@ export function technicBounds(recipe: TechnicRecipe) {
 export function initialTechnicRecipe(): TechnicRecipe {
   const cells: TechnicCell[] = [];
   for (let y = 0; y < 5; y++) for (let x = 0; x < 7; x++) {
-    if (x === 0 || x === 6 || y === 0 || y === 4) cells.push({ x, y, kind: "pin", axis: "Z", roll: 0 });
+    if (x === 0 || x === 6 || y === 0 || y === 4) cells.push({ x, y, kind: "pin",
+      axis: y === 0 || y === 4 ? x % 2 === 0 ? "Z" : "Y" : "X", roll: 0, rounding: "outer" });
   }
   return { version: 1, pitch: 8, height: 8, holeAdjustment: 0, cornerRadius: 4, cells };
 }

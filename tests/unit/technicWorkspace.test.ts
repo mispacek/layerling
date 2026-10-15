@@ -25,7 +25,7 @@ async function click(selector: string) {
   await act(async () => node.click());
 }
 async function button(text: string) {
-  const nodes = [...host.querySelectorAll<HTMLButtonElement>("button")];
+  const nodes = [...host.querySelectorAll<HTMLButtonElement>("button")].filter(n => !n.classList.contains("technic-cell"));
   const node = (nodes.find(n => n.textContent?.trim() === text) ?? nodes.find(n => n.textContent?.trim().endsWith(text)))!;
   expect(node).not.toBeUndefined();
   await act(async () => node.click());
@@ -74,7 +74,8 @@ describe("construction workspace draft", () => {
     expect(document.activeElement).toBe(host.querySelector('.technic-workspace'));
     await act(async () => document.activeElement!.dispatchEvent(new KeyboardEvent("keydown", { key: "x", bubbles: true })));
     await button(t("technic.done"));
-    expect(onApply.mock.calls[0][0].cells.filter(c => c.axis === "X")).toHaveLength(1);
+    expect(onApply.mock.calls[0][0].cells.find(c => c.x === 0 && c.y === 0)?.axis).toBe("X");
+    expect(onApply.mock.calls[0][0].cells.filter(c => c.x !== 0 || c.y !== 0)).toEqual(initial.cells.filter(c => c.x !== 0 || c.y !== 0));
   });
   it("applies mixed oriented patterns only in the active floor and writes explicit directions back to text", async () => {
     const { onApply } = await render(); await button(t("technic.duplicateLayer"));
@@ -172,6 +173,15 @@ describe("construction workspace draft", () => {
     await act(async () => resizeGrid([{ contentRect: { width: 370, height: 240 } }]));
     expect(host.querySelectorAll(".technic-cell.filled")).toHaveLength(20);
     expect(host.querySelector(".technic-cell")?.getAttribute("data-cell")).toBe("0,4");
+  });
+  it("opens with the preview and outside rounding enabled, and centres the frame in a wide grid", async () => {
+    await render();
+    expect(host.querySelector('.technic-preview-toggle')?.getAttribute('aria-pressed')).toBe("true");
+    expect(host.querySelector<HTMLSelectElement>('.technic-rounding select')!.value).toBe("outer");
+    await act(async () => resizeGrid([{ contentRect: { width: 632, height: 500 } }]));
+    expect(host.querySelector(".technic-cell")?.getAttribute("data-cell")).toBe("-3,7");
+    await button(t("technic.preview"));
+    expect(host.querySelector('.technic-preview-toggle')?.getAttribute('aria-pressed')).toBe("false");
   });
   it("accepts Czech decimals in dimensions, retains them in the applied recipe and resets the draft on undo", async () => {
     const { onApply } = await render();

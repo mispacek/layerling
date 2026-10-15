@@ -41,7 +41,7 @@ describe("optional Lego Compatible recipes", () => {
     expect(baseOrigin(previous).distanceTo(baseOrigin(replaced))).toBeLessThan(1e-8);
   });
   it("supports individual choices and retains legacy rounding", () => {
-    const r = initialTechnicRecipe(); r.cells = r.cells.map(c => ({ ...c, rounded: true }));
+    const r = initialTechnicRecipe(); r.cells = r.cells.map(c => ({ ...c, rounding: undefined, rounded: true }));
     expect(technicCorners(r)).toHaveLength(8);
     r.cells = r.cells.map(c => ({ ...c, rounding: "none" })); r.cells[0] = { ...r.cells[0], rounding: "outer" };
     expect(technicCorners(r).map(c => c.kind)).toEqual(["convex"]);
@@ -52,7 +52,13 @@ describe("optional Lego Compatible recipes", () => {
     expect(validTechnicRecipe(r)).toBe(true);
     expect(r.cells).toHaveLength(20);
     expect(technicBounds(r)).toMatchObject({ width: 56, depth: 40 });
-    expect(parseTechnicPattern(technicPattern(r), "X", 45)).toEqual(r.cells.slice().sort((a, b) => b.y - a.y || a.x - b.x));
+    expect(technicPattern(r).split("\n").map(row => row.trim().split(/\s+/).join(" "))).toEqual([
+      "oz oy oz oy oz oy oz", "ox . . . . . ox", "ox . . . . . ox", "ox . . . . . ox", "oz oy oz oy oz oy oz",
+    ]);
+    expect(r.cornerRadius).toBe(4);
+    expect(r.cells.every(c => c.rounding === "outer")).toBe(true);
+    expect(technicCorners(r).map(c => c.kind)).toEqual(["convex", "convex", "convex", "convex"]);
+    expect(parseTechnicPattern(technicPattern(r), "X", 45)).toEqual(r.cells.map(({ rounding: _rounding, ...c }) => c).sort((a, b) => b.y - a.y || a.x - b.x));
   });
   it("keeps sparse negative coordinates and uses exactly 8 mm spacing", () => {
     const r = { ...initialTechnicRecipe(), cells: [{ x: -3, y: 2, kind: "solid" as const, axis: "Z" as const, roll: 0 as const }, { x: 1, y: -1, kind: "solid" as const, axis: "Z" as const, roll: 0 as const }] };

@@ -171,7 +171,7 @@ describe("real Lego Compatible bodies", () => {
   it("rounds inner corners and keeps horizontal holes through added fillet material open", async () => {
     const r = initialTechnicRecipe();
     r.cornerRadius = 4;
-    r.cells = r.cells.map(c => ({ ...c, rounded: true, axis: c.x === 1 && c.y === 0 ? "Y" : c.axis }));
+    r.cells = r.cells.map(c => ({ ...c, rounding: "both", axis: c.x === 1 && c.y === 0 ? "Y" : "Z" }));
     const { body, shape, dispose } = await bodyFor(r);
     try {
       expect(body.status()).toBe("NoError");
@@ -224,7 +224,7 @@ describe("real Lego Compatible bodies", () => {
     const { body, shape, dispose } = await bodyFor(initialTechnicRecipe());
     try {
       expect(body.status()).toBe("NoError"); expect(shape).toMatchObject({ width: 56, depth: 40, height: 8 });
-      expect(body.volume()).toBeCloseTo(20 * (512 - boreVolume), 2);
+      expect(body.volume()).toBeCloseTo(20 * (512 - boreVolume) - (64 - circleArea(8)) * 8, 2);
       expect(body.rayCast([0, -10, 0], [0, 15, 0])).toHaveLength(0);
       const components = body.decompose(); expect(components).toHaveLength(1); components.forEach(disposeManifold);
     } finally { dispose(); }
@@ -261,7 +261,7 @@ describe("real Lego Compatible bodies", () => {
     expect(restored.width).toBeCloseTo(56, 4); expect(restored.depth).toBeCloseTo(40, 4); expect(restored.height).toBeCloseTo(8, 4);
     const created: ManifoldSolid[] = [];
     const solid = shapeToManifoldSolid(await getManifoldRuntime(), restored, created)!;
-    try { expect(solid.status()).toBe("NoError"); expect(solid.volume()).toBeCloseTo(20 * (512 - boreVolume), 2); }
+    try { expect(solid.status()).toBe("NoError"); expect(solid.volume()).toBeCloseTo(20 * (512 - boreVolume) - (64 - circleArea(8)) * 8, 2); }
     finally { [...new Set([...created, solid])].reverse().forEach(disposeManifold); }
   });
 });

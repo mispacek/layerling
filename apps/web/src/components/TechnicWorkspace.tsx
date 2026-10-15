@@ -22,8 +22,8 @@ type Mode = "select" | "add" | "remove" | "set";
 function fittedGridView(recipe: TechnicRecipe, columns: number, rows: number) {
   if (!recipe.cells.length) return { x: -Math.floor(columns / 2), y: Math.floor(rows / 2) };
   const b = technicBounds(recipe);
-  const marginX = Math.max(0, Math.min(2, Math.floor((columns - (b.maxX - b.minX + 1)) / 2)));
-  const marginY = Math.max(0, Math.min(2, Math.floor((rows - (b.maxY - b.minY + 1)) / 2)));
+  const marginX = Math.max(0, Math.floor((columns - (b.maxX - b.minX + 1)) / 2));
+  const marginY = Math.max(0, Math.floor((rows - (b.maxY - b.minY + 1)) / 2));
   return { x: Math.max(-128, Math.min(129 - columns, b.minX - marginX)),
     y: Math.max(-129 + rows, Math.min(128, b.maxY + marginY)) };
 }
@@ -96,7 +96,7 @@ export function TechnicWorkspace({ initial, initialRoundingOpen = false, workspa
   const [future, setFuture] = useState<DraftSnapshot[]>([]);
   const [mode, setMode] = useState<Mode>("select");
   const [roundingOpen, setRoundingOpen] = useState(initialRoundingOpen);
-  const [brush, setBrush] = useState<Omit<TechnicCell, "x" | "y" | "z">>({ kind: "pin", axis: "Z", roll: 0 });
+  const [brush, setBrush] = useState<Omit<TechnicCell, "x" | "y" | "z">>({ kind: "pin", axis: "Z", roll: 0, rounding: "outer" });
   const [selected, setSelected] = useState<string[]>([]);
   const [placement, setPlacement] = useState<"move" | "copy" | null>(null);
   const [transferLayer, setTransferLayer] = useState<number | null>(null);
@@ -104,7 +104,7 @@ export function TechnicWorkspace({ initial, initialRoundingOpen = false, workspa
   const selectionStroke = useRef<{ start: { x: number; y: number }; base: string[] } | null>(null);
   const paintStroke = useRef<DraftSnapshot | null>(null);
   const finishRef = useRef<() => void>(() => {});
-  const [preview, setPreview] = useState(false);
+  const [preview, setPreview] = useState(true);
   const [profiles, setProfiles] = useState<TechnicPrintProfile[]>([]);
   const [profileName, setProfileName] = useState("");
   const [profileNotice, setProfileNotice] = useState("");
