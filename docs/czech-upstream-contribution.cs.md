@@ -1,41 +1,44 @@
-# Český překlad pro původní Layerling
+# Český překlad připravený pro pull request
 
-Připraveno proti upstream `edaad2dd` (1.72.3), commit `7e6c0810`.
+Ověřeno 15. 10. 2026 proti upstream verzi **1.75.0**, commit `bf95d765`.
+Větev příspěvku: `codex/czech-localization`, aktualizační commit `abb674c9`.
 
-- Větev: [mispacek/layerling — codex/czech-localization](https://github.com/mispacek/layerling/tree/codex/czech-localization)
-- [Otevřít předvyplněný pull request do henmedia/layerling](https://github.com/henmedia/layerling/compare/main...mispacek:layerling:codex/czech-localization?expand=1&title=Add%20Czech%20translation%20and%20complete%20Czech%20user%20guide&body=Adds%20Czech%20as%20a%20complete%2C%20selectable%20language%2C%20following%20docs%2FTRANSLATING.md.%0A%0A-%20Translates%20all%202%2C365%20current%20UI%20messages%20and%20195%20release-note%20entries.%0A-%20Adds%20all%2016%20Czech%20user-guide%20chapters%2C%20shared%20screenshots%2C%20printable%20guide%2C%20and%2053%20translated%20contextual-help%20anchors.%0A-%20Registers%20cs-CZ%20formatting%20and%20lazy-loaded%20messages.%20The%20existing%20English%20default%2C%20theme%2C%20and%20site%20identity%20are%20unchanged.%0A-%20Includes%20a%20small%20drawing-PDF%20fallback%20for%20Czech%2FPolish%20letters%20unsupported%20by%20standard%20Helvetica%3A%20unsupported%20accents%20become%20readable%20base%20letters%20instead%20of%20question%20marks.%20SVG%20preserves%20full%20Unicode.%0A-%20Adds%20locale%2Fguide%20coverage%2C%20Czech%20font%20coverage%20in%20all%20seven%20built-in%20faces%2C%20and%20SVG%2FPDF%20regression%20checks.%0A%0AThis%20contribution%20was%20extracted%20from%20our%20maintained%20Czech-language%20fork.%20Custom%20LEGO%20features%2C%20local%20defaults%2C%20and%20hosting%20changes%20are%20excluded.%20Generated%20guide%20HTML%20is%20not%20committed.%0A%0AValidation%3A%0A-%20TypeScript%2C%20translation-status%20checks%20(2%2C365%2F2%2C365%20messages%3B%2016%2F16%20chapters)%2C%20guide%20generation%2C%20and%20static%20export%20pass.%0A-%20All%2080%20focused%20tests%20pass.%0A-%20Full%20unit%20suite%3A%201%2C984%2F1%2C985%20pass.%20The%20remaining%20sharedProjectsCopy%20test%20is%20an%20existing%20Windows%20path%20expectation%20failure%2C%20unrelated%20to%20localization.%0A-%20Browser%20verification%3A%20switching%20CS%20%E2%86%92%20EN%20%E2%86%92%20CS%2C%20translated%20guide%20chapter%2C%20and%20the%20combined%2016-chapter%20print%20page.%0A%0ATranslation%20note%3A%20the%20Czech%20UI%20comes%20from%20our%20Czech-speaking%20user's%20maintained%20fork%3B%20the%20completed%20guide%20and%20contribution%20preparation%20used%20AI%20assistance%20with%20contextual%20terminology%20review.%20Independent%20second%20native-speaker%20proofreading%20has%20not%20been%20completed%3B%20corrections%20and%20review%20are%20welcome.)
+- [Větev na GitHubu](https://github.com/mispacek/layerling/tree/codex/czech-localization)
+- [Otevřít předvyplněný pull request do henmedia/layerling](https://github.com/henmedia/layerling/compare/main...mispacek:layerling:codex/czech-localization?expand=1&title=Add%20Czech%20translation%20and%20complete%20Czech%20user%20guide&body=%23%23%20Summary%0A%0A-%20Add%20complete%20Czech%20localization%20for%20layerling%201.75.0%3A%20all%202%2C381%20UI%20messages%2C%2016%20user-guide%20chapters%2C%20218%20release-note%20items%2C%20and%20translated%20contextual-help%20links.%0A-%20Register%20Czech%20as%20a%20lazy-loaded%20language%20with%20cs-CZ%20formatting.%20Preserve%20the%20existing%20default%20language%2C%20theme%2C%20and%20site%20identity.%0A-%20Include%20readable%20base-letter%20fallback%20for%20Czech%2FPolish%20characters%20unsupported%20by%20the%20drawing%20PDF's%20standard%20Helvetica.%20SVG%20retains%20full%20Unicode%3B%20no%20storage%2C%20import%2C%20grouping%2C%20or%20undo%20behavior%20changes.%0A-%20Keep%20this%20contribution%20focused%3A%20custom%20LEGO%20functionality%2C%20fork-specific%20defaults%2C%20hosting%20changes%2C%20and%20generated%20guide%20pages%20are%20excluded.%0A%0A%23%23%20Testing%0A%0A-%20%5Bx%5D%20%60npm%20run%20typecheck%60%0A-%20%5Bx%5D%20%60npm%20run%20i18n%3Astatus%60%3A%20Czech%202%2C381%2F2%2C381%20messages%20and%2016%2F16%20chapters%2C%20no%20problems.%0A-%20%5Bx%5D%20%60npm%20run%20guide%60%20and%20%60npm%20run%20export%60%2C%20including%20both%20static%20CAD%20worker%20runtime%20checks.%0A-%20%5Bx%5D%2086%20focused%20locale%2Fguide%2Fdrawing%2Ffont%20tests.%0A-%20%5Bx%5D%20Manually%20verified%20CS%20%E2%86%92%20EN%20%E2%86%92%20CS%2C%20translated%201.75.0%20release%20notes%2C%20and%20updated%20Czech%20sketch-guide%20content%20in%20the%20browser.%0A-%20Full%20unit%20suite%3A%202%2C057%2F2%2C058%20pass.%20The%20existing%20%60sharedProjectsCopy%60%20Windows%20path%20expectation%20fails%20(%60Halterungen%60%20versus%20a%20relative%20temporary%20path)%3B%20the%20affected%20test%20and%20implementation%20are%20unchanged%20by%20this%20contribution.%0A-%20Audited%20all%2016%20chapters'%20UI%2Fvalue%2Fimage%2Fchapter%20references%20and%20verified%20that%20all%20non-Czech%20release-note%20fields%20are%20unchanged.%0A%0A%23%23%20Notes%0A%0AThe%20Czech%20UI%20originates%20in%20our%20maintained%20Czech-language%20fork.%20The%20guide%20and%20update%20preparation%20used%20AI%20assistance%20with%20contextual%20terminology%20review.%20Independent%20second%20native-speaker%20proofreading%20has%20not%20been%20completed%3B%20corrections%20and%20review%20are%20welcome.%0A)
+- [Porovnat změny s původním repozitářem](https://github.com/henmedia/layerling/compare/main...mispacek:layerling:codex/czech-localization)
 
-Větev je odeslaná na GitHub. Pull request zatím nevznikl: GitHub konektor odmítl vytvoření v původním repozitáři chybou 403 (Resource not accessible by integration). Prohlížeč Codexu nemá přihlášení ke GitHubu a ovládání Chrome je aktuálně nedostupné. Po přihlášení otevřete odkaz výše, zkontrolujte formulář a zvolte **Create pull request**.
+Po přihlášení na GitHub zkontrolujte předvyplněný název a popis a zvolte **Create pull request**. Při předchozím pokusu GitHub konektor vytvoření v původním repozitáři odmítl chybou 403. Tento dokument neznamená, že už pull request vznikl.
 
-Příspěvek obsahuje 2 365 položek rozhraní, 16 úplných kapitol příručky, 195 položek novinek a 53 odkazů na sekce příručky. Obsahuje také testy a malou úpravu čitelného náhradního zápisu znaků při exportu PDF. LEGO rozšíření, naše výchozí nastavení a vlastní doména nejsou součástí příspěvku.
+Příspěvek obsahuje 2 381 textů rozhraní, všech 16 kapitol příručky, 218 položek novinek a kontextovou nápovědu. Příručka odpovídá změnám 1.73.0–1.75.0 včetně PNG/JPG, rozšířené čáry při rotaci, nových ovladačů náčrtu, posunu po 0,01 mm a ukládání STL pod jiným názvem. Závislosti se nezměnily.
 
-Dokončená česká příručka je zároveň přidána do naší vlastní verze. Její výchozí čeština, grafitové téma a LEGO funkce zůstávají zachovány.
+## Rozsah a ověření
 
-## Ověření
-
-- TypeScript, stav překladů, generování příručky a statický export: prošly.
-- Zaměřené testy příspěvku: 80/80; lokální příručky: 60/60.
-- Celá unit sada příspěvku: 1 984/1 985; zbývá dříve existující chyba očekávání cest ve Windows v sharedProjectsCopy.
-- Prohlížeč: přepnutí CS → EN → CS, česká kapitola a společná tisková stránka všech 16 kapitol.
-- Neproběhlo nahrání na WEDOS ani fyzický tisk.
+- Příspěvek je v samostatném pracovním adresáři `C:/xampp/htdocs/layerling-upstream-cs`.
+- Hlavní větev `codex/customizations` s LEGO funkcemi a její aplikace se v tomto kroku neaktualizovaly. Tento dokument zaznamenává stav samostatného příspěvku.
+- Statické/lokální: TypeScript, překlady, generování příručky, statický export a 86 zaměřených testů prošly. Celá unit sada: 2 057/2 058; zbývá dříve zaznamenaná chyba cest ve Windows v sharedProjectsCopy.
+- Prohlížeč: ověřeno přepínání CS → EN → CS, české novinky 1.75.0 a aktualizované části příručky k náčrtům.
+- Nasazení na WEDOS a fyzický tisk: neprováděno.
 - Nezávislá druhá jazyková korektura rodilým mluvčím ještě neproběhla.
 
 ## Text pull requestu
 
-Adds Czech as a complete, selectable language, following docs/TRANSLATING.md.
+## Summary
 
-- Translates all 2,365 current UI messages and 195 release-note entries.
-- Adds all 16 Czech user-guide chapters, shared screenshots, printable guide, and 53 translated contextual-help anchors.
-- Registers cs-CZ formatting and lazy-loaded messages. The existing English default, theme, and site identity are unchanged.
-- Includes a small drawing-PDF fallback for Czech/Polish letters unsupported by standard Helvetica: unsupported accents become readable base letters instead of question marks. SVG preserves full Unicode.
-- Adds locale/guide coverage, Czech font coverage in all seven built-in faces, and SVG/PDF regression checks.
+- Add complete Czech localization for layerling 1.75.0: all 2,381 UI messages, 16 user-guide chapters, 218 release-note items, and translated contextual-help links.
+- Register Czech as a lazy-loaded language with cs-CZ formatting. Preserve the existing default language, theme, and site identity.
+- Include readable base-letter fallback for Czech/Polish characters unsupported by the drawing PDF's standard Helvetica. SVG retains full Unicode; no storage, import, grouping, or undo behavior changes.
+- Keep this contribution focused: custom LEGO functionality, fork-specific defaults, hosting changes, and generated guide pages are excluded.
 
-This contribution was extracted from our maintained Czech-language fork. Custom LEGO features, local defaults, and hosting changes are excluded. Generated guide HTML is not committed.
+## Testing
 
-Validation:
-- TypeScript, translation-status checks (2,365/2,365 messages; 16/16 chapters), guide generation, and static export pass.
-- All 80 focused tests pass.
-- Full unit suite: 1,984/1,985 pass. The remaining sharedProjectsCopy test is an existing Windows path expectation failure, unrelated to localization.
-- Browser verification: switching CS → EN → CS, translated guide chapter, and the combined 16-chapter print page.
+- [x] `npm run typecheck`
+- [x] `npm run i18n:status`: Czech 2,381/2,381 messages and 16/16 chapters, no problems.
+- [x] `npm run guide` and `npm run export`, including both static CAD worker runtime checks.
+- [x] 86 focused locale/guide/drawing/font tests.
+- [x] Manually verified CS → EN → CS, translated 1.75.0 release notes, and updated Czech sketch-guide content in the browser.
+- Full unit suite: 2,057/2,058 pass. The existing `sharedProjectsCopy` Windows path expectation fails (`Halterungen` versus a relative temporary path); the affected test and implementation are unchanged by this contribution.
+- Audited all 16 chapters' UI/value/image/chapter references and verified that all non-Czech release-note fields are unchanged.
 
-Translation note: the Czech UI comes from our Czech-speaking user's maintained fork; the completed guide and contribution preparation used AI assistance with contextual terminology review. Independent second native-speaker proofreading has not been completed; corrections and review are welcome.
+## Notes
+
+The Czech UI originates in our maintained Czech-language fork. The guide and update preparation used AI assistance with contextual terminology review. Independent second native-speaker proofreading has not been completed; corrections and review are welcome.
