@@ -742,6 +742,8 @@ export type WorkplaneShape = {
     // re-emit the original analytic geometry instead of the tessellation.
     brepStep?: string;
   };
+  /** A shape that only shows what a preview would make (the common part of an intersection, #372): not picked, not saved. */
+  previewOnly?: boolean;
   imagePlate?: {
     dataUrl: string;
     mimeType: string;

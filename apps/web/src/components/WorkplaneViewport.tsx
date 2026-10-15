@@ -6,7 +6,7 @@ import { objectSnapOffset, shiftSnapBox, type ObjectSnapGuide, type SnapBox } fr
 import { useMovablePanel, type MovablePanelOptions } from "@/lib/useMovablePanel";
 import { computeSectionPlaneVector, DEFAULT_SECTION_SETTINGS, getSectionBounds, SECTION_AXES_SHOWN, sectionAxisLetter, sectionFineWindow, sectionPlacementWorkplane, type SectionPlaneAxis, type SectionPlaneSettings } from "@/lib/sectionView";
 import { projectSectionPoint, type SectionLoop, type SectionPoint } from "@/lib/sectionSvg";
-import { sectionMeasurement, sectionPointToWorld, snapSectionPoint, type SectionSnap } from "@/lib/sectionMeasure";
+import { circleOfLoop, sectionMeasurement, sectionPointToWorld, snapSectionPoint, type SectionSnap } from "@/lib/sectionMeasure";
 import * as THREE from "three";
 import { acceleratedRaycast, computeBoundsTree, disposeBoundsTree } from "three-mesh-bvh";
 import { groupShowsPartColors } from "@/lib/groupColors";
@@ -1722,7 +1722,15 @@ type SectionMeasureOverlayState = {
   b: { x: number; y: number } | null;
   hover: { x: number; y: number; kind: SectionSnap["kind"] } | null;
   label: { x: number; y: number; text: string } | null;
+  /** The centres of round outlines: marked so it shows that they snap. */
+  centers: Array<{ x: number; y: number }>;
 };
+
+/** Ø in front of a diameter and R in front of a radius, so the number says what it measures. */
+function sectionMeasureLabel(result: ReturnType<typeof sectionMeasurement>, accuracy: MeasurementAccuracy) {
+  const prefix = result.circle === "diameter" ? "Ø " : result.circle === "radius" ? "R " : "";
+  return `${prefix}${formatMeasure(result.distance, accuracy)}`;
+}
 
 /** The parts of a measurement that lie in the cutting plane, named like the position fields. */
 function sectionMeasureDeltas(result: ReturnType<typeof sectionMeasurement>, axis: SectionPlaneAxis, accuracy: MeasurementAccuracy) {
@@ -1763,8 +1771,12 @@ function syncSectionMeasureOverlay(
   const b = model.b ? toScreen(model.b) : null;
   const hoverScreen = model.hover ? toScreen(model.hover.point) : null;
   const label = model.a && model.b && a && b
-    ? { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 - 18, text: formatMeasure(sectionMeasurement(model.a, model.b, model.axis, model.offset).distance, accuracy) }
+    ? { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 - 18, text: sectionMeasureLabel(sectionMeasurement(model.a, model.b, model.axis, model.offset, model.loops), accuracy) }
     : null;
+  const centers = model.loops.flatMap((loop) => {
+    const circle = circleOfLoop(loop);
+    return circle ? [toScreen(circle.center)] : [];
+  });
   const next: SectionMeasureOverlayState = {
     signature: "",
     outlines,
@@ -1772,8 +1784,9 @@ function syncSectionMeasureOverlay(
     b,
     hover: hoverScreen && model.hover ? { ...hoverScreen, kind: model.hover.kind } : null,
     label,
+    centers,
   };
-  next.signature = JSON.stringify([outlines.join("|").length, outlines[0]?.slice(0, 40), a, b, next.hover, label?.text, label?.x]);
+  next.signature = JSON.stringify([outlines.join("|").length, outlines[0]?.slice(0, 40), a, b, next.hover, label?.text, label?.x, centers.map((center) => `${center.x.toFixed(0)},${center.y.toFixed(0)}`).join(" ")]);
   if (overlayRef.current?.signature === next.signature) return;
   overlayRef.current = next;
   setOverlay(next);
@@ -1785,6 +1798,12 @@ function SectionMeasureOverlay({ overlay }: { overlay: SectionMeasureOverlayStat
       <svg className="tape-guides" width="100%" height="100%">
         {overlay.outlines.map((points, index) => (
           <polyline key={index} className="section-measure-outline" points={points} fill="none" />
+        ))}
+        {overlay.centers.map((center, index) => (
+          <g key={`center-${index}`}>
+            <path className="section-measure-center-halo" d={`M${center.x - 5},${center.y} h10 M${center.x},${center.y - 5} v10`} />
+            <path className="section-measure-center" d={`M${center.x - 5},${center.y} h10 M${center.x},${center.y - 5} v10`} />
+          </g>
         ))}
         {overlay.a && overlay.b ? <line className="section-measure-line" x1={overlay.a.x} y1={overlay.a.y} x2={overlay.b.x} y2={overlay.b.y} /> : null}
         {overlay.a ? <circle className="section-measure-point" cx={overlay.a.x} cy={overlay.a.y} r="4.5" /> : null}
@@ -4505,7 +4524,7 @@ export function WorkplaneViewport({
     // Third click starts the next measurement.
     const next = !model.a || model.b ? { ...model, a: point, b: null } : { ...model, b: point };
     sectionMeasureRef.current = { ...next, hover: null };
-    setSectionMeasureResult(next.a && next.b ? sectionMeasurement(next.a, next.b, next.axis, next.offset) : null);
+    setSectionMeasureResult(next.a && next.b ? sectionMeasurement(next.a, next.b, next.axis, next.offset, next.loops) : null);
     if (threeRef.current) threeRef.current.needsRender = true;
   }, []);
 
@@ -6088,7 +6107,7 @@ export function WorkplaneViewport({
       const shapeId = entry.object.userData.shapeId;
       if (typeof shapeId !== "string") return false;
       const shape = shapesRef.current.find((candidate) => candidate.id === shapeId);
-      return shape ? !shape.imagePlate : false;
+      return shape ? !shape.imagePlate && !shape.previewOnly : false;
     };
     const hit = state.raycaster.intersectObjects(state.shapeLayer.children, true).find(pickable);
     if (hit) {
@@ -8479,7 +8498,7 @@ export function WorkplaneViewport({
                         {sectionMeasureMode ? (
                           sectionMeasureResult ? (
                             <div className="section-measure-readout" aria-live="polite">
-                              <strong>{formatMeasure(sectionMeasureResult.distance, workspace.accuracy)} {lengthDisplayUnit(workspace).label}</strong>
+                              <strong>{sectionMeasureResult.circle === "diameter" ? "Ø " : sectionMeasureResult.circle === "radius" ? "R " : ""}{formatMeasure(sectionMeasureResult.distance, workspace.accuracy)} {lengthDisplayUnit(workspace).label}</strong>
                               <span>{sectionMeasureDeltas(sectionMeasureResult, sectionSettings.axis, workspace.accuracy)}</span>
                             </div>
                           ) : (
@@ -10479,8 +10498,13 @@ function pullModifierEdgeTowardCamera(material: THREE.LineBasicMaterial) {
 // Browsers draw a plain WebGL line 1px wide whatever its linewidth says, so the
 // hovered edge and the edge to unselect get a screen-space wide line at twice that.
 const WIDE_MODIFIER_EDGE_PX = 2;
+// The hovered edge also gets a darker, wider line under it: on the pale floor a
+// light blue line alone has hardly any contrast, the outline keeps it readable
+// on light and dark ground alike.
+const MODIFIER_EDGE_HALO_PX = 6;
+const MODIFIER_EDGE_HALO_COLOR = "#0a2a3a";
 
-function wideModifierEdgeLine(state: ThreeState, points: number[], color: string, renderOrder: number) {
+function wideModifierEdgeLine(state: ThreeState, points: number[], color: string, renderOrder: number, linewidth = WIDE_MODIFIER_EDGE_PX, opacity = 1) {
   const segments: number[] = [];
   for (let index = 3; index + 2 < points.length; index += 3) {
     segments.push(points[index - 3], points[index - 2], points[index - 1], points[index], points[index + 1], points[index + 2]);
@@ -10489,10 +10513,10 @@ function wideModifierEdgeLine(state: ThreeState, points: number[], color: string
   geometry.setPositions(segments);
   const material = new LineMaterial({
     color,
-    linewidth: WIDE_MODIFIER_EDGE_PX,
+    linewidth,
     worldUnits: false,
     transparent: true,
-    opacity: 1,
+    opacity,
     depthTest: false,
     depthWrite: false,
     alphaToCoverage: false,
@@ -10529,6 +10553,9 @@ function rebuildModifierEdges(
     const belowThreshold = !active && !hovered && !highlighted.has(edge.id);
     const style = modifierEdgeMaterialStyle(active, hovered, previewActive, belowThreshold, failed.has(edge.id));
     if (hovered || (active && failed.has(edge.id))) {
+      if (hovered) {
+        state.modifierLayer.add(wideModifierEdgeLine(state, edge.points, MODIFIER_EDGE_HALO_COLOR, 1002.5, MODIFIER_EDGE_HALO_PX, 0.85));
+      }
       state.modifierLayer.add(wideModifierEdgeLine(state, edge.points, style.color, hovered ? 1003 : 1002));
       return;
     }

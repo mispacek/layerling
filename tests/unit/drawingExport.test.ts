@@ -189,9 +189,9 @@ describe("automatic drawing export", () => {
     expect(generateDrawing([meshFromGeometry(new THREE.BoxGeometry(240, 50, 20))], "Long").paper).toBe("ISO A3");
   });
 
-  it("keeps Czech labels in SVG and uses readable base letters for unsupported PDF accents", () => {
+  it("keeps Czech labels in SVG and uses readable base letters for unsupported PDF accents", async () => {
     const language = getLanguage();
-    setLanguage("cs");
+    await setLanguage("cs");
     try {
       const drawing = generateDrawing([plateWithBores()], "Český díl", drawingLabelsInLanguage());
       expect(drawingToSvg(drawing)).toContain("MĚŘÍTKO");
@@ -200,7 +200,7 @@ describe("automatic drawing export", () => {
       expect(pdf).toContain("MER\\315TKO");
       expect(pdf).toContain("Cesk\\375 d\\355l");
       expect(pdf).not.toContain("?");
-    } finally { setLanguage(language); }
+    } finally { await setLanguage(language); }
   });
   it("writes the sheet in the interface language, also into the PDF", () => {
     setLanguage("de");

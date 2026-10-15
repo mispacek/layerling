@@ -1,5 +1,70 @@
 [
   {
+    "version": "1.76.0",
+    "items": [
+      {
+        "title": {
+          "de": "Schnittmenge mit Vorschau",
+          "en": "Intersection with a preview",
+          "cs": "Náhled průniku těles"
+        },
+        "body": {
+          "de": "Neben der Schnittmenge gibt es einen Knopf „Gemeinsames Stück zeigen\": Er macht die markierten Formen durchsichtig und zeichnet grün, was sie gemeinsam haben. Du kannst jede Form einzeln markieren und verschieben, das grüne Stück folgt. Schnittmenge wendet es an, Esc schließt die Vorschau. Haben die Formen nichts gemeinsam, bleiben sie jetzt, statt zu verschwinden, und eine Meldung sagt es.",
+          "en": "Beside Boolean Intersection there is a new button, \"Show common part\": it makes the selected shapes see-through and draws what they share in green. You can select and move each shape on its own and the green part follows. Intersection applies it, Esc closes the preview. If the shapes share nothing, they now stay instead of vanishing, and a message says so.",
+          "cs": "Vedle příkazu Průnik těles je nové tlačítko „Zobrazit společnou část“. Vybrané tvary zprůhlední a jejich společný prostor zobrazí zeleně. Jednotlivá tělesa můžete vybírat a přesouvat a náhled se průběžně mění. Příkaz Průnik těles operaci provede, Esc náhled zavře. Pokud tělesa společnou část nemají, nově zůstanou zachovaná a zobrazí se upozornění."
+        }
+      },
+      {
+        "title": {
+          "de": "Messen am Kreis im Schnitt",
+          "en": "Measuring a circle in the section view",
+          "cs": "Měření kružnice v řezu"
+        },
+        "body": {
+          "de": "Im Schnitt markiert ein kleines Kreuz die Mitte runder Umrisse, und die Mitte rastet beim Messen ein. Klickst du einen Punkt auf dem Kreis an und gehst dann zum Punkt gegenüber, landet der zweite Klick genau gegenüber der Mitte: Die Zahl trägt ein Ø und ist der Durchmesser. Von der Mitte zu einem Punkt auf dem Kreis liest du R, den Radius.",
+          "en": "In the section view a small cross marks the centre of round outlines, and the centre snaps when you measure. Click a point on the circle and go to the point across from it: the second click lands exactly across the centre, and the number carries a Ø, the diameter. From the centre to a point on the circle you read R, the radius.",
+          "cs": "V řezu označuje malý křížek střed kruhového obrysu a při měření se k němu lze přichytit. Klikněte na bod kružnice a přibližte se k protilehlému bodu: druhý bod se umístí přesně přes střed a údaj Ø zobrazí průměr. Při měření od středu k bodu kružnice údaj R označuje poloměr."
+        }
+      },
+      {
+        "title": {
+          "de": "Tschechisch als Sprache",
+          "en": "Czech as a language",
+          "cs": "Český překlad"
+        },
+        "body": {
+          "de": "layerling gibt es jetzt auch auf Tschechisch: die ganze Oberfläche, die 16 Kapitel der Anleitung und die „Was ist neu\"-Karten. Die Sprache wird für einen Browser mit tschechischer Einstellung von selbst gewählt und lässt sich in der Sprachliste ändern. Übersetzt mit einem KI-Assistenten; falsche Wörter lassen sich mit einem kleinen Pull Request auf GitHub verbessern.",
+          "en": "layerling now speaks Czech: the whole interface, the 16 chapters of the guide and the release notes. The language is chosen automatically for a browser set to Czech and can be changed in the language list. It was translated with an AI assistant; wrong words are fixed with a small pull request on GitHub.",
+          "cs": "Layerling je nyní dostupný česky: celé rozhraní, všech 16 kapitol příručky i novinky. Původní projekt vybírá jazyk podle nastavení prohlížeče a umožňuje jeho změnu v jazykové nabídce. Naše vlastní instalace nadále používá češtinu jako výchozí. Překlad vznikl s pomocí AI asistenta; nepřesné výrazy lze opravit malým pull requestem na GitHubu."
+        }
+      },
+      {
+        "title": {
+          "de": "Slowenisch als Sprache",
+          "en": "Slovenian as a language",
+          "cs": "Slovinský překlad"
+        },
+        "body": {
+          "de": "layerling gibt es jetzt auch auf Slowenisch: die ganze Oberfläche und die 16 Kapitel der Anleitung. Die Sprache wird für einen Browser mit slowenischer Einstellung von selbst gewählt und lässt sich in der Sprachliste ändern. Übersetzt mit einem KI-Assistenten; falsche Wörter lassen sich mit einem kleinen Pull Request auf GitHub verbessern.",
+          "en": "layerling now speaks Slovenian: the whole interface and the 16 chapters of the guide. The language is chosen automatically for a browser set to Slovenian and can be changed in the language list. It was translated with an AI assistant; wrong words are fixed with a small pull request on GitHub.",
+          "cs": "Rozhraní Layerlingu i všech 16 kapitol příručky je nyní dostupných slovinsky. Původní projekt vybírá jazyk podle nastavení prohlížeče a umožňuje jeho změnu v jazykové nabídce. Překlad vznikl s pomocí AI asistenta; nepřesné výrazy lze opravit malým pull requestem na GitHubu."
+        }
+      },
+      {
+        "title": {
+          "de": "Pfeiltasten: ein Schritt im Verlauf",
+          "en": "Arrow keys: one step in the history",
+          "cs": "Série posunů šipkami jako jeden krok historie"
+        },
+        "body": {
+          "de": "Eine Folge von Pfeil-Drücken, die einzeln jeweils um einen Schritt verschiebt, ist jetzt ein Schritt im Verlauf, in 3D-Editor und Skizze. Folgt der nächste Druck innerhalb von anderthalb Sekunden, nimmt Rückgängig die ganze Folge zurück. Der Verlauf füllt sich nicht mehr mit einem Eintrag je Tastendruck.",
+          "en": "A run of arrow presses, each moving by one step, is now one step in the history, in the 3D editor and in the sketch. If the next press follows within a second and a half, Undo takes back the whole run. The history no longer fills up with an entry for every key press.",
+          "cs": "Série stisků šipek tvoří jeden krok historie ve 3D editoru i v náčrtu. Pokud další stisk následuje do 1,5 sekundy, příkaz Zpět vrátí celou sérii. Historie se tak nezaplňuje samostatným záznamem pro každý stisk."
+        }
+      }
+    ]
+  },
+  {
     "version": "1.75.0",
     "items": [
       {

@@ -49,7 +49,7 @@ Soms moeten onderdelen alleen bij elkaar blijven zonder één te worden, bijvoor
 
 ## Doorsnijding
 
-{{ui:editor.tool.intersect}} houdt alleen over wat twee of meer lichamen gemeen hebben. Leg twee overlappende vormen over elkaar, selecteer ze allebei en klik erop. Zo maak je van een cilinder en een blok een stuk met één ronde en één rechte kant. Een groep telt zoals hij eruitziet, inclusief gaten. Is er ook een gat geselecteerd, dan blijft over wat alle lichamen gemeen hebben met alle gaten.
+{{ui:editor.tool.intersect}} houdt alleen over wat twee of meer lichamen gemeen hebben. Leg twee overlappende vormen over elkaar, selecteer ze allebei en klik erop. Zo maak je van een cilinder en een blok een stuk met één ronde en één rechte kant. Een groep telt zoals hij eruitziet, inclusief gaten. Is er ook een gat geselecteerd, dan blijft over wat alle lichamen gemeen hebben met alle gaten. Hebben de vormen niets gemeen, dan verandert er niets en zegt een melding dat. Ernaast toont {{ui:editor.tool.intersectPreview}} het gemeenschappelijke deel voordat je het toepast: de geselecteerde vormen worden doorzichtig en wat ze gemeen hebben, wordt groen getekend. Selecteer en verplaats elke vorm afzonderlijk en het groene deel volgt; {{ui:editor.tool.intersect}} past het toe, [[Esc]] sluit de voorvertoning.
 
 ## Een groep bewerken
 

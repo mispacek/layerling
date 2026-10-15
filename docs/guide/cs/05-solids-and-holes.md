@@ -49,7 +49,7 @@ Někdy mají díly jen držet pohromadě, aniž by se spojila jejich geometrie. 
 
 ## Průnik
 
-{{ui:editor.tool.intersect}} zachová pouze prostor společný dvěma nebo více tělesům. Umístěte dva tvary tak, aby se překrývaly, vyberte je a spusťte příkaz. Z válce a kvádru tak vznikne například díl s jednou oblou a jednou rovnou stranou. Sloučený tvar se vyhodnocuje podle skutečné geometrie včetně otvorů. Obsahuje-li výběr i výřez, zachová se společná oblast všech plných těles a všech výřezů.
+{{ui:editor.tool.intersect}} zachová pouze prostor společný dvěma nebo více tělesům. Umístěte dva tvary tak, aby se překrývaly, vyberte je a spusťte příkaz. Z válce a kvádru tak vznikne například díl s jednou oblou a jednou rovnou stranou. Sloučený tvar se vyhodnocuje podle skutečné geometrie včetně otvorů. Obsahuje-li výběr i výřez, zachová se společná oblast všech plných těles a všech výřezů. Pokud tvary společnou část nemají, zůstanou zachované a zobrazí se upozornění. Sousední tlačítko {{ui:editor.tool.intersectPreview}} ukáže výsledek před provedením operace: vybrané tvary zprůhlední a společná část se zobrazí zeleně. Jednotlivá tělesa můžete dál vybírat a přesouvat a náhled se přizpůsobuje. {{ui:editor.tool.intersect}} průnik provede, [[Esc]] náhled ukončí.
 
 ## Úprava sloučení
 

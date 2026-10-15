@@ -262,7 +262,7 @@ describe("custom snap grids", () => {
   });
 
   it("names a step after its measure, and after its size once the measure is gone", () => {
-    expect(customSnapGridLabel("custom:19.05:1", [keyUnit])).toBe("1 × MX Key Unit");
+    expect(customSnapGridLabel("custom:19.05:1", [keyUnit])).toBe("MX Key Unit");
     expect(customSnapGridLabel("custom:19.05:4", [keyUnit])).toBe("¼ × MX Key Unit");
     expect(customSnapGridLabel("custom:19.05:2", [])).toBe("½ × 19.05 mm");
     expect(customSnapGridLabel("1.0 mm", [keyUnit])).toBeNull();

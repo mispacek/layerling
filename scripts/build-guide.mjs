@@ -115,7 +115,7 @@ const CYRILLIC_TRANSLITERATION = {
 export function slugify(text) {
   return text
     .toLowerCase()
-    .replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/ß/g, "ss")
+    .replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/ß/g, "ss").replace(/č/g, "c").replace(/š/g, "s").replace(/ž/g, "z").replace(/đ/g, "d")
     // Cyrillic is spelled out first - the accent stripping below would take the
     // breve off "й" and leave "и", which would spell "Настройки" as "nastroiki"
     // and move the id a Russian heading already had.

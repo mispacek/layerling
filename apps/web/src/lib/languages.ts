@@ -10,7 +10,7 @@
  *
  * To add a language, see docs/TRANSLATING.md.
  */
-export const LANGUAGES = ["en", "de", "cs", "nl", "fr", "pl", "ru"] as const;
+export const LANGUAGES = ["en", "de", "cs", "nl", "fr", "pl", "ru", "sl"] as const;
 export type Language = (typeof LANGUAGES)[number];
 export const DEFAULT_LANGUAGE: Language = "cs";
 
@@ -354,6 +354,44 @@ export const LANGUAGE_INFO: Readonly<Record<Language, LanguageInfo>> = {
       printAllLead: "Все главы подряд — чтобы распечатать или сохранить как PDF: нажмите Ctrl+P и отключите в настройках печати «Колонтитулы». Если нужно распечатать только часть, выберите там номера страниц.",
       printContents: "Содержание",
       printButton: "Печать",
+    },
+  },
+  sl: {
+    name: "Slovenščina",
+    htmlLang: "sl",
+    numberLocale: "sl-SI",
+    quotes: ["„", "“"],
+    guideDir: "navodila",
+    communityUrl: GITHUB_DISCUSSIONS,
+    readme: "README.md",
+    quickstartAnchor: "windows-quickstart",
+    legal: { imprint: "Odtis", privacy: "Zasebnost" },
+    keyNames: { Click: "Klik", RightClick: "Desni klik", Drag: "Vlečenje" },
+    asciiUmlauts: false,
+    // LEGO-specific interface text uses English fallback.
+    complete: false,
+    guide: {
+      site: "layerling navodila",
+      home: "Navodila",
+      openEditor: "V urejevalnik",
+      backToEditor: "Nazaj v urejevalnik",
+      editorElsewhere: "Urejevalnik je že odprt v drugem zavihku – preprosto preklopi nanj.",
+      chapters: "Poglavja",
+      onThisPage: "Na tej strani",
+      previous: "Prejšnje poglavje",
+      next: "Naslednje poglavje",
+      overviewLead: "Vse, kar zmore layerling, korak za korakom. Slike so posnete iz delujočega programa (v angleškem vmesniku).",
+      sourceNote: "Ta navodila rastejo skupaj s programom. Če kaj manjka ali ne drži, sporoči v",
+      forum: "razpravah",
+      notTranslated: "To poglavje še ni prevedeno v tvoj jezik. Sledi angleško besedilo.",
+      languageMenu: "Jezik",
+      search: "Išči po navodilih",
+      searchNothing: "Nič ni najdeno.",
+      printAll: "Celotna navodila za tiskanje",
+      printAllTitle: "Celotna navodila na eni strani",
+      printAllLead: "Vsa poglavja eno za drugim, za tiskanje ali shranjevanje kot PDF: pritisni Ctrl+P in v nastavitvah tiskanja izklopi »Glave in noge«. Če želiš natisniti le del, tam izberi številke strani.",
+      printContents: "Kazalo",
+      printButton: "Natisni",
     },
   },
 };

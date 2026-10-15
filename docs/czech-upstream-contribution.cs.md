@@ -1,4 +1,6 @@
-# Český překlad připravený pro pull request
+# Český překlad přijatý do původního Layerlingu
+
+**Stav k 15. 10. 2026:** původní projekt přijal náš [pull request #379](https://github.com/henmedia/layerling/pull/379). Český překlad a příručka jsou součástí vydání 1.76.0. Níže jsou podklady původního příspěvku a postup jeho vytvoření. Pro další příspěvek založte novou větev z aktuálního `upstream/main`.
 
 Ověřeno 15. 10. 2026 proti upstream verzi **1.75.0**, commit `bf95d765`.
 Větev příspěvku: `codex/czech-localization`, aktualizační commit `abb674c9`.
@@ -7,7 +9,7 @@ Větev příspěvku: `codex/czech-localization`, aktualizační commit `abb674c9
 - [Otevřít předvyplněný pull request do henmedia/layerling](https://github.com/henmedia/layerling/compare/main...mispacek:layerling:codex/czech-localization?expand=1&title=Add%20Czech%20translation%20and%20complete%20Czech%20user%20guide&body=%23%23%20Summary%0A%0A-%20Add%20complete%20Czech%20localization%20for%20layerling%201.75.0%3A%20all%202%2C381%20UI%20messages%2C%2016%20user-guide%20chapters%2C%20218%20release-note%20items%2C%20and%20translated%20contextual-help%20links.%0A-%20Register%20Czech%20as%20a%20lazy-loaded%20language%20with%20cs-CZ%20formatting.%20Preserve%20the%20existing%20default%20language%2C%20theme%2C%20and%20site%20identity.%0A-%20Include%20readable%20base-letter%20fallback%20for%20Czech%2FPolish%20characters%20unsupported%20by%20the%20drawing%20PDF's%20standard%20Helvetica.%20SVG%20retains%20full%20Unicode%3B%20no%20storage%2C%20import%2C%20grouping%2C%20or%20undo%20behavior%20changes.%0A-%20Keep%20this%20contribution%20focused%3A%20custom%20LEGO%20functionality%2C%20fork-specific%20defaults%2C%20hosting%20changes%2C%20and%20generated%20guide%20pages%20are%20excluded.%0A%0A%23%23%20Testing%0A%0A-%20%5Bx%5D%20%60npm%20run%20typecheck%60%0A-%20%5Bx%5D%20%60npm%20run%20i18n%3Astatus%60%3A%20Czech%202%2C381%2F2%2C381%20messages%20and%2016%2F16%20chapters%2C%20no%20problems.%0A-%20%5Bx%5D%20%60npm%20run%20guide%60%20and%20%60npm%20run%20export%60%2C%20including%20both%20static%20CAD%20worker%20runtime%20checks.%0A-%20%5Bx%5D%2086%20focused%20locale%2Fguide%2Fdrawing%2Ffont%20tests.%0A-%20%5Bx%5D%20Manually%20verified%20CS%20%E2%86%92%20EN%20%E2%86%92%20CS%2C%20translated%201.75.0%20release%20notes%2C%20and%20updated%20Czech%20sketch-guide%20content%20in%20the%20browser.%0A-%20Full%20unit%20suite%3A%202%2C057%2F2%2C058%20pass.%20The%20existing%20%60sharedProjectsCopy%60%20Windows%20path%20expectation%20fails%20(%60Halterungen%60%20versus%20a%20relative%20temporary%20path)%3B%20the%20affected%20test%20and%20implementation%20are%20unchanged%20by%20this%20contribution.%0A-%20Audited%20all%2016%20chapters'%20UI%2Fvalue%2Fimage%2Fchapter%20references%20and%20verified%20that%20all%20non-Czech%20release-note%20fields%20are%20unchanged.%0A%0A%23%23%20Notes%0A%0AThe%20Czech%20UI%20originates%20in%20our%20maintained%20Czech-language%20fork.%20The%20guide%20and%20update%20preparation%20used%20AI%20assistance%20with%20contextual%20terminology%20review.%20Independent%20second%20native-speaker%20proofreading%20has%20not%20been%20completed%3B%20corrections%20and%20review%20are%20welcome.%0A)
 - [Porovnat změny s původním repozitářem](https://github.com/henmedia/layerling/compare/main...mispacek:layerling:codex/czech-localization)
 
-Po přihlášení na GitHub zkontrolujte předvyplněný název a popis a zvolte **Create pull request**. Při předchozím pokusu GitHub konektor vytvoření v původním repozitáři odmítl chybou 403. Tento dokument neznamená, že už pull request vznikl.
+Pull request #379 je již sloučený. Pro kontrolu přijatého příspěvku otevřete jeho odkaz výše; předvyplněné porovnání níže zůstává historickým podkladem původní větve.
 
 Příspěvek obsahuje 2 381 textů rozhraní, všech 16 kapitol příručky, 218 položek novinek a kontextovou nápovědu. Příručka odpovídá změnám 1.73.0–1.75.0 včetně PNG/JPG, rozšířené čáry při rotaci, nových ovladačů náčrtu, posunu po 0,01 mm a ukládání STL pod jiným názvem. Závislosti se nezměnily.
 
@@ -34,7 +36,7 @@ Samotné nahrání větve na náš GitHub ještě pull request nevytvoří. Tent
 ## Rozsah a ověření
 
 - Příspěvek je v samostatném pracovním adresáři `C:/xampp/htdocs/layerling-upstream-cs`.
-- Hlavní větev `codex/customizations` s LEGO funkcemi byla samostatně [aktualizována na 1.75.0](upstream-update-1.75.0.cs.md). Pro český pull request nadále používejte výhradně `codex/czech-localization`.
+- Hlavní větev `codex/customizations` s LEGO funkcemi byla samostatně [aktualizována na 1.76.0](upstream-update-1.76.0.cs.md). Přijatý český příspěvek vycházel z oddělené větve `codex/czech-localization`.
 - Statické/lokální: TypeScript, překlady, generování příručky, statický export a 86 zaměřených testů prošly. Celá unit sada: 2 057/2 058; zbývá dříve zaznamenaná chyba cest ve Windows v sharedProjectsCopy.
 - Prohlížeč: ověřeno přepínání CS → EN → CS, české novinky 1.75.0 a aktualizované části příručky k náčrtům.
 - Nasazení na WEDOS a fyzický tisk: neprováděno.

@@ -185,6 +185,8 @@ export function customSnapGridLabel(value: unknown, customGrids: CustomSnapGrid[
   const parsed = parseCustomSnapGrid(value);
   if (!parsed) return null;
   const name = customGrids.find((grid) => grid.size === parsed.size)?.name.trim() || `${parsed.size} mm`;
+  // Used whole, a grid carries its name alone: "10 mm", not "1 × 10 mm" (#329).
+  if (parsed.divisor === 1) return name;
   return `${CUSTOM_SNAP_GRID_FRACTIONS[parsed.divisor] ?? `1/${parsed.divisor}`} × ${name}`;
 }
 

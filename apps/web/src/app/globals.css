@@ -7693,6 +7693,24 @@ html[data-theme="dark"] .inspector-bundle-note {
   stroke-width: 2;
 }
 
+.section-measure-center-halo {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 4;
+  opacity: 0.85;
+}
+
+.section-measure-center {
+  fill: none;
+  stroke: #7a3d00;
+  stroke-width: 1.5;
+}
+
+.section-measure-hover.center,
+.section-measure-hover.opposite {
+  fill: rgba(200, 106, 18, 0.22);
+}
+
 .section-measure-hover.free {
   stroke: #9a8b7b;
   stroke-dasharray: 3 2;
@@ -14201,7 +14219,7 @@ html[data-theme="dark"] .shortcuts-or {
    Gemessen (mit Lupen-, Vereinfachen- und Verlaufsknopf): in voller Groesse
    braucht das Band 1818 px, in der mittleren Stufe 1540 px, in der kleinen
    1415 px. Jeder neue Knopf verschiebt alle drei Schwellen: neu messen. */
-@media (max-width: 1910px) {
+@media (max-width: 1953px) {
   :root {
     --toolbar-icon-size: calc(37px * var(--toolbar-scale));
   }
@@ -14222,7 +14240,7 @@ html[data-theme="dark"] .shortcuts-or {
   }
 }
 
-@media (max-width: 1620px) {
+@media (max-width: 1657px) {
   :root {
     --toolbar-icon-size: calc(34px * var(--toolbar-scale));
   }
@@ -14243,7 +14261,7 @@ html[data-theme="dark"] .shortcuts-or {
    hides tools and cuts off every menu that hangs beneath it. The bar grows,
    and the editor passes its real height on (see --editor-toolbar-height).
    A new button in the bar moves both thresholds up: measure again. */
-@media (max-width: 1489px) {
+@media (max-width: 1523px) {
   .toolbar-mode-content,
   .sketch-toolbar-ribbon {
     flex-wrap: wrap;

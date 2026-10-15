@@ -1,6 +1,6 @@
 # Translating layerling
 
-layerling speaks English, German, Dutch and Russian in full. Further languages are welcome (see the
+layerling speaks English, German, Dutch, French, Russian, Czech and Slovenian in full. Further languages are welcome (see the
 [discussion](https://github.com/henmedia/layerling/discussions/141)); this page is how to add one. You do not have to
 finish it in one go: a language may start with a few hundred sentences and one chapter of the guide, and everything
 it does not have yet shows in English.

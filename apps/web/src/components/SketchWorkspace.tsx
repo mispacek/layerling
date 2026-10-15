@@ -66,12 +66,12 @@ type SketchWorkspaceProps = {
   /** Shift+click with Select: adds the point or line to the selection, or takes it out. */
   onToggleSelect: (entity: SketchSelectableEntity) => void;
   onSelectImage: (id: string) => void;
-  onUpdateImage: (id: string, patch: Partial<SketchImage>, message?: string) => void;
+  onUpdateImage: (id: string, patch: Partial<SketchImage>, message?: string, keyRunKey?: string) => void;
   onDeleteImage: (id: string) => void;
   onDeletePoint: (id: string) => void;
   onDeleteSegment: (id: string) => void;
   onMovePoint: (id: string, point: { x: number; z: number }) => void;
-  onTransformPoints: (points: SketchPoint[], message?: string) => void;
+  onTransformPoints: (points: SketchPoint[], message?: string, keyRunKey?: string) => void;
   onMoveHandle: (id: string, handle: "in" | "out", point: { x: number; z: number }) => void;
   onInsertPoint: (segmentId: string, point: { x: number; z: number }, amount: number) => void;
   onSetPointMode: (id: string, mode: "corner" | "smooth" | "split") => void;
@@ -1329,7 +1329,7 @@ export function SketchWorkspace({
           onUpdateImage(image.id, {
             x: clamp(image.x + dx, -workspace.width / 2, workspace.width / 2),
             z: clamp(image.z + dz, -workspace.depth / 2, workspace.depth / 2),
-          }, t("sketch.imageMoved"));
+          }, t("sketch.imageMoved"), `image:${image.id}`);
           return;
         }
         const moving = new Set(sketchSelectionMovePointIds(profile, selected));
@@ -1338,7 +1338,8 @@ export function SketchWorkspace({
         event.preventDefault();
         const allowed = clampNudge(startPoints, dx, dz, workspace.width / 2, workspace.depth / 2);
         if (allowed.dx === 0 && allowed.dz === 0) return;
-        onTransformPoints(translateSketchPoints(startPoints, allowed.dx, allowed.dz), t("sketch.shapeMoved"));
+        // A run of arrow presses is one step of the history (#370).
+        onTransformPoints(translateSketchPoints(startPoints, allowed.dx, allowed.dz), t("sketch.shapeMoved"), `points:${startPoints.map((point) => point.id).join(",")}`);
       }
     };
     const handleKeyUp = (event: KeyboardEvent) => {
