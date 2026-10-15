@@ -11,6 +11,26 @@ Po přihlášení na GitHub zkontrolujte předvyplněný název a popis a zvolte
 
 Příspěvek obsahuje 2 381 textů rozhraní, všech 16 kapitol příručky, 218 položek novinek a kontextovou nápovědu. Příručka odpovídá změnám 1.73.0–1.75.0 včetně PNG/JPG, rozšířené čáry při rotaci, nových ovladačů náčrtu, posunu po 0,01 mm a ukládání STL pod jiným názvem. Závislosti se nezměnily.
 
+## Jak správně založit pull request
+
+1. Přihlaste se na GitHub jako **mispacek** a otevřete výše uvedený odkaz **Otevřít předvyplněný pull request do henmedia/layerling**.
+2. Nad porovnáním zkontrolujte následující nastavení. Pokud všechna pole nevidíte, použijte **compare across forks**.
+
+   | Pole na GitHubu | Správná hodnota |
+   | --- | --- |
+   | base repository | `henmedia/layerling` |
+   | base | `main` |
+   | head repository / head fork | `mispacek/layerling` |
+   | compare | `codex/czech-localization` |
+
+3. Prohlédněte si změněné soubory. Příspěvek má obsahovat české texty, příručku, zapojení češtiny a související testy či opravu textu v PDF. Větev `codex/customizations` pro tento pull request **nevybírejte**: obsahuje i naše vlastní LEGO funkce a nastavení webu.
+4. Pokud stránka nejprve nabízí **Create pull request**, klikněte na něj pro otevření formuláře. Název má být **Add Czech translation and complete Czech user guide**. Předvyplněný popis porovnejte s částí **Text pull requestu** níže; pokud chybí, zkopírujte jej odtud. Ponechte informaci o jediném neprocházejícím testu ve Windows a o dosud neprovedené druhé jazykové korektuře.
+5. Zkontrolujte, zda GitHub nehlásí konflikty. Pokud ano, před odesláním je potřeba aktualizovat příspěvkovou větev proti původnímu `main` a konflikty vyřešit. Neřešte je přepnutím na naši větev s LEGO.
+6. Tlačítkem **Create pull request** ve formuláři odešlete hotový příspěvek ke kontrole. Po odeslání musí vzniknout stránka s adresou ve tvaru `https://github.com/henmedia/layerling/pull/číslo` a stavem **Open**. Pokud GitHub místo toho nabídne již existující pull request stejné větve, otevřete jej; další nezakládejte.
+7. Správce původního projektu může požádat o opravy. Ty se commitnou a nahrají do stejné větve `codex/czech-localization`; otevřený pull request se tím automaticky aktualizuje. Přijetí a sloučení do původního projektu provádí jeho správce. Větev ponechte dostupnou do dokončení kontroly.
+
+Samotné nahrání větve na náš GitHub ještě pull request nevytvoří. Tento postup odpovídá [návodu GitHubu pro příspěvek z forku](https://docs.github.com/en/pull-requests/how-tos/create-pull-requests/creating-a-pull-request-from-a-fork).
+
 ## Rozsah a ověření
 
 - Příspěvek je v samostatném pracovním adresáři `C:/xampp/htdocs/layerling-upstream-cs`.
