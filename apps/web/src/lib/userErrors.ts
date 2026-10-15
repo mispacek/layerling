@@ -64,6 +64,10 @@ export const ERROR_RULES: ErrorRule[] = [
   { pattern: /SVG contains invalid NaN geometry/i, key: "error.svgNaN" },
   { pattern: /SVG is too complex|SVG has too many/i, key: "error.svgTooComplex" },
   { pattern: /SVG external references/i, key: "error.svgExternal" },
+  { pattern: /SVG embedded pictures are not drawings/i, key: "error.svgPicture" },
+  // pictures traced as an outline (#359)
+  { pattern: /The picture could not be read/i, key: "error.pictureUnreadable" },
+  { pattern: /The picture has no shape to trace/i, key: "error.pictureEmpty" },
   { pattern: /SVG contains only open strokes/i, key: "error.svgOpenStrokes" },
   { pattern: /SVG has no (readable|filled)/i, key: "error.svgNoPaths" },
   { pattern: /SVG is not valid XML/i, key: "error.svgInvalidXml" },

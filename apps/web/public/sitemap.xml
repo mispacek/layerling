@@ -4,12 +4,34 @@
     <loc>https://3d.espide.eu/</loc>
   </url>
   <url>
+    <loc>https://3d.espide.eu/ru/index.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://3d.espide.eu/guide/index.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/index.html"/>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/index.html"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/index.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/index.html"/>
+    <xhtml:link rel="alternate" hreflang="pl" href="https://3d.espide.eu/instrukcja/index.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/index.html"/>
+  </url>
+  <url>
     <loc>https://3d.espide.eu/instrukcja/index.html</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://3d.espide.eu/guide/index.html"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/index.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/index.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/index.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/index.html"/>
     <xhtml:link rel="alternate" hreflang="pl" href="https://3d.espide.eu/instrukcja/index.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/index.html"/>
+  </url>
+  <url>
+    <loc>https://3d.espide.eu/guide-fr/index.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://3d.espide.eu/guide/index.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/index.html"/>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/index.html"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/index.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/index.html"/>
+    <xhtml:link rel="alternate" hreflang="pl" href="https://3d.espide.eu/instrukcja/index.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/index.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/handleiding/index.html</loc>
@@ -17,7 +39,9 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/index.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/index.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/index.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/index.html"/>
     <xhtml:link rel="alternate" hreflang="pl" href="https://3d.espide.eu/instrukcja/index.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/index.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/prirucka/index.html</loc>
@@ -25,7 +49,9 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/index.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/index.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/index.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/index.html"/>
     <xhtml:link rel="alternate" hreflang="pl" href="https://3d.espide.eu/instrukcja/index.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/index.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/anleitung/index.html</loc>
@@ -33,7 +59,9 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/index.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/index.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/index.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/index.html"/>
     <xhtml:link rel="alternate" hreflang="pl" href="https://3d.espide.eu/instrukcja/index.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/index.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/guide/index.html</loc>
@@ -41,7 +69,9 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/index.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/index.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/index.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/index.html"/>
     <xhtml:link rel="alternate" hreflang="pl" href="https://3d.espide.eu/instrukcja/index.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/index.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/guide/getting-started.html</loc>
@@ -49,6 +79,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/erste-schritte.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/getting-started.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/aan-de-slag.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/getting-started.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/getting-started.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/guide/view-and-workplane.html</loc>
@@ -56,6 +88,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/ansicht-und-arbeitsebene.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/view-and-workplane.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/weergave-en-werkvlak.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/view-and-workplane.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/view-and-workplane.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/guide/shapes.html</loc>
@@ -63,6 +97,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/formen.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/shapes.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/vormen.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/shapes.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/shapes.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/guide/select-and-arrange.html</loc>
@@ -70,6 +106,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/auswaehlen-und-anordnen.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/select-and-arrange.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/selecteren-en-schikken.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/select-and-arrange.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/select-and-arrange.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/guide/solids-and-holes.html</loc>
@@ -77,6 +115,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/koerper-und-aussparungen.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/solids-and-holes.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/lichamen-en-gaten.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/solids-and-holes.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/solids-and-holes.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/guide/edges-and-hollowing.html</loc>
@@ -84,6 +124,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/kanten-und-aushoehlen.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/edges-and-hollowing.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/randen-en-uithollen.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/edges-and-hollowing.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/edges-and-hollowing.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/guide/sketches.html</loc>
@@ -91,6 +133,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/skizzen.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/sketches.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/schetsen.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/sketches.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/sketches.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/guide/text.html</loc>
@@ -98,6 +142,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/text.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/text.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/tekst.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/text.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/text.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/guide/threads-and-mechanics.html</loc>
@@ -105,6 +151,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/gewinde-und-mechanik.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/threads-and-mechanics.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/schroefdraad-en-mechanica.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/threads-and-mechanics.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/threads-and-mechanics.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/guide/measuring-and-notes.html</loc>
@@ -112,6 +160,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/messen-und-notizen.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/measuring-and-notes.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/meten-en-notities.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/measuring-and-notes.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/measuring-and-notes.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/guide/printing.html</loc>
@@ -119,6 +169,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/drucken.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/printing.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/printen.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/printing.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/printing.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/guide/files-and-saving.html</loc>
@@ -126,6 +178,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/dateien-und-speichern.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/files-and-saving.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/bestanden-en-opslaan.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/files-and-saving.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/files-and-saving.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/guide/shortcuts.html</loc>
@@ -133,6 +187,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/tastenkuerzel.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/shortcuts.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/sneltoetsen.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/shortcuts.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/shortcuts.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/guide/ai-with-mcp.html</loc>
@@ -140,6 +196,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/ki-mit-mcp.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/ai-with-mcp.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/ai-met-mcp.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/ai-with-mcp.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/ai-with-mcp.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/guide/offline-and-install.html</loc>
@@ -147,6 +205,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/offline-und-installieren.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/offline-and-install.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/offline-en-installeren.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/offline-and-install.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/offline-and-install.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/guide/videos.html</loc>
@@ -154,6 +214,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/videos.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/videos.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/videos.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/videos.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/videos.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/anleitung/erste-schritte.html</loc>
@@ -161,6 +223,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/erste-schritte.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/getting-started.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/aan-de-slag.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/getting-started.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/getting-started.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/anleitung/ansicht-und-arbeitsebene.html</loc>
@@ -168,6 +232,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/ansicht-und-arbeitsebene.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/view-and-workplane.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/weergave-en-werkvlak.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/view-and-workplane.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/view-and-workplane.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/anleitung/formen.html</loc>
@@ -175,6 +241,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/formen.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/shapes.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/vormen.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/shapes.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/shapes.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/anleitung/auswaehlen-und-anordnen.html</loc>
@@ -182,6 +250,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/auswaehlen-und-anordnen.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/select-and-arrange.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/selecteren-en-schikken.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/select-and-arrange.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/select-and-arrange.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/anleitung/koerper-und-aussparungen.html</loc>
@@ -189,6 +259,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/koerper-und-aussparungen.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/solids-and-holes.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/lichamen-en-gaten.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/solids-and-holes.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/solids-and-holes.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/anleitung/kanten-und-aushoehlen.html</loc>
@@ -196,6 +268,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/kanten-und-aushoehlen.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/edges-and-hollowing.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/randen-en-uithollen.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/edges-and-hollowing.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/edges-and-hollowing.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/anleitung/skizzen.html</loc>
@@ -203,6 +277,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/skizzen.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/sketches.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/schetsen.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/sketches.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/sketches.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/anleitung/text.html</loc>
@@ -210,6 +286,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/text.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/text.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/tekst.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/text.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/text.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/anleitung/gewinde-und-mechanik.html</loc>
@@ -217,6 +295,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/gewinde-und-mechanik.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/threads-and-mechanics.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/schroefdraad-en-mechanica.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/threads-and-mechanics.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/threads-and-mechanics.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/anleitung/messen-und-notizen.html</loc>
@@ -224,6 +304,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/messen-und-notizen.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/measuring-and-notes.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/meten-en-notities.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/measuring-and-notes.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/measuring-and-notes.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/anleitung/drucken.html</loc>
@@ -231,6 +313,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/drucken.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/printing.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/printen.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/printing.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/printing.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/anleitung/dateien-und-speichern.html</loc>
@@ -238,6 +322,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/dateien-und-speichern.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/files-and-saving.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/bestanden-en-opslaan.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/files-and-saving.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/files-and-saving.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/anleitung/tastenkuerzel.html</loc>
@@ -245,6 +331,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/tastenkuerzel.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/shortcuts.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/sneltoetsen.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/shortcuts.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/shortcuts.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/anleitung/ki-mit-mcp.html</loc>
@@ -252,6 +340,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/ki-mit-mcp.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/ai-with-mcp.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/ai-met-mcp.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/ai-with-mcp.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/ai-with-mcp.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/anleitung/offline-und-installieren.html</loc>
@@ -259,6 +349,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/offline-und-installieren.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/offline-and-install.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/offline-en-installeren.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/offline-and-install.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/offline-and-install.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/anleitung/videos.html</loc>
@@ -266,6 +358,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/videos.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/videos.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/videos.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/videos.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/videos.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/prirucka/getting-started.html</loc>
@@ -273,6 +367,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/erste-schritte.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/getting-started.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/aan-de-slag.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/getting-started.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/getting-started.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/prirucka/view-and-workplane.html</loc>
@@ -280,6 +376,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/ansicht-und-arbeitsebene.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/view-and-workplane.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/weergave-en-werkvlak.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/view-and-workplane.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/view-and-workplane.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/prirucka/shapes.html</loc>
@@ -287,6 +385,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/formen.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/shapes.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/vormen.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/shapes.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/shapes.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/prirucka/select-and-arrange.html</loc>
@@ -294,6 +394,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/auswaehlen-und-anordnen.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/select-and-arrange.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/selecteren-en-schikken.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/select-and-arrange.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/select-and-arrange.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/prirucka/solids-and-holes.html</loc>
@@ -301,6 +403,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/koerper-und-aussparungen.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/solids-and-holes.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/lichamen-en-gaten.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/solids-and-holes.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/solids-and-holes.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/prirucka/edges-and-hollowing.html</loc>
@@ -308,6 +412,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/kanten-und-aushoehlen.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/edges-and-hollowing.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/randen-en-uithollen.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/edges-and-hollowing.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/edges-and-hollowing.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/prirucka/sketches.html</loc>
@@ -315,6 +421,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/skizzen.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/sketches.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/schetsen.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/sketches.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/sketches.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/prirucka/text.html</loc>
@@ -322,6 +430,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/text.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/text.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/tekst.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/text.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/text.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/prirucka/threads-and-mechanics.html</loc>
@@ -329,6 +439,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/gewinde-und-mechanik.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/threads-and-mechanics.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/schroefdraad-en-mechanica.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/threads-and-mechanics.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/threads-and-mechanics.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/prirucka/measuring-and-notes.html</loc>
@@ -336,6 +448,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/messen-und-notizen.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/measuring-and-notes.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/meten-en-notities.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/measuring-and-notes.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/measuring-and-notes.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/prirucka/printing.html</loc>
@@ -343,6 +457,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/drucken.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/printing.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/printen.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/printing.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/printing.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/prirucka/files-and-saving.html</loc>
@@ -350,6 +466,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/dateien-und-speichern.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/files-and-saving.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/bestanden-en-opslaan.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/files-and-saving.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/files-and-saving.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/prirucka/shortcuts.html</loc>
@@ -357,6 +475,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/tastenkuerzel.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/shortcuts.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/sneltoetsen.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/shortcuts.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/shortcuts.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/prirucka/ai-with-mcp.html</loc>
@@ -364,6 +484,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/ki-mit-mcp.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/ai-with-mcp.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/ai-met-mcp.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/ai-with-mcp.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/ai-with-mcp.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/prirucka/offline-and-install.html</loc>
@@ -371,6 +493,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/offline-und-installieren.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/offline-and-install.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/offline-en-installeren.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/offline-and-install.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/offline-and-install.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/prirucka/videos.html</loc>
@@ -378,6 +502,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/videos.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/videos.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/videos.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/videos.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/videos.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/handleiding/aan-de-slag.html</loc>
@@ -385,6 +511,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/erste-schritte.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/getting-started.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/aan-de-slag.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/getting-started.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/getting-started.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/handleiding/weergave-en-werkvlak.html</loc>
@@ -392,6 +520,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/ansicht-und-arbeitsebene.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/view-and-workplane.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/weergave-en-werkvlak.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/view-and-workplane.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/view-and-workplane.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/handleiding/vormen.html</loc>
@@ -399,6 +529,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/formen.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/shapes.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/vormen.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/shapes.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/shapes.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/handleiding/selecteren-en-schikken.html</loc>
@@ -406,6 +538,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/auswaehlen-und-anordnen.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/select-and-arrange.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/selecteren-en-schikken.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/select-and-arrange.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/select-and-arrange.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/handleiding/lichamen-en-gaten.html</loc>
@@ -413,6 +547,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/koerper-und-aussparungen.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/solids-and-holes.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/lichamen-en-gaten.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/solids-and-holes.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/solids-and-holes.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/handleiding/randen-en-uithollen.html</loc>
@@ -420,6 +556,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/kanten-und-aushoehlen.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/edges-and-hollowing.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/randen-en-uithollen.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/edges-and-hollowing.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/edges-and-hollowing.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/handleiding/schetsen.html</loc>
@@ -427,6 +565,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/skizzen.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/sketches.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/schetsen.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/sketches.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/sketches.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/handleiding/tekst.html</loc>
@@ -434,6 +574,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/text.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/text.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/tekst.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/text.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/text.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/handleiding/schroefdraad-en-mechanica.html</loc>
@@ -441,6 +583,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/gewinde-und-mechanik.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/threads-and-mechanics.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/schroefdraad-en-mechanica.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/threads-and-mechanics.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/threads-and-mechanics.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/handleiding/meten-en-notities.html</loc>
@@ -448,6 +592,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/messen-und-notizen.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/measuring-and-notes.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/meten-en-notities.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/measuring-and-notes.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/measuring-and-notes.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/handleiding/printen.html</loc>
@@ -455,6 +601,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/drucken.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/printing.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/printen.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/printing.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/printing.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/handleiding/bestanden-en-opslaan.html</loc>
@@ -462,6 +610,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/dateien-und-speichern.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/files-and-saving.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/bestanden-en-opslaan.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/files-and-saving.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/files-and-saving.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/handleiding/sneltoetsen.html</loc>
@@ -469,6 +619,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/tastenkuerzel.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/shortcuts.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/sneltoetsen.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/shortcuts.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/shortcuts.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/handleiding/ai-met-mcp.html</loc>
@@ -476,6 +628,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/ki-mit-mcp.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/ai-with-mcp.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/ai-met-mcp.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/ai-with-mcp.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/ai-with-mcp.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/handleiding/offline-en-installeren.html</loc>
@@ -483,6 +637,8 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/offline-und-installieren.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/offline-and-install.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/offline-en-installeren.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/offline-and-install.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/offline-and-install.html"/>
   </url>
   <url>
     <loc>https://3d.espide.eu/handleiding/videos.html</loc>
@@ -490,5 +646,295 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/videos.html"/>
     <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/videos.html"/>
     <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/videos.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/videos.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/videos.html"/>
+  </url>
+  <url>
+    <loc>https://3d.espide.eu/guide-fr/getting-started.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://3d.espide.eu/guide/getting-started.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/erste-schritte.html"/>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/getting-started.html"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/aan-de-slag.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/getting-started.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/getting-started.html"/>
+  </url>
+  <url>
+    <loc>https://3d.espide.eu/guide-fr/view-and-workplane.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://3d.espide.eu/guide/view-and-workplane.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/ansicht-und-arbeitsebene.html"/>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/view-and-workplane.html"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/weergave-en-werkvlak.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/view-and-workplane.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/view-and-workplane.html"/>
+  </url>
+  <url>
+    <loc>https://3d.espide.eu/guide-fr/shapes.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://3d.espide.eu/guide/shapes.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/formen.html"/>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/shapes.html"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/vormen.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/shapes.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/shapes.html"/>
+  </url>
+  <url>
+    <loc>https://3d.espide.eu/guide-fr/select-and-arrange.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://3d.espide.eu/guide/select-and-arrange.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/auswaehlen-und-anordnen.html"/>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/select-and-arrange.html"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/selecteren-en-schikken.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/select-and-arrange.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/select-and-arrange.html"/>
+  </url>
+  <url>
+    <loc>https://3d.espide.eu/guide-fr/solids-and-holes.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://3d.espide.eu/guide/solids-and-holes.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/koerper-und-aussparungen.html"/>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/solids-and-holes.html"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/lichamen-en-gaten.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/solids-and-holes.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/solids-and-holes.html"/>
+  </url>
+  <url>
+    <loc>https://3d.espide.eu/guide-fr/edges-and-hollowing.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://3d.espide.eu/guide/edges-and-hollowing.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/kanten-und-aushoehlen.html"/>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/edges-and-hollowing.html"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/randen-en-uithollen.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/edges-and-hollowing.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/edges-and-hollowing.html"/>
+  </url>
+  <url>
+    <loc>https://3d.espide.eu/guide-fr/sketches.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://3d.espide.eu/guide/sketches.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/skizzen.html"/>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/sketches.html"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/schetsen.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/sketches.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/sketches.html"/>
+  </url>
+  <url>
+    <loc>https://3d.espide.eu/guide-fr/text.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://3d.espide.eu/guide/text.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/text.html"/>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/text.html"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/tekst.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/text.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/text.html"/>
+  </url>
+  <url>
+    <loc>https://3d.espide.eu/guide-fr/threads-and-mechanics.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://3d.espide.eu/guide/threads-and-mechanics.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/gewinde-und-mechanik.html"/>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/threads-and-mechanics.html"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/schroefdraad-en-mechanica.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/threads-and-mechanics.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/threads-and-mechanics.html"/>
+  </url>
+  <url>
+    <loc>https://3d.espide.eu/guide-fr/measuring-and-notes.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://3d.espide.eu/guide/measuring-and-notes.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/messen-und-notizen.html"/>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/measuring-and-notes.html"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/meten-en-notities.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/measuring-and-notes.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/measuring-and-notes.html"/>
+  </url>
+  <url>
+    <loc>https://3d.espide.eu/guide-fr/printing.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://3d.espide.eu/guide/printing.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/drucken.html"/>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/printing.html"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/printen.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/printing.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/printing.html"/>
+  </url>
+  <url>
+    <loc>https://3d.espide.eu/guide-fr/files-and-saving.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://3d.espide.eu/guide/files-and-saving.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/dateien-und-speichern.html"/>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/files-and-saving.html"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/bestanden-en-opslaan.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/files-and-saving.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/files-and-saving.html"/>
+  </url>
+  <url>
+    <loc>https://3d.espide.eu/guide-fr/shortcuts.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://3d.espide.eu/guide/shortcuts.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/tastenkuerzel.html"/>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/shortcuts.html"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/sneltoetsen.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/shortcuts.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/shortcuts.html"/>
+  </url>
+  <url>
+    <loc>https://3d.espide.eu/guide-fr/ai-with-mcp.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://3d.espide.eu/guide/ai-with-mcp.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/ki-mit-mcp.html"/>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/ai-with-mcp.html"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/ai-met-mcp.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/ai-with-mcp.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/ai-with-mcp.html"/>
+  </url>
+  <url>
+    <loc>https://3d.espide.eu/guide-fr/offline-and-install.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://3d.espide.eu/guide/offline-and-install.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/offline-und-installieren.html"/>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/offline-and-install.html"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/offline-en-installeren.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/offline-and-install.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/offline-and-install.html"/>
+  </url>
+  <url>
+    <loc>https://3d.espide.eu/guide-fr/videos.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://3d.espide.eu/guide/videos.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/videos.html"/>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/videos.html"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/videos.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/videos.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/videos.html"/>
+  </url>
+  <url>
+    <loc>https://3d.espide.eu/ru/getting-started.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://3d.espide.eu/guide/getting-started.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/erste-schritte.html"/>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/getting-started.html"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/aan-de-slag.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/getting-started.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/getting-started.html"/>
+  </url>
+  <url>
+    <loc>https://3d.espide.eu/ru/view-and-workplane.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://3d.espide.eu/guide/view-and-workplane.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/ansicht-und-arbeitsebene.html"/>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/view-and-workplane.html"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/weergave-en-werkvlak.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/view-and-workplane.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/view-and-workplane.html"/>
+  </url>
+  <url>
+    <loc>https://3d.espide.eu/ru/shapes.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://3d.espide.eu/guide/shapes.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/formen.html"/>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/shapes.html"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/vormen.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/shapes.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/shapes.html"/>
+  </url>
+  <url>
+    <loc>https://3d.espide.eu/ru/select-and-arrange.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://3d.espide.eu/guide/select-and-arrange.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/auswaehlen-und-anordnen.html"/>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/select-and-arrange.html"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/selecteren-en-schikken.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/select-and-arrange.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/select-and-arrange.html"/>
+  </url>
+  <url>
+    <loc>https://3d.espide.eu/ru/solids-and-holes.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://3d.espide.eu/guide/solids-and-holes.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/koerper-und-aussparungen.html"/>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/solids-and-holes.html"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/lichamen-en-gaten.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/solids-and-holes.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/solids-and-holes.html"/>
+  </url>
+  <url>
+    <loc>https://3d.espide.eu/ru/edges-and-hollowing.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://3d.espide.eu/guide/edges-and-hollowing.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/kanten-und-aushoehlen.html"/>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/edges-and-hollowing.html"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/randen-en-uithollen.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/edges-and-hollowing.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/edges-and-hollowing.html"/>
+  </url>
+  <url>
+    <loc>https://3d.espide.eu/ru/sketches.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://3d.espide.eu/guide/sketches.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/skizzen.html"/>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/sketches.html"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/schetsen.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/sketches.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/sketches.html"/>
+  </url>
+  <url>
+    <loc>https://3d.espide.eu/ru/text.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://3d.espide.eu/guide/text.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/text.html"/>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/text.html"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/tekst.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/text.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/text.html"/>
+  </url>
+  <url>
+    <loc>https://3d.espide.eu/ru/threads-and-mechanics.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://3d.espide.eu/guide/threads-and-mechanics.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/gewinde-und-mechanik.html"/>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/threads-and-mechanics.html"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/schroefdraad-en-mechanica.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/threads-and-mechanics.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/threads-and-mechanics.html"/>
+  </url>
+  <url>
+    <loc>https://3d.espide.eu/ru/measuring-and-notes.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://3d.espide.eu/guide/measuring-and-notes.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/messen-und-notizen.html"/>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/measuring-and-notes.html"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/meten-en-notities.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/measuring-and-notes.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/measuring-and-notes.html"/>
+  </url>
+  <url>
+    <loc>https://3d.espide.eu/ru/printing.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://3d.espide.eu/guide/printing.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/drucken.html"/>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/printing.html"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/printen.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/printing.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/printing.html"/>
+  </url>
+  <url>
+    <loc>https://3d.espide.eu/ru/files-and-saving.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://3d.espide.eu/guide/files-and-saving.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/dateien-und-speichern.html"/>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/files-and-saving.html"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/bestanden-en-opslaan.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/files-and-saving.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/files-and-saving.html"/>
+  </url>
+  <url>
+    <loc>https://3d.espide.eu/ru/shortcuts.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://3d.espide.eu/guide/shortcuts.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/tastenkuerzel.html"/>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/shortcuts.html"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/sneltoetsen.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/shortcuts.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/shortcuts.html"/>
+  </url>
+  <url>
+    <loc>https://3d.espide.eu/ru/ai-with-mcp.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://3d.espide.eu/guide/ai-with-mcp.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/ki-mit-mcp.html"/>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/ai-with-mcp.html"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/ai-met-mcp.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/ai-with-mcp.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/ai-with-mcp.html"/>
+  </url>
+  <url>
+    <loc>https://3d.espide.eu/ru/offline-and-install.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://3d.espide.eu/guide/offline-and-install.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/offline-und-installieren.html"/>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/offline-and-install.html"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/offline-en-installeren.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/offline-and-install.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/offline-and-install.html"/>
+  </url>
+  <url>
+    <loc>https://3d.espide.eu/ru/videos.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://3d.espide.eu/guide/videos.html"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://3d.espide.eu/anleitung/videos.html"/>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://3d.espide.eu/prirucka/videos.html"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://3d.espide.eu/handleiding/videos.html"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://3d.espide.eu/guide-fr/videos.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://3d.espide.eu/ru/videos.html"/>
   </url>
 </urlset>

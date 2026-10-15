@@ -70,7 +70,7 @@ import { numberLocale, t, type MessageKey } from "@/lib/i18n";
 import { useLanguage } from "@/lib/useLanguage";
 import { measurementOptionLabel, normalizeScaleForUnits, parseMeasurementInput, scaleOptionsForUnits, WORKSPACE_UNIT_OPTIONS } from "@/lib/measurementUnits";
 import { shapeAssetDefaultDimensions, shapeAssetLabel, shapeAssetSpecialDefaults, toolbarShapeAssets } from "@/lib/shapeCatalog";
-import { BOOLEAN_TRIANGLE_LIMIT_PRESETS, BOOLEAN_TRIANGLE_LIMIT_STEP, DEFAULT_WORKPLANE_WORKSPACE, MAX_BOOLEAN_TRIANGLE_LIMIT, MAX_CUSTOM_SHAPE_DIMENSION, MAX_HIGH_RESOLUTION_SIDES, MAX_HIGH_RESOLUTION_STEPS, MIN_BOOLEAN_TRIANGLE_LIMIT, MIN_CUSTOM_SHAPE_DIMENSION, booleanTriangleLimitPreset, gridBlockForUnits, snapGridForUnits, type BooleanTriangleLimitPreset, CUSTOM_SNAP_GRID_DIVISORS, DEFAULT_SNAP_GRID, MAX_CUSTOM_SNAP_GRID, MAX_CUSTOM_SNAP_GRID_NAME, MAX_CUSTOM_SNAP_GRIDS, MIN_CUSTOM_SNAP_GRID, customSnapGridLabel, customSnapGridSize, parseCustomSnapGrid, snapGridOptions } from "@/lib/workplaneSettings";
+import { BOOLEAN_TRIANGLE_LIMIT_PRESETS, BOOLEAN_TRIANGLE_LIMIT_STEP, DEFAULT_WORKPLANE_WORKSPACE, MAX_BOOLEAN_TRIANGLE_LIMIT, MAX_CUSTOM_SHAPE_DIMENSION, MAX_HIGH_RESOLUTION_SIDES, MAX_HIGH_RESOLUTION_STEPS, MIN_BOOLEAN_TRIANGLE_LIMIT, MIN_CUSTOM_SHAPE_DIMENSION, booleanTriangleLimitPreset, gridBlockForUnits, snapGridForUnits, type BooleanTriangleLimitPreset, DEFAULT_SNAP_GRID, MAX_CUSTOM_SNAP_GRID, MAX_CUSTOM_SNAP_GRID_NAME, MAX_CUSTOM_SNAP_GRIDS, MIN_CUSTOM_SNAP_GRID, customSnapGridDivisors, customSnapGridLabel, customSnapGridSize, parseCustomSnapGrid, snapGridOptions } from "@/lib/workplaneSettings";
 import { DEFAULT_SKETCH_BACKGROUND, DEFAULT_SKETCH_GRID_COLOR, DEFAULT_SKETCH_PLATE_COLOR, IMPERIAL_GRID_BLOCK_PRESETS, inchGridPresetMm, workplaneGridPalette } from "@/lib/workplaneGrid";
 import type { BentTubeProfile, CustomSnapGrid, GearProfile, GearType, GridSize, ShapeCustomization, ShapeKind, ThreadHand, ThreadHead, ThreadProfile, ThreadRole, WorkplaneWorkspaceSettings } from "@/types/layerling";
 import { DEFAULT_LOFT } from "@/lib/loftGeometry";
@@ -858,6 +858,7 @@ export function WorkspaceSettingsModal({
                       value={workspace.shadowStrength}
                       disabled={!workspace.showShadows || workspace.fastMode}
                       onChange={(event) => patchWorkspace({ shadowStrength: Number(event.currentTarget.value) })}
+                      onDoubleClick={() => patchWorkspace({ shadowStrength: DEFAULT_WORKPLANE_WORKSPACE.shadowStrength })}
                     />
                   </label>
                   <label className="workspace-range">
@@ -870,6 +871,7 @@ export function WorkspaceSettingsModal({
                       value={workspace.shadowSoftness}
                       disabled={!workspace.showShadows || workspace.fastMode}
                       onChange={(event) => patchWorkspace({ shadowSoftness: Number(event.currentTarget.value) })}
+                      onDoubleClick={() => patchWorkspace({ shadowSoftness: DEFAULT_WORKPLANE_WORKSPACE.shadowSoftness })}
                     />
                     <small>
                       <span>{t("workspace.shadowCrisp")}</span>
@@ -885,6 +887,7 @@ export function WorkspaceSettingsModal({
                       step={5}
                       value={workspace.lightAzimuth}
                       onChange={(event) => patchWorkspace({ lightAzimuth: Number(event.currentTarget.value) })}
+                      onDoubleClick={() => patchWorkspace({ lightAzimuth: DEFAULT_WORKPLANE_WORKSPACE.lightAzimuth })}
                     />
                     <small>
                       <span>{t("workspace.lightFromLeft")}</span>
@@ -901,6 +904,7 @@ export function WorkspaceSettingsModal({
                       step={5}
                       value={workspace.lightElevation}
                       onChange={(event) => patchWorkspace({ lightElevation: Number(event.currentTarget.value) })}
+                      onDoubleClick={() => patchWorkspace({ lightElevation: DEFAULT_WORKPLANE_WORKSPACE.lightElevation })}
                     />
                     <small>
                       <span>{t("workspace.lightLow")}</span>
@@ -916,6 +920,7 @@ export function WorkspaceSettingsModal({
                       step={5}
                       value={workspace.shadeContrast}
                       onChange={(event) => patchWorkspace({ shadeContrast: Number(event.currentTarget.value) })}
+                      onDoubleClick={() => patchWorkspace({ shadeContrast: DEFAULT_WORKPLANE_WORKSPACE.shadeContrast })}
                     />
                     <small>
                       <span>{t("workspace.shadeSoft")}</span>
@@ -953,6 +958,7 @@ export function WorkspaceSettingsModal({
                       step={5}
                       value={workspace.overhangAngle}
                       onChange={(event) => patchWorkspace({ overhangAngle: Number(event.currentTarget.value) })}
+                      onDoubleClick={() => patchWorkspace({ overhangAngle: DEFAULT_WORKPLANE_WORKSPACE.overhangAngle })}
                     />
                     <small>
                       <span>{t("workspace.overhangStrict")}</span>
@@ -972,6 +978,7 @@ export function WorkspaceSettingsModal({
                       max={10}
                       value={workspace.zoomSpeed}
                       onChange={(event) => patchWorkspace({ zoomSpeed: Number(event.currentTarget.value) })}
+                      onDoubleClick={() => patchWorkspace({ zoomSpeed: DEFAULT_WORKPLANE_WORKSPACE.zoomSpeed })}
                     />
                     <small>
                       <span>{t("workspace.slow")}</span>
@@ -1076,7 +1083,10 @@ export function WorkspaceSettingsModal({
                       // The step in use follows its measure: resized with it, back to the usual step when it goes.
                       const current = parseCustomSnapGrid(snap);
                       if (!current) return;
-                      if (resized && resized.from === current.size) onSnapChange(customSnapGridSize(resized.to, current.divisor));
+                      const owner = customSnapGrids.find((grid) => grid.size === (resized && resized.from === current.size ? resized.to : current.size));
+                      // Only the whole measure is offered now: a half or quarter in use goes to the whole.
+                      if (owner && !customSnapGridDivisors(owner).includes(current.divisor)) onSnapChange(customSnapGridSize(owner.size, 1));
+                      else if (resized && resized.from === current.size) onSnapChange(customSnapGridSize(resized.to, current.divisor));
                       else if (!customSnapGrids.some((grid) => grid.size === current.size)) onSnapChange(workspace.units === "Imperial" ? "1/8 in" : DEFAULT_SNAP_GRID);
                     }}
                   />
@@ -1843,8 +1853,23 @@ function CustomSnapGridList({
             <span>mm</span>
           </label>
           <span className="workspace-custom-snap-steps" aria-hidden="true">
-            {CUSTOM_SNAP_GRID_DIVISORS.map((divisor) => Number((grid.size / divisor).toFixed(4))).join(" · ")}
+            {customSnapGridDivisors(grid).map((divisor) => Number((grid.size / divisor).toFixed(4))).join(" · ")}
           </span>
+          <label className="workspace-custom-snap-parts">
+            <input
+              type="checkbox"
+              checked={!grid.wholeOnly}
+              onChange={(event) => {
+                const parts = event.currentTarget.checked;
+                onChange(grids.map((entry, at) => {
+                  if (at !== index) return entry;
+                  const { wholeOnly: _whole, ...rest } = entry;
+                  return parts ? rest : { ...rest, wholeOnly: true };
+                }));
+              }}
+            />
+            <span>{t("workspace.customSnapGridParts")}</span>
+          </label>
           <button
             type="button"
             aria-label={t("workspace.customSnapGridRemove")}

@@ -7,7 +7,7 @@ Nicht alles lässt sich aus Grundformen zusammensetzen. Für Teile mit eigener K
 
 ## Eine Skizze beginnen
 
-Wechsle oben von {{ui:editor.modeGeometry}} auf {{ui:editor.modeSketch}}. Klicke im Menüband auf {{ui:sketch.to3d}} und wähle, was aus dem Umriss werden soll:
+Wechsle oben von {{ui:editor.modeGeometry}} auf {{ui:editor.modeSketch}}. In der Gruppe {{ui:sketch.group.create}} des Menübands stehen zwei Knöpfe nebeneinander dafür, was aus dem Umriss werden soll:
 
 - **{{ui:sketch.extrude}}:** Der Umriss wird in die Höhe gezogen, wie eine Ausstechform.
 - **{{ui:sketch.revolve}}:** Der Umriss wird um eine Achse gedreht, wie bei einer Drehbank. So entstehen Vasen, Becher, Kegel und alles, was rund ist.
@@ -71,7 +71,7 @@ Eine Hilfslinie hilft dir beim Setzen von Punkten, ohne zum Körper zu gehören.
 
 Klicke auf {{ui:sketch.finishSketch}}. Der Umriss steht als Körper auf der Arbeitsebene und trägt den Namen „Skizzenkörper“. In seinen Einstellungen änderst du die Höhe, die Farbe und alles Weitere wie bei jeder anderen Form. Änderst du seine Größe, baut layerling ihn kurz danach aus der Skizze neu auf, und die Skizze wächst mit. So bleibt er ein exakter Körper, an dem Fase und Rundung gehen, und beim nächsten Bearbeiten hat die Skizze die Größe, die der Körper hat.
 
-Liegt die Arbeitsebene auf einer Seite eines Körpers, zeichnest du so, wie du auf diese Seite schaust: Oben in der Skizze ist auch am fertigen Körper oben. Der blasse Umriss des Körpers in der Skizzenansicht zeigt, wo er steht. Schneidet die Arbeitsebene durch einen Körper, zeigt die Skizzenansicht stattdessen den Umriss dieses Schnitts: Ein ausgehöhlter Körper erscheint als Ring, und du kannst die Skizze an seinen Wänden ausrichten. Ein Punkt, den du nahe an eine Ecke dieser Umrisse setzt oder ziehst, rastet genau dort ein; ein kleiner blauer Ring zeigt das an. So übernimmst du Kanten anderer Körper in die Skizze, auch wenn die Arbeitsebene nicht genau auf ihnen liegt.
+Liegt die Arbeitsebene auf einer Seite eines Körpers, zeichnest du so, wie du auf diese Seite schaust: Oben in der Skizze ist auch am fertigen Körper oben. Der blasse Umriss des Körpers in der Skizzenansicht zeigt, wo er steht. Schneidet die Arbeitsebene durch einen Körper, zeigt die Skizzenansicht stattdessen den Umriss dieses Schnitts: Ein ausgehöhlter Körper erscheint als Ring, und du kannst die Skizze an seinen Wänden ausrichten. Ein Punkt, den du nahe an eine Ecke dieser Umrisse setzt oder ziehst, rastet genau dort ein; ein kleiner blauer Ring zeigt das an. So übernimmst du Kanten anderer Körper in die Skizze, auch wenn die Arbeitsebene nicht genau auf ihnen liegt. Um an vorhandener Arbeit entlangzuzeichnen, schaltest du {{ui:sketch.showPartEdges}} ein (der Knopf mit den Schichten bei den Ansichtsknöpfen links): Dann werden alle Kanten der Körper dünn und blass auf die Skizzenebene gezeichnet, als sähest du durch sie hindurch, in welcher Höhe sie auch liegen. Eine senkrecht stehende Ebene, etwa auf eine Vorderfläche gelegt, zeigt so die Vorderansicht. Die Wahl wird im Browser gemerkt.
 
 ![Aus dem Umriss ist ein Körper geworden. Die Ecke ist gerundet.](shot:sketch-result)
 
@@ -79,7 +79,7 @@ Mit {{ui:inspector.editSketch}} kehrst du jederzeit in die Skizze zurück, um si
 
 ### Rotieren
 
-Beim Rotieren zeichnest du den halben Querschnitt **links von der Achse**, die in der Skizze eingezeichnet ist. Daneben siehst du eine 3D-Vorschau der Drehung. Sie zeigt sofort, wie der Körper aussieht. Der Umriss muss geschlossen sein. Zum Schluss klickst du auf {{ui:sketch.finishRevolve}}.
+Beim Rotieren zeichnest du den halben Querschnitt **links von der Achse**, die in der Skizze eingezeichnet ist. Daneben siehst du eine 3D-Vorschau der Drehung. Sie zeigt sofort, wie der Körper aussieht. Der Umriss muss geschlossen sein, oder du baust eine offene Linie als Kontur, siehe unten. Zum Schluss klickst du auf {{ui:sketch.finishRevolve}}.
 
 Ein gedrehter Körper ist ein exakter Körper wie ein ausgezogener: Er nimmt Fasen und Verrundungen an, und du kannst ihn aushöhlen, für einen Becher oder eine Vase. Ein Körper, der mit einer älteren layerling-Fassung gedreht wurde, ist ein Netz; öffne {{ui:inspector.editSketch}} und schließe ihn neu ab, dann ist er exakt. Ein Umriss, der über die Achse hinausreicht, lässt sich nicht exakt bauen und wird wie bisher ein Netz.
 
@@ -91,7 +91,9 @@ Normalerweise wird die Fläche innerhalb eines geschlossenen Umrisses zum Körpe
 - Eine **offene Linie** wird zu einem Streifen, mittig auf der Linie. Unter {{ui:sketch.strokeCap}} wählst du, wie ihre Enden aussehen: {{ui:sketch.strokeCap.flat}}, {{ui:sketch.strokeCap.square}} (um die halbe Breite verlängert) oder {{ui:sketch.strokeCap.round}}.
 - {{ui:sketch.strokeJoin}} gilt für beide: {{ui:sketch.strokeJoin.miter}}, {{ui:sketch.strokeJoin.round}} oder {{ui:sketch.strokeJoin.bevel}}.
 
-Die Skizze behält die gezeichnete Linie. Öffnest du sie wieder, änderst du Linie und Kontur weiter, und ohne Häkchen wird wieder die Fläche gebaut. Kurven werden dabei in kurze gerade Stücke zerlegt. Beim Rotieren gibt es die Kontur nicht.
+Die Skizze behält die gezeichnete Linie. Öffnest du sie wieder, änderst du Linie und Kontur weiter, und ohne Häkchen wird wieder die Fläche gebaut. Kurven werden dabei in kurze gerade Stücke zerlegt.
+
+Beim Rotieren ist die Kontur eine dünne Wand: Zeichne die Wand einer Vase oder eines Bechers als **eine offene Linie** links von der Achse, setze das Häkchen bei {{ui:sketch.stroke}} und stelle die Breite ein, dann dreht die Rotation dieses Band. Was über die Achse hinausreicht, wird an ihr abgeschnitten.
 
 ## Füllung und Silhouette
 

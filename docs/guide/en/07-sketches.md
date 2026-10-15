@@ -7,7 +7,7 @@ Not everything can be put together from basic shapes. For parts with a contour o
 
 ## Starting a sketch
 
-At the top, switch from {{ui:editor.modeGeometry}} to {{ui:editor.modeSketch}}. Click {{ui:sketch.to3d}} in the ribbon and choose what the outline should become:
+At the top, switch from {{ui:editor.modeGeometry}} to {{ui:editor.modeSketch}}. In the {{ui:sketch.group.create}} group of the ribbon, two buttons stand side by side for what the outline should become:
 
 - **{{ui:sketch.extrude}}:** The outline is pulled upward, like a cookie cutter.
 - **{{ui:sketch.revolve}}:** The outline is spun about an axis, as on a lathe. That gives vases, cups, cones and everything round.
@@ -71,7 +71,7 @@ A construction line helps you place points without becoming part of the body. It
 
 Click {{ui:sketch.finishSketch}}. The outline stands as a body on the workplane. In its settings you change the height, the colour and everything else as with any other shape. When you resize it, layerling builds it again from the sketch a moment later, and the sketch grows with it. So it stays an exact body that takes chamfers and fillets, and the next time you edit it the sketch has the size the body has.
 
-If the workplane lies on the side of a body, you draw the way you look at that side: up in the sketch is up on the finished body too. The faint outline of the body in the sketch view shows where it stands. If the workplane cuts through a body, the sketch view shows the outline of that cut instead, so a hollow body appears as a ring and you can line the sketch up with its walls. A point you set or drag close to a corner of these outlines snaps exactly onto it; a small blue ring shows it. That way you take edges of other bodies into the sketch, even when the workplane does not lie exactly on them.
+If the workplane lies on the side of a body, you draw the way you look at that side: up in the sketch is up on the finished body too. The faint outline of the body in the sketch view shows where it stands. If the workplane cuts through a body, the sketch view shows the outline of that cut instead, so a hollow body appears as a ring and you can line the sketch up with its walls. A point you set or drag close to a corner of these outlines snaps exactly onto it; a small blue ring shows it. That way you take edges of other bodies into the sketch, even when the workplane does not lie exactly on them. To trace round existing work, switch on {{ui:sketch.showPartEdges}} (the layers button in the view buttons on the left): all the edges of the bodies are then drawn on the sketch plane, thin and faint, as if you looked through them, whatever height they lie at. A plane that stands upright, set on a front face for example, shows the front view this way. The choice is kept in the browser.
 
 ![The outline has become a body. The corner is rounded.](shot:sketch-result)
 
@@ -79,7 +79,7 @@ With {{ui:inspector.editSketch}} you can return to the sketch at any time to cha
 
 ### Revolving
 
-When revolving, you draw half the cross-section **to the left of the axis** shown in the sketch. Next to it you see a 3D preview of the revolve. It shows at once what the body will look like. The outline must be closed. At the end click {{ui:sketch.finishRevolve}}.
+When revolving, you draw half the cross-section **to the left of the axis** shown in the sketch. Next to it you see a 3D preview of the revolve. It shows at once what the body will look like. The outline must be closed, or you build an open line as a stroke, see below. At the end click {{ui:sketch.finishRevolve}}.
 
 A revolved body is an exact body, like an extruded one: it takes chamfers and fillets, and you can hollow it, for a cup or a vase. A body revolved with an older layerling is a mesh; open {{ui:inspector.editSketch}} and finish it again to make it exact. A profile that reaches across the axis cannot be built exactly and becomes a mesh, as before.
 
@@ -91,7 +91,9 @@ Normally the area inside a closed outline becomes the body. With {{ui:sketch.str
 - An **open line** becomes a stripe, centred on the line. {{ui:sketch.strokeCap}} sets how its ends look: {{ui:sketch.strokeCap.flat}}, {{ui:sketch.strokeCap.square}} (longer by half the width) or {{ui:sketch.strokeCap.round}}.
 - {{ui:sketch.strokeJoin}} applies to both: {{ui:sketch.strokeJoin.miter}}, {{ui:sketch.strokeJoin.round}} or {{ui:sketch.strokeJoin.bevel}}.
 
-The sketch keeps the drawn line. Open it again and you go on changing line and stroke; untick the box and the area is built again. Curves are broken into short straight pieces for it. A revolve has no stroke.
+The sketch keeps the drawn line. Open it again and you go on changing line and stroke; untick the box and the area is built again. Curves are broken into short straight pieces for it.
+
+In a revolve the stroke is a thin wall: draw the wall of a vase or a cup as **one open line** to the left of the axis, tick {{ui:sketch.stroke}} and set the width, and the revolve turns that band. What reaches across the axis is cut off at it.
 
 ## Fill and silhouette
 

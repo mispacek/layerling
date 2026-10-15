@@ -108,17 +108,19 @@ Tippe die Namen in die {{ui:textLayers.names}}, einen je Zeile, bis zu hundert. 
 
 Ein Symbolschild ist dasselbe Schild mit einem SVG-Symbol statt Buchstaben: ein Herz, eine Wolke, das Logo eines Vereins. Oben das Symbol, darunter derselbe Umriss etwas breiter in einer zweiten Farbe, zuunterst eine Platte ohne Löcher.
 
-- **Ein neues Symbolschild:** Wähle in der Formenbibliothek {{ui:shape.iconTag}}. Ein kleines Fenster öffnet sich: Klicke auf {{ui:iconTag.browse}}, wähle eine SVG-Datei, prüfe das Bild, tippe die {{ui:iconTag.width}} des Symbols ein und klicke auf {{ui:iconTag.ok}}. Das Schild steht in der Mitte der Platte, in denselben Schichten wie ein neues Namensschild.
+- **Ein neues Symbolschild:** Wähle in der Formenbibliothek {{ui:shape.iconTag}}. Ein kleines Fenster öffnet sich: Klicke auf {{ui:iconTag.browse}}, wähle eine SVG-, PNG- oder JPG-Datei, prüfe das Bild, tippe die {{ui:iconTag.width}} des Symbols ein und klicke auf {{ui:iconTag.ok}}. Das Schild steht in der Mitte der Platte, in denselben Schichten wie ein neues Namensschild.
 - **Aus einem Skizzenkörper:** Eine importierte SVG oder eine selbst gezeichnete Skizze hat oben in ihren Einstellungen {{ui:nameTag.makeLayers}}.
 
 Die Karte {{ui:iconTag.title}} oben in den Einstellungen enthält:
 
-- **{{ui:iconTag.replace}}:** setzt das Symbol einer anderen SVG auf das Schild; Schichten und Breite bleiben, wie sie sind.
+- **{{ui:iconTag.replace}}:** setzt das Symbol einer anderen Datei (SVG, PNG oder JPG) auf das Schild; Schichten und Breite bleiben, wie sie sind.
 - **{{ui:iconTag.iconWidth}}:** wie breit das Symbol oben ist, in mm. Alle Schichten gehen mit und bleiben deckungsgleich.
 - **{{ui:nameTag.layers}}:** die Zeilen wie beim Namensschild - Farbe, um wie viel breiter, {{ui:nameTag.corners}}, Höhe und {{ui:nameTag.noHoles}}, **+** und **–**, zwei bis sechs Schichten. Die oberste Zeile ist das Symbol selbst.
 - **{{ui:iconTag.count}}:** wie viele Schilder du möchtest, 1 bis 100. {{ui:iconTag.fill}} rechnet es aus der Platte des Druckers aus, der in den Einstellungen gewählt ist, für kleine Logos eine volle Platte. Der Knopf darunter erzeugt sie, 5 mm auseinander, in der Mitte der Platte verteilt; das erste ist das Schild selbst.
 
 Die SVG braucht geschlossene Umrisse; eine Zeichnung nur aus offenen Linien wird kein Schild. Ein Skizzenkörper, dessen Füllung eine Linie ist, behält sie: Die Fläche dieser Linie ist das Symbol.
+
+**Ein Bild (PNG oder JPG)** wird zu einem Umriss nachgezeichnet, und die Vorschau zeigt den Umriss. Unter {{ui:iconTag.part}} wählst du, ob der {{ui:iconTag.part.dark}} oder der {{ui:iconTag.part.light}} das Symbol wird; zuerst ist es der Teil, der nicht der Hintergrund ist. Durchsichtige Pixel gehören nie zum Symbol. Eine SVG, die nur ein einziges Bild enthält, wie Inkscape eine importierte Bitmap speichert, wird genauso nachgezeichnet. Der Umriss folgt den Pixeln, ein kleines Bild gibt also einen rauen Rand: Bilder ab einigen hundert Pixeln eignen sich am besten. {{ui:iconTag.replace}} nimmt von einem Bild den Teil, der nicht sein Hintergrund ist.
 
 ## Text auf dem Kreisbogen
 

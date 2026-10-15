@@ -2,7 +2,7 @@
 
 import { GuideHelpLink } from "@/components/GuideHelpLink";
 import { TechnicModuleIcon } from "@/components/TechnicModuleIcon";
-import { AlertTriangle, Check, Percent, Circle as CircleIcon, CloudUpload, Download, Eye, EyeOff, FilePlus2, FolderOpen, Hexagon as HexagonIcon, Info, ListTree, Pencil, Pentagon as PentagonIcon, Search, Square as SquareIcon, Star as StarIcon, Triangle as TriangleIcon, X } from "lucide-react";
+import { AlertTriangle, ArrowUpFromLine, Check, Percent, Circle as CircleIcon, CloudUpload, Download, Eye, EyeOff, FilePlus2, FolderOpen, Hexagon as HexagonIcon, Info, ListTree, Pencil, Pentagon as PentagonIcon, Rotate3d, Search, Square as SquareIcon, Star as StarIcon, Triangle as TriangleIcon, X } from "lucide-react";
 import { ObjectListPanel } from "@/components/workplane/ObjectListPanel";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import * as THREE from "three";
@@ -22,6 +22,7 @@ import { NAME_TAG_LAYERS, NAME_TAG_LETTER_SIZE } from "@/lib/nameTag";
 import { DEFAULT_ICON_TAG_WIDTH, ICON_TAG_LAYERS, MAX_ICON_TAG_WIDTH, MIN_ICON_TAG_WIDTH, normalizeIconTagCount } from "@/lib/iconTag";
 import type { IconLayerPatch, IconTagControls, TextLayerPatch } from "@/components/workplane/ShapeInspector";
 import { IconTagPanel } from "@/components/workplane/IconTagPanel";
+import { iconSourceFromFile, PICTURE_FILE_ACCEPT, type IconSource } from "@/lib/pictureIcon";
 import { loadedManifoldRuntime, onManifoldReady } from "@/lib/manifoldHandle";
 import { canApplySketchCornerTreatment } from "@/lib/sketchFilletChamfer";
 import {
@@ -106,7 +107,7 @@ import { storedCustomFonts } from "@/lib/customFontStore";
 import { ArrayPanel } from "./workplane/ArrayPanel";
 import { ScalePercentPanel, type ScalePercentSettings } from "./workplane/ScalePercentPanel";
 import { scaleShapesByPercent } from "@/lib/scaleByPercent";
-import { canToggleGroupColors } from "@/lib/groupColors";
+import { canToggleGroupColors, groupShowsPartColors } from "@/lib/groupColors";
 import { disposeBoundsTree } from "three-mesh-bvh";
 import { SHELL_SIDES, shellMaxThickness, shellOpeningsFor, shellOpenSides } from "@/lib/shellLimits";
 import { circleStepDegrees, clampArrayCount, moveAlongRadius, rotateAroundVertical, rowOffset, singleAxisSpacing, type ArraySettings } from "@/lib/shapeArray";
@@ -137,7 +138,7 @@ import { composedShapeRotation, geometryRotationDegreesForShortcut, geometryRota
 import { carryShapePivot, shapePivotFromWorld, shapePivotWorld, type PivotPoint } from "@/lib/rotationPivot";
 import { createLocalId } from "@/lib/localIds";
 import { canEditGroupAtLevel, openGroupLevelsStillOpen, trackOpenGroupLevels } from "@/lib/openGroupParts";
-import { projectExportFileName } from "@/lib/exportNames";
+import { projectExportFileName, stlNameAsksForNewFile } from "@/lib/exportNames";
 import { exportMeshesToObj } from "@/lib/objExport";
 import { rotateSketchPoints, selectedClosedSketchPoints } from "@/lib/sketchRotation";
 import { PROJECT_THUMBNAIL_IDLE_MS, projectThumbnailSceneChanged, type ProjectThumbnailSceneKey } from "@/lib/projectThumbnail";
@@ -211,6 +212,8 @@ import { DEFAULT_SKETCH_STROKE, normalizeSketchStroke, strokedSketchProfile } fr
 import { topCadModifierEdgeIds } from "@/lib/topEdges";
 import { movedWithEditedOutline, placeSketchShape, sketchBodyAnchor, type SketchAnchor } from "@/lib/sketchPlacement";
 import { meshSlicePath, planeCutsMesh } from "@/lib/sketchSlice";
+import { projectedEdgesPath } from "@/lib/sketchEdges";
+import { useRememberedFlag } from "@/lib/useRememberedFlag";
 import { BUG_REPORT_FILE, bugReportText, rememberBugReportEvent, type BugReportEvent } from "@/lib/bugReport";
 import { formatLengthMm, lengthDisplayUnit } from "@/lib/measurementUnits";
 import { wrapMeshAroundCylinder, type CylinderWrapError } from "@/lib/cylinderWrap";
@@ -224,7 +227,7 @@ import { type Vec3, type MeshData, type Cuboid, type ShapeUpdatePatch, type Mani
 import { cloneAsGroupChild, meshDataToManifoldMesh, shapeToManifoldSolid, splitShapesByPlane, unionOverlappingExportMeshes, exportBodiesWithLooseHoles, exportSolidVolume, type ExportSolidVolume, PRINT_MATERIAL_STORAGE_KEY, PRINT_INFILL_STORAGE_KEY, PRINT_WALLS_STORAGE_KEY, formatEstimateNumber, formatSectionOffset, SECTION_SEEN_FROM_KEYS, expandBundles, visibleExportShapes, multicolorExportSolids, exportFaceColors, colorSeparatedExportMeshes, disposeManifold, canIntersectShapes, buildIntersectionShapeFromSelection, groupedShape, quaternionForShape, rotationFromQuaternion, ARROW_KEYS, cleanShapePatch, restoreGroupedChildren, buildGroupedShapeFromSelection } from "@/lib/editorBooleans";
 import { booleanAutomationScene } from "@/lib/editorAutomation";
 import { debugShapeSummary, mcpPivotRequest, compactShapeSummary, mcpShapeSummary, mcpSketchFillProfile, mcpTextFont } from "@/lib/editorMcpSummary";
-import { emptySketchProfile, cadShapeFromSketchProfile, shapeFromRevolvedSketchProfile, shapeFromCadMesh, sketchReferenceShapeOnWorkplane, defaultMcpSketchProfile } from "@/lib/editorSketchCad";
+import { emptySketchProfile, cadShapeFromSketchProfile, revolveBuildProfile, shapeFromRevolvedSketchProfile, shapeFromCadMesh, sketchReferenceShapeOnWorkplane, defaultMcpSketchProfile } from "@/lib/editorSketchCad";
 import { drawingLabelsInLanguage } from "@/lib/drawingLabels";
 import { offersTextLayers, textLayerStack, layeredTextShape, nameTagSource, nameTagsFor, offersIconLayers, iconLayerStack, iconTagArea, layeredIconShape, iconTagCopies, svgIconArea, iconTagFromSvg } from "@/lib/editorTextTags";
 
@@ -2497,7 +2500,8 @@ export function LayerlingEditor({
   const [iconTagPanelOpen, setIconTagPanelOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [guideOpen, setGuideOpen] = useState(false);
-  const [outlinerOpen, setOutlinerOpen] = useState(false);
+  // The object list stays open or closed as it was left, in this browser, for every design (#356).
+  const [outlinerOpen, setOutlinerOpen] = useRememberedFlag("layerling.editor.objectListOpen");
   /**
    * The groups being edited, outermost first; each next one is a part of the
    * one before. A group's parts lie loose on the workplane until "Done" groups
@@ -2626,7 +2630,7 @@ export function LayerlingEditor({
   // Left open on an iPad, which greys out files of types it does not know (#219).
   const projectFileAccept = useFileAccept(".lyl,.skf");
   const myShapesFileAccept = useFileAccept(".zip,.lyl,.skf");
-  const importFileAccept = useFileAccept(".stl,.obj,.mtl,.zip,.3mf,.step,.stp,.svg,image/svg+xml");
+  const importFileAccept = useFileAccept(`.stl,.obj,.mtl,.zip,.3mf,.step,.stp,.svg,image/svg+xml,${PICTURE_FILE_ACCEPT}`);
   const projectFileInputRef = useRef<HTMLInputElement | null>(null);
   const insertProjectFileInputRef = useRef<HTMLInputElement | null>(null);
   const sketchImageInputRef = useRef<HTMLInputElement | null>(null);
@@ -3102,7 +3106,7 @@ export function LayerlingEditor({
     }
     const timer = window.setTimeout(() => {
       void getManifoldRuntime()
-        .then((runtime) => buildSketchRevolveMesh(runtime, sketchProfile, sketchRevolveSettings))
+        .then((runtime) => buildSketchRevolveMesh(runtime, revolveBuildProfile(runtime, sketchProfile), sketchRevolveSettings))
         .then((mesh) => {
           if (sketchRevolvePreviewRequestRef.current === requestId) setSketchRevolvePreview(mesh);
         })
@@ -3342,6 +3346,22 @@ export function LayerlingEditor({
     });
     return slices;
   }, [activeSketchWorkplane, editingSketchShapeId, shapes, sketchActive]);
+  // The bodies seen through, all their edges projected onto the sketch plane, to trace round existing work (#354).
+  const [sketchShowPartEdges, setSketchShowPartEdges] = useRememberedFlag("layerling.sketch.showPartEdges");
+  const sketchReferenceEdges = useMemo(() => {
+    if (!sketchActive || !sketchShowPartEdges) return "";
+    return shapes
+      .filter((shape) => !shape.hidden && !shape.hole && shape.id !== editingSketchShapeId && !isNonSolidShapeKind(shape.kind))
+      .map((shape) => {
+        const mesh = meshForShape(shape);
+        const vertices = mesh.vertices.map(([x, y, z]) => {
+          const local = placementWorkplaneCoordinates(activeSketchWorkplane, { x, y, z });
+          return { x: local.x, h: local.y, z: local.z };
+        });
+        return projectedEdgesPath(vertices, mesh.faces);
+      })
+      .join("");
+  }, [activeSketchWorkplane, editingSketchShapeId, shapes, sketchActive, sketchShowPartEdges]);
   const debugState = useMemo(
     () =>
       JSON.stringify({
@@ -4756,7 +4776,7 @@ export function LayerlingEditor({
     const timer = window.setTimeout(() => {
       void getManifoldRuntime().then((runtime) => {
         if (cancelled) return;
-        const stroked = strokedSketchProfile(runtime, sketchProfile.silhouette ? silhouetteSketchProfile(sketchProfile) : sketchProfile);
+        const stroked = strokedSketchProfile(runtime, sketchProfile.silhouette ? silhouetteSketchProfile(sketchProfile) : sketchProfile, { clipToRevolveSide: sketchOperation === "revolve" });
         if (!stroked) {
           setSketchStrokePreview(null);
           return;
@@ -4775,7 +4795,7 @@ export function LayerlingEditor({
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [sketchActive, sketchProfile]);
+  }, [sketchActive, sketchOperation, sketchProfile]);
 
   const finishSketch = useCallback(async () => {
     const existing = editingSketchShapeId ? shapes.find((shape) => shape.id === editingSketchShapeId) ?? null : null;
@@ -4789,10 +4809,11 @@ export function LayerlingEditor({
         if (existing?.sketchProfile && resolved) {
           // The rebuilt body is centred on its outline again: keep its axis where it was.
           const base = existing.importedMesh;
+          const runtime = await getManifoldRuntime();
           const shift = revolveAxisShift(
             existing,
-            { profile: existing.sketchProfile, settings: existing.sketchRevolve ?? {} },
-            { profile: sketchProfile, settings: sketchRevolveSettings },
+            { profile: revolveBuildProfile(runtime, existing.sketchProfile), settings: existing.sketchRevolve ?? {} },
+            { profile: revolveBuildProfile(runtime, sketchProfile), settings: sketchRevolveSettings },
             base ? existing.width / Math.max(0.001, base.baseWidth) : 1,
             base ? existing.depth / Math.max(0.001, base.baseDepth) : 1,
             1,
@@ -5015,7 +5036,7 @@ export function LayerlingEditor({
       if (!source?.sketchProfile || source.sketchOperation !== "revolve") return;
       setNotice(t("status.updatingRevolve"), true);
       void shapeFromRevolvedSketchProfile(source.sketchProfile, settings, source)
-        .then((generated) => {
+        .then(async (generated) => {
           if (sketchRevolveUpdateRequestRef.current.get(id) !== requestId) return;
           const current = shapesRef.current.find((shape) => shape.id === id);
           if (!current?.importedMesh || current.sketchOperation !== "revolve") return;
@@ -5026,10 +5047,13 @@ export function LayerlingEditor({
           const depth = generated.depth * depthScale;
           const height = generated.height * heightScale;
           // The body is centred on its outline, which moves with the sweep: carry its middle so the axis stays put.
+          const runtime = await getManifoldRuntime();
+          if (sketchRevolveUpdateRequestRef.current.get(id) !== requestId) return;
+          const turned = revolveBuildProfile(runtime, source.sketchProfile!);
           const shift = revolveAxisShift(
             current,
-            { profile: source.sketchProfile!, settings: current.sketchRevolve ?? {} },
-            { profile: source.sketchProfile!, settings },
+            { profile: turned, settings: current.sketchRevolve ?? {} },
+            { profile: turned, settings },
             widthScale,
             depthScale,
           );
@@ -6705,6 +6729,29 @@ export function LayerlingEditor({
     );
   }, [refuseLockedSelection, commitShapes, hasSelection, selectedIds, shapes]);
 
+  /** Multicolor for the selected groups (Shift+M): each part in its own colour, or one colour for the group (#367). */
+  const toggleSelectionMulticolor = useCallback(() => {
+    if (!hasSelection) {
+      setNotice(t("status.selectShapeFirst"));
+      return;
+    }
+    if (refuseLockedSelection()) return;
+    const selected = new Set(selectedIds);
+    const eligible = (shape: WorkplaneShape) => selected.has(shape.id) && !shape.locked && canToggleGroupColors(shape);
+    const groups = shapes.filter(eligible);
+    if (groups.length === 0) {
+      setNotice(t("status.multicolorNeedsGroup"));
+      return;
+    }
+    // If every group shows its parts' colours, switch to one colour; otherwise to the parts' colours.
+    const multicolor = !groups.every((shape) => groupShowsPartColors(shape));
+    commitShapes(
+      shapes.map((shape) => (eligible(shape) ? { ...shape, multicolor } : shape)),
+      selectedIds,
+      multicolor ? t("status.selectionMulticolor") : t("status.selectionOneColor"),
+    );
+  }, [refuseLockedSelection, commitShapes, hasSelection, selectedIds, shapes]);
+
   /** One colour for every selected part (#183); a group shows it whole. */
   const setSelectionColor = useCallback(
     (color: string) => {
@@ -7141,7 +7188,11 @@ export function LayerlingEditor({
     }
     const selected = new Set(selectedIds);
     const editableGroup = canonicalizeShape({ ...group, groupOperation: "group" });
-    commitShapes([...shapesRef.current.filter((shape) => !selected.has(shape.id)), editableGroup], editableGroup.id, t("status.groupedMany", { count: selectedShapes.length }));
+    commitShapes(
+      [...shapesRef.current.filter((shape) => !selected.has(shape.id)), editableGroup],
+      editableGroup.id,
+      result.openGapEdges ? t("status.cutLeftOpen", { count: result.openGapEdges }) : t("status.groupedMany", { count: selectedShapes.length }),
+    );
   }, [refuseLockedSelection, commitShapes, selectedIds, selectedShapes]);
 
   /** the usual bundle (Ctrl+B): the parts move, turn and scale together and stay what they are. */
@@ -7521,7 +7572,8 @@ export function LayerlingEditor({
     const current = selectedShapes.length === 1 && selectedShape?.layeredIcon ? selectedShape : null;
     const stack = current ? iconLayerStack(current) : null;
     if (!current || !stack) return;
-    const { area, name } = await svgIconArea(file.name, await file.text(), stack.width);
+    const source = await iconSourceFromFile(file);
+    const { area, name } = await svgIconArea(source.name, source.svg, stack.width);
     const next = await layeredIconShape(area, stack.layers, stack.place, stack.ids, current.id, { ...current, name });
     if (!shapesRef.current.some((shape) => shape.id === current.id)) return;
     commitShapes(shapesRef.current.map((shape) => (shape.id === current.id ? next : shape)), [next.id], t("status.iconReplaced", { name }));
@@ -7542,10 +7594,9 @@ export function LayerlingEditor({
     };
   }, [layerSelectedIcon, makeIconTags, replaceIconSvg, selectedIconStack, selectedShape, workspaceSettings.depth, workspaceSettings.width]);
 
-  /** The icon tag window's OK: the SVG as a new icon tag on the plate, selected. */
-  const createIconTag = useCallback(async (file: File, width: number) => {
-    const text = await file.text();
-    const tag = await iconTagFromSvg(file.name, text, width);
+  /** The icon tag window's OK: the SVG (or the traced picture) as a new icon tag on the plate, selected. */
+  const createIconTag = useCallback(async (source: IconSource, width: number) => {
+    const tag = await iconTagFromSvg(source.name, source.svg, width);
     commitShapes([...shapesRef.current, tag], [tag.id], t("status.iconTagAdded", { name: tag.name }));
     setIconTagPanelOpen(false);
   }, [commitShapes]);
@@ -9779,7 +9830,9 @@ export function LayerlingEditor({
     let target: LylFileHandle | "download" = "download";
     if (format === "stl" && lylFileAccessSupported()) {
       try {
-        const linked = chooseFile ? null : linkedStlFile(designId);
+        const linkedBefore = linkedStlFile(designId);
+        // A name typed in the window that is not the linked file's asks for a file of its own (reported by mail, 15.10.2026).
+        const linked = chooseFile || stlNameAsksForNewFile(exportName, projectName, linkedBefore?.name) ? null : linkedBefore;
         if (linked && !(await ensureLylFileWritable(linked))) {
           setNotice(t("status.fileNotWritable", { name: linked.name }), true);
           return;
@@ -10840,7 +10893,11 @@ export function LayerlingEditor({
       } else if (key === "t" && !shortcut && !event.altKey && hasSelection) {
         event.preventDefault();
         toggleSelectionTransparency();
-      } else if (key === "m") {
+      } else if (key === "m" && event.shiftKey && !shortcut && !event.altKey) {
+        // Shift+M: Multicolor for the selected groups (#367); M alone is the mirror mode.
+        event.preventDefault();
+        toggleSelectionMulticolor();
+      } else if (key === "m" && !event.shiftKey) {
         event.preventDefault();
         toggleMirrorMode();
       } else if (key === "l") {
@@ -11214,6 +11271,9 @@ export function LayerlingEditor({
             revolvePreviewPositions={sketchRevolvePreview?.positions ?? null}
             referenceShapes={sketchReferenceShapes.filter((shape) => shape.id !== editingSketchShapeId)}
             referenceSlices={sketchReferenceSlices}
+            referenceEdges={sketchReferenceEdges}
+            showReferenceEdges={sketchShowPartEdges}
+            onToggleReferenceEdges={() => setSketchShowPartEdges((on) => !on)}
             tool={sketchTool}
             activePointId={sketchActivePointId}
             selected={sketchSelection}
@@ -11271,7 +11331,7 @@ export function LayerlingEditor({
             onMeasureTool={() => setActiveSketchTool(sketchTool === "measure" ? "select" : "measure")}
             cornerDialog={sketchCornerDialog}
             onCornerDialogChange={setSketchCornerDialog}
-            strokePanelOpen={sketchStrokePanelOpen && sketchOperation !== "revolve"}
+            strokePanelOpen={sketchStrokePanelOpen}
             onCloseStrokePanel={() => setSketchStrokePanelOpen(false)}
             onStrokeChange={(stroke) => commitSketchProfile(
               { ...sketchProfile, stroke },
@@ -12106,7 +12166,6 @@ function SecondaryToolbar({
   onSelectObject: (id: string) => void;
 }) {
   const [shapesOpen, setShapesOpen] = useState(false);
-  const [sketchCreateOpen, setSketchCreateOpen] = useState(false);
   // On a narrow window the tools wrap onto more rows. Their real height goes
   // into --editor-toolbar-height, which the workplane, the status and the menus
   // below the bar are placed by.
@@ -12134,7 +12193,6 @@ function SecondaryToolbar({
   const [visibilityOpen, setVisibilityOpen] = useState(false);
   const [visibilityMenuPosition, setVisibilityMenuPosition] = useState({ top: 0, left: 0 });
   const shapesMenuRef = useRef<HTMLDivElement>(null);
-  const sketchCreateMenuRef = useRef<HTMLDivElement>(null);
   const visibilityMenuRef = useRef<HTMLDivElement>(null);
   const touchShapeStartRef = useRef<{ id: string; x: number; y: number } | null>(null);
   const suppressNextShapeClickRef = useRef(false);
@@ -12166,7 +12224,6 @@ function SecondaryToolbar({
   };
   const selectToolbarMode = (mode: "geometry" | "sketch") => {
     setShapesOpen(false);
-    setSketchCreateOpen(false);
     setVisibilityOpen(false);
     onTopPanel(null);
     onToolbarModeChange(mode);
@@ -12180,7 +12237,6 @@ function SecondaryToolbar({
     setShapesOpen(false);
   };
   const startSketch = (operation: SketchOperation) => {
-    setSketchCreateOpen(false);
     onStartSketch(operation);
   };
   useEffect(() => {
@@ -12191,7 +12247,6 @@ function SecondaryToolbar({
   const [paletteOpen, setPaletteOpen] = useState(false);
   const openPalette = () => {
     setShapesOpen(false);
-    setSketchCreateOpen(false);
     setVisibilityOpen(false);
     setPaletteOpen(true);
   };
@@ -12210,23 +12265,7 @@ function SecondaryToolbar({
     return () => window.removeEventListener("keydown", openOnShortcut);
   }, []);
   useEffect(() => {
-    if (!sketchCreateOpen) return;
-    const closeOnPointerDown = (event: PointerEvent) => {
-      if (!sketchCreateMenuRef.current?.contains(event.target as Node)) setSketchCreateOpen(false);
-    };
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setSketchCreateOpen(false);
-    };
-    window.addEventListener("pointerdown", closeOnPointerDown);
-    window.addEventListener("keydown", closeOnEscape);
-    return () => {
-      window.removeEventListener("pointerdown", closeOnPointerDown);
-      window.removeEventListener("keydown", closeOnEscape);
-    };
-  }, [sketchCreateOpen]);
-  useEffect(() => {
-    if (sketchActive) setSketchCreateOpen(false);
-    else setShapesOpen(false);
+    if (!sketchActive) setShapesOpen(false);
   }, [sketchActive]);
   useEffect(() => {
     if (!shapesOpen) return;
@@ -12284,7 +12323,6 @@ function SecondaryToolbar({
       });
     }
     setShapesOpen(false);
-    setSketchCreateOpen(false);
     onTopPanel(null);
     setVisibilityOpen(true);
   };
@@ -12330,19 +12368,19 @@ function SecondaryToolbar({
     { id: "intersect", label: t("editor.tool.intersect"), icon: ToolbarIntersectionIcon, action: onIntersect, enabled: canIntersect },
   ];
   const modifyTools = [
-    { id: "align", label: t("editor.tool.align"), icon: ToolbarAlignIcon, action: onAlign, enabled: canAlign, active: alignMode },
     { id: "mirror", label: t("editor.tool.mirror"), icon: ToolbarMirrorIcon, action: onMirror, enabled: canModifySelection, active: mirrorMode },
     { id: "pivot", label: t("editor.tool.rotationPivot"), icon: ToolbarRotationPivotIcon, action: onRotationPivot, enabled: canModifySelection, active: rotationPivotActive },
     { id: "array", label: t("editor.tool.array"), icon: ToolbarPatternIcon, action: onArray, enabled: canModifySelection, active: arrayActive },
     { id: "holePattern", label: t("holePattern.title"), icon: ToolbarHolePatternIcon, action: onHolePattern, enabled: canHolePattern, active: holePatternActive },
     { id: "split", label: t("editor.tool.split"), icon: ToolbarSplitIcon, action: onSplit, enabled: splitMode || canSplit, active: splitMode },
-    { id: "snap", label: t("editor.tool.snapToGrid"), icon: ToolbarSnapGridIcon, action: onSnap, enabled: canModifySelection },
     { id: "chamfer", label: t("editor.tool.chamfer"), icon: ToolbarChamferIcon, action: onChamfer, enabled: canEdgeModify, active: edgeModifierKind === "chamfer" },
     { id: "fillet", label: t("editor.tool.fillet"), icon: ToolbarFilletIcon, action: onFillet, enabled: canEdgeModify, active: edgeModifierKind === "fillet" },
     { id: "hollow", label: t("editor.tool.hollow"), icon: ToolbarHollowIcon, action: onHollow, enabled: canEdgeModify, active: hollowActive },
     { id: "simplify", label: t("editor.tool.simplify"), icon: ToolbarSimplifyIcon, action: onSimplify, enabled: canSimplify, active: simplifyActive },
   ];
   const arrangeTools = [
+    { id: "align", label: t("editor.tool.align"), icon: ToolbarAlignIcon, action: onAlign, enabled: canAlign, active: alignMode },
+    { id: "snap", label: t("editor.tool.snapToGrid"), icon: ToolbarSnapGridIcon, action: onSnap, enabled: canModifySelection },
     { id: "drop", label: t("editor.tool.dropToWorkplane"), icon: ToolbarDropToWorkplaneIcon, action: onDropToWorkplane, enabled: canModifySelection },
     { id: "layFlat", label: t("editor.tool.layFlat"), icon: ToolbarLayFlatIcon, action: onLayFlat, enabled: canModifySelection, active: layFlatActive },
     { id: "mateFaces", label: t("editor.tool.mateFaces"), icon: ToolbarMateFacesIcon, action: onMateFaces, enabled: canModifySelection, active: mateFacesActive },
@@ -12448,7 +12486,7 @@ function SecondaryToolbar({
         ...sketchClipboardTools.map((tool) => fromTool(tool, t("editor.group.clipboard"))),
         plain("sketch-undo", t("editor.tool.undo"), t("editor.group.history"), sketchCanUndo, onSketchUndo, { icon: ToolbarUndoIcon }),
         plain("sketch-redo", t("editor.tool.redo"), t("editor.group.history"), sketchCanRedo, onSketchRedo, { icon: ToolbarRedoIcon }),
-        ...(sketchOperation === "revolve" ? [] : [plain("sketch-stroke", t("sketch.strokeHint"), finishGroup, true, () => onSketchStroke?.(), { icon: SKETCH_PALETTE_ICONS.line, active: Boolean(sketchStrokeActive) })]),
+        plain("sketch-stroke", t("sketch.strokeHint"), finishGroup, true, () => onSketchStroke?.(), { icon: SKETCH_PALETTE_ICONS.line, active: Boolean(sketchStrokeActive) }),
         plain("sketch-finish", sketchOperation === "revolve" ? t("sketch.finishRevolve") : t("sketch.finishSketch"), finishGroup, true, onSketchFinish),
         plain("sketch-cancel", t("sketch.cancel"), finishGroup, true, onSketchCancel),
         modeCommand,
@@ -12809,7 +12847,6 @@ function SecondaryToolbar({
                       aria-haspopup="menu"
                       aria-expanded={shapesOpen}
                       onClick={() => {
-                        setSketchCreateOpen(false);
                         setVisibilityOpen(false);
                         setShapesOpen((open) => !open);
                       }}
@@ -12935,7 +12972,7 @@ function SecondaryToolbar({
                 <div className="toolbar-section sketch-finish-section" data-group="finish">
                   <div className="toolbar-section-label">{t("sketch.group.finish")}</div>
                   <div className="toolbar-section-tools">
-                    {sketchOperation === "revolve" ? null : <button
+                    <button
                       className={`sketch-command-button ${sketchStrokeActive ? "active" : ""}`}
                       type="button"
                       aria-pressed={Boolean(sketchStrokeActive)}
@@ -12944,7 +12981,7 @@ function SecondaryToolbar({
                     >
                       <SketchReferenceIcon name="line" />
                       <span>{t("sketch.stroke")}</span>
-                    </button>}
+                    </button>
                     <button className="sketch-command-button primary" type="button" onClick={onSketchFinish}>
                       <Check />
                       <span>{sketchOperation === "revolve" ? t("sketch.finishRevolve") : t("sketch.finishSketch")}</span>
@@ -12960,36 +12997,27 @@ function SecondaryToolbar({
               <div className="toolbar-section sketch-start-section" data-group="create">
                 <div className="toolbar-section-label">{t("sketch.group.create")}</div>
                 <div className="toolbar-section-tools">
-                  <div className="sketch-create-menu" ref={sketchCreateMenuRef}>
-                    <button
-                      className={`sketch-command-button primary sketch-create-menu-trigger ${sketchCreateOpen ? "active" : ""}`}
-                      type="button"
-                      aria-label={t("sketch.to3dOptions")}
-                      aria-haspopup="menu"
-                      aria-expanded={sketchCreateOpen}
-                      onClick={() => setSketchCreateOpen((open) => !open)}
-                    >
-                      <SketchReferenceIcon name="sketchTo3d" />
-                      <span>{t("sketch.to3d")}</span>
-                      <ToolbarCaretDownIcon className="sketch-create-menu-chevron" />
-                    </button>
-                    {sketchCreateOpen ? (
-                      <div className="sketch-create-dropdown" role="menu" aria-label={t("sketch.to3dMethod")}>
-                        <div className="sketch-create-title">
-                          {t("sketch.to3dMethod")}
-                          <GuideHelpLink section="sketchToBody" />
-                        </div>
-                        <button type="button" role="menuitem" onClick={() => startSketch("extrude")}>
-                          <strong>{t("sketch.extrude")}</strong>
-                          <span>{t("sketch.extrudeHint")}</span>
-                        </button>
-                        <button type="button" role="menuitem" onClick={() => startSketch("revolve")}>
-                          <strong>{t("sketch.revolve")}</strong>
-                          <span>{t("sketch.revolveHint")}</span>
-                        </button>
-                      </div>
-                    ) : null}
-                  </div>
+                  <button
+                    className="sketch-command-button primary"
+                    type="button"
+                    aria-label={t("sketch.extrude")}
+                    title={`${t("sketch.extrude")} - ${t("sketch.extrudeHint")}`}
+                    onClick={() => startSketch("extrude")}
+                  >
+                    <ArrowUpFromLine aria-hidden="true" />
+                    <span>{t("sketch.extrude")}</span>
+                  </button>
+                  <button
+                    className="sketch-command-button primary"
+                    type="button"
+                    aria-label={t("sketch.revolve")}
+                    title={`${t("sketch.revolve")} - ${t("sketch.revolveHint")}`}
+                    onClick={() => startSketch("revolve")}
+                  >
+                    <Rotate3d aria-hidden="true" />
+                    <span>{t("sketch.revolve")}</span>
+                  </button>
+                  <GuideHelpLink section="sketchToBody" />
                   <button className={`sketch-command-button ${canEditSketch ? "" : "disabled"}`} type="button" aria-label={t("sketch.editTo3d")} title={t("sketch.editTo3d")} onClick={onEditSketch} disabled={!canEditSketch}>
                     <SketchReferenceIcon name="editSketchTo3d" />
                     <span>{t("sketch.edit")}</span>
@@ -13577,7 +13605,9 @@ function TopActionPanel({
 
           <footer className="export-dialog-footer">
             {exportFormat === "stl" && stlFileName ? (
-              <span className="export-linked-file" title={stlFileName}>{t("export.stlLinkedFile", { name: stlFileName })}</span>
+              stlNameAsksForNewFile(exportName, projectName, stlFileName)
+                ? <span className="export-linked-file" title={exportName}>{t("export.stlNewFile", { name: projectExportFileName(exportName.trim().replace(/\.stl$/i, ""), "stl") })}</span>
+                : <span className="export-linked-file" title={stlFileName}>{t("export.stlLinkedFile", { name: stlFileName })}</span>
             ) : null}
             <div>
               {exportFormat === "stl" && stlFileName ? (

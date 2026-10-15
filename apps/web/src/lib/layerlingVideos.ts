@@ -6,16 +6,23 @@
  */
 export const LAYERLING_VIDEOS = [
   {
+    title: "10 things I love about Layerling and 3 things that Tinkercad does better",
+    channel: "TECHNOBENTO",
+    lang: "EN",
+    url: "https://www.youtube.com/watch?v=WWhFSWFfG9g",
+  },
+  {
     title: "The PERFECT FREE CAD Program Between Tinkercad and Fusion 360!",
     channel: "Print N Repeat",
     lang: "EN",
     url: "https://youtu.be/GIoG-IHPXyg",
   },
   {
-    title: "Meet Layerling Free Browser Based CAD that EXTENDS Tinkercad!",
+    // A whole playlist, so new videos in it arrive here without a release.
+    title: "Layerling Tutorials",
     channel: "HL ModTech",
     lang: "EN",
-    url: "https://youtu.be/979_Ohy9ESM",
+    url: "https://www.youtube.com/playlist?list=PLZ-ZWS0D1JIk",
   },
   {
     // A whole playlist, so new videos in it arrive here without a release.

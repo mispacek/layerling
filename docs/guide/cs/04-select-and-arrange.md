@@ -11,7 +11,7 @@ Překážející objekt skryjte pomocí {{ui:editor.tool.hideSelected}}, [[Ctrl]
 
 ## Seznam objektů
 
-U složitého modelu pomůže seznam všech tvarů: {{ui:editor.tool.showOutliner}} nebo [[Ctrl]]+[[Shift]]+[[O]].
+U složitého modelu pomůže seznam všech tvarů: {{ui:editor.tool.showOutliner}} nebo [[Ctrl]]+[[Shift]]+[[O]]. V tomto prohlížeči si pamatuje, zda jste jej nechali otevřený nebo zavřený, a toto nastavení platí pro všechny projekty.
 
 ![Seznam objektů: sloučený celek se dvěma částmi a vedle něj koule. Ikona složky otevře úpravu celku.](shot:object-list)
 
@@ -71,6 +71,8 @@ Vyberte díl, zapněte {{ui:editor.tool.layFlat}} a klikněte na plochu, která 
 Pro přiložení dvou dílů vyberte pohyblivý díl, spusťte {{ui:editor.tool.mateFaces}}, klikněte na jeho plochu a pak na plochu druhého. {{ui:mate.mode.against}} přiloží plochy proti sobě, {{ui:mate.mode.flush}} je srovná do jedné roviny. {{ui:mate.gap}} ponechá mezeru, například pro vůli. {{ui:mate.apply}} otočí první díl nejkratší cestou do rovnoběžné orientace a přesune jej pouze kolmo k druhé ploše. Boční poloha se zachová. Pokud jsou plochy rovnoběžné, neotáčí se. Druhý díl zůstane na místě a jediný krok Zpět operaci vrátí.
 
 ![Panel zarovnání ploch: volba pohyblivého dílu, plochy druhého, režimu proti sobě nebo do roviny a případné mezery.](shot:mate-faces)
+
+**Přesný úhel mezi dvěma plochami:** {{ui:editor.tool.mateFaces}} plochy zarovná rovnoběžně. Samostatný nástroj pro úhel mezi nimi není, ale můžete postupovat takto: nejprve plochy spojte přes {{ui:editor.tool.mateFaces}}, pak nastavte střed otáčení na společnou hranu pomocí {{ui:editor.tool.rotationPivot}} a kliknutí na hranu nebo roh. V kartě {{ui:inspector.rotation}} zadejte požadovaný úhel, například 15° či 30°. Díl se otočí kolem tohoto středu. Osy karty odpovídají osám podložky, takže postup funguje pro hranu ve směru X, Y nebo Z.
 
 {{ui:editor.tool.dropToWorkplane}} ([[D]]) jednoduše položí výběr na pracovní rovinu, {{ui:editor.tool.centerOnWorkplane}} jej vystředí.
 

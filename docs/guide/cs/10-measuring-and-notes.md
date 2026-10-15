@@ -16,7 +16,7 @@ Nástroj je ve spodní části levé lišty pohledu, {{ui:camera.tapeTools}}. M�
 3. **{{ui:camera.deleteMeasurement}}:** Po zapnutí klikněte na měření, které chcete odstranit.
 4. **{{ui:camera.tapeWholeEdges}}:** Kliknutí na hranu změří celou její délku, například obvod kružnice. Při vypnutí se na hranu umístí bod a druhý můžete zvolit kdekoliv. Změříte tak průměr i jiné vzdálenosti. [[Alt]] režim pro jedno kliknutí obrátí. Na kružnici se při přiblížení ukazatele přichytí bod protilehlý prvnímu. Body leží na skutečné kružnici, takže průměr vyjde přesně.
 5. **{{ui:camera.deleteAllMeasurements}}:** Odstraní všechna měření. Protože operaci nelze vrátit, program si vyžádá potvrzení. Bez měření nemá příkaz co odstranit.
-6. **{{ui:camera.tapeMarkMiddle}}:** Pod hodnotou každého měření je tlačítko se zaměřovacím křížem. Vytvoří [referenční bod](#referencni-body) ve středu měření. U kruhové hrany, například okraje otvoru, je to střed kružnice, a to i u importované sítě. U průměru nebo přímého měření vznikne bod v polovině úsečky. Přetahovaný tvar se na něj přichytí svým středem. Již existující bod se nevytváří znovu.
+6. **{{ui:camera.tapeMarkMiddle}}:** Pod hodnotou každého měření je tlačítko se zaměřovacím křížem. Vytvoří [referenční bod](#referencni-body) ve středu měření. U kruhové hrany, například okraje otvoru, je to střed kružnice, a to i u importované sítě. U průměru nebo přímého měření vznikne bod v polovině úsečky. Přetahovaný tvar se na něj přichytí svým středem. Již existující bod se nevytváří znovu. Měřicí pásmo se k referenčním bodům přichytává stejně jako k rohům. Chcete-li měřit od středu kružnice nebo úsečky, nejprve jej označte a potom na bod klikněte.
 
 [[Esc]] ukončí režim měření.
 
@@ -33,7 +33,7 @@ Pro měření v pravém úhlu použijte {{ui:camera.cornerRulerTool}} v liště 
 - **Tažením úchytu** měníte polohu.
 - **Krátkým kliknutím na úchyt** otočíte úhelník o 90°.
 - **×** vedle úhelníku jej odstraní.
-- **Malé tlačítko vlevo od úchytu** přepíná měření od vnějšího okraje tělesa, se symbolem čar, nebo od jeho středu, se zaměřovacím křížem.
+- **Malé tlačítko vlevo od úchytu** přepíná měření od vnějšího okraje tělesa, se symbolem čar, nebo od jeho středu, se zaměřovacím křížem. Stejný malý přepínač je i u každého zeleného čísla a nastavuje pouze danou kótu. U stojícího válce tak můžete měřit v obou ramenech ke středu a ve výšce ke spodní straně, u ležícího napříč ke středu a podélně ke konci. Pokud se všechna tři nastavení shodují, tlačítko u úchytu ukáže společný režim.
 
 U těles umístěných u ramen úhelník automaticky ukazuje rozměry. To funguje pouze na základní podložce, nikoli na boční stěně.
 
@@ -69,7 +69,7 @@ Poznámky se ukládají v projektu, do exportu se nezahrnují a jejich viditelno
 Referenční bod je samostatná značka v prostoru, podobná rysce při práci v dílně. Nepatří žádnému tělesu, netiskne se a ostatní objekty se na něj přichytávají. Klikněte pravým tlačítkem na těleso a vyberte {{ui:contextMenu.markCenter}}, {{ui:contextMenu.markCorners}} nebo {{ui:contextMenu.markMidpoints}}. Body vzniknou na horní ploše tělesa, případně celého výběru.
 
 - Bod přesunete tažením nebo kliknutím otevřete souřadnice v nastavených jednotkách. Každou kartu lze přetáhnout za záhlaví samostatně; ostatní zůstanou na místě. Dvojklik ji vrátí a naposledy použitá karta se zobrazí vpředu. **Odstranit všechny** na kartě nebo v nabídce pravého tlačítka odstraní všechny body najednou. {{ui:common.delete}} odstraní jednotlivý bod.
-- Bod vytvoří i měřicí nástroj: {{ui:camera.tapeMarkMiddle}} pod hodnotou měření označí jeho střed, například střed kruhového otvoru.
+- Bod vytvoří i měřicí nástroj: {{ui:camera.tapeMarkMiddle}} pod hodnotou měření označí jeho střed, například střed kruhového otvoru. Měřit lze také od takového bodu: pásmo se k referenčním bodům přichytává stejně jako k rohům.
 - Při tažení se na body přichytávají hrany i středy tvarů, stejně jako na jiná tělesa při {{ui:workspace.objectSnap}}. Přichytává se i úhelník.
 - Body se ukládají do projektu, neexportují se a zobrazují či skrývají se společně s poznámkami přes {{ui:visibility.notes}}.
 - AI je může vytvářet, vypisovat a odstraňovat pomocí `layerling_add_reference_points`, `layerling_list_reference_points` a `layerling_remove_reference_points`.

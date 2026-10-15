@@ -8,6 +8,7 @@ import { readKeepSvgPage } from "@/lib/importPreferences";
 import { importedShapeFromSvgWithReport } from "@/lib/svgImport";
 import { importedShapesFrom3mf } from "@/lib/threemfImport";
 import { sketchProfileFromSvg } from "@/lib/svgSketch";
+import { importedPictureSvg, isPictureFile, svgEmbeddedPicture } from "@/lib/pictureIcon";
 import type { ProjectAsset, SketchProfile, WorkplaneShape } from "@/types/layerling";
 
 /**
@@ -98,7 +99,9 @@ export async function importModelFiles(
     const file = files[index];
     if (options.cancelled?.()) return null;
 
-    const sourceFormat = sourceFormatForFileName(file.name) ?? (file.type === "image/svg+xml" ? "svg" : null);
+    // A PNG or JPG comes in traced into an outline, as an SVG (#359).
+    const isPicture = isPictureFile(file);
+    const sourceFormat = isPicture ? "svg" : sourceFormatForFileName(file.name) ?? (file.type === "image/svg+xml" ? "svg" : null);
     const isStep = sourceFormat === "step";
     const isObj = sourceFormat === "obj";
     const isSvg = sourceFormat === "svg";
@@ -110,7 +113,10 @@ export async function importModelFiles(
 
     options.onProgress?.(index, files.length, file, isStep);
     try {
-      const bytes = new Uint8Array(await file.arrayBuffer());
+      let bytes = new Uint8Array(await file.arrayBuffer());
+      // The project keeps a traced picture as the SVG of its outline.
+      let assetName = file.name;
+      let assetType = file.type;
       const buffer = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
       let shape: WorkplaneShape;
       // Eine farbige OBJ oder 3MF wird zu einem Koerper je Farbe, eine 3MF mit
@@ -134,10 +140,19 @@ export async function importModelFiles(
         const { importedShapeFromStep } = await import("@/lib/stepImport");
         shape = await importedShapeFromStep(file.name, buffer);
       } else if (isSvg) {
-        const text = new TextDecoder().decode(bytes);
+        let text = isPicture ? await importedPictureSvg(file) : new TextDecoder().decode(bytes);
+        const embedded = isPicture ? null : svgEmbeddedPicture(text);
+        if (embedded) text = await importedPictureSvg(embedded);
+        const traced = isPicture || Boolean(embedded);
+        if (traced) {
+          bytes = new TextEncoder().encode(text);
+          assetName = `${file.name.replace(/\.[^.]+$/, "")}.svg`;
+          assetType = "image/svg+xml";
+        }
         // The mesh lies mirrored top to bottom - turned up out of the drawing - and older designs
         // rebuild it so from their file. A new import mirrors it back to read right from above (#197).
-        const svg = importedShapeFromSvgWithReport(file.name, text, { keepPagePosition: options.svgKeepPagePosition ?? readKeepSvgPage() });
+        // A traced picture has no page of its own to keep.
+        const svg = importedShapeFromSvgWithReport(file.name, text, { keepPagePosition: !traced && (options.svgKeepPagePosition ?? readKeepSvgPage()) });
         shape = { ...svg.shape, mirrorZ: true };
         if (svg.pageKept === false) result.notes.push(t("status.importSvgNoPage", { name: file.name }));
         // A shape that does not build into a solid is left out; say so instead of leaving a gap unexplained (#258).
@@ -157,7 +172,7 @@ export async function importModelFiles(
       if (shape.importedMesh?.sourceFormat === "json") {
         result.shapes.push(shape);
       } else {
-        const asset = await projectAssetFromBytes(file.name, sourceFormat, bytes, file.type);
+        const asset = await projectAssetFromBytes(assetName, sourceFormat, bytes, assetType);
         result.shapes.push(attachProjectAsset(shape, asset.id));
         result.assets.push(asset);
       }

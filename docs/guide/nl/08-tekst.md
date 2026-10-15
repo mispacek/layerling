@@ -108,17 +108,19 @@ Typ de namen in de {{ui:textLayers.names}}, één per regel, tot honderd. De kno
 
 Een icoonbordje is hetzelfde bordje met een SVG-icoon in plaats van letters: een hartje, een wolk, het logo van een club. Het icoon bovenop, daaronder dezelfde contour iets breder in een tweede kleur, onderaan een plaat zonder gaten.
 
-- **Een nieuw icoonbordje:** kies {{ui:shape.iconTag}} in de vormenbibliotheek. Er opent een klein venster: klik op {{ui:iconTag.browse}}, kies een SVG-bestand, controleer de afbeelding, typ de {{ui:iconTag.width}} van het icoon en klik op {{ui:iconTag.ok}}. Het bordje staat midden op de plaat, in dezelfde lagen als een nieuw naambordje.
+- **Een nieuw icoonbordje:** kies {{ui:shape.iconTag}} in de vormenbibliotheek. Er opent een klein venster: klik op {{ui:iconTag.browse}}, kies een SVG-, PNG- of JPG-bestand, controleer de afbeelding, typ de {{ui:iconTag.width}} van het icoon en klik op {{ui:iconTag.ok}}. Het bordje staat midden op de plaat, in dezelfde lagen als een nieuw naambordje.
 - **Vanuit een schetslichaam:** een geïmporteerde SVG, of een schets die je zelf hebt getekend, heeft {{ui:nameTag.makeLayers}} bovenaan zijn instellingen.
 
 De kaart {{ui:iconTag.title}} bovenaan de instellingen bevat:
 
-- **{{ui:iconTag.replace}}:** zet het icoon uit een andere SVG op het bordje; de lagen en de breedte blijven zoals ze zijn.
+- **{{ui:iconTag.replace}}:** zet het icoon uit een ander bestand (SVG, PNG of JPG) op het bordje; de lagen en de breedte blijven zoals ze zijn.
 - **{{ui:iconTag.iconWidth}}:** hoe breed het icoon bovenop is, in mm. Alle lagen volgen en blijven op één lijn.
 - **{{ui:nameTag.layers}}:** de rijen zoals bij een naambordje - kleur, hoeveel breder, {{ui:nameTag.corners}}, hoogte en {{ui:nameTag.noHoles}}, **+** en **–**, twee tot zes lagen. De bovenste rij is het icoon zelf.
 - **{{ui:iconTag.count}}:** hoeveel bordjes je wilt, 1 tot 100. {{ui:iconTag.fill}} rekent het uit op basis van de plaat van de printer die in de instellingen is gekozen, voor kleine logo's een volle plaat. De knop eronder maakt ze, 5 mm uit elkaar, neergelegd op het midden van de plaat; het eerste is het bordje zelf.
 
 De SVG heeft gesloten contouren nodig; een tekening van alleen open lijnen kan geen bordje worden. Een schetslichaam waarvan de vulling een lijn is, houdt die: het vlak van die lijn is het icoon.
+
+**Een afbeelding (PNG of JPG)** wordt overgetrokken tot een omtrek, en het voorbeeld toont die omtrek. Onder {{ui:iconTag.part}} kies je of het {{ui:iconTag.part.dark}} of het {{ui:iconTag.part.light}} het icoon wordt; eerst is dat het deel dat niet de achtergrond is. Doorzichtige pixels horen nooit bij het icoon. Een SVG die alleen één afbeelding bevat, zoals Inkscape een geïmporteerde bitmap opslaat, wordt net zo overgetrokken. De omtrek volgt de pixels, dus een kleine afbeelding geeft een ruwe rand: afbeeldingen van een paar honderd pixels of meer werken het best. {{ui:iconTag.replace}} neemt van een afbeelding het deel dat niet haar achtergrond is.
 
 ## Tekst op een cirkelboog
 

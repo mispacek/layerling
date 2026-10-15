@@ -7,7 +7,8 @@ import { isThreadProfile } from "@/lib/threadProfiles";
 export const DEFAULT_SNAP_GRID: GridSize = "1.0 mm";
 export const BRICK_SNAP_STEP = 8;
 // Used only when the snap grid is off: fine steps, since that is why the grid is switched off (#293).
-export const KEYBOARD_NUDGE_FALLBACK_STEP = 0.1;
+// An arrow moves 0.01 mm (#370, as in Tinkercad); Shift as many times that as with a grid.
+export const KEYBOARD_NUDGE_FALLBACK_STEP = 0.01;
 // Shift has always moved five times as far as a plain arrow press.
 export const KEYBOARD_NUDGE_COARSE_FACTOR = 5;
 export const MIN_CUSTOM_SHAPE_DIMENSION = 0.01;
@@ -121,6 +122,11 @@ export const MAX_CUSTOM_SNAP_GRIDS = 12;
 export const MAX_CUSTOM_SNAP_GRID_NAME = 32;
 /** A custom measure snaps whole, halved and quartered: 1U, 0.5U and 0.25U (and with it 0.75U). */
 export const CUSTOM_SNAP_GRID_DIVISORS = [1, 2, 4] as const;
+
+/** The divisors a custom measure is offered with: all three, or only the whole when it is set to that (#329). */
+export function customSnapGridDivisors(grid: { wholeOnly?: boolean }): readonly number[] {
+  return grid.wholeOnly ? [1] : CUSTOM_SNAP_GRID_DIVISORS;
+}
 const CUSTOM_SNAP_GRID_FRACTIONS: Record<number, string> = { 1: "1", 2: "½", 4: "¼" };
 
 function cleanCustomSnapSize(value: number) {
@@ -154,6 +160,7 @@ export function normalizeCustomSnapGrids(value: unknown, fallback: CustomSnapGri
     grids.push({
       name: typeof name === "string" ? name.trim().slice(0, MAX_CUSTOM_SNAP_GRID_NAME) : "",
       size: cleanCustomSnapSize(size),
+      ...((entry as { wholeOnly?: unknown }).wholeOnly === true ? { wholeOnly: true } : {}),
     });
   }
   return grids;
@@ -164,9 +171,9 @@ export function snapGridOptionsForUnits(units: string): GridSize[] {
   return units === "Imperial" ? IMPERIAL_SNAP_GRIDS : METRIC_SNAP_GRIDS;
 }
 
-/** The snap menu: the steps of the unit system, then each custom measure whole, halved and quartered. */
+/** The snap menu: the steps of the unit system, then each custom measure whole, halved and quartered (or just whole, as set). */
 export function snapGridOptions(units: string, customGrids: CustomSnapGrid[] = []): GridSize[] {
-  const custom = customGrids.flatMap((grid) => CUSTOM_SNAP_GRID_DIVISORS.map((divisor) => customSnapGridSize(grid.size, divisor)));
+  const custom = customGrids.flatMap((grid) => customSnapGridDivisors(grid).map((divisor) => customSnapGridSize(grid.size, divisor)));
   return [...snapGridOptionsForUnits(units), ...new Set(custom)];
 }
 
@@ -526,7 +533,7 @@ export function snapGridStep(size: GridSize) {
  * moved a hard-coded millimetre. With the grid at 5mm a drag landed on the
  * 5mm lattice and the very next arrow press pushed the shape off it again.
  * Following the grid keeps an aligned shape aligned; Shift keeps its former
- * meaning of a coarser step. With the grid off, the old 1mm and 5mm stand.
+ * meaning of a coarser step. With the grid off an arrow moves 0.01 mm.
  */
 export function keyboardNudgeStep(size: GridSize, coarse: boolean, coarseFactor = KEYBOARD_NUDGE_COARSE_FACTOR) {
   const grid = snapGridStep(size);

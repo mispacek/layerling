@@ -7,7 +7,7 @@ Ne každý díl lze pohodlně sestavit ze základních tvarů. Pro držák, prof
 
 ## Zahájení náčrtu
 
-Nahoře přepněte z {{ui:editor.modeGeometry}} na {{ui:editor.modeSketch}}. Přes {{ui:sketch.to3d}} zvolte výsledek:
+Nahoře přepněte z {{ui:editor.modeGeometry}} na {{ui:editor.modeSketch}}. Ve skupině {{ui:sketch.group.create}} na pásu nástrojů jsou vedle sebe dvě tlačítka pro výsledné těleso:
 
 - **{{ui:sketch.extrude}}:** vysune obrys vzhůru, například jako vykrajovátko.
 - **{{ui:sketch.revolve}}:** otočí profil kolem osy jako na soustruhu. Vznikají tak vázy, nádoby, kužely a další rotační díly.
@@ -71,7 +71,7 @@ Konstrukční čára pomáhá umísťovat body, ale netvoří těleso. Kreslí s
 
 {{ui:sketch.finishSketch}} vytvoří těleso na pracovní rovině. Výšku, barvu a další parametry upravujete jako u jiného tvaru. Po změně velikosti se těleso znovu sestaví a spolu s ním se zvětší i náčrt. Přesná geometrie tak nadále podporuje úpravy hran a při opětovném otevření odpovídá náčrt tělesu.
 
-Je-li pracovní rovina na boční ploše, kreslíte při pohledu na ni a horní směr náčrtu bude horním směrem hotového dílu. Jemný obrys ukazuje polohu původního tělesa. Prochází-li rovina tělesem, zobrazí se jeho řez; duté těleso tak vypadá jako prstenec a náčrt můžete srovnat se stěnami. Nový nebo přesouvaný bod poblíž rohu obrysu se k němu přichytí, což ukáže modrý kroužek. Do náčrtu tak převezmete polohu hran i mimo přesný povrch původního tělesa.
+Je-li pracovní rovina na boční ploše, kreslíte při pohledu na ni a horní směr náčrtu bude horním směrem hotového dílu. Jemný obrys ukazuje polohu původního tělesa. Prochází-li rovina tělesem, zobrazí se jeho řez; duté těleso tak vypadá jako prstenec a náčrt můžete srovnat se stěnami. Nový nebo přesouvaný bod poblíž rohu obrysu se k němu přichytí, což ukáže modrý kroužek. Do náčrtu tak převezmete polohu hran i mimo přesný povrch původního tělesa. Pro obkreslení existujících dílů zapněte {{ui:sketch.showPartEdges}}, tlačítko s vrstvami mezi ovládacími prvky pohledu vlevo. Všechny hrany těles se pak jemně promítnou do roviny náčrtu bez ohledu na jejich výšku, jako při pohledu skrz tělesa. Na svislé rovině položené na přední stěnu tak uvidíte nárys dílu. Volba se pamatuje v prohlížeči.
 
 ![Z obrysu vzniklo těleso se zaobleným rohem.](shot:sketch-result)
 
@@ -79,7 +79,7 @@ Je-li pracovní rovina na boční ploše, kreslíte při pohledu na ni a horní 
 
 ### Rotace profilu
 
-Nakreslete polovinu průřezu **nalevo od zobrazené osy**. Vedle náčrtu uvidíte průběžný 3D náhled. Obrys musí být uzavřený. Dokončíte jej přes {{ui:sketch.finishRevolve}}.
+Nakreslete polovinu průřezu **nalevo od zobrazené osy**. Vedle náčrtu uvidíte průběžný 3D náhled. Obrys musí být uzavřený, nebo můžete použít otevřenou čáru rozšířenou na pás, viz níže. Dokončíte jej přes {{ui:sketch.finishRevolve}}.
 
 Rotační těleso má přesnou geometrii stejně jako vysunuté. Podporuje zaoblení, zkosení a dutiny pro nádoby či vázy. Starší verze vytvářely síť; otevřením {{ui:inspector.editSketch}} a opětovným dokončením získáte přesné těleso. Profil přesahující přes osu zůstává sítí, protože jej nelze přesně sestavit.
 
@@ -91,7 +91,7 @@ Běžně se vyplňuje plocha uzavřeného obrysu. {{ui:sketch.stroke}} v {{ui:sk
 - **Otevřená čára** vytvoří pás souměrný kolem ní. {{ui:sketch.strokeCap}} určí zakončení {{ui:sketch.strokeCap.flat}}, {{ui:sketch.strokeCap.square}}, delší o polovinu šířky, nebo {{ui:sketch.strokeCap.round}}.
 - {{ui:sketch.strokeJoin}} určuje rohy obou typů: {{ui:sketch.strokeJoin.miter}}, {{ui:sketch.strokeJoin.round}} nebo {{ui:sketch.strokeJoin.bevel}}.
 
-Původní čára zůstává upravitelná. Po otevření měníte čáru i rozšíření; vypnutím volby se opět vyplní plocha. Křivky se pro tuto operaci převádějí na krátké úsečky. Rotační profil rozšíření čáry nepodporuje.
+Původní čára zůstává upravitelná. Po otevření měníte čáru i rozšíření; vypnutím volby se opět vyplní plocha. Křivky se pro tuto operaci převádějí na krátké úsečky. Při rotaci vytvoří rozšířená čára tenkou stěnu: nakreslete stěnu vázy či nádoby jako **jednu otevřenou čáru nalevo od osy**, zapněte {{ui:sketch.stroke}} a nastavte šířku. Rotací vzniklého pásu se vytvoří stěna. Část pásu přesahující přes osu se ořízne.
 
 ## Výplň a silueta
 

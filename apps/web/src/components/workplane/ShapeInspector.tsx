@@ -172,6 +172,7 @@ import { DEFAULT_KEYRING_DIAMETER, MIN_KEYRING_DIAMETER, TEXT_KEYRING_SIDES } fr
 import { addTextLayer, MIN_LETTER_SIZE, MIN_NAME_TAG_LAYERS, NAME_TAG_GAP, NAME_TAG_LAYERS, NAME_TAG_LETTER_SIZE, removeTextLayer, textLetterSize, textLetterSizePatch, type NameTagStack } from "@/lib/nameTag";
 import { FONT_MANAGER_OPTION, requestFontManager } from "@/lib/fontManagerEvents";
 import { ICON_TAG_LAYERS, iconTagFitCount, MAX_ICON_TAG_WIDTH, MAX_ICON_TAGS, MIN_ICON_TAG_WIDTH, normalizeIconTagCount, type IconLayerStack } from "@/lib/iconTag";
+import { PICTURE_FILE_ACCEPT } from "@/lib/pictureIcon";
 import { customFontList, textFontLabel } from "@/lib/textFonts";
 import { MIN_SLOT_END_RATIO, normalizeSlotEndRatio, taperedSlotOutline } from "@/lib/slotGeometry";
 import { loftMeasures, loftShapePatch, loftTiltLimit, maxLoftWall, MAX_LOFT_SIDES, MAX_LOFT_TWIST, MIN_LOFT_SIDES, MIN_LOFT_SIZE, normalizeLoftOutline, type LoftMeasures } from "@/lib/loftGeometry";
@@ -2428,7 +2429,7 @@ export function ShapeInspector({
           aria-expanded={colorOpen}
         >
           <span className="large-solid-swatch" style={{ "--swatch": solidColor } as CSSProperties} />
-          <span>{t("inspector.solid")}</span>
+          <span>{t("inspector.solid")} <span className="key-hint">(S)</span></span>
         </button>
         <button
           className={shape.hole ? "active hole-choice" : "hole-choice"}
@@ -2440,18 +2441,18 @@ export function ShapeInspector({
           aria-pressed={shape.hole}
         >
           <span className="large-hole-swatch" />
-          <span>{t("inspector.hole")}</span>
+          <span>{t("inspector.hole")} <span className="key-hint">(H)</span></span>
         </button>
         {/* Stays in place for a hole, only greyed out, so the card does not jump. */}
         <ToggleProperty
-          label={t("inspector.transparent")}
+          label={`${t("inspector.transparent")} (T)`}
           value={Boolean(shape.transparent) && !shape.hole}
           disabled={locked || Boolean(shape.hole)}
           onChange={(transparent) => onUpdate({ transparent: transparent || undefined })}
         />
         {canToggleGroupColors(shape) ? (
           <ToggleProperty
-            label={t("inspector.multicolor")}
+            label={`${t("inspector.multicolor")} (Shift+M)`}
             value={groupShowsPartColors(shape)}
             disabled={locked}
             onChange={(multicolor) => onUpdate({ multicolor })}
@@ -2529,7 +2530,7 @@ export function ShapeInspector({
 
       {onOpenGroup ? (
         <button className="inspector-action-button" type="button" disabled={locked} onClick={onOpenGroup}>
-          {t(shape.groupOperation === "bundle" ? "group.editBundle" : "group.edit")}
+          {t(shape.groupOperation === "bundle" ? "group.editBundle" : "group.edit")} (E)
         </button>
       ) : null}
 
@@ -3260,7 +3261,7 @@ function IconTagCard({ shapeId, controls, workspace, disabled, onInteractionActi
           <input
             ref={fileRef}
             type="file"
-            accept=".svg,image/svg+xml"
+            accept={`.svg,image/svg+xml,${PICTURE_FILE_ACCEPT}`}
             hidden
             data-testid="icon-tag-replace-file"
             onChange={(event) => {
@@ -3560,7 +3561,9 @@ function ShapePropertyRows({
     }
     const differs = typeof fallback === "number" && Math.abs(fallback - property.value) > Math.max(1e-6, (property.step ?? 0.01) / 10);
     const onReset = differs ? () => property.onChange(fallback as number) : undefined;
-    return <RangeProperty {...property} key={property.id} workspace={workspace} disabled={disabled || property.disabled} onReset={onReset} formula={formulas?.[property.id]} onFormula={onFormula ? (text) => onFormula(property.id, text) : undefined} onInteractionActiveChange={onInteractionActiveChange} />;
+    // A double click on the slider goes back to the default, also when the first click of it has just moved the value.
+    const onDefault = typeof fallback === "number" ? () => property.onChange(fallback) : undefined;
+    return <RangeProperty {...property} key={property.id} workspace={workspace} disabled={disabled || property.disabled} onReset={onReset} onDefault={onDefault} formula={formulas?.[property.id]} onFormula={onFormula ? (text) => onFormula(property.id, text) : undefined} onInteractionActiveChange={onInteractionActiveChange} />;
   });
 }
 
@@ -3716,10 +3719,11 @@ function RangeProperty({
   disabled,
   onChange,
   onReset,
+  onDefault,
   formula,
   onFormula,
   onInteractionActiveChange,
-}: RangePropertyConfig & { workspace: WorkplaneWorkspaceSettings; disabled?: boolean; onReset?: () => void; formula?: string; onFormula?: (text: string | null | undefined) => void; onInteractionActiveChange?: (active: boolean) => void }) {
+}: RangePropertyConfig & { workspace: WorkplaneWorkspaceSettings; disabled?: boolean; onReset?: () => void; onDefault?: () => void; formula?: string; onFormula?: (text: string | null | undefined) => void; onInteractionActiveChange?: (active: boolean) => void }) {
   const holdInteraction = useInteractionHold(onInteractionActiveChange);
   const snapStepMm = useContext(SliderSnapContext);
   const draggingSliderRef = useRef(false);
@@ -3839,6 +3843,7 @@ function RangeProperty({
             holdInteraction(false);
           }}
           onChange={(event) => handleSliderChange(Number(event.currentTarget.value))}
+          onDoubleClick={() => onDefault?.()}
         />
       </div>
     </label>
@@ -4130,7 +4135,7 @@ export function SelectionInspector({
             aria-expanded={colorOpen}
           >
             <span className="large-solid-swatch" style={{ "--swatch": swatch } as CSSProperties} />
-            <span>{t("inspector.solid")}</span>
+            <span>{t("inspector.solid")} <span className="key-hint">(S)</span></span>
           </button>
           <button
             className={allHoles ? "active hole-choice" : "hole-choice"}
@@ -4142,7 +4147,7 @@ export function SelectionInspector({
             aria-pressed={allHoles}
           >
             <span className="large-hole-swatch" />
-            <span>{t("inspector.hole")}</span>
+            <span>{t("inspector.hole")} <span className="key-hint">(H)</span></span>
           </button>
           {!noHoles && !allHoles ? <p className="selection-mixed-note">{t("inspector.selectionMixed")}</p> : null}
         </div>

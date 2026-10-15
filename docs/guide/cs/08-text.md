@@ -106,17 +106,19 @@ Do {{ui:textLayers.names}} zadejte nejvýše sto jmen, každé na samostatný ř
 
 Štítek používá místo textu SVG symbol, například srdce, mrak nebo logo kroužku. Nahoře je symbol, pod ním širší obrys druhé barvy a dole souvislá podložka.
 
-- **Nový štítek:** vyberte {{ui:shape.iconTag}}. V okně zvolte {{ui:iconTag.browse}}, soubor SVG, zkontrolujte obrázek, nastavte {{ui:iconTag.width}} a potvrďte {{ui:iconTag.ok}}. Štítek vznikne uprostřed podložky se stejnými vrstvami jako nová jmenovka.
+- **Nový štítek:** vyberte {{ui:shape.iconTag}}. V okně zvolte {{ui:iconTag.browse}}, soubor SVG, PNG nebo JPG, zkontrolujte obrázek, nastavte {{ui:iconTag.width}} a potvrďte {{ui:iconTag.ok}}. Štítek vznikne uprostřed podložky se stejnými vrstvami jako nová jmenovka.
 - **Z tělesa náčrtu:** importované SVG i vlastní náčrt nabízí nahoře {{ui:nameTag.makeLayers}}.
 
 Karta {{ui:iconTag.title}} obsahuje:
 
-- **{{ui:iconTag.replace}}:** nahradí symbol jiným SVG při zachování vrstev a šířky.
+- **{{ui:iconTag.replace}}:** nahradí symbol jiným souborem SVG, PNG nebo JPG při zachování vrstev a šířky.
 - **{{ui:iconTag.iconWidth}}:** šířku horního symbolu v mm; ostatní vrstvy zůstávají zarovnané.
 - **{{ui:nameTag.layers}}:** stejné řádky jako jmenovka: barva, rozšíření, {{ui:nameTag.corners}}, výška, {{ui:nameTag.noHoles}}, **+** a **–**, dvě až šest vrstev. Horní řádek je samotný symbol.
 - **{{ui:iconTag.count}}:** počet 1 až 100. {{ui:iconTag.fill}} jej vypočte podle podložky vybrané tiskárny. Tlačítko vytvoří kopie s mezerou 5 mm uprostřed podložky; původní štítek tvoří první kopii.
 
 SVG musí obsahovat uzavřené obrysy. Pouhé otevřené čáry nelze převést na štítek. Náčrt s výplní typu čára ji zachová a symbol tvoří plocha rozšířené čáry.
+
+**Obrázek PNG nebo JPG** se převede na obrys, který se zobrazí v náhledu. V {{ui:iconTag.part}} vyberte, zda se symbolem stane {{ui:iconTag.part.dark}}, nebo {{ui:iconTag.part.light}}; výchozí je část, která netvoří pozadí. Průhledné pixely do symbolu nikdy nepatří. Stejně se zpracuje SVG obsahující pouze jeden rastrový obrázek, jaké vznikne například při uložení vložené bitmapy v Inkscapu. Obrys sleduje pixely, takže malý obrázek vytvoří hrubé okraje. Nejlépe fungují obrázky o velikosti alespoň několika set pixelů. Při {{ui:iconTag.replace}} se použije část mimo pozadí.
 
 ## Text po kruhovém oblouku
 

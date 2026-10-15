@@ -12,14 +12,29 @@ import {
   setLanguage,
   translate,
 } from "@/lib/i18n";
-import { MESSAGES_DE } from "@/lib/messages.de";
-import { MESSAGES_CS } from "@/lib/messages.cs";
-import { MESSAGES_EN } from "@/lib/messages.en";
-import { MESSAGES_NL } from "@/lib/messages.nl";
 
-const CATALOGUES = { en: MESSAGES_EN, de: MESSAGES_DE, cs: MESSAGES_CS, nl: MESSAGES_NL } as const;
-/** Czech has every interface sentence even while its guide chapters use English fallback. */
-const COMPLETE_LANGUAGES = LANGUAGES.filter((language) => LANGUAGE_INFO[language].complete || language === "cs");
+import { MESSAGES_EN } from "@/lib/messages.en";
+
+/**
+ * Every catalogue that is there, whatever language it is: a language added in
+ * languages.ts brings its own file, and a language that is fetched when chosen
+ * (like Russian) is not built into the program, so it cannot be imported by
+ * name here.
+ */
+const FILES = import.meta.glob("../../apps/web/src/lib/messages.*.ts", { eager: true }) as Record<string, Record<string, Record<string, string>>>;
+const CATALOGUES: Record<string, Record<string, string> | undefined> = {};
+for (const [path, module] of Object.entries(FILES)) {
+  const code = /messages\.([a-z-]+)\.ts$/.exec(path)?.[1];
+  if (code) CATALOGUES[code] = module[`MESSAGES_${code.toUpperCase()}`];
+}
+/** The languages that must have every sentence; a language still on its way is held to less (i18nLanguages.test.ts). */
+const COMPLETE_LANGUAGES = LANGUAGES.filter((language) => LANGUAGE_INFO[language].complete);
+/** A complete language whose file is missing is a broken promise, not a passing test. */
+const catalogueOf = (language: string) => {
+  const catalogue = CATALOGUES[language];
+  expect(catalogue, `messages.${language}.ts`).toBeDefined();
+  return catalogue as Record<string, string>;
+};
 
 function placeholders(value: string) {
   return [...value.matchAll(/\{(\w+)\}/g)].map((match) => match[1]).sort();
@@ -36,13 +51,13 @@ describe("message catalogues", () => {
   it("covers every key in every language", () => {
     const keys = Object.keys(MESSAGES_EN).sort();
     for (const language of COMPLETE_LANGUAGES) {
-      expect(Object.keys(CATALOGUES[language]).sort()).toEqual(keys);
+      expect(Object.keys(catalogueOf(language)).sort()).toEqual(keys);
     }
   });
 
   it("leaves no message empty", () => {
     for (const language of COMPLETE_LANGUAGES) {
-      for (const [key, value] of Object.entries(CATALOGUES[language])) {
+      for (const [key, value] of Object.entries(catalogueOf(language))) {
         expect(value.trim(), `${language}:${key}`).not.toBe("");
       }
     }
@@ -51,24 +66,21 @@ describe("message catalogues", () => {
   it("keeps the same placeholders in every translation", () => {
     for (const [key, english] of Object.entries(MESSAGES_EN)) {
       for (const language of COMPLETE_LANGUAGES) {
-        const translated = CATALOGUES[language][key as keyof typeof MESSAGES_EN];
+        const translated = catalogueOf(language)[key];
         expect(placeholders(translated), `${language}:${key}`).toEqual(placeholders(english));
       }
     }
   });
 
-  it("does not leave a translation identical to the English one by accident", () => {
-    // A handful are the same in both languages on purpose - the product claim,
-    // "Name" - but the bulk of a catalogue that never changed would mean a
-    // forgotten translation.
-    const identical = Object.keys(MESSAGES_EN).filter(
-      (key) => MESSAGES_DE[key as keyof typeof MESSAGES_EN] === MESSAGES_EN[key as keyof typeof MESSAGES_EN],
-    );
-    expect(identical.length).toBeLessThan(Object.keys(MESSAGES_EN).length * 0.1);
-    const identicalCzech = Object.keys(MESSAGES_EN).filter(
-      (key) => MESSAGES_CS[key as keyof typeof MESSAGES_EN] === MESSAGES_EN[key as keyof typeof MESSAGES_EN],
-    );
-    expect(identicalCzech.length).toBeLessThan(Object.keys(MESSAGES_EN).length * 0.1);
+  it("does not leave a catalogue that was never touched", () => {
+    // A handful of sentences read the same in every language on purpose - "X",
+    // the material names, a file suffix - but a catalogue that never changed
+    // would mean a forgotten translation.
+    for (const language of COMPLETE_LANGUAGES.filter((code) => code !== "en")) {
+      const catalogue = catalogueOf(language);
+      const identical = Object.keys(MESSAGES_EN).filter((key) => catalogue[key] === MESSAGES_EN[key as keyof typeof MESSAGES_EN]);
+      expect(identical.length, language).toBeLessThan(Object.keys(MESSAGES_EN).length * 0.1);
+    }
   });
 });
 
@@ -84,7 +96,7 @@ describe("translation", () => {
   });
 
   it("falls back to English when a catalogue misses a key", () => {
-    const broken = { ...MESSAGES_DE } as Record<string, string>;
+    const broken = { ...catalogueOf("de") } as Record<string, string>;
     delete broken["common.save"];
     // The catalogue itself is type-checked; this guards the runtime path.
     expect(translate("en", "common.save")).toBe("Save");
@@ -98,14 +110,20 @@ describe("language detection", () => {
     expect(languageFromTag("en-GB")).toBe("en");
     expect(languageFromTag("cs-CZ")).toBe("cs");
     expect(languageFromTag("CS")).toBe("cs");
-    expect(languageFromTag("fr-FR")).toBe(null);
+    expect(languageFromTag("fr-FR")).toBe("fr");
+    expect(languageFromTag("ru-RU")).toBe("ru");
+    expect(languageFromTag("it-IT")).toBe(null);
     expect(languageFromTag(undefined)).toBe(null);
   });
 
   it("recognises only the languages it can serve", () => {
     expect(isLanguage("de")).toBe(true);
     expect(isLanguage("cs")).toBe(true);
-    expect(isLanguage("fr")).toBe(false);
+    expect(isLanguage("nl")).toBe(true);
+    expect(isLanguage("fr")).toBe(true);
+    expect(isLanguage("pl")).toBe(true);
+    expect(isLanguage("ru")).toBe(true);
+    expect(isLanguage("it")).toBe(false);
     expect(isLanguage(null)).toBe(false);
   });
 
@@ -145,13 +163,15 @@ describe("language detection", () => {
     expect(withBrowser(["en-US"], "de")).toBe("de");
   });
 
-  it("switches and reports the new language", () => {
+  it("switches and reports the new language", async () => {
     setLanguage("cs", false);
     expect(getLanguage()).toBe("cs");
     expect(getLocale()).toBe("cs-CZ");
     expect((1234.5).toLocaleString(getLocale())).toBe("1\u00a0234,5");
     setLanguage("de", false);
     expect(getLanguage()).toBe("de");
+    await setLanguage("fr", false);
+    expect(getLanguage()).toBe("fr");
     setLanguage("en", false);
     expect(getLanguage()).toBe("en");
   });

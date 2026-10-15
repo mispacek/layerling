@@ -10,7 +10,7 @@
  *
  * To add a language, see docs/TRANSLATING.md.
  */
-export const LANGUAGES = ["en", "de", "cs", "nl", "pl"] as const;
+export const LANGUAGES = ["en", "de", "cs", "nl", "fr", "pl", "ru"] as const;
 export type Language = (typeof LANGUAGES)[number];
 export const DEFAULT_LANGUAGE: Language = "cs";
 
@@ -230,6 +230,53 @@ export const LANGUAGE_INFO: Readonly<Record<Language, LanguageInfo>> = {
       printButton: "Afdrukken",
     },
   },
+  fr: {
+    name: "Français",
+    htmlLang: "fr",
+    numberLocale: "fr-FR",
+    quotes: ["« ", " »"],
+    guideDir: "guide-fr",
+    communityUrl: GITHUB_DISCUSSIONS,
+    readme: "README.md",
+    quickstartAnchor: "windows-quickstart",
+    legal: { imprint: "Mentions légales", privacy: "Politique de confidentialité" },
+    keyNames: {
+      Ctrl: "Ctrl",
+      Shift: "Maj",
+      Delete: "Suppr",
+      Backspace: "Retour arrière",
+      Home: "Début",
+      Click: "Clic",
+      RightClick: "Clic droit",
+      Drag: "Glisser",
+    },
+    asciiUmlauts: false,
+    // LEGO-specific interface text currently uses English fallback.
+    complete: false,
+    guide: {
+      site: "Manuel d'utilisation layerling",
+      home: "Manuel d'utilisation",
+      openEditor: "Ouvrir l'éditeur",
+      backToEditor: "Retour à l'éditeur",
+      editorElsewhere: "L'éditeur est déjà ouvert dans un autre onglet - basculez simplement vers lui.",
+      chapters: "Chapitres",
+      onThisPage: "Sur cette page",
+      previous: "Chapitre précédent",
+      next: "Chapitre suivant",
+      overviewLead: "Tout ce que layerling peut faire, pas à pas. Les images proviennent du programme en cours d'exécution et sont renouvelées à chaque version.",
+      sourceNote: "Ce manuel grandit avec le programme. Si quelque chose manque ou est inexact, dites-le nous dans les",
+      forum: "discussions",
+      notTranslated: "Ce chapitre n'est pas encore traduit en français. Le texte en anglais suit.",
+      languageMenu: "Langue",
+      search: "Rechercher dans le manuel",
+      searchNothing: "Aucun résultat trouvé.",
+      printAll: "Guide complet, à imprimer",
+      printAllTitle: "L'intégralité du guide sur une seule page",
+      printAllLead: "Tous les chapitres les uns après les autres, à imprimer ou à enregistrer au format PDF : appuyez sur Ctrl+P et désactivez « En-têtes et pieds de page » dans les paramètres d'impression. Pour imprimer seulement une partie, choisissez ses numéros de page dans la boîte de dialogue.",
+      printContents: "Table des matières",
+      printButton: "Imprimer",
+    },
+  },
   // Polish: added as a language that is fetched when chosen, not complete yet (missing sentences show in English).
   // The README and the guide stay English until they are translated, so readme and quickstartAnchor point at the English ones.
   pl: {
@@ -269,6 +316,44 @@ export const LANGUAGE_INFO: Readonly<Record<Language, LanguageInfo>> = {
       printAllLead: "Wszystkie rozdziały jeden po drugim, do wydrukowania lub zapisania jako PDF: naciśnij Ctrl+P i wyłącz w ustawieniach drukowania „Nagłówki i stopki”. Aby wydrukować tylko część, wybierz tam numery stron.",
       printContents: "Spis treści",
       printButton: "Drukuj",
+    },
+  },
+  ru: {
+    name: "Русский",
+    htmlLang: "ru",
+    numberLocale: "ru-RU",
+    quotes: ["«", "»"],
+    guideDir: "ru",
+    communityUrl: GITHUB_DISCUSSIONS,
+    readme: "README.md",
+    quickstartAnchor: "windows-quickstart",
+    legal: { imprint: "Выходные данные", privacy: "Политика конфиденциальности" },
+    keyNames: { Ctrl: "Ctrl", Shift: "Shift", Delete: "Del", Backspace: "Backspace", Home: "Home", Click: "Щёлчок", RightClick: "Правый клик", Drag: "Перетаскивание" },
+    asciiUmlauts: false,
+    // LEGO-specific interface text currently uses English fallback.
+    complete: false,
+    guide: {
+      site: "Руководство layerling",
+      home: "Руководство",
+      openEditor: "Открыть редактор",
+      backToEditor: "Вернуться в редактор",
+      editorElsewhere: "Редактор уже открыт в другой вкладке — просто переключитесь туда.",
+      chapters: "Главы",
+      onThisPage: "На этой странице",
+      previous: "Предыдущая глава",
+      next: "Следующая глава",
+      overviewLead: "Всё, что умеет layerling, шаг за шагом. Картинки сняты с работающей программы и обновляются с каждой версией.",
+      sourceNote: "Это руководство растёт вместе с программой. Если чего-то не хватает или что-то не так — напишите в",
+      forum: "обсуждениях",
+      notTranslated: "Эта глава ещё не переведена на ваш язык. Ниже идёт английский текст.",
+      languageMenu: "Язык",
+      search: "Поиск по руководству",
+      searchNothing: "Ничего не найдено.",
+      printAll: "Всё руководство для печати",
+      printAllTitle: "Всё руководство на одной странице",
+      printAllLead: "Все главы подряд — чтобы распечатать или сохранить как PDF: нажмите Ctrl+P и отключите в настройках печати «Колонтитулы». Если нужно распечатать только часть, выберите там номера страниц.",
+      printContents: "Содержание",
+      printButton: "Печать",
     },
   },
 };

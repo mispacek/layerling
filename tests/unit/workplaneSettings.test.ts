@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { WorkplaneWorkspaceSettings } from "@/types/layerling";
 import { formatMeasurementNumber, lengthDisplayUnit, millimetersToDisplay, normalizeScaleForUnits, parseMeasurementInput, resolveMeasurementInput, scaleOptionsForUnits } from "@/lib/measurementUnits";
-import { booleanTriangleLimitPreset, canBeginShapeDrag, customSnapGridLabel, DEFAULT_ORBIT_ZOOM_SPEED, DEFAULT_SNAP_GRID, DEFAULT_WORKPLANE_WORKSPACE, keyboardNudgeStep, normalizeShapeCustomizations, snapGridForUnits, snapGridOptions, snapGridStep, normalizeSnapGrid, normalizeWorkspaceSettings, orbitControlsZoomSpeed, shapeDimensionLimit, workplaneSettingsFingerprint, workspaceHydrationSyncDecision, zoomDistanceScale } from "@/lib/workplaneSettings";
+import { booleanTriangleLimitPreset, canBeginShapeDrag, customSnapGridDivisors, customSnapGridLabel, normalizeCustomSnapGrids, DEFAULT_ORBIT_ZOOM_SPEED, DEFAULT_SNAP_GRID, DEFAULT_WORKPLANE_WORKSPACE, keyboardNudgeStep, normalizeShapeCustomizations, snapGridForUnits, snapGridOptions, snapGridStep, normalizeSnapGrid, normalizeWorkspaceSettings, orbitControlsZoomSpeed, shapeDimensionLimit, workplaneSettingsFingerprint, workspaceHydrationSyncDecision, zoomDistanceScale } from "@/lib/workplaneSettings";
 import { toolbarShapeAssets } from "@/lib/shapeCatalog";
 
 describe("workplane settings helpers", () => {
@@ -283,5 +283,25 @@ describe("custom snap grids", () => {
       customSnapGrids: [{ name: "  MX Key Unit ", size: 19.05 }, { name: 7, size: 5 }, { name: "bad", size: -1 }, "nonsense", { name: "huge", size: 1e9 }],
     }).customSnapGrids).toEqual([{ name: "MX Key Unit", size: 19.05 }, { name: "", size: 5 }, { name: "huge", size: 1000 }]);
     expect(normalizeWorkspaceSettings({ customSnapGrids: Array.from({ length: 40 }, (_unused, index) => ({ name: `n${index}`, size: index + 1 })) }).customSnapGrids).toHaveLength(12);
+  });
+});
+
+describe("a custom snap grid offered whole only (#329)", () => {
+  it("offers the whole measure alone when it is set to that, and all three otherwise", () => {
+    const withParts = snapGridOptions("Metric (Default)", [{ name: "Grid", size: 10 }]).slice(-3);
+    const wholeOnly = snapGridOptions("Metric (Default)", [{ name: "Grid", size: 10, wholeOnly: true }]).slice(-1);
+    expect(withParts).toEqual(["custom:10:1", "custom:10:2", "custom:10:4"]);
+    expect(wholeOnly).toEqual(["custom:10:1"]);
+    expect(snapGridOptions("Metric (Default)", [{ name: "Grid", size: 10, wholeOnly: true }])).toEqual([...snapGridOptions("Metric (Default)"), "custom:10:1"]);
+    expect(customSnapGridDivisors({ wholeOnly: true })).toEqual([1]);
+    expect(customSnapGridDivisors({})).toEqual([1, 2, 4]);
+  });
+
+  it("keeps the switch in the settings, and only when it is on", () => {
+    expect(normalizeCustomSnapGrids([{ name: "A", size: 10, wholeOnly: true }, { name: "B", size: 5, wholeOnly: false }, { name: "C", size: 2, wholeOnly: "yes" }])).toEqual([
+      { name: "A", size: 10, wholeOnly: true },
+      { name: "B", size: 5 },
+      { name: "C", size: 2 },
+    ]);
   });
 });

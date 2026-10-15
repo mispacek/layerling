@@ -13,6 +13,7 @@ import type { SketchProfile, WorkplaneShape } from "@/types/layerling";
 import { getManifoldRuntime } from "@/lib/editorMeshCore";
 import { groupedShape, restoreGroupedChildren } from "@/lib/editorBooleans";
 import { cadShapeFromSketchProfile } from "@/lib/editorSketchCad";
+import { iconFileName } from "@/lib/pictureIcon";
 
 /**
  * The settings panel offers wrapping only where it is what people want: an
@@ -176,7 +177,7 @@ export async function svgIconArea(fileName: string, text: string, width: number)
   const probe = await cadShapeFromSketchProfile(profile, 1).catch(() => null);
   if (!probe || !svgSketchMatchesMesh(probe, { ...importedShapeFromSvg(fileName, text), mirrorZ: true })) throw new Error(t("iconTag.unreadable"));
   const area = await iconTagArea(iconSourceProfile(profile), probe.width, width);
-  return { area, name: fileName.replace(/\.svg$/i, "").trim() || "Icon tag" };
+  return { area, name: iconFileName(fileName) || "Icon tag" };
 }
 
 /** An SVG file's text as a new icon tag in the start layers, `width` mm wide, standing on the plate's middle. */

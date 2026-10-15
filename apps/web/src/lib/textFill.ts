@@ -254,6 +254,49 @@ export function textFillPieceGeometry(component: TextFillComponent, height: numb
 }
 
 /**
+ * The text's fill as one closed body, extruded by the 2D kernel: the region of the letters with the fill's
+ * line or widening and the key ring, from the floor to the text's height, standing the way the text does.
+ * Null when the kernel makes nothing of it, so the pieces built by hand take over.
+ */
+export function textFillClosedGeometry(runtime: ManifoldToplevel, shape: WorkplaneShape): THREE.BufferGeometry | null {
+  if (!textHasFill(shape)) return null;
+  const made: { delete: () => void }[] = [];
+  const keep = <T extends { delete: () => void }>(item: T): T => {
+    made.push(item);
+    return item;
+  };
+  try {
+    const region = textBodyRegion(runtime, keep as Keep, shape);
+    if (!region) return null;
+    const solid = keep(region.extrude(Math.max(1e-3, shape.height)));
+    if (solid.status() !== "NoError" || solid.numTri() < 1) return null;
+    const mesh = solid.getMesh();
+    const stride = mesh.numProp;
+    const positions: number[] = [];
+    // Manifold's x/y plane is the text's x/z plane and its z the height: x, y and z are swapped, which turns
+    // the faces over, so the triangles are written the other way round.
+    for (let index = 0; index < mesh.vertProperties.length; index += stride) {
+      positions.push(mesh.vertProperties[index], mesh.vertProperties[index + 2], mesh.vertProperties[index + 1]);
+    }
+    const indices: number[] = [];
+    for (let index = 0; index + 2 < mesh.triVerts.length; index += 3) {
+      indices.push(mesh.triVerts[index], mesh.triVerts[index + 2], mesh.triVerts[index + 1]);
+    }
+    const indexed = new THREE.BufferGeometry();
+    indexed.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+    indexed.setIndex(indices);
+    const geometry = toCreasedNormals(indexed, THREE.MathUtils.degToRad(12));
+    indexed.dispose();
+    geometry.computeBoundingBox();
+    return geometry;
+  } catch {
+    return null;
+  } finally {
+    new Set(made).forEach((item) => item.delete());
+  }
+}
+
+/**
  * The text's display geometry: the fill path when the text has a fill mode and the 2D kernel is
  * there, else the filled letters. Before the kernel has loaded the text draws plain and asks for
  * it; the viewport draws the text again once it is there (manifoldRevision in its cache key).
@@ -266,6 +309,10 @@ export function textDisplayGeometry(shape: WorkplaneShape): THREE.BufferGeometry
     return createTextGeometry(shape);
   }
   if (textHasEdge(shape)) return textEdgeGeometry(runtime, shape) ?? new THREE.BoxGeometry(0.001, shape.height, 0.001);
+  // The 2D kernel extrudes the region itself: its mesh is closed whatever the outline looks like, where the
+  // pieces built by hand could leave gaps along letters that touch (a line round a block font, #352).
+  const closed = textFillClosedGeometry(runtime, shape);
+  if (closed) return closed;
   const components = textFillComponents(runtime, shape);
   if (!components) return new THREE.BoxGeometry(0.001, shape.height, 0.001);
   const pieces = components.map((component) => textFillPieceGeometry(component, shape.height));

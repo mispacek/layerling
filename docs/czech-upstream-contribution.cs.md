@@ -34,7 +34,7 @@ Samotné nahrání větve na náš GitHub ještě pull request nevytvoří. Tent
 ## Rozsah a ověření
 
 - Příspěvek je v samostatném pracovním adresáři `C:/xampp/htdocs/layerling-upstream-cs`.
-- Hlavní větev `codex/customizations` s LEGO funkcemi a její aplikace se v tomto kroku neaktualizovaly. Tento dokument zaznamenává stav samostatného příspěvku.
+- Hlavní větev `codex/customizations` s LEGO funkcemi byla samostatně [aktualizována na 1.75.0](upstream-update-1.75.0.cs.md). Pro český pull request nadále používejte výhradně `codex/czech-localization`.
 - Statické/lokální: TypeScript, překlady, generování příručky, statický export a 86 zaměřených testů prošly. Celá unit sada: 2 057/2 058; zbývá dříve zaznamenaná chyba cest ve Windows v sharedProjectsCopy.
 - Prohlížeč: ověřeno přepínání CS → EN → CS, české novinky 1.75.0 a aktualizované části příručky k náčrtům.
 - Nasazení na WEDOS a fyzický tisk: neprováděno.

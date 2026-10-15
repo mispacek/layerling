@@ -108,17 +108,19 @@ Type the names into {{ui:textLayers.names}}, one per line, up to a hundred. The 
 
 An icon tag is the same tag with an SVG icon instead of letters: a heart, a cloud, a club's logo. The icon on top, under it the same outline a little wider in a second colour, at the bottom a plate without holes.
 
-- **A new icon tag:** choose {{ui:shape.iconTag}} in the shape library. A small window opens: click {{ui:iconTag.browse}}, pick an SVG file, check the picture, type the {{ui:iconTag.width}} of the icon and click {{ui:iconTag.ok}}. The tag stands in the middle of the plate, in the same layers as a new name tag.
+- **A new icon tag:** choose {{ui:shape.iconTag}} in the shape library. A small window opens: click {{ui:iconTag.browse}}, pick an SVG, PNG or JPG file, check the picture, type the {{ui:iconTag.width}} of the icon and click {{ui:iconTag.ok}}. The tag stands in the middle of the plate, in the same layers as a new name tag.
 - **From a sketch body:** an imported SVG, or a sketch you drew, has {{ui:nameTag.makeLayers}} at the top of its settings.
 
 The card {{ui:iconTag.title}} at the top of the settings holds:
 
-- **{{ui:iconTag.replace}}:** puts another SVG's icon on the tag; the layers and the width stay as they are.
+- **{{ui:iconTag.replace}}:** puts the icon of another file (SVG, PNG or JPG) on the tag; the layers and the width stay as they are.
 - **{{ui:iconTag.iconWidth}}:** how wide the icon on top is, in mm. All layers follow and stay lined up.
 - **{{ui:nameTag.layers}}:** the rows as on a name tag - colour, how much wider, {{ui:nameTag.corners}}, height and {{ui:nameTag.noHoles}}, **+** and **–**, two to six layers. The top row is the icon itself.
 - **{{ui:iconTag.count}}:** how many tags you want, 1 to 100. {{ui:iconTag.fill}} works it out from the plate of the printer chosen in the settings, for small logos a full plate. The button below makes them, 5 mm apart, laid out on the middle of the plate; the first is the tag itself.
 
 The SVG needs closed outlines; a drawing of open lines only cannot become a tag. A sketch body whose fill is a line keeps it: the area of that line is the icon.
+
+**A picture (PNG or JPG)** is traced into an outline, and the preview shows the outline. Under {{ui:iconTag.part}} you choose whether the {{ui:iconTag.part.dark}} or the {{ui:iconTag.part.light}} becomes the icon; at first it is the part that is not the background. Transparent pixels never belong to the icon. An SVG that holds nothing but one picture, as Inkscape saves an imported bitmap, is traced the same way. The outline follows the pixels, so a small picture gives a rough edge: pictures of a few hundred pixels or more work best. {{ui:iconTag.replace}} takes the part of a picture that is not its background.
 
 ## Text on a circular arc
 

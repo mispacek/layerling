@@ -1,5 +1,296 @@
 [
   {
+    "version": "1.75.0",
+    "items": [
+      {
+        "title": {
+          "de": "Symbolschild aus einem Bild (PNG, JPG)",
+          "en": "Icon tag from a picture (PNG, JPG)",
+          "cs": "Štítek se symbolem z obrázku PNG nebo JPG"
+        },
+        "body": {
+          "de": "Das Fenster Symbolschild nimmt jetzt auch PNG- und JPG-Dateien. Das Bild wird zu einem Umriss nachgezeichnet, die Vorschau zeigt ihn, und du wählst, ob sein dunkler oder sein heller Teil das Symbol wird. Eine SVG, die nur ein Bild enthält, wird genauso nachgezeichnet.",
+          "en": "The icon tag window now takes PNG and JPG files too. The picture is traced into an outline, the preview shows it, and you choose whether its dark or its light part becomes the icon. An SVG that holds nothing but a picture is traced the same way.",
+          "cs": "Okno štítku se symbolem nově přijímá i PNG a JPG. Obrázek se převede na obrys, který uvidíte v náhledu, a vyberete, zda symbolem bude jeho tmavá, nebo světlá část. Stejně se zpracuje SVG obsahující pouze jeden rastrový obrázek."
+        }
+      },
+      {
+        "title": {
+          "de": "Skizze: Teile durchscheinend zeigen",
+          "en": "Sketch: show the parts seen through",
+          "cs": "Průhledné zobrazení dílů v náčrtu"
+        },
+        "body": {
+          "de": "In der Skizze gibt es bei den Ansichtsknöpfen links einen neuen Knopf mit Schichten: Er zeichnet alle Kanten der Körper dünn und blass auf die Skizzenebene, in jeder Höhe, als sähest du durch sie hindurch. So zeichnest du an vorhandener Arbeit entlang; auf einer senkrechten Ebene an einer Vorderfläche ist es die Vorderansicht des Teils. Die Wahl bleibt im Browser.",
+          "en": "In the sketch there is a new button with layers among the view buttons on the left: it draws all the edges of the bodies on the sketch plane, thin and faint, at any height, as if you looked through them. That lets you trace round existing work; on an upright plane set on a front face it is the front view of the part. The choice stays in the browser.",
+          "cs": "Vlevo mezi tlačítky pohledu náčrtu přibylo tlačítko s vrstvami. Jemně promítne všechny hrany těles do roviny náčrtu bez ohledu na jejich výšku, jako při pohledu skrz ně. Usnadní tak obkreslení existujících dílů. Na svislé rovině položené na přední stěnu zobrazí nárys. Volba se pamatuje v prohlížeči."
+        }
+      },
+      {
+        "title": {
+          "de": "Skizze extrudieren und rotieren: zwei Knöpfe",
+          "en": "Extrude and Revolve: two buttons",
+          "cs": "Vysunutí a rotace mají samostatná tlačítka"
+        },
+        "body": {
+          "de": "Im Reiter Skizze stehen „Skizze extrudieren\" und „Skizze rotieren\" jetzt als zwei Knöpfe nebeneinander in der Gruppe Erstellen, statt in einem Ausklappmenü. Der Hinweis steht als Tooltip am Knopf, das Fragezeichen daneben. So spart der Wechsel zwischen beiden Arten einen Klick.",
+          "en": "In the Sketch tab, Extrude sketch and Revolve sketch now stand side by side as two buttons in the Create group instead of in a drop-down. The hint is the tooltip of the button, the question mark beside them. Switching between the two takes one click less.",
+          "cs": "Na kartě Náčrt jsou příkazy Vysunout náčrt a Rotovat náčrt vedle sebe ve skupině Vytvořit místo rozbalovací nabídky. Vysvětlení se ukáže po najetí na tlačítko a vedle zůstává otazník nápovědy. Přepnutí mezi oběma způsoby vyžaduje o jedno kliknutí méně."
+        }
+      },
+      {
+        "title": {
+          "de": "Bilder importieren (PNG, JPG)",
+          "en": "Importing pictures (PNG, JPG)",
+          "cs": "Import obrázků PNG a JPG"
+        },
+        "body": {
+          "de": "Das Importfenster nimmt jetzt auch PNG- und JPG-Dateien. Das Bild wird zu einem Umriss nachgezeichnet und kommt als Skizzenkörper von 50 mm Breite, den du danach anders groß machen kannst. Eine SVG, die nur ein Bild enthält, wird genauso nachgezeichnet.",
+          "en": "The import window now takes PNG and JPG files too. The picture is traced into an outline and comes in as a sketch body 50 mm wide, which you can resize afterwards. An SVG that holds nothing but a picture is traced the same way.",
+          "cs": "Importní okno nově přijímá také PNG a JPG. Obrázek převede na obrys a vloží jako těleso náčrtu široké 50 mm, jehož velikost můžete následně změnit. Stejně se zpracuje SVG obsahující pouze jeden rastrový obrázek."
+        }
+      },
+      {
+        "title": {
+          "de": "Tasten neben den Namen, und Umschalt+M für Mehrfarbig",
+          "en": "Keys beside the names, and Shift+M for Multicolor",
+          "cs": "Zkratky u názvů a Shift+M pro vícebarevné zobrazení"
+        },
+        "body": {
+          "de": "In den Einstellungen einer Form stehen die Tasten jetzt neben den Namen: Körper (S), Aussparung (H), Durchsichtig (T) und Gruppe bearbeiten (E). Mehrfarbig bekommt eine Taste, Umschalt+M, und steht in der Tastenkürzel-Liste. Sie schaltet markierte Gruppen zwischen jedem Teil in seiner Farbe und einer Farbe für die Gruppe um. Umschalt+M schaltete bisher den Spiegelmodus ein, das tut jetzt nur noch M allein.",
+          "en": "The settings of a shape now show the keys next to the names: Solid (S), Hole (H), Transparent (T) and Edit group (E). Multicolor gets a key, Shift+M, and is in the shortcuts list: it switches the selected groups between each part in its own colour and one colour for the group. Shift+M used to start the mirror mode; now only M alone does.",
+          "cs": "V nastavení tvaru se nyní vedle názvů zobrazují klávesy: těleso (S), výřez (H), průhlednost (T) a úprava sloučeného celku (E). Vícebarevné zobrazení získalo zkratku Shift+M a položku v seznamu zkratek. U vybraných celků přepíná mezi vlastní barvou každé části a společnou barvou. Zrcadlení, které dříve spouštělo i Shift+M, se nyní zapíná pouze samotným M."
+        }
+      },
+      {
+        "title": {
+          "de": "Französisch als Sprache",
+          "en": "French as a language",
+          "cs": "Francouzský překlad"
+        },
+        "body": {
+          "de": "layerling gibt es jetzt auch auf Französisch: die ganze Oberfläche und die 16 Kapitel der Anleitung. Die Sprache wird für einen Browser mit französischer Einstellung von selbst gewählt und lässt sich in der Sprachliste ändern. Übersetzt mit einem KI-Assistenten; falsche Wörter lassen sich mit einem kleinen Pull Request auf GitHub verbessern.",
+          "en": "layerling now speaks French: the whole interface and the 16 chapters of the guide. The language is chosen automatically for a browser set to French and can be changed in the language list. It was translated with an AI assistant; wrong words are fixed with a small pull request on GitHub.",
+          "cs": "Rozhraní Layerlingu i všech 16 kapitol příručky je nyní dostupných francouzsky. Jazyk se zvolí automaticky podle nastavení prohlížeče a lze jej změnit v jazykové nabídce. Překlad vznikl s pomocí AI asistenta; nepřesné výrazy lze opravit malým pull requestem na GitHubu."
+        }
+      },
+      {
+        "title": {
+          "de": "Eigene Rasterstufe nur ganz",
+          "en": "A custom snap grid, whole only",
+          "cs": "Vlastní rozteč i bez poloviny a čtvrtiny"
+        },
+        "body": {
+          "de": "Jede eigene Rasterstufe in den Einstellungen hat einen Schalter „Auch halb und viertel“. Ohne Haken bietet das Menü nur die Größe, die du eingetippt hast, nicht mehr ihre Hälfte und ihr Viertel. Bei den Stufen, die du schon hast, bleibt der Haken gesetzt.",
+          "en": "Each custom snap grid in the settings has a switch “Also half and quarter”. With it off, the menu offers just the size you typed, not its half and quarter as well. For the grids you already have, it stays on.",
+          "cs": "Každá vlastní rozteč v nastavení má volbu „Také polovinu a čtvrtinu“. Po vypnutí nabídka obsahuje pouze zadaný celý krok. U již uložených roztečí zůstává volba zapnutá."
+        }
+      },
+      {
+        "title": {
+          "de": "Ansicht zentrieren auch jenseits der Platte",
+          "en": "Center view beyond the plate",
+          "cs": "Vycentrování pohledu i mimo podložku"
+        },
+        "body": {
+          "de": "Ein Teil, das über den Rand der Platte hinausliegt, lässt sich jetzt mit „Ansicht auf die Auswahl zentrieren“ (Umschalt+F) in die Bildmitte holen. Das Haus-Symbol stellt die ganze Platte wieder ein.",
+          "en": "A part that lies beyond the edge of the plate can now be brought to the middle of the screen with “Center view on selection” (Shift+F). The house button brings the whole plate back.",
+          "cs": "Díl ležící za okrajem podložky lze nyní přivést doprostřed obrazovky příkazem pro vycentrování pohledu na výběr (Shift+F). Tlačítko s domečkem znovu zobrazí celou podložku."
+        }
+      },
+      {
+        "title": {
+          "de": "Pfeiltasten: 0,01 mm bei ausgeschaltetem Raster",
+          "en": "Arrow keys: 0.01 mm with the grid off",
+          "cs": "Posun šipkami po 0,01 mm bez přichytávání"
+        },
+        "body": {
+          "de": "Ist das Raster aus, schiebt eine Pfeiltaste die Auswahl um 0,01 mm statt 0,1 mm, mit Umschalt um das Fünffache. Mit Raster folgen die Pfeile weiter dem Raster.",
+          "en": "With the snap grid off, an arrow key moves the selection by 0.01 mm instead of 0.1 mm, and Shift five times that. With a grid on, the arrows still follow the grid.",
+          "cs": "Při vypnutém přichytávání šipka posune výběr o 0,01 mm místo 0,1 mm, se Shift o pětinásobek. Při zapnutém přichytávání se krok nadále řídí mřížkou."
+        }
+      },
+      {
+        "title": {
+          "de": "Text mit Kontur lässt sich ausschneiden",
+          "en": "A text with an outline can be cut out",
+          "cs": "Odečítání obrysového textu"
+        },
+        "body": {
+          "de": "Ein Text mit einer Linie um die Buchstaben (Füllart Kontur) konnte bei manchen Schriften nicht als Aussparung aus einer Platte geschnitten werden („Could not cut this imported mesh cleanly“). Sein Netz ist jetzt immer geschlossen, und der Schnitt klappt.",
+          "en": "A text with a line round its letters (the Outline fill) could not be cut out of a plate with some fonts (“Could not cut this imported mesh cleanly”). Its mesh is always closed now, and the cut works.",
+          "cs": "Text s obrysovou výplní nešel u některých písem vyříznout z desky a objevovala se chyba, že importovanou síť nelze čistě proříznout. Síť je nyní vždy uzavřená a odečtení funguje."
+        }
+      }
+    ]
+  },
+  {
+    "version": "1.74.0",
+    "items": [
+      {
+        "title": {
+          "de": "Russisch als Sprache",
+          "en": "Russian as a language",
+          "cs": "Ruský překlad"
+        },
+        "body": {
+          "de": "layerling gibt es jetzt auch auf Russisch: die ganze Oberfläche und die 16 Kapitel der Anleitung. Die Sprache wird für einen Browser mit russischer Einstellung von selbst gewählt und lässt sich in der Sprachliste ändern. Übersetzt mit einem KI-Assistenten; falsche Wörter lassen sich mit einem kleinen Pull Request auf GitHub verbessern.",
+          "en": "layerling now speaks Russian: the whole interface and the 16 chapters of the guide. The language is chosen automatically for a browser set to Russian and can be changed in the language list. It was translated with an AI assistant; wrong words are fixed with a small pull request on GitHub.",
+          "cs": "Rozhraní Layerlingu i všech 16 kapitol příručky je nyní dostupných rusky. Jazyk se zvolí automaticky podle nastavení prohlížeče a lze jej změnit v jazykové nabídce. Překlad vznikl s pomocí AI asistenta; nepřesné výrazy lze opravit malým pull requestem na GitHubu."
+        }
+      },
+      {
+        "title": {
+          "de": "Rotation aus einer Linie mit Breite",
+          "en": "Revolve from a line with a width",
+          "cs": "Rotace čáry s nastavenou šířkou"
+        },
+        "body": {
+          "de": "In einer Rotationsskizze gibt es den Knopf Kontur wieder. Zeichne die Wand einer Vase oder eines Bechers als eine offene Linie links von der Achse, setze das Häkchen bei Kontur und stelle die Breite ein: Die Rotation dreht dieses Band zu einer dünnen Wand, wie in Tinkercad. Was über die Achse hinausreicht, wird abgeschnitten. Der Körper behält die gezeichnete Linie, mit „Skizze bearbeiten“ machst du dort weiter.",
+          "en": "A revolve sketch has the Stroke button again. Draw the wall of a vase or a cup as one open line to the left of the axis, tick the stroke and set the width: the revolve turns that band into a thin wall, as in Tinkercad. What reaches across the axis is cut off. The body keeps the drawn line, so Edit sketch goes on from there.",
+          "cs": "Náčrt pro rotaci znovu nabízí rozšíření čáry. Nakreslete stěnu nádoby či vázy jako jednu otevřenou čáru nalevo od osy, zapněte rozšíření a nastavte šířku. Rotací pásu vznikne tenká stěna jako v Tinkercadu. Přesah přes osu se ořízne. Těleso si původní čáru zachová pro další úpravy náčrtu."
+        }
+      },
+      {
+        "title": {
+          "de": "Die Objektliste bleibt offen",
+          "en": "The object list stays open",
+          "cs": "Seznam objektů si pamatuje otevření"
+        },
+        "body": {
+          "de": "Die Objektliste (Strg+Umschalt+O) begann bei jedem Entwurf und nach jedem Neuladen geschlossen. Jetzt bleibt sie offen oder geschlossen, wie du sie verlassen hast, für alle Entwürfe, in diesem Browser.",
+          "en": "The object list (Ctrl+Shift+O) started closed with every design and after every reload. It now stays open or closed as you left it, for all designs, in this browser.",
+          "cs": "Seznam objektů (Ctrl+Shift+O) se dříve při otevření projektu i po obnovení stránky zavřel. Nyní si prohlížeč pro všechny projekty pamatuje, zda jste jej nechali otevřený nebo zavřený."
+        }
+      },
+      {
+        "title": {
+          "de": "Ausrichten und Raster-Einrasten unter Anordnen",
+          "en": "Align and Snap to Grid under Arrange",
+          "cs": "Zarovnání a přichycení do skupiny Uspořádání"
+        },
+        "body": {
+          "de": "Ausrichten und Am Raster ausrichten standen im Menüband unter Anpassen, bei Fase, Verrundung und Aushöhlen. Sie platzieren eine Form, sie verändern sie nicht, und stehen jetzt ganz vorn in der Gruppe Anordnen, neben Auf die Arbeitsebene fallen lassen, Auf Fläche legen und Zentrieren.",
+          "en": "Align and Snap to Grid sat in the ribbon under Modify, beside Chamfer, Fillet and Hollow. They place a shape and do not change it, so they now head the Arrange group, beside Drop to workplane, Lay flat and Center on workplane.",
+          "cs": "Zarovnání a přichycení k mřížce byly mezi úpravami vedle zkosení, zaoblení a dutiny. Protože mění umístění, nově jsou na začátku skupiny Uspořádání vedle položení na pracovní rovinu, položení na plochu a vystředění."
+        }
+      },
+      {
+        "title": {
+          "de": "Offener Schnitt wird gemeldet",
+          "en": "An open cut is reported",
+          "cs": "Upozornění na otevřenou řeznou plochu"
+        },
+        "body": {
+          "de": "Hat die Oberfläche eines importierten Teils Lücken, etwa ein STEP-Teil mit kleinen Rissen im Netz, bleibt die Schnittfläche beim Gruppieren mit einem Loch offen, und das Teil ist innen hohl. Die Meldung danach sagt das jetzt mit der Zahl der offenen Kanten und schlägt vor, das Teil als STL oder 3MF zu importieren.",
+          "en": "When the surface of an imported part has gaps, a STEP part with a few cracks in its mesh for example, the cut face stays open when you group it with a hole, and the part is hollow inside. The message afterwards now says so, with the number of open edges, and suggests importing the part as STL or 3MF.",
+          "cs": "Pokud má povrch importovaného dílu mezery, například drobné trhliny v síti ze STEP, může po odečtení výřezu zůstat řezná plocha otevřená a díl uvnitř dutý. Nové hlášení to vysvětlí, uvede počet otevřených hran a doporučí zkusit import STL nebo 3MF."
+        }
+      },
+      {
+        "title": {
+          "de": "Winkellineal: jede Zahl für sich",
+          "en": "Framing square: every number on its own",
+          "cs": "Samostatné nastavení každé kóty úhelníku"
+        },
+        "body": {
+          "de": "Neben jeder grünen Zahl des Winkellineals sitzt ein kleiner Schalter: Die Zahl zählt bis zum Rand oder bis zur Mitte des Körpers, jede für sich. So setzt du einen stehenden Zylinder mit der Mitte in den beiden Armen und der Unterseite in der Höhe, einen liegenden mit der Mitte quer und einem Ende längs. Der Knopf am Griff schaltet weiter alle drei zugleich. Die Höhenbemaßung steht jetzt außerhalb des Körpers, an der Kante, die auf dem Bildschirm am weitesten rechts liegt.",
+          "en": "Beside each green number of the framing square sits a small switch: the number counts to the edge or to the middle of the body, each on its own. A standing cylinder is placed by its middle in the two arms and its bottom in height, a lying one by its middle across and an end along. The button at the handle still switches all three at once. The height dimension now stands outside the body, on the edge furthest right on the screen.",
+          "cs": "U každého zeleného čísla úhelníku je přepínač měření ke kraji nebo ke středu tělesa. U stojícího válce tak nastavíte střed v obou ramenech a spodní stranu ve výšce; u ležícího střed napříč a konec podélně. Tlačítko u úchytu stále přepíná všechny tři kóty společně. Výšková kóta se nyní kreslí mimo těleso u hrany nejvíce vpravo na obrazovce."
+        }
+      },
+      {
+        "title": {
+          "de": "Neuer Name beim STL-Export fragt nach einer neuen Datei",
+          "en": "A new name in the STL export asks for a new file",
+          "cs": "Nový název při exportu STL otevře výběr souboru"
+        },
+        "body": {
+          "de": "In Chrome und Edge schrieb jeder STL-Export in die Datei, die du beim ersten Mal gewählt hast, und das Dateinamenfeld tat nichts mehr. Tippst du dort jetzt einen anderen Namen, fragt layerling, wo die neue Datei liegen soll. Unter dem Fenster steht, ob in die bisherige Datei geschrieben wird oder gefragt wird.",
+          "en": "In Chrome and Edge every STL export wrote into the file you chose the first time, and the file name field did nothing any more. If you now type another name there, layerling asks where the new file should go. The line under the window says whether the old file is written or you are asked.",
+          "cs": "V Chrome a Edge každý další export STL zapisoval do prvně zvoleného souboru a pole s názvem už nemělo účinek. Po zadání jiného názvu se nyní Layerling zeptá, kam nový soubor uložit. Řádek v okně uvádí, zda se přepíše původní soubor, nebo se otevře výběr."
+        }
+      },
+      {
+        "title": {
+          "de": "Doppelklick auf einen Schieber setzt ihn zurück",
+          "en": "A double click on a slider resets it",
+          "cs": "Dvojklik na posuvník obnoví výchozí hodnotu"
+        },
+        "body": {
+          "de": "Ein Doppelklick auf einen Schieber in den Einstellungen einer Form setzt den Wert auf seine Vorgabe zurück, wie der kleine Pfeil neben dem Namen. Das gilt auch für sieben Schieber der Arbeitsbereich-Einstellungen, etwa Zoomgeschwindigkeit und Schattenstärke.",
+          "en": "A double click on a slider in a shape's settings sets the value back to its default, like the small arrow next to its name. It works for seven sliders of the workspace settings as well, such as zoom speed and shadow strength.",
+          "cs": "Dvojklik na posuvník v nastavení tvaru obnoví jeho výchozí hodnotu stejně jako malá šipka vedle názvu. Funguje také u sedmi posuvníků nastavení pracovní plochy, například rychlosti přiblížení a intenzity stínu."
+        }
+      },
+      {
+        "title": {
+          "de": "Raster: die gezogene Fläche landet auf dem Raster",
+          "en": "Snap grid: the dragged face lands on the grid",
+          "cs": "Tažená plocha se přichytává přímo k mřížce"
+        },
+        "body": {
+          "de": "Beim Ziehen des Höhenpfeils rastete die Änderung der Höhe in ganzen Rasterschritten ein: Ein 0,5 mm hoher Körper ging auf einem 1-mm-Raster auf 1,5 mm. Jetzt landet die gezogene Fläche selbst auf dem Raster der Arbeitsebene (oben, beim unteren Griff die Unterseite), der Körper geht also auf 1,0 mm. Der Hebepfeil setzt die Unterseite genauso aufs Raster. Eine gekippte Auswahl behält den alten Schritt.",
+          "en": "Dragging the height handle snapped the change of the height by whole grid steps: a body 0.5 mm high on a 1 mm grid went to 1.5 mm. Now the face you drag lands on the grid of the workplane (the top, or the bottom for the lower handle), so it goes to 1.0 mm. The lift arrow puts the bottom of the body on the grid the same way. A tilted selection keeps the old step.",
+          "cs": "Tažení výškového úchytu dříve měnilo výšku po celých krocích: těleso vysoké 0,5 mm se na mřížce 1 mm zvětšilo na 1,5 mm. Nyní se přímo tažená horní nebo spodní plocha přichytí k mřížce pracovní roviny, takže výška vyjde 1,0 mm. Zvedací šipka takto přichytává spodní stranu tělesa. Nakloněný výběr zachovává původní způsob kroku."
+        }
+      }
+    ]
+  },
+  {
+    "version": "1.73.0",
+    "items": [
+      {
+        "title": {
+          "de": "Maßband rastet an Bezugspunkten ein",
+          "en": "The tape measure snaps to reference points",
+          "cs": "Měřicí pásmo se přichytává k referenčním bodům"
+        },
+        "body": {
+          "de": "Markiere die Mitte eines Kreises oder die Mitte einer Linie als Bezugspunkt (Fadenkreuz-Knopf unter einer Messung oder Rechtsklickmenü) und klicke diesen Punkt dann mit dem Maßband an: Du misst von dort aus. Das Maßband rastet an Bezugspunkten ein wie an Ecken.",
+          "en": "Mark the centre of a circle or the middle of a line as a reference point (the crosshair button under a measurement, or the right-click menu) and then click that point with the tape measure: you measure from there. The tape measure snaps to reference points like to corners.",
+          "cs": "Označte střed kružnice nebo úsečky jako referenční bod tlačítkem se zaměřovacím křížem pod měřením nebo v místní nabídce. Potom na bod klikněte měřicím pásmem a měřte od něj. Pásmo se k referenčním bodům přichytává stejně jako k rohům."
+        }
+      },
+      {
+        "title": {
+          "de": "Touch: ein Finger greift weiter",
+          "en": "Touch screens: a finger reaches further",
+          "cs": "Snazší ovládání prstem na dotykové obrazovce"
+        },
+        "body": {
+          "de": "Auf einem Touchscreen trifft ein Finger kleine Ziele jetzt leichter. In der Skizze geht ein Druck neben einen Punkt, einen Griff oder eine dünne Linie an dieses Teil. Maßband, Schnittmessung und die Kanten bei Fase und Verrundung greifen für einen Finger aus größerer Entfernung. Maus und Stift behalten ihre bisherige Reichweite. Auf einem Tablet bleibt ein Stift die genauere Wahl.",
+          "en": "On a touch screen a finger now hits small targets more easily. In the sketch, a press beside a point, a handle or a thin line goes to that part. The tape measure, the section measure and the edges of the chamfer and fillet tools catch a finger from a larger distance. A mouse and a stylus keep the reach they had. On a tablet a stylus remains the more precise choice.",
+          "cs": "Na dotykové obrazovce prst snáze zasáhne malé prvky. V náčrtu se dotyk poblíž bodu, úchytu nebo tenké čáry přiřadí tomuto prvku. Také měřicí pásmo, měření řezu a nástroje zkosení a zaoblení zachytávají hrany z větší vzdálenosti. Myš a pero zachovávají původní přesnost zachycení. Na tabletu je pero stále přesnější volbou."
+        }
+      },
+      {
+        "title": {
+          "de": "Detailreiche SVG-Dateien lassen sich wieder importieren",
+          "en": "Detailed SVG files import again",
+          "cs": "Obnovený import podrobných SVG"
+        },
+        "body": {
+          "de": "Eine SVG mit einer sehr detailreichen Kontur, etwa eine nachgezeichnete Grafik, brach mit „Maximum call stack size exceeded“ ab und kam nicht herein. Beim Bau des Körpers wurden alle Dreiecke in einem einzigen Aufruf übergeben, und der hat eine Größengrenze, die tausende Punkte überschreiten. Jetzt werden sie einzeln angefügt, und die Datei importiert.",
+          "en": "An SVG with one very detailed outline, such as a traced drawing, stopped with \"Maximum call stack size exceeded\" and did not come in. Building the body handed all its triangles over in one call, which has a size limit that thousands of points overrun. They are now added one at a time, and the file imports.",
+          "cs": "SVG s velmi podrobným obrysem, například trasovanou grafikou, mohlo skončit chybou „Maximum call stack size exceeded“. Při sestavování tělesa se všechny trojúhelníky předávaly v jediném volání, jehož limit tisíce bodů překročily. Nyní se přidávají postupně a soubor lze importovat."
+        }
+      },
+      {
+        "title": {
+          "de": "Winkellineal: kein Linienfächer mehr",
+          "en": "Corner ruler: no more fan of lines",
+          "cs": "Úhelník bez vějíře čar přes obrazovku"
+        },
+        "body": {
+          "de": "Schwebt die Kamera dicht über dem Winkellineal, wurde der Teil eines Arms hinter der Kamera gespiegelt gezeichnet und ergab einen Fächer feiner Linien quer über das Bild. Linien, Teilstriche, Zahlen und Maßpfeile des Lineals werden jetzt an der Kamera abgeschnitten, gezeichnet wird nur, was davor liegt.",
+          "en": "With the camera hovering close above the corner ruler, the part of an arm behind the camera was drawn mirrored and made a fan of fine lines across the picture. The ruler's lines, ticks, numbers and distance arrows are now cut off at the camera, and only what is in front of it is drawn.",
+          "cs": "Při pohledu těsně nad úhelníkem se část ramene za kamerou kreslila zrcadlově a vytvářela vějíř jemných čar přes obrazovku. Čáry, rysky, čísla a kótovací šipky se nyní oříznou v místě kamery a kreslí se pouze část před ní."
+        }
+      }
+    ]
+  },
+  {
     "version": "1.72.3",
     "items": [
       {
