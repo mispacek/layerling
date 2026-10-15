@@ -146,11 +146,18 @@ export function TechnicWorkspace({ initial, initialRoundingOpen = false, workspa
     if (!node) return;
     const observer = new ResizeObserver(entries => {
       const { width, height } = entries[0].contentRect;
-      const columns = Math.max(3, Math.min(24, Math.floor((width - 16) / 44)));
-      const rows = Math.max(4, Math.min(24, Math.floor((height - 16) / 44)));
-      setSize({ columns, rows });
+      let columns = Math.max(3, Math.min(24, Math.floor((width - 16) / 44)));
+      let rows = Math.max(4, Math.min(24, Math.floor((height - 16) / 44)));
       const slice = technicLayerRecipe(recipeRef.current, activeLayerRef.current);
-      setView(fittedGridView(slice.cells.length ? slice : recipeRef.current, columns, rows));
+      const fitted = slice.cells.length ? slice : recipeRef.current;
+      if (fitted.cells.length) {
+        const b = technicBounds(fitted), partColumns = b.maxX - b.minX + 1, partRows = b.maxY - b.minY + 1;
+        // Equal empty margins keep the part centred without moving it off its 8 mm grid.
+        if (partColumns <= columns && (columns - partColumns) % 2 && columns > 3) columns--;
+        if (partRows <= rows && (rows - partRows) % 2 && rows > 4) rows--;
+      }
+      setSize({ columns, rows });
+      setView(fittedGridView(fitted, columns, rows));
     });
     observer.observe(node);
     return () => observer.disconnect();

@@ -30,7 +30,7 @@
 .technic-neighbour-preview { position: absolute; inset: 2px; display: grid; place-items: center; opacity: .25; pointer-events: none; }
 .technic-grid .technic-cell.layer-below { background-image: repeating-linear-gradient(135deg, transparent 0 6px, var(--border-strong) 6px 8px); }
 .technic-grid .technic-cell.layer-above { box-shadow: inset 0 0 0 6px var(--border-strong); }
-.technic-canvas { flex: 1; min-height: 180px; overflow: auto; padding: 8px; }
+.technic-canvas { display: grid; place-items: safe center; flex: 1; min-height: 180px; overflow: auto; padding: 8px; }
 .technic-views { display: flex; flex: 1; min-height: 0; min-width: 0; }
 .technic-preview { display: flex; flex-direction: column; width: 40%; min-width: 200px; position: relative; border-left: 1px solid var(--border); }
 .technic-preview-stage { flex: 1; min-height: 180px; min-width: 0; position: relative; }
