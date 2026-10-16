@@ -100,7 +100,7 @@ import { positionsForTwist, twistBandCount } from "@/lib/heightSlices";
 import { toCreasedNormals } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { canBeginShapeDrag, handleDimensionLimit, DEFAULT_SNAP_GRID, DEFAULT_WORKPLANE_WORKSPACE, effectiveViewSettings, viewPixelRatio, normalizeSnapGrid, normalizeWorkspaceSettings, orbitControlsZoomSpeed, readWorkspaceDefault, saveWorkspaceDefault, snapGridForUnits, snapGridStep as snapStep, workplaneSettingsFingerprint, workspaceHydrationSyncDecision, zoomDistanceScale } from "@/lib/workplaneSettings";
 import { withShapeDefaults } from "@/lib/shapeDefaults";
-import { workplaneGridBandWidths, workplaneGridDisplayLayout, AXIS_ARROW_COLORS, axisArrowLayout, DEFAULT_EDGE_LINE_COLOR, fillLightPosition, keyLightPosition, sceneLightLevels, shadowBlurRadius, workplaneGridLayout, workplaneGridLines, workplaneGridPalette, workplaneLabelLayout, workplaneThemePalette, WORKPLANE_LABEL_ASPECT, WORKPLANE_LINE_ELEVATION, type WorkplaneGridLayout } from "@/lib/workplaneGrid";
+import { workplaneGridBandVisibility, workplaneGridBandWidths, workplaneGridDisplayLayout, AXIS_ARROW_COLORS, axisArrowLayout, DEFAULT_EDGE_LINE_COLOR, fillLightPosition, keyLightPosition, sceneLightLevels, shadowBlurRadius, workplaneGridLayout, workplaneGridLines, workplaneGridPalette, workplaneLabelLayout, workplaneThemePalette, WORKPLANE_LABEL_ASPECT, WORKPLANE_LINE_ELEVATION, type WorkplaneGridLayout } from "@/lib/workplaneGrid";
 import { visibleGridStep } from "@/lib/gridSnap";
 import { cleanNearZero, cleanRotationDegrees, isNonSolidShapeKind, mirroredAxisCount, mirrorSign, preservesEdgeTreatmentSize, proportionalResizeScale, resizedImportedCoordinates, resizedImportedMeshPositions, resizedShapeSize, shapeDepth, shapeExtrudeDeformAt, shapeHasExtrudeDeform, shapeHasShapeDeform, shapeHasTaper, shapeSupportsTaper, shapeTaperDimensions, shapeTaperScaleAt, shapeWidth, shapeWithParametricSource } from "@/lib/workplaneShapes";
 import { sphereTessellation } from "@/lib/sphereTessellation";
@@ -4078,9 +4078,9 @@ export function WorkplaneViewport({
     state.workplaneLayer.visible = !workplaneLayerHiddenRef.current;
     const syncGridDensity = () => {
       const settings = workspaceRef.current;
-      if (!settings.showGrid || settings.gridFollowSnap === false || snapRef.current === "Off") return;
+      if (!settings.showGrid) return;
       const layout = viewportGridLayout(state, settings, snapRef.current);
-      if (state.workplaneLayer.userData.gridSignature !== `${layout.step}:${layout.majorInterval}`) {
+      if (state.workplaneLayer.userData.gridSignature !== layout.signature) {
         rebuildWorkplane(state, settings, resolvedThemeRef.current, drawnWorkplane(), projectNameRef.current, snapRef.current);
       }
     };
@@ -9321,11 +9321,14 @@ function refreshFrozenObjectMatrix(object: THREE.Object3D) {
 
 function viewportGridLayout(state: ThreeState, workspace: WorkspaceSettings, snap?: GridSize) {
   const layout = workplaneGridLayout(workspace, visibleGridStep(workspace, snap));
-  if (workspace.gridFollowSnap === false || snap === undefined || snap === "Off") return layout;
   const camera = state.camera;
   const viewHeight = camera instanceof THREE.OrthographicCamera ? (camera.top - camera.bottom) / camera.zoom
     : 2 * camera.position.distanceTo(state.controls.target) * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2) / camera.zoom;
-  return workplaneGridDisplayLayout(layout, viewHeight / Math.max(1, state.renderer.domElement.clientHeight), Math.max(workspace.width, workspace.depth));
+  const worldUnitsPerPixel = viewHeight / Math.max(1, state.renderer.domElement.clientHeight);
+  const display = workspace.gridFollowSnap === false || snap === undefined || snap === "Off" ? layout
+    : workplaneGridDisplayLayout(layout, worldUnitsPerPixel, Math.max(workspace.width, workspace.depth));
+  const bands = workspace.gridLinesGrow === false ? { minor: false, major: false } : workplaneGridBandVisibility(display.step, worldUnitsPerPixel);
+  return { ...display, bands, signature: `${display.step}:${display.majorInterval}:${Number(bands.minor)}:${Number(bands.major)}` };
 }
 
 function rebuildWorkplane(
@@ -9341,7 +9344,7 @@ function rebuildWorkplane(
   }
 
   const gridLayout = viewportGridLayout(state, workspace, snap);
-  state.workplaneLayer.userData.gridSignature = `${gridLayout.step}:${gridLayout.majorInterval}`;
+  state.workplaneLayer.userData.gridSignature = gridLayout.signature;
 
   const palette = workplaneThemePalette(theme, workspace.background, workspace.gridColor, state.palette, workspace.surfaceColor);
   disposeChildren(state.workplaneLayer);
@@ -9413,6 +9416,7 @@ function rebuildWorkplane(
         true,
         majorLineColor,
         workspace.gridLinesGrow !== false,
+        gridLayout.bands,
       ));
     } else if (workspace.showGrid) {
       group.add(createGridLines(
@@ -9425,6 +9429,7 @@ function rebuildWorkplane(
         false,
         majorLineColor,
         workspace.gridLinesGrow !== false,
+        gridLayout.bands,
       ));
       const labelPalette = workplaneGridPalette(theme, lineColor, state.palette).major;
       // The design's name in the near left corner, so a screenshot of the scene
@@ -9760,6 +9765,7 @@ function createGridLines(
   outlineOnly = false,
   majorColor = "",
   linesGrow = true,
+  bandVisibility = { minor: true, major: true },
 ) {
   const group = new THREE.Group();
   const palette = workplaneThemePalette(theme, DEFAULT_WORKSPACE.background, gridColor, paletteName, undefined, majorColor).grid;
@@ -9777,7 +9783,9 @@ function createGridLines(
   // Every fine and darker line also gets a band on the plate, growing as you zoom in (#143).
   const minorBands: Array<[number, number, number, number]> = [];
   const majorBands: Array<[number, number, number, number]> = [];
-  const bandsFor = (kind: "axis" | "major" | "minor") => (kind === "major" ? majorBands : kind === "minor" ? minorBands : null);
+  const bandsFor = (kind: "axis" | "major" | "minor") => (
+    !linesGrow ? null : kind === "major" && bandVisibility.major ? majorBands : kind === "minor" && bandVisibility.minor ? minorBands : null
+  );
   for (const { coordinate: centeredX, kind } of outlineOnly ? [] : workplaneGridLines(width, layout)) {
     pushLine(pointsFor(kind), [centeredX, WORKPLANE_LINE_ELEVATION, -depth / 2], [centeredX, WORKPLANE_LINE_ELEVATION, depth / 2]);
     bandsFor(kind)?.push([centeredX, -depth / 2, centeredX, depth / 2]);
@@ -9854,6 +9862,8 @@ function bandsFromSegments(segments: Array<[number, number, number, number]>, ba
     depthWrite: Boolean(crossings),
     depthFunc: crossings ? THREE.LessDepth : THREE.LessEqualDepth,
     side: THREE.DoubleSide,
+    // These bands are flat: a separate transparent back-face pass adds no visible surface.
+    forceSinglePass: true,
     polygonOffset: true,
     polygonOffsetFactor: -1,
     polygonOffsetUnits: -1,

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { visibleGridStep, snapShapeFootprintToVisibleGrid } from "@/lib/gridSnap";
 import { DEFAULT_WORKPLANE_WORKSPACE, normalizeWorkspaceSettings, customSnapGridSize } from "@/lib/workplaneSettings";
-import { workplaneGridLayout, workplaneGridDisplayLayout, workplaneGridLines, workplaneGridBandWidths } from "@/lib/workplaneGrid";
+import { workplaneGridLayout, workplaneGridDisplayLayout, workplaneGridLines, workplaneGridBandWidths, workplaneGridBandVisibility } from "@/lib/workplaneGrid";
 import type { GridSize, WorkplaneShape } from "@/types/layerling";
 
 describe("visible grid follows snap resolution", () => {
@@ -34,6 +34,14 @@ describe("visible grid follows snap resolution", () => {
 });
 
 describe("readable grid density", () => {
+  it("omits subpixel bands while retaining readable major bands and restoring both on zoom", () => {
+    expect(workplaneGridBandVisibility(1, 0.2)).toEqual({ minor: false, major: false });
+    expect(workplaneGridBandVisibility(1, 0.075)).toEqual({ minor: false, major: true });
+    expect(workplaneGridBandVisibility(1, 0.025)).toEqual({ minor: true, major: true });
+    expect(workplaneGridBandVisibility(0.1, 0.02)).toEqual({ minor: false, major: false });
+    expect(workplaneGridBandVisibility(0.1, 0.002)).toEqual({ minor: true, major: true });
+    expect(workplaneGridBandVisibility(8, 0.2)).toEqual({ minor: true, major: true });
+  });
   it("restores the exact fine step when zoomed in and draws only lattice multiples when zoomed out", () => {
     const layout = workplaneGridLayout(DEFAULT_WORKPLANE_WORKSPACE, 0.25);
     expect(workplaneGridDisplayLayout(layout, 0.05, 200)).toEqual(layout);

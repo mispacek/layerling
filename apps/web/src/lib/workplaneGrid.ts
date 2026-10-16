@@ -248,6 +248,13 @@ export function workplaneGridBandWidths(step: number, subMillimeter = false) {
   return { minor, major: minor * 2 };
 }
 
+/** Subpixel bands add transparent draw passes without a readable increase in line width. */
+export function workplaneGridBandVisibility(step: number, worldUnitsPerPixel: number) {
+  const widths = workplaneGridBandWidths(step, step < 1);
+  const minimum = Number.isFinite(worldUnitsPerPixel) && worldUnitsPerPixel > 0 ? worldUnitsPerPixel : 0;
+  return { minor: widths.minor >= minimum, major: widths.major >= minimum };
+}
+
 export function workplaneGridLines(span: number, layout: WorkplaneGridLayout) {
   const coordinates = centeredWorkplaneGridCoordinates(span, layout.step);
   return coordinates.map(({ coordinate, index }) => ({
