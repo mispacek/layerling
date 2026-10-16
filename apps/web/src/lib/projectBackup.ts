@@ -95,3 +95,12 @@ export function zipHoldsDesigns(bytes: Uint8Array) {
   }
   return found;
 }
+
+/**
+ * Ein Entwurf aus der Sicherung ist schon da, wenn ein vorhandener Name und
+ * Erstellzeit teilt: Das Wiederherstellen behaelt die Erstellzeit bei, ein
+ * Duplikat aus dem Menue bekommt eine neue (#407).
+ */
+export function backupDesignAlreadyThere(existing: ReadonlyArray<{ name: string; createdAt: number }>, restored: { name: string; createdAt: number }) {
+  return existing.some((project) => project.createdAt === restored.createdAt && project.name === restored.name);
+}

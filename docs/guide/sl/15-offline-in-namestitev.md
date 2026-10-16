@@ -26,7 +26,7 @@ Na layerling.com in na drugih spletnih strežnikih odprta stran posodobitev opaz
 
 ## Jezik in videz
 
-Jezik nastaviš zgoraj desno, slovenščina ali angleščina. Barvna shema ob njem ponuja {{ui:theme.short.system}} (sledi operacijskemu sistemu), {{ui:theme.short.light}}, {{ui:theme.short.dark}} in {{ui:theme.short.graphite}}, nevtralno temno sivo.
+Jezik izbereš zgoraj desno, na seznamu jezikov. Barvna shema ob njem ponuja {{ui:theme.short.system}} (sledi operacijskemu sistemu), {{ui:theme.short.light}}, {{ui:theme.short.dark}} in {{ui:theme.short.graphite}}, nevtralno temno sivo.
 
 ## Lastno upravljanje
 

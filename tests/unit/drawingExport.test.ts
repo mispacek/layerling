@@ -177,7 +177,7 @@ describe("automatic drawing export", () => {
     expect(drawingToSvg(drawing)).toContain("&lt;script&gt;&quot;&amp;");
     expect(() => generateDrawing([], "Empty")).toThrow("no solid geometry");
     expect(() => projectDrawingMeshes([{ vertices: [[NaN, 0, 0]], faces: [[0, 0, 0]] }], [0, 0, 0])).toThrow("invalid coordinates");
-    expect(() => projectDrawingMeshes([{ vertices: [[0, 0, 0]], faces: Array.from({ length: 100001 }, () => [0, 0, 0]) }], [0, 0, 0])).toThrow("100,000 triangles");
+    expect(() => projectDrawingMeshes([{ vertices: [[0, 0, 0]], faces: Array.from({ length: 400001 }, () => [0, 0, 0]) }], [0, 0, 0])).toThrow("400,000 triangles; these views have 400,001");
   });
   it("lists the bores as rows with their sheet id and the position from the view's lower-left corner", () => {
     const rows = drawingBoreRows(generateDrawing([plateWithBores()], "Fixture"));

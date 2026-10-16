@@ -65,6 +65,19 @@ describe("a picture as an icon (#359)", () => {
     expect(pictureShapePart(picture(60, 60, (x, y) => (inDisc(x, y) ? BLACK : CLEAR)))).toBe("dark");
   });
 
+  it("takes a dark sticker on a transparent edge as a dark shape, though a few of its pixels touch the border (#345)", () => {
+    // A black figure with a light detail, clear all round except where its tail reaches the bottom edge.
+    const sticker = picture(60, 60, (x, y) => {
+      if (y === 59 && x >= 20 && x < 30) return BLACK;
+      if (!inDisc(x, y)) return CLEAR;
+      return Math.hypot(x - 30, y - 24) < 4 ? WHITE : BLACK;
+    });
+    expect(pictureShapePart(sticker)).toBe("dark");
+    // The same on a light figure.
+    const light = picture(60, 60, (x, y) => (y === 59 && x >= 20 && x < 30 ? WHITE : inDisc(x, y) ? WHITE : CLEAR));
+    expect(pictureShapePart(light)).toBe("light");
+  });
+
   it("traces the part asked for, or else the one that is not the background", () => {
     const whiteOnBlack = picture(60, 60, (x, y) => (inDisc(x, y) ? WHITE : BLACK));
     const traced = tracedIconSource("disc", whiteOnBlack);

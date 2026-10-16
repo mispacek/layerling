@@ -42,7 +42,7 @@ type Point = { x: number; z: number };
 type Arc = { cx: number; cz: number; rx: number; rz: number; start: number; end: number };
 type Corner = { start: Point; end: Point; arc?: Arc };
 
-export const CAD_PROFILE_SHAPE_KINDS = new Set<WorkplaneShape["kind"]>(["polygon", "star", "heart", "crescent", "slot", "honeycomb", "gear", "knurl", "dovetail", "teardrop", "counterbore", "countersink", "ellipse", "cylinder", "tube", "ring", "halfSphere", "sphere", "cone", "roundRoof", "roundedBox", "text", "bentTube", "loft"]);
+export const CAD_PROFILE_SHAPE_KINDS = new Set<WorkplaneShape["kind"]>(["polygon", "star", "heart", "crescent", "slot", "honeycomb", "gear", "knurl", "dovetail", "teardrop", "counterbore", "countersink", "doubleCountersink", "ellipse", "cylinder", "tube", "ring", "halfSphere", "sphere", "cone", "roundRoof", "roundedBox", "text", "bentTube", "loft"]);
 
 function shortestAngleDelta(from: number, to: number) {
   let delta = to - from;
@@ -1077,7 +1077,8 @@ export function cadProfileForShapeKind(shape: WorkplaneShape, designedRound = fa
       return { loops: [roundedRectLoop(width, depth, corner)], capFillet: ends > 1e-4 ? ends : undefined };
     }
     case "counterbore":
-    case "countersink": {
+    case "countersink":
+    case "doubleCountersink": {
       // Only a round hole is a body of revolution; stretched along z it stays a mesh.
       if (Math.abs(width - depth) > 1e-6) return null;
       const points = screwHoleProfile({ kind: shape.kind, width, height: shape.height, screwHoleShaft: shape.screwHoleShaft, screwHoleHeadDepth: shape.screwHoleHeadDepth, screwHoleAngle: shape.screwHoleAngle })

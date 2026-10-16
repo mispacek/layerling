@@ -26,7 +26,7 @@ Ist layerling in mehreren Tabs offen, achten die Tabs aufeinander: Läuft in ein
 
 ## Sprache und Aussehen
 
-Die Sprache stellst du oben rechts ein, Deutsch oder Englisch. Das Farbschema daneben bietet {{ui:theme.short.system}} (folgt dem Betriebssystem), {{ui:theme.short.light}}, {{ui:theme.short.dark}} und {{ui:theme.short.graphite}}, ein neutrales Dunkelgrau.
+Die Sprache wählst du oben rechts in der Sprachliste. Das Farbschema daneben bietet {{ui:theme.short.system}} (folgt dem Betriebssystem), {{ui:theme.short.light}}, {{ui:theme.short.dark}} und {{ui:theme.short.graphite}}, ein neutrales Dunkelgrau.
 
 ## Selbst betreiben
 

@@ -15,7 +15,7 @@ Z miško:
 | kolesce miške | približevanje in oddaljevanje |
 | drži [[Ctrl]] in vleci z levim gumbom | prav tako premikanje |
 
-Hitrost zumiranja s kolescem nastaviš z {{ui:workspace.zoomSpeed}} v nastavitvah, pod {{ui:workspace.appearance}}: drsnik od 1 do 10, na začetku 5.
+Hitrost zumiranja s kolescem nastaviš z {{ui:workspace.zoomSpeed}} v nastavitvah, pod {{ui:workspace.appearance}}: drsnik od 1 do 14, na začetku 5; nad 10 se pospeši le kolešček.
 
 Na tablici ali telefonu dva prsta (razmikanje in približevanje) zumirata, skupno premikanje obeh pa premika pogled. En prst dela na načrtu, tako kot levi gumb miške. Kdor bi rad vrtel z enim prstom, v vrstici kamere vklopi {{ui:camera.touchRotate}}. Stikalo se pokaže samo na napravah z zaslonom na dotik.
 

@@ -70,6 +70,13 @@ describe("what every language's sentences must be", () => {
       expect(analysis.mismatched, "placeholders that differ from English").toEqual([]);
     });
 
+    it(`${language}: a line break is a line break, not the two characters backslash and n (#416)`, () => {
+      // A doubled backslash in the source shows up as "\n" in the menu: Danish and Russian had it in the thread tile.
+      const written = String.fromCharCode(92) + "n";
+      const broken = Object.entries(catalogueOf(language)!).filter(([key, value]) => value.includes(written) && !(MESSAGES_EN[key as keyof typeof MESSAGES_EN] ?? "").includes(written));
+      expect(broken.map(([key]) => key)).toEqual([]);
+    });
+
     if (LANGUAGE_INFO[language].complete) {
       it(`${language}: complete, so every sentence is there`, () => {
         expect(analyseCatalogue(MESSAGES_EN, catalogueOf(language)!).missing).toEqual([]);

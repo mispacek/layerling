@@ -20,7 +20,7 @@ export const editorTargetSchema = {
 export const creatableShapeKinds = [
   "box", "roundedBox", "cube", "cylinder", "slot", "ellipse", "polygon", "sphere", "cone", "pyramid", "wedge",
   "roundRoof", "halfSphere", "torus", "loft", "tube", "bentTube", "star", "heart", "crescent", "text", "thread", "spring", "gear",
-  "hinge", "knurl", "dovetail", "counterbore", "countersink", "teardrop", "ruler", "sketch",
+  "hinge", "knurl", "dovetail", "counterbore", "countersink", "doubleCountersink", "teardrop", "ruler", "sketch",
 ];
 
 /**
@@ -59,7 +59,7 @@ export const threadSizeSetting = {
  * geprueft wie in den Einstellungen; was daneben liegt, wird eingefangen.
  */
 export const shapeSettingSchema = {
-  sides: { type: "number", description: "Cylinder, slot, cone, tube, polygon, pyramid, round roof, teardrop, counterbore, countersink, torus (around the ring). Left out on a round body, the side count follows the diameter." },
+  sides: { type: "number", description: "Cylinder, slot, cone, tube, polygon, pyramid, round roof, teardrop, counterbore, countersink, doubleCountersink, torus (around the ring). Left out on a round body, the side count follows the diameter." },
   steps: { type: "number", description: "Sphere and half sphere: how finely the surface is divided. Torus: how finely the tube is divided; left out, it follows the size." },
   bevel: { type: "number", description: "Tube: wall thickness. Text: rounding of the lettering." },
   segments: { type: "number", description: "Text only: steps in the rounding." },
@@ -125,9 +125,9 @@ export const shapeSettingSchema = {
   hingeLeafThickness: { type: "number", description: "Hinge only: thickness of the two leaves in mm (default 2), at most the knuckle radius less the bore radius so a leaf stays below the bore." },
   hingeClearance: { type: "number", description: "Hinge only: gap in mm between the moving parts (0.1 to 1, default 0.4) - around the pin, between the knuckles and in front of the leaves. Go up for a printer that tends to fuse, down for a tighter hinge." },
   dovetailNeckWidth: { type: "number", description: "Dovetail only: width of the narrow neck in mm; the shape's width is the wide end, its depth the length of the tail. Must be narrower than the width." },
-  screwHoleShaft: { type: "number", description: "Counterbore and countersink only: diameter of the shaft below the head in mm. The shape's width is the head diameter, its height the whole length; the head end is on top." },
+  screwHoleShaft: { type: "number", description: "Counterbore, countersink and doubleCountersink: diameter of the shaft below the head (on the doubleCountersink, between the two cones) in mm. The shape's width is the head diameter, its height the whole length; the head end of a counterbore and a countersink is on top." },
   screwHoleHeadDepth: { type: "number", description: "Counterbore only: depth of the cylindrical head pocket in mm." },
-  screwHoleAngle: { type: "number", description: "Countersink only: opening angle of the cone in degrees (30 to 150, default 90 for a countersunk screw)." },
+  screwHoleAngle: { type: "number", description: "Countersink and doubleCountersink: opening angle of the cone in degrees (30 to 150, default 90 for a countersunk screw). A doubleCountersink is chamfered on both faces; if it is too short for two cones they meet in the middle at this angle." },
   loftBottomOutline: { type: "string", enum: ["round", "rectangle", "polygon"], description: "Loft (transition) only: the outline at the bottom - round (a circle, or an ellipse when width and length differ), rectangle (corners rounded by loftBottomCorner) or polygon (loftBottomSides corners). A loft joins its bottom outline to its top outline with a straight-ruled wall: a hose adapter, a square fan onto a round duct, a stand. Its frame is what both ends need together; width and depth stretch both ends alike." },
   loftTopOutline: { type: "string", enum: ["round", "rectangle", "polygon"], description: "Loft only: the outline at the top, as loftBottomOutline." },
   loftBottomWidth: { type: "number", description: "Loft only: width (x) of the bottom outline in mm." },
@@ -368,6 +368,7 @@ export const tools = [
           description: "Extruded sketch bodies (an imported SVG among them) and texts: how the body is filled. An object builds the outline as a frame - align outside is Tinkercad's outer line, inside its inner line, center on the line - or with align grow keeps the area and widens it by width all round; width in mm; join miter (sharp), round or bevel; values left out keep the current ones. null makes it a filled area again. A sketch body is built again from its sketch, where it stands; a text keeps its letters and its box grows by the stroke's reach (outside and grow by width, center by half).",
         },
         silhouette: { type: "boolean", description: "Extruded sketch bodies and texts: true leaves out every outline inside another - holes, and islands in them; on a text the counters of its letters - false brings them back. With an outside stroke this makes a cookie cutter from one SVG; with grow, a base layer under a text." },
+        stretch: { type: "boolean", description: "Straight text only: true stretches the letters to fill the whole box in both directions, so a capital can be made lower or narrower as in Tinkercad; false (the default) fits them into the box with their proportions kept, centred. Set the box with width and depth." },
         letterEdge: {
           anyOf: [
             { type: "null" },
@@ -456,6 +457,32 @@ export const tools = [
     },
   },
   {
+    name: "layerling_sweep_sketch",
+    description: "Pull a cross-section along a path as one exact body, like the editor's Sweep sketch (#400): a cable channel that turns a corner, a conduit, a guard round a belt, a ring round a hexagon. The path is a list of points in the sketch plane, [x, z] in mm on the workplane (z runs towards the front), joined by straight lines; closed joins the last point to the first and makes a ring. The section is a rectangle (width across the path, height up) or a circle (width is the diameter), solid or hollow with a wall thickness. It is drawn at the first point and seen looking along the path, so it starts there. The body stands on the plane with the lowest point of the section, a corner of the path is a mitre, and the result is an exact body: fillet, chamfer and the STEP export work on it. Returns the new object.",
+    inputSchema: {
+      ...editorTargetSchema,
+      required: ["path", "section"],
+      properties: {
+        ...editorTargetSchema.properties,
+        path: { type: "array", items: { anyOf: [{ type: "array", items: { type: "number" }, minItems: 2, maxItems: 2 }, { type: "object", properties: { x: { type: "number" }, z: { type: "number" } } }] }, minItems: 2, description: "The points of the path, [x, z] or { x, z }, in mm." },
+        closed: { type: "boolean", description: "Join the last point to the first: a ring." },
+        section: {
+          type: "object",
+          description: "The cross-section.",
+          properties: {
+            kind: { type: "string", enum: ["rectangle", "circle"] },
+            width: { type: "number", description: "Across the path in mm; the diameter of a circle." },
+            height: { type: "number", description: "Up on the body in mm (rectangle only, default the width)." },
+            wall: { type: "number", description: "A wall thickness in mm makes the section hollow." },
+          },
+          required: ["kind", "width"],
+        },
+        name: { type: "string" },
+        color: { type: "string" },
+      },
+    },
+  },
+  {
     name: "layerling_perforate_face",
     description: "Cut a pattern of holes into a flat face of a solid body - the editor's Hole pattern tool (vents, speaker grilles, baskets). The holes are ordinary hole shapes standing on the face and grouped with the body (nothing is baked: ungroup frees them again). Name the body and a side of its own box (targetFace, snapped to the nearest real face; the whole flat face around its middle is used) or give point and normal on the face yourself. Only holes that lie wholly inside the face, at least margin away from its edge, are made. form: round (size = diameter), square (size = side), rectangle and slot (size = width, height = height), hexagon (size = diameter across the corners). spacing is centre to centre; staggered shifts every second row by half a spacing and packs the rows so each hole has neighbours one spacing away. Without depth the holes go through the whole body. A curved face is refused. One undo step.",
     inputSchema: {
@@ -473,6 +500,24 @@ export const tools = [
         arrangement: { type: "string", enum: ["grid", "staggered"], description: "grid (rows and columns) or staggered (default)." },
         margin: { type: "number", minimum: 0, maximum: 100, description: "Clear distance between the holes and the face's edge in millimetres (default 4)." },
         depth: { type: "number", minimum: 0.1, description: "Depth of the holes in millimetres. Omit to go through the whole body." },
+      },
+    },
+  },
+  {
+    name: "layerling_push_face",
+    description: "Push a flat face of a solid body out or cut a pocket into it - the editor's Face tool. out adds a body standing on the face, in cuts a pocket reaching depth into it; inset keeps the new outline that far inside the face's edge (0 takes the whole face, so a wall gets thicker) and openings in the face grow by it; radius rounds every corner of the outline, the inner ones too, and closes a gap narrower than twice the radius. The new part is an ordinary sketch body grouped with the body (nothing is baked: Edit group and Edit sketch reach it). On the top or the bottom of a plain sketch body (one area, not grouped, mirrored, tapered, twisted or leaning, without a stroke, key ring or edge treatment) it keeps that body's own outline, exact where the CAD kernel can set it in, and keeps the inset when resized; on any other face, and on every face of an imported mesh, it follows the face's triangles. A pocket goes no deeper than the body behind the face. Name the body and a side of its own box (targetFace, snapped to the nearest real face) or give point and normal on the face yourself. A curved face is refused. One undo step.",
+    inputSchema: {
+      ...editorTargetSchema,
+      properties: {
+        ...editorTargetSchema.properties,
+        targetId: { type: "string", description: "The body whose face to push. If omitted, the one selected object (id also works)." },
+        targetFace: { type: "string", enum: ["bottom", "top", "left", "right", "front", "back"], description: "Side of the body's own box, taken in its current turn (default top)." },
+        point: { type: "array", items: { type: "number" }, minItems: 3, maxItems: 3, description: "A point on the face, [x, y, z] in world coordinates (y up). With normal, wins over targetFace." },
+        normal: { type: "array", items: { type: "number" }, minItems: 3, maxItems: 3, description: "Outward normal [x, y, z] of the face at point, in world coordinates." },
+        direction: { type: "string", enum: ["out", "in"], description: "out adds material on the face (default), in cuts a pocket into it." },
+        inset: { type: "number", minimum: 0, maximum: 50, description: "How far the outline stays inside the face's edge, in millimetres (default 0)." },
+        radius: { type: "number", minimum: 0, maximum: 30, description: "Corner radius of the outline in millimetres (default 0)." },
+        depth: { type: "number", minimum: 0.2, maximum: 100, description: "How far the new part stands out, or the pocket reaches in, in millimetres (default 2)." },
       },
     },
   },
@@ -817,7 +862,7 @@ export const tools = [
   },
   {
     name: "layerling_layer_icon",
-    description: "An SVG icon as a layered tag for a multicolour print, like the editor's Icon tag (the shape library) and its card: the icon on top, under it the same outline a little wider in another colour, at the bottom a plate without holes - one bundle of extruded sketch bodies, each with its own colour and height. Two ways in. `svg` (the text of an SVG file) makes a new icon tag standing on the middle of the plate, named after `name`; the drawing is checked as the import checks it and refused when the kernel would build it differently. `id` of an extruded sketch body (an imported SVG, say) turns that body into an icon tag, or of an icon tag builds it again with a new width or new layers; the place and the turn stay. `width` is how wide the icon on top is, seen from above, in mm (2 to 250; 30 for a new tag, the current width otherwise). `layers` are the layers top to bottom as for layerling_layer_text - grow, height, color, silhouette, join - without the letter edge or a key ring hole; left out, a new tag gets the name tag's start layers (the icon, a 1.5 mm rim, a 3 mm plate without holes) and an existing one keeps its own. `count` (1 to 100) lays that many copies out on the middle of the plate 5 mm apart, the first being the tag itself - for small logos one prints a full plate. One undo step. The result returns the tag(s) and the layers.",
+    description: "An SVG icon as a layered tag for a multicolour print, like the editor's Icon tag (the shape library) and its card: the icon on top, under it the same outline a little wider in another colour, at the bottom a plate without holes - one bundle of extruded sketch bodies, each with its own colour and height. Two ways in. `svg` (the text of an SVG file) makes a new icon tag standing on the middle of the plate, named after `name`; the drawing is checked as the import checks it and refused when the kernel would build it differently. `id` of an extruded sketch body (an imported SVG, say) turns that body into an icon tag, or of an icon tag builds it again with a new width or new layers; the place and the turn stay. `width` is how wide the icon on top is, seen from above, in mm (2 to 250; 30 for a new tag, the current width otherwise). `layers` are the layers top to bottom as for layerling_layer_text - grow, height, color, silhouette, join - without the letter edge; left out, a new tag gets the name tag's start layers (the icon, a 1.5 mm rim, a 3 mm plate without holes) and an existing one keeps its own. `keyring` puts a key ring hole on the tag as on a name tag (a tab with a round end on the bottom layer, the hole through every layer, beyond the icon on the side chosen). `count` (1 to 100) lays that many copies out on the middle of the plate 5 mm apart, the first being the tag itself - for small logos one prints a full plate. One undo step. The result returns the tag(s) and the layers.",
     inputSchema: {
       ...editorTargetSchema,
       properties: {
@@ -840,6 +885,19 @@ export const tools = [
               join: { type: "string", enum: ["round", "bevel", "miter"], description: "How a wider layer goes round the corners of the icon: round (default), bevel or miter (sharp)." },
             },
           },
+        },
+        keyring: {
+          description: "A key ring hole: { side, diameter } puts it on (a tab with a round end on the bottom layer, the hole through every layer, beyond the icon), true puts a 3 mm hole on the left, false takes it off. Left out, it stays as it is. A side other than left, right or top, or a diameter outside 1 to 20 mm, is refused.",
+          anyOf: [
+            {
+              type: "object",
+              properties: {
+                side: { type: "string", enum: ["left", "right", "top"], description: "Where the ear sits, seen from above (default left)." },
+                diameter: { type: "number", minimum: 1, maximum: 20, description: "The hole's diameter in mm (default 3); the tab grows with it." },
+              },
+            },
+            { type: "boolean" },
+          ],
         },
         count: { type: "integer", minimum: 1, maximum: 100, description: "Copies of the tag on the plate (default 1)." },
       },
@@ -1001,6 +1059,19 @@ export const tools = [
         ...editorTargetSchema.properties,
         ids: { type: "array", items: { type: "string" }, description: "Objects to draw. Defaults to the whole design." },
         format: { type: "string", enum: ["svg", "pdf"], description: "svg returns the drawing as text, pdf as base64. Defaults to svg." },
+      },
+    },
+  },
+  {
+    name: "layerling_export_mesh",
+    description: "Make the file the editor's export window writes as STL, 3MF or OBJ, from the same bodies: visible solids only, loose holes already taken off, overlapping bodies merged into one (STL) or separated by colour (3MF and OBJ, where a group in Multicolor keeps its part colours), and the tiny loose pieces a cut leaves behind left out. ids limits it to those objects (holes still cut). The answer lists the file name, its size in bytes, the number of bodies and triangles, how many bodies were merged or failed to merge, and how many loose pieces were left out. With path the file is written to that place on this computer and the answer carries no content; without it the file comes back as base64. Neither the editor's dialogs nor a download is involved.",
+    inputSchema: {
+      ...editorTargetSchema,
+      properties: {
+        ...editorTargetSchema.properties,
+        format: { type: "string", enum: ["stl", "3mf", "obj"], description: "The file format. Defaults to stl." },
+        ids: { type: "array", items: { type: "string" }, description: "Objects to export. Defaults to the whole design." },
+        path: { type: "string", description: "Where to write the file, e.g. C:/print/part.stl. Directories are made as needed. Omit it to get the file as base64." },
       },
     },
   },

@@ -26,6 +26,7 @@ export type ShapeKind =
   | "dovetail"
   | "counterbore"
   | "countersink"
+  | "doubleCountersink"
   | "teardrop"
   | "loft"
   | "thread"
@@ -205,11 +206,11 @@ export type ShapeCustomization = {
   /** Transition: degrees the top end tilts about the x axis and about the z axis (#205). */
   loftTiltX?: number;
   loftTiltZ?: number;
-  /** Counterbore/countersink: diameter of the shaft below the head in mm. */
+  /** Counterbore/countersink: diameter of the shaft below the head in mm (double countersink: the shaft between the two cones). */
   screwHoleShaft?: number;
   /** Counterbore: depth of the head pocket in mm. */
   screwHoleHeadDepth?: number;
-  /** Countersink: opening angle of the cone in degrees. */
+  /** Countersink and double countersink: opening angle of the cone in degrees. */
   screwHoleAngle?: number;
   bentTubeProfile?: BentTubeProfile;
   bentTubeInnerProfile?: BentTubeInnerProfile;
@@ -378,6 +379,15 @@ export type TextKeyringSide = "left" | "right" | "top";
  */
 export type TextKeyring = { side: TextKeyringSide; diameter: number; offset: number; ear?: boolean };
 
+/** A key ring hole in an extruded sketch (#391): its middle in the sketch's own mm, its size, the side it is on and whether the layer has the ear. */
+export type SketchKeyring = { side: TextKeyringSide; diameter: number; x: number; z: number; ear?: boolean };
+/**
+ * A sketch built set in from its outlines: every edge `distance` mm inward, every corner rounded to
+ * `radius` mm. The face tool keeps the outline of the face it pushes out or in here and builds the
+ * inset from it, as a stroked sketch keeps its line.
+ */
+export type SketchInset = { distance: number; radius: number };
+
 export type SketchProfile = {
   points: SketchPoint[];
   segments: SketchSegment[];
@@ -385,9 +395,13 @@ export type SketchProfile = {
   stroke?: SketchStroke;
   /** Built without its holes: only the outermost outlines count, as the usual Silhouette (#197). */
   silhouette?: boolean;
+  /** A key ring hole cut through the body, with its ear on the bottom layer of an icon tag (#391). */
+  keyring?: SketchKeyring;
+  /** Built set in from its outlines by the face tool: the body keeps the face's outline and builds the inset from it. */
+  inset?: SketchInset;
 };
 
-export type SketchOperation = "extrude" | "revolve";
+export type SketchOperation = "extrude" | "revolve" | "sweep";
 
 /** Spur, helical, herringbone and bevel gears; a ring gear with its teeth pointing in and a rack (#201, #265). */
 export type GearType = "spur" | "helical" | "herringbone" | "bevel" | "internal" | "rack";
@@ -662,11 +676,11 @@ export type WorkplaneShape = {
   /** Transition: degrees the top end tilts about the x axis and about the z axis (#205). */
   loftTiltX?: number;
   loftTiltZ?: number;
-  /** Counterbore/countersink: diameter of the shaft below the head in mm. */
+  /** Counterbore/countersink: diameter of the shaft below the head in mm (double countersink: the shaft between the two cones). */
   screwHoleShaft?: number;
   /** Counterbore: depth of the head pocket in mm. */
   screwHoleHeadDepth?: number;
-  /** Countersink: opening angle of the cone in degrees. */
+  /** Countersink and double countersink: opening angle of the cone in degrees. */
   screwHoleAngle?: number;
   cornerFillet?: number;
   topBottomFillet?: number;
@@ -697,6 +711,12 @@ export type WorkplaneShape = {
   textStroke?: SketchStroke;
   /** Text only (#215): the letters without their counters (the holes in O, A, e), as the usual Silhouette. */
   textSilhouette?: boolean;
+  /**
+   * Straight text only (#382): the letters are stretched to fill the box in both directions, so a
+   * capital can be made lower or narrower as in Tinkercad. Without it the letters keep their
+   * proportions and are fitted into the box, centred.
+   */
+  textStretch?: boolean;
   /**
    * Text only (#225): the top edge of the letters rounded or chamfered by `size` mm, as a name
    * tag's letters on top are finished. Built from the outline stepped inwards, so it works for

@@ -43,7 +43,7 @@ Les paramètres sont ancrés sur le bord droit. S'ils couvrent quelque chose que
 
 ![Un groupe composé d'un bloc orange, d'une cheville bleue et d'un trou, découpés en un seul corps. Lorsque Multicolor est activé, le piquet reste bleu, le bloc orange et les parois du trou prennent la couleur du bloc.](shot:group-multicolor)
 
-Le cône et la torsion fonctionnent sur presque toutes les formes. Seuls l'engrenage, le filetage, le ressort, la molette, la charnière, la pyramide, le tube coudé, la larme, les fraises à tête de vis et la règle les laissent de côté : ils ont leurs propres mesures fixes ou, comme la pyramide, un sommet qui leur est déjà propre.
+Le cône et la torsion fonctionnent sur presque toutes les formes. Seuls l'engrenage, le filetage, le ressort, la molette, la charnière, la pyramide, le tube courbé, la larme, les fraises à tête de vis et la règle les laissent de côté : ils ont leurs propres mesures fixes ou, comme la pyramide, un sommet qui leur est déjà propre.
 
 ![Un cône dont le rayon supérieur et la hauteur ont été modifiés : une petite flèche à côté de chacun reprend la valeur, et les deux boutons du bas enregistrent ou réinitialisent les valeurs par défaut de la forme.](shot:property-reset)
 

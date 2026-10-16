@@ -7,10 +7,11 @@ Not everything can be put together from basic shapes. For parts with a contour o
 
 ## Starting a sketch
 
-At the top, switch from {{ui:editor.modeGeometry}} to {{ui:editor.modeSketch}}. In the {{ui:sketch.group.create}} group of the ribbon, two buttons stand side by side for what the outline should become:
+At the top, switch from {{ui:editor.modeGeometry}} to {{ui:editor.modeSketch}}. In the {{ui:sketch.group.create}} group of the ribbon, three buttons stand side by side for what the outline should become:
 
 - **{{ui:sketch.extrude}}:** The outline is pulled upward, like a cookie cutter.
 - **{{ui:sketch.revolve}}:** The outline is spun about an axis, as on a lathe. That gives vases, cups, cones and everything round.
+- **{{ui:sketch.sweep}}:** The outline is pulled along a path: a cable channel that turns a corner, a conduit, a ring round a shape. See Sweeping along a path below.
 
 The editor then shows a sheet with a grid. That is your drawing surface.
 
@@ -30,6 +31,8 @@ A body comes only from a **closed** outline.
 
 ![An L-shaped outline. At the selected corner point, top left, the lengths of the two lines are shown in millimetres, and the angle between them in degrees.](shot:sketch-outline)
 
+The keys [[1]] to [[4]] pick the drawing tools, in the order of the bar: {{ui:sketch.line}}, {{ui:sketch.bezier}}, {{ui:sketch.smooth}} and {{ui:sketch.refine}}. They work as long as no line is being drawn; while one is, the digits are its length (see below).
+
 ## Lines by numbers
 
 Once you have set the first point with {{ui:sketch.line}} or {{ui:sketch.smooth}}, just type a number: two fields open next to the line, {{ui:sketch.typedLength}} in millimetres and {{ui:sketch.typedAngle}} in degrees. [[<]] or [[Tab]] moves to the angle, so "50<30" gives a line 50 mm long at 30°, as in AutoCAD. [[Enter]] sets the point, and you can type the next line straight away; [[Esc]] closes the fields without ending the line chain.
@@ -38,7 +41,7 @@ The angle counts counterclockwise from the right: 0° to the right, 90° up, 180
 
 ## Curving a straight side
 
-Select a straight line and click {{ui:sketch.curveLine}} in the bar that appears: the side bows out into a curve, as in Tinkercad, and shows its two handles. Drag them to shape the curve; the further out a handle stands, the stronger the bend. {{ui:sketch.straightenLine}} makes the side straight again. A point you select can be made round with {{ui:sketch.smooth}}: it gets handles of its own and the lines next to it become curves.
+Select a straight line and click {{ui:sketch.curveLine}} in the bar that appears: the side bows out into a curve, as in Tinkercad, and shows its two handles. Drag them to shape the curve; the further out a handle stands, the stronger the bend. {{ui:sketch.straightenLine}} makes the side straight again. A point you select can be made round with {{ui:sketch.smooth}}: it gets handles of its own and the lines next to it become curves. Click a handle and it lights up: the arrow keys then move it by one grid step, with [[Shift]] by a larger step, so you can set a curve precisely.
 
 ![The bottom side of the L-shaped outline bent into a curve, with its two handles at the ends.](shot:sketch-curve)
 
@@ -82,6 +85,18 @@ With {{ui:inspector.editSketch}} you can return to the sketch at any time to cha
 When revolving, you draw half the cross-section **to the left of the axis** shown in the sketch. Next to it you see a 3D preview of the revolve. It shows at once what the body will look like. The outline must be closed, or you build an open line as a stroke, see below. At the end click {{ui:sketch.finishRevolve}}.
 
 A revolved body is an exact body, like an extruded one: it takes chamfers and fillets, and you can hollow it, for a cup or a vase. A body revolved with an older layerling is a mesh; open {{ui:inspector.editSketch}} and finish it again to make it exact. A profile that reaches across the axis cannot be built exactly and becomes a mesh, as before.
+
+## Sweeping along a path
+
+{{ui:sketch.sweep}} pulls an outline along a path: a cable channel that turns a corner, a conduit, a guard round a belt, a ring around a hexagon. It sits next to {{ui:sketch.extrude}} and {{ui:sketch.revolve}} in the {{ui:sketch.group.create}} group.
+
+You draw two things on the same sheet:
+
+- **The cross-section** as a closed outline, as usual. Draw it as you would see it looking along the path from its start: across the path is the sketch's left and right, up is up on the finished body. A hollow section, a channel or a tube, is an outline with another one inside it. The section is centred on the path, and the body stands on the sketch plane with the lowest point of the section.
+
+- **The path** as a {{ui:sketch.construction}}: switch it on and draw lines or curves, one chain, open or closed (a closed chain gives a ring). The path lies flat in the sketch plane.
+
+Draw the section near the end of the path where it should start; the path starts at the end nearest to it. Then click {{ui:sketch.finishSweep}}. A corner of straight pieces becomes a mitre, a curve stays smooth, and the section stays upright all the way. The body is exact, like an extruded one: fillet, chamfer and the STEP export work on it. If a closed outline or a path is missing, or there are several separate paths, layerling says so. With {{ui:inspector.editSketch}} you can return to the sketch and change the section or the path.
 
 ## Building as a stroke
 

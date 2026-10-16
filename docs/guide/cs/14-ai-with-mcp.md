@@ -58,6 +58,8 @@ AI používá stejné funkce a stejné zpracování příkazů jako ruční ovl�
 | `layerling_lay_flat` | položí objekt vybranou plochou na podložku |
 | `layerling_place_on_face` | umístí objekty na plochu jiného tělesa, i šikmou, jako klávesa C |
 | `layerling_perforate_face` | vytvoří rastr otvorů na rovinné ploše; výřezy zůstanou sloučené s tělesem |
+| `layerling_sweep_sketch` | protáhne obdélníkový nebo kruhový průřez podél dráhy z bodů jako jedno přesné těleso; uzavřená dráha dá prstenec |
+| `layerling_push_face` | vysune rovinnou plochu ven nebo do ní vyřízne kapsu, s odsazením od okraje a poloměrem rohů; nový díl je těleso z náčrtu sloučené s tělesem |
 | `layerling_mate_faces` | přiloží plochy dvou objektů proti sobě nebo do společné roviny |
 | `layerling_open_group` | otevře sloučený celek k úpravě částí, i uvnitř jiného otevřeného celku |
 | `layerling_close_group` | potvrdí úpravu celku nebo ji zruší |
@@ -93,6 +95,7 @@ AI používá stejné funkce a stejné zpracování příkazů jako ruční ovl�
 | `layerling_set_history_view` | zobrazí starší stav projektu bez změny současného; editační nástroje počkají na zavření historie |
 | `layerling_export_section_svg` | vrátí obrysy řezu jako SVG v měřítku 1:1 ze stejných těles jako běžný export |
 | `layerling_export_drawing` | vytvoří technický výkres tří pohledů v měřítku 1:1 na listu ISO s celkovými rozměry a tabulkou kruhových otvorů, jako SVG nebo PDF |
+| `layerling_export_mesh` | zapíše soubor exportního okna jako STL, 3MF nebo OBJ ze stejných těles; na cestu v tomto počítači nebo jako base64 |
 | `layerling_set_workplane` | položí pracovní rovinu na plochu tělesa nebo zpět na podložku a přepíná její viditelnost |
 | `layerling_capture_image` | pořídí snímek zepředu, shora, z boku, šikmo z rohu a z dalších pohledů |
 

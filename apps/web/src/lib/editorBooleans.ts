@@ -1,4 +1,5 @@
 
+import { removeLooseSplinters } from "@/lib/meshSplinters";
 import type { ManifoldToplevel } from "manifold-3d";
 import { ADDITION, Brush, Evaluator, HOLLOW_INTERSECTION, HOLLOW_SUBTRACTION, INTERSECTION, SUBTRACTION, type CSGOperation } from "three-bvh-csg";
 import * as THREE from "three";
@@ -30,6 +31,11 @@ export type GroupBuildResult = {
    * solid's surface has gaps: how many open edges it has. 0 when the cut is closed (#346).
    */
   openGapEdges?: number;
+  /**
+   * The solids were grouped by laying their meshes together, not merged into one, because they have
+   * more triangles than the limit.
+   */
+  mergeWarning?: string;
 };
 
 type IntersectionAttempt =
@@ -950,7 +956,7 @@ function isPileOfSolids(shape: WorkplaneShape) {
   return Boolean(shape.groupedShapes && shape.groupedShapes.length > 1 && !shape.importedMesh);
 }
 
-export async function unionOverlappingExportMeshes(shapes: WorkplaneShape[], meshes: MeshData[]) {
+async function unionOverlappingExportMeshesRaw(shapes: WorkplaneShape[], meshes: MeshData[]) {
   const gruppen = overlappingExportClusters(meshes.map((mesh) => meshBounds(mesh.vertices)));
   if (!gruppen.some((gruppe) => gruppe.length > 1 || isPileOfSolids(shapes[gruppe[0]]))) {
     return { meshes, quellen: meshes.map((_, index) => index), verschmolzen: 0, gescheitert: 0 };
@@ -1222,16 +1228,16 @@ export function exportFaceColors(mesh: MeshData, solids: PartColorSolid[], fallb
   });
 }
 
-export async function colorSeparatedExportMeshes(shapes: WorkplaneShape[], meshes: MeshData[]) {
+async function colorSeparatedExportMeshesRaw(shapes: WorkplaneShape[], meshes: MeshData[]) {
   const farben = exportColorGroups(shapes.map((shape) => shape.color));
   if (farben.length <= 1) {
-    return unionOverlappingExportMeshes(shapes, meshes);
+    return unionOverlappingExportMeshesRaw(shapes, meshes);
   }
   const koerper: { mesh: MeshData; quelle: number; farbe: number }[] = [];
   let verschmolzen = 0;
   let gescheitert = 0;
   for (const [farbe, gruppe] of farben.entries()) {
-    const teil = await unionOverlappingExportMeshes(gruppe.map((index) => shapes[index]), gruppe.map((index) => meshes[index]));
+    const teil = await unionOverlappingExportMeshesRaw(gruppe.map((index) => shapes[index]), gruppe.map((index) => meshes[index]));
     teil.meshes.forEach((mesh, index) => koerper.push({ mesh, quelle: gruppe[teil.quellen[index]], farbe }));
     verschmolzen += teil.verschmolzen;
     gescheitert += teil.gescheitert;
@@ -1301,6 +1307,28 @@ export async function colorSeparatedExportMeshes(shapes: WorkplaneShape[], meshe
     quellen.push(entry.quelle);
   });
   return { meshes: ergebnis, quellen, verschmolzen, gescheitert };
+}
+
+/**
+ * What an export writes: the loose splinters a cut or the colour separation leaves behind are left out (#352), as
+ * `splinters` counts. A slicer shows them as spikes, and they can lift a flat design off the plate.
+ */
+function withoutSplinters<T extends { meshes: MeshData[] }>(result: T): T & { splinters: number } {
+  let splinters = 0;
+  const meshes = result.meshes.map((mesh) => {
+    const cleaned = removeLooseSplinters(mesh);
+    splinters += cleaned.removed;
+    return cleaned.mesh;
+  });
+  return { ...result, meshes, splinters };
+}
+
+export async function unionOverlappingExportMeshes(shapes: WorkplaneShape[], meshes: MeshData[]) {
+  return withoutSplinters(await unionOverlappingExportMeshesRaw(shapes, meshes));
+}
+
+export async function colorSeparatedExportMeshes(shapes: WorkplaneShape[], meshes: MeshData[]) {
+  return withoutSplinters(await colorSeparatedExportMeshesRaw(shapes, meshes));
 }
 
 export function disposeManifold(value: unknown) {
@@ -1978,6 +2006,25 @@ export function restoreGroupedChildren(group: WorkplaneShape): WorkplaneShape[] 
   });
 }
 
+/**
+ * The bodies of a group for the edge tool, with the groups inside it opened where that changes nothing:
+ * a group of nothing but holes (the usual way to cut a pattern) or of nothing but solids. Left closed it
+ * reaches the kernel as one mesh of several loose pieces, and its curves are facets there; opened, every
+ * hole is the exact shape it was. A group that mixes solids and holes cuts only its own solids, so it stays closed (#394).
+ */
+export function restoreGroupedChildrenForEdges(group: WorkplaneShape): WorkplaneShape[] {
+  return restoreGroupedChildren(group).flatMap((child) => {
+    const grandChildren = child.groupedShapes ?? [];
+    const opensCleanly = grandChildren.length > 0
+      && !child.importedMesh
+      && !shapeHasShapeDeform(child)
+      && (child.groupOperation === undefined || child.groupOperation === "group")
+      && (grandChildren.every((part) => part.hole) || grandChildren.every((part) => !part.hole))
+      && (child.hole || grandChildren.every((part) => !part.hole));
+    return opensCleanly ? restoreGroupedChildrenForEdges(child) : [child];
+  });
+}
+
 function expandGroupsForBoolean(selection: WorkplaneShape[]): WorkplaneShape[] {
   return selection.flatMap((shape) => {
     if (shape.importedMesh) {
@@ -2064,9 +2111,17 @@ export async function buildGroupedShapeFromSelection(groupable: WorkplaneShape[]
   const openGapEdges = group && hasImportedMesh && hasSolid && hasHole && OPEN_CUT_ID.test(group.id)
     ? openSurfaceEdgeCount(booleanSelection.filter((shape) => !shape.hole && !shape.locked))
     : 0;
+  // Above the limit the solids are only laid together, they are kept overlapping when exported.
+  const unmergedTriangles = group && group === bakedImportedMerge && !manifoldImportedMerge && hasSolid
+    ? group.importedMesh?.triangleCount ?? 0
+    : 0;
+  const mergeWarning = unmergedTriangles > triangleLimit
+    ? t("status.groupNotMerged", { triangles: formatTriangleCount(unmergedTriangles), limit: formatTriangleCount(triangleLimit) })
+    : undefined;
   return {
     group,
     openGapEdges,
+    mergeWarning,
     booleanSelection,
     hasSolid,
     hasHole,

@@ -58,6 +58,8 @@ De AI werkt met dezelfde functies als jij, via dezelfde weg als jouw bediening i
 | `layerling_lay_flat` | legt een object met één vlak op de plaat |
 | `layerling_place_on_face` | zet objecten neer op een vlak van een ander, ook op schuine, zoals de C-toets |
 | `layerling_perforate_face` | snijdt een gatenpatroon in een plat vlak; de gaten blijven gaten, gegroepeerd met het lichaam |
+| `layerling_sweep_sketch` | trekt een rechthoekige of ronde dwarsdoorsnede langs een pad van punten als één exact lichaam; een gesloten pad geeft een ring |
+| `layerling_push_face` | trekt een plat vlak naar buiten of snijdt er een kamer in, met inspringing vanaf de rand en hoekradius; het nieuwe deel is een schetslichaam, gegroepeerd met het lichaam |
 | `layerling_mate_faces` | brengt een vlak van het ene object tegen een vlak van een ander, vlak tegen vlak of gelijk |
 | `layerling_open_group` | opent een groep zodat de onderdelen een voor een kunnen worden gewijzigd, ook een groep binnen een geopende groep |
 | `layerling_close_group` | sluit hem weer ("Klaar") of annuleert |
@@ -93,6 +95,7 @@ De AI werkt met dezelfde functies als jij, via dezelfde weg als jouw bediening i
 | `layerling_set_history_view` | kijkt terug naar een eerdere toestand van het project, zoals de geschiedenisweergave (het echte ontwerp blijft onaangeroerd; gereedschappen die iets wijzigen wachten tot hij gesloten is) |
 | `layerling_export_section_svg` | geeft de contouren op een doorsnedevlak terug als SVG op 1:1, van dezelfde lichamen als de export |
 | `layerling_export_drawing` | maakt de werkplaatstekening van de "2D"-export: drie aanzichten op 1:1 op een ISO-blad met buitenmaten en een tabel van de ronde boringen, als SVG-tekst of PDF |
+| `layerling_export_mesh` | schrijft het bestand van het exportvenster als STL, 3MF of OBJ, uit dezelfde lichamen; naar een pad op deze computer of als base64 |
 | `layerling_set_workplane` | legt het werkvlak op een zijde van een lichaam of terug op de grondplaat, en verbergt of toont het |
 | `layerling_capture_image` | maakt een afbeelding van de weergave: voorkant, bovenkant, zijkant, schuin vanuit een hoek en meer |
 

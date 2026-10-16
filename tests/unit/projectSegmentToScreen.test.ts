@@ -51,7 +51,7 @@ describe("projectSegmentToScreen", () => {
 });
 
 describe("the corner ruler with the camera hovering above it", () => {
-  it("draws no tick that was mirrored from behind the camera", () => {
+  it("keeps no label that was mirrored from behind the camera, and draws its lines in the room", () => {
     const camera = new THREE.PerspectiveCamera(45, 800 / 600, 0.1, 1000);
     camera.position.set(0, 15, 40);
     camera.lookAt(0, 0, -100);
@@ -63,20 +63,30 @@ describe("the corner ruler with the camera hovering above it", () => {
       armLengthX: 100,
       armLengthZ: 80,
     };
+    const layer = new THREE.Group();
+    const state = { ...stateFor(camera), cornerRulerLayer: layer, shapeLayer: new THREE.Group(), raycaster: new THREE.Raycaster() } as unknown as ThreeState;
     let overlay: CornerRulerOverlayState | null = null;
-    syncCornerRulerToolOverlay(stateFor(camera), [ruler], [], [], { current: null }, (next) => {
+    syncCornerRulerToolOverlay(state, [ruler], [], [], { current: null }, (next) => {
       overlay = typeof next === "function" ? next(overlay) : next;
     }, "0.01" as never);
     const item = overlay!.items[0];
-    const all = cornerRulerTicks(100).length + cornerRulerTicks(80).length;
-    expect(item.ticks.length).toBeGreaterThan(0);
-    // The part of the z arm behind the camera (z > 40) has no ticks.
-    expect(item.ticks.length).toBeLessThan(all);
-    for (const tick of item.ticks) {
-      for (const value of [tick.x1, tick.y1, tick.x2, tick.y2]) expect(Math.abs(value)).toBeLessThan(100000);
+    const allLabels = [100, 80].reduce((sum, length) => sum + cornerRulerTicks(length).filter((tick) => tick.isTen && tick.offset > 0).length, 0);
+    expect(item.labels.length).toBeGreaterThan(0);
+    // The part of the z arm behind the camera (z > 40) has no numbers.
+    expect(item.labels.length).toBeLessThan(allLabels);
+    for (const label of item.labels) {
+      for (const value of [label.x, label.y]) expect(Math.abs(value)).toBeLessThan(100000);
     }
-    for (const line of [item.armXLine, item.armZLine]) {
-      for (const value of [line.x1, line.y1, line.x2, line.y2]) expect(Math.abs(value)).toBeLessThan(100000);
-    }
+    // The ticks and the arms are lines in the room, which the graphics card cuts at the camera: no mirrored fan.
+    expect(layer.children.length).toBe(2);
+    // A ruler that hides behind bodies tests the depth; one that stays in view does not.
+    expect(item.occlude).toBe(true);
+    const material = (layer.children[0] as THREE.Mesh).material as THREE.Material;
+    expect(material.depthTest).toBe(true);
+    syncCornerRulerToolOverlay(state, [{ ...ruler, occlude: false }], [], [], { current: null }, (next) => {
+      overlay = typeof next === "function" ? next(overlay) : next;
+    }, "0.01" as never);
+    expect(overlay!.items[0].occlude).toBe(false);
+    expect(((layer.children[0] as THREE.Mesh).material as THREE.Material).depthTest).toBe(false);
   });
 });

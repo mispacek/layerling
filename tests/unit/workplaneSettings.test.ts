@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { WorkplaneWorkspaceSettings } from "@/types/layerling";
 import { formatMeasurementNumber, lengthDisplayUnit, millimetersToDisplay, normalizeScaleForUnits, parseMeasurementInput, resolveMeasurementInput, scaleOptionsForUnits } from "@/lib/measurementUnits";
-import { booleanTriangleLimitPreset, canBeginShapeDrag, customSnapGridDivisors, customSnapGridLabel, normalizeCustomSnapGrids, DEFAULT_ORBIT_ZOOM_SPEED, DEFAULT_SNAP_GRID, DEFAULT_WORKPLANE_WORKSPACE, keyboardNudgeStep, normalizeShapeCustomizations, snapGridForUnits, snapGridOptions, snapGridStep, normalizeSnapGrid, normalizeWorkspaceSettings, orbitControlsZoomSpeed, shapeDimensionLimit, workplaneSettingsFingerprint, workspaceHydrationSyncDecision, zoomDistanceScale } from "@/lib/workplaneSettings";
+import { booleanTriangleLimitPreset, canBeginShapeDrag, customSnapGridDivisors, customSnapGridLabel, normalizeCustomSnapGrids, DEFAULT_ORBIT_ZOOM_SPEED, DEFAULT_SNAP_GRID, DEFAULT_WORKPLANE_WORKSPACE, keyboardNudgeStep, normalizeShapeCustomizations, snapGridForUnits, snapGridOptions, snapGridStep, normalizeSnapGrid, normalizeWorkspaceSettings, orbitControlsZoomSpeed, shapeDimensionLimit, workplaneSettingsFingerprint, ZOOM_SPEED_SLIDER_MAX, workspaceHydrationSyncDecision, zoomDistanceScale } from "@/lib/workplaneSettings";
 import { toolbarShapeAssets } from "@/lib/shapeCatalog";
 
 describe("workplane settings helpers", () => {
@@ -92,7 +92,11 @@ describe("workplane settings helpers", () => {
     expect(fast / slow).toBeCloseTo(20);
     expect(orbitControlsZoomSpeed(Number.NaN)).toBeCloseTo(DEFAULT_ORBIT_ZOOM_SPEED);
     expect(orbitControlsZoomSpeed(-4)).toBeCloseTo(slow);
-    expect(orbitControlsZoomSpeed(40)).toBeCloseTo(fast);
+    // The slider goes on above 10 with the same factor per step; the first ten steps are as they were (#331).
+    const top = orbitControlsZoomSpeed(ZOOM_SPEED_SLIDER_MAX);
+    expect(top / fast).toBeCloseTo((20 ** (1 / 9)) ** (ZOOM_SPEED_SLIDER_MAX - 10));
+    expect(orbitControlsZoomSpeed(40)).toBeCloseTo(top);
+    expect(zoomDistanceScale(0.7, ZOOM_SPEED_SLIDER_MAX)).toBeCloseTo(zoomDistanceScale(0.7, 10));
 
     const slowStep = zoomDistanceScale(0.7, 1);
     const fastStep = zoomDistanceScale(0.7, 10);

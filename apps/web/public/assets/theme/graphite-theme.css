@@ -405,6 +405,52 @@ html[data-theme="dark"]:where([data-palette="graphite"]) .dashboard-trademark {
   color: #565656;
 }
 
+:where(html[data-theme="dark"][data-palette="graphite"]) .storage-notice {
+  background: #eeeeee;
+  border: 2px solid #e08a2c;
+}
+
+:where(html[data-theme="dark"][data-palette="graphite"]) .storage-notice-icon {
+  color: #ffffff;
+  background: #d9730d;
+}
+
+:where(html[data-theme="dark"][data-palette="graphite"]) .storage-notice-text strong {
+  color: #313131;
+}
+
+:where(html[data-theme="dark"][data-palette="graphite"]) .storage-notice-text span {
+  color: #494949;
+}
+
+:where(html[data-theme="dark"][data-palette="graphite"]) .storage-notice-button {
+  color: #ffffff;
+  background: #bf6508;
+  border: 0;
+}
+
+:where(html[data-theme="dark"][data-palette="graphite"]) .storage-notice-button:hover {
+  background: #a95805;
+}
+
+:where(html[data-theme="dark"][data-palette="graphite"]) .storage-notice-button.secondary {
+  color: #8a4a05;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 2px #bf6508;
+}
+
+:where(html[data-theme="dark"][data-palette="graphite"]) .storage-notice-button.secondary:hover {
+  background: #e6e6e6;
+}
+
+:where(html[data-theme="dark"][data-palette="graphite"]) .storage-notice-help {
+  color: #8a5312;
+}
+
+:where(html[data-theme="dark"][data-palette="graphite"]) .storage-notice-help:hover {
+  color: #313131;
+}
+
 :where(html[data-theme="dark"][data-palette="graphite"]) .install-app-hint {
   background: #f7f7f7;
   border: 1px solid #d4d4d4;
@@ -2648,6 +2694,11 @@ html[data-theme="dark"]:where([data-palette="graphite"]) .sketch-image-hint {
   stroke: #f08036;
 }
 
+:where(html[data-theme="dark"][data-palette="graphite"]) .sketch-curve-handles circle.sketch-handle-selected {
+  fill: #f08036;
+  stroke: #ffffff;
+}
+
 :where(html[data-theme="dark"][data-palette="graphite"]) .sketch-drag-handles circle,
 :where(html[data-theme="dark"][data-palette="graphite"]) .sketch-curve-handles circle {
   fill: #ffffff;
@@ -3428,6 +3479,34 @@ html[data-theme="dark"]:where([data-palette="graphite"]) .inspector-bundle-note 
   background: rgba(255, 255, 255, 0.96);
   border: 1px solid rgba(129, 199, 132, 0.9);
   box-shadow: 0 1px 3px rgba(46, 125, 50, 0.16);
+}
+
+:where(html[data-theme="dark"][data-palette="graphite"]) .ruler-coordinate-field {
+  background: rgba(255, 255, 255, 0.96);
+  border: 1.5px solid #4caf50;
+  box-shadow: 0 1px 4px rgba(46, 125, 50, 0.18);
+}
+
+:where(html[data-theme="dark"][data-palette="graphite"]) .ruler-coordinate-field .corner-ruler-mode-toggle {
+  border: 0;
+  border-right: 1px solid rgba(129, 199, 132, 0.8);
+  box-shadow: none;
+}
+
+:where(html[data-theme="dark"][data-palette="graphite"]) .ruler-coordinate-field .ruler-coordinate-badge {
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+:where(html[data-theme="dark"][data-palette="graphite"]) .corner-ruler-occlude-toggle {
+  color: #595959;
+  background: rgba(255, 255, 255, 0.96);
+  border-color: rgba(182, 97, 8, 0.45);
+}
+
+:where(html[data-theme="dark"][data-palette="graphite"]) .corner-ruler-occlude-toggle.active {
+  color: #b66108;
 }
 
 :where(html[data-theme="dark"][data-palette="graphite"]) .corner-ruler-mode-toggle:hover {
@@ -5394,6 +5473,37 @@ html[data-theme="dark"]:where([data-palette="graphite"]) .support-nudge-close:ho
   background: #2d2d2d;
 }
 
+html[data-theme="dark"]:where([data-palette="graphite"]) .storage-notice {
+  background: #272727;
+  border-color: #d9863a;
+}
+
+html[data-theme="dark"]:where([data-palette="graphite"]) .storage-notice-text strong {
+  color: #eaeaea;
+}
+
+html[data-theme="dark"]:where([data-palette="graphite"]) .storage-notice-text span {
+  color: #cccccc;
+}
+
+html[data-theme="dark"]:where([data-palette="graphite"]) .storage-notice-button.secondary {
+  color: #eaeaea;
+  background: #272727;
+  box-shadow: inset 0 0 0 2px #d9863a;
+}
+
+html[data-theme="dark"]:where([data-palette="graphite"]) .storage-notice-button.secondary:hover {
+  background: #353535;
+}
+
+html[data-theme="dark"]:where([data-palette="graphite"]) .storage-notice-help {
+  color: #f3a452;
+}
+
+html[data-theme="dark"]:where([data-palette="graphite"]) .storage-notice-help:hover {
+  color: #eaeaea;
+}
+
 html[data-theme="dark"]:where([data-palette="graphite"]) .install-app-hint-icon {
   color: #f3a452;
   background: #2d2d2d;
@@ -6707,13 +6817,13 @@ html[data-theme="dark"]:where([data-palette="graphite"]) .shortcuts-or {
   color: #787878;
 }
 
-@media (max-width: 1953px) {
+@media (max-width: 1990px) {
   :root:where([data-theme="dark"][data-palette="graphite"]) {
     --toolbar-icon-size: calc(37px * var(--toolbar-scale));
   }
 }
 
-@media (max-width: 1657px) {
+@media (max-width: 1688px) {
   :root:where([data-theme="dark"][data-palette="graphite"]) {
     --toolbar-icon-size: calc(34px * var(--toolbar-scale));
   }

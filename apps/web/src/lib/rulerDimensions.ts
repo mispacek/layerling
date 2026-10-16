@@ -315,18 +315,17 @@ export function computeCornerRulerRelativeCoordinates(
   const xEndpointOnAxis = rulerCorner.clone().addScaledVector(axisX, x);
   const zEndpointOnAxis = rulerCorner.clone().addScaledVector(axisZ, z);
 
+  // The guide lines run along the floor - the plane the ruler lies in - to the point below (or beside) the body
+  // that the numbers count to; the height has its own arrow (DrJones, forum).
   const xTargetPoint = rulerCorner
     .clone()
     .addScaledVector(axisX, x)
-    .addScaledVector(axisZ, z)
-    .addScaledVector(axisY, elevation);
+    .addScaledVector(axisZ, z);
 
   const zTargetPoint = xTargetPoint.clone();
 
-  const elevationBasePoint = rulerCorner
-    .clone()
-    .addScaledVector(axisX, max.x)
-    .addScaledVector(axisZ, modes.z === "midpoint" ? z : min.z);
+  // The height arrow stands where the two guide lines meet, not at a corner of its own (DrJones, forum).
+  const elevationBasePoint = xTargetPoint.clone();
 
   const elevationTargetPoint = elevationBasePoint
     .clone()

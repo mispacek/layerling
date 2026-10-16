@@ -85,7 +85,7 @@ Pro přiložení dvou dílů vyberte pohyblivý díl, spusťte {{ui:editor.tool.
 ![Opakování po kružnici nejprve zobrazuje náhled kopií.](shot:pattern-tool)
 
 - **{{ui:array.mode.row}}:** stejné rozestupy podél X, Y a Z přes {{ui:array.spacingX}}, {{ui:array.spacingY}} a {{ui:array.spacingZ}}. Jedna nenulová osa tvoří přímou řadu, více os šikmou řadu nebo schodiště. Záporný rozestup obrátí směr.
-- **{{ui:array.mode.circle}}:** rozmístění kolem středu s počtem {{ui:array.count}} a úhlem {{ui:array.angle}}, pro celý obvod 360°. Můžete zapnout společné natáčení kopií. {{ui:array.rise}} zvedá každou další kopii pro šroubovici, {{ui:array.radiusChange}} mění poloměr pro rovinnou spirálu. Kombinací vznikne kuželová spirála.
+- **{{ui:array.mode.circle}}:** rozmístění kolem středu s počtem {{ui:array.count}} a úhlem {{ui:array.angle}}, pro celý obvod 360°. Můžete zapnout společné natáčení kopií. {{ui:array.rise}} zvedá každou další kopii pro šroubovici, {{ui:array.radiusChange}} mění poloměr pro rovinnou spirálu. Kombinací vznikne kuželová spirála. Spirála udělá nejvýš jeden závit: úhel nad 360° se počítá jako celý kruh a kopií je nejvýš 100.
 
 Tip: nastavte nejprve {{ui:editor.tool.rotationPivot}} na plochu. Střed kružnice pak bude přesně tam.
 
@@ -112,6 +112,23 @@ Kopie jsou nejprve pouze náhled. Vytvoří je až {{ui:array.apply}}. Výřezy 
 Výřezy zůstávají běžnými tvary sloučenými s tělesem jako po {{ui:editor.tool.group}}. {{ui:editor.tool.ungroup}} je uvolní pro samostatný posun, změnu nebo smazání. Vše je jediný krok {{ui:editor.tool.undo}}. Najednou lze vytvořit nejvýše 400 otvorů; při překročení zvětšete otvory nebo rozteč.
 
 AI může provést totéž přes `layerling_perforate_face`, viz [Modelování s AI](chapter:ai-with-mcp).
+
+## Vysunutí plochy ven nebo dovnitř
+
+Pro zesílení stěny, vyvýšenou plošku nebo vyříznutou kapsu pracuje nástroj {{ui:faceTool.title}} s jednou rovinnou plochou. Funguje i u importovaného STL, které nemá náčrt ke změně. Vyberte právě jedno těleso a spusťte {{ui:faceTool.title}} v {{ui:editor.group.modify}} vedle rastru otvorů, pravým tlačítkem nebo vyhledáváním [[Ctrl]]+[[K]].
+
+1. Klikněte na rovinnou plochu tělesa. Stejně jako u rastru otvorů se použije celá souvislá rovinná oblast; oblá plocha není podporovaná.
+2. V okně nastavte:
+   - **{{ui:faceTool.direction}}:** {{ui:faceTool.direction.out}} pro materiál na ploše, nebo {{ui:faceTool.direction.in}} pro kapsu vyříznutou do ní. Kapsa nejde hlouběji než těleso za plochou; u dutého tělesa může přesto dosáhnout do dutiny.
+   - **{{ui:faceTool.inset}}:** jak daleko zůstane nový obrys uvnitř okraje plochy. Směrem ven se při 0 vezme celá plocha, tak se stěna zesílí. Otvory v ploše se zvětší o stejnou hodnotu.
+   - **{{ui:faceTool.radius}}:** zaoblí každý roh obrysu, i vnitřní, takže ostrý hrot skončí obloukem. Zářez užší než dvojnásobek poloměru se uzavře a část plochy užší než dvojnásobek odsazení a poloměru dohromady odpadne.
+   - **{{ui:faceTool.depth}}:** jak daleko nový díl vystoupí z plochy, nebo jak hluboká bude kapsa.
+3. Výsledek se hned zobrazí jako náhled a sleduje každou hodnotu. {{ui:faceTool.repick}} vybere jinou plochu, [[Esc]] nástroj zavře.
+4. Teprve {{ui:faceTool.apply}} díl vytvoří.
+
+Nástroj přidá běžné těleso z náčrtu sloučené s tělesem; nic se nezapéká. {{ui:group.edit}} otevře sloučení a {{ui:inspector.editSketch}} u nového dílu ukáže obrys, ze kterého vychází. Na horní nebo spodní ploše jednoduchého tělesa z náčrtu - jedna oblast, nesloučené, nezrcadlené, bez zúžení, zkroucení a naklonění, bez obrysového pásu, kroužku na klíče, zkosení či zaoblení - je to vlastní obrys tělesa, při stavbě odsazený dovnitř, takže jeho čáry a oblouky zůstanou přesné všude, kde je CAD jádro dokáže odsadit, pro nástroje hran a export STEP. Při pozdější změně velikosti si díl odsazení ponechá. Na každé jiné ploše, i u importované sítě, sleduje obrys trojúhelníky plochy a křivka se skládá z krátkých rovných úseků. Vše je jediný krok {{ui:editor.tool.undo}}. Odsazení nebo poloměr později změníte tak, že krok vrátíte zpět a nástroj použijete znovu. Horní hranu potom zaoblíte nástrojem {{ui:editor.tool.fillet}} s volbou {{ui:edge.topEdges}} na sloučení jako posledním krokem: jako každá úprava hran sloučení z něj udělá jedno těleso.
+
+AI může provést totéž přes `layerling_push_face`, viz [Modelování s AI](chapter:ai-with-mcp).
 
 ## Současná změna více dílů
 

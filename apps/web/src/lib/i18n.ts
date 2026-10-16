@@ -81,12 +81,14 @@ export function createCatalogueStore(
 /** Fetching a further language: one line per language that is not built in, `() => import("@/lib/messages.xx").then((module) => module.MESSAGES_XX)`. */
 const LOADERS: Partial<Record<Language, CatalogueLoader>> = {
   nl: () => import("@/lib/messages.nl").then((module) => module.MESSAGES_NL),
+  da: () => import("@/lib/messages.da").then((module) => module.MESSAGES_DA),
   fr: () => import("@/lib/messages.fr").then((module) => module.MESSAGES_FR),
   // Polish is a separate chunk: only browsers that pick Polish download it.
   pl: () => import("@/lib/messages.pl").then((module) => module.MESSAGES_PL),
   // Russian is a separate chunk as well: the fork adds it, the author has no Russian.
   ru: () => import("@/lib/messages.ru").then((module) => module.MESSAGES_RU),
   sl: () => import("@/lib/messages.sl").then((module) => module.MESSAGES_SL),
+  hu: () => import("@/lib/messages.hu").then((module) => module.MESSAGES_HU),
 };
 
 const catalogues = createCatalogueStore({ en: MESSAGES_EN, de: MESSAGES_DE, cs: MESSAGES_CS }, LOADERS);

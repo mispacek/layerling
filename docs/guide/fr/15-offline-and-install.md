@@ -26,7 +26,7 @@ Lorsque layerling est ouvert dans plusieurs onglets, ils se surveillent : si un 
 
 ## Langue et apparence
 
-Vous définissez la langue en haut à droite, allemand ou anglais. La palette de couleurs à côté propose {{ui:theme.short.system}} (suit le système d'exploitation), {{ui:theme.short.light}}, {{ui:theme.short.dark}} et {{ui:theme.short.graphite}}, un gris foncé neutre.
+Vous choisissez la langue en haut à droite, dans la liste des langues. La palette de couleurs à côté propose {{ui:theme.short.system}} (suit le système d'exploitation), {{ui:theme.short.light}}, {{ui:theme.short.dark}} et {{ui:theme.short.graphite}}, un gris foncé neutre.
 
 ## Exécutez-le vous-même
 

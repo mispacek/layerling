@@ -1414,6 +1414,111 @@ html[data-theme="dark"] .dashboard-trademark {
   font-weight: 800;
 }
 
+/* The designs live in this browser and nowhere else: said in bold, and it stays. */
+.storage-notice {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: -8px 0 22px;
+  padding: 14px 14px 14px 16px;
+  background: #fff1dc;
+  border: 2px solid #e08a2c;
+  border-radius: 10px;
+}
+
+.storage-notice-icon {
+  display: grid;
+  flex: none;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  color: #ffffff;
+  background: #d9730d;
+  border-radius: 10px;
+}
+
+.storage-notice-text {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  gap: 3px;
+}
+
+.storage-notice-text strong {
+  color: #4a2f10;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.storage-notice-text span {
+  color: #5e4630;
+  font-size: 13.5px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.storage-notice-button {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 15px;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 800;
+  background: #bf6508;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.storage-notice-button:hover {
+  background: #a95805;
+}
+
+/* "Back up all" and "Restore backup" side by side; the restore one is the quieter of the two. */
+.storage-notice-actions {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.storage-notice-button.secondary {
+  color: #8a4a05;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 2px #bf6508;
+}
+
+.storage-notice-button.secondary:hover {
+  background: #ffe9cc;
+}
+
+.storage-notice-help {
+  display: inline-flex;
+  vertical-align: text-bottom;
+  color: #8a5312;
+}
+
+.storage-notice-help:hover {
+  color: #4a2f10;
+}
+
+@media (max-width: 560px) {
+  .storage-notice {
+    flex-wrap: wrap;
+  }
+
+  .storage-notice-actions {
+    width: 100%;
+  }
+
+  .storage-notice-button {
+    flex: 1 1 140px;
+    justify-content: center;
+  }
+}
+
 /* Installed as an app, layerling also starts offline - a quiet strip under the
    start tiles says so, with the browser's own install button where it has one. */
 .install-app-hint {
@@ -6550,6 +6655,12 @@ html[data-theme="dark"] .sketch-image-hint {
   vector-effect: non-scaling-stroke;
 }
 
+.sketch-curve-handles circle.sketch-handle-selected {
+  fill: #f08036;
+  stroke: #ffffff;
+  stroke-width: 3;
+}
+
 .sketch-drag-handles circle,
 .sketch-curve-handles circle {
   fill: #ffffff;
@@ -8320,6 +8431,59 @@ html[data-theme="dark"] .inspector-bundle-note {
   width: 18px;
   height: 18px;
   z-index: 5;
+}
+
+/* The switch sits in the same frame as its number, the number's left edge (forum). */
+.ruler-coordinate-field {
+  position: absolute;
+  z-index: 4;
+  display: flex;
+  align-items: stretch;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1.5px solid #4caf50;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(46, 125, 50, 0.18);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.ruler-coordinate-field .corner-ruler-mode-toggle {
+  position: static;
+  width: 22px;
+  height: auto;
+  flex: none;
+  border: 0;
+  border-right: 1px solid rgba(129, 199, 132, 0.8);
+  border-radius: 2px 0 0 2px;
+  box-shadow: none;
+  transform: none;
+  pointer-events: all;
+}
+
+.ruler-coordinate-field .ruler-coordinate-badge {
+  position: static;
+  min-width: 40px;
+  border: 0;
+  border-radius: 0 2px 2px 0;
+  box-shadow: none;
+  background: transparent;
+  transform: none;
+}
+
+/* The ruler's lines stay in view over bodies (the eye is open) or hide behind them. */
+.corner-ruler-occlude-toggle {
+  color: #6b5b46;
+  background: rgba(255, 255, 255, 0.96);
+  border-color: rgba(182, 97, 8, 0.45);
+}
+
+.corner-ruler-occlude-toggle.active {
+  color: #b66108;
+}
+
+.corner-ruler-tick-label.hidden,
+.ruler-dimension-label.hidden {
+  opacity: 0.2;
 }
 
 .corner-ruler-mode-toggle:hover {
@@ -12713,6 +12877,37 @@ html[data-theme="dark"] .support-nudge-close:hover {
   background: #3a2c16;
 }
 
+html[data-theme="dark"] .storage-notice {
+  background: #33230f;
+  border-color: #d9863a;
+}
+
+html[data-theme="dark"] .storage-notice-text strong {
+  color: #fbeed9;
+}
+
+html[data-theme="dark"] .storage-notice-text span {
+  color: #e2cfb6;
+}
+
+html[data-theme="dark"] .storage-notice-button.secondary {
+  color: #fbeed9;
+  background: #33230f;
+  box-shadow: inset 0 0 0 2px #d9863a;
+}
+
+html[data-theme="dark"] .storage-notice-button.secondary:hover {
+  background: #4a3318;
+}
+
+html[data-theme="dark"] .storage-notice-help {
+  color: #f3a452;
+}
+
+html[data-theme="dark"] .storage-notice-help:hover {
+  color: #fbeed9;
+}
+
 html[data-theme="dark"] .install-app-hint-icon {
   color: #f3a452;
   background: #3a2c16;
@@ -14219,7 +14414,7 @@ html[data-theme="dark"] .shortcuts-or {
    Gemessen (mit Lupen-, Vereinfachen- und Verlaufsknopf): in voller Groesse
    braucht das Band 1818 px, in der mittleren Stufe 1540 px, in der kleinen
    1415 px. Jeder neue Knopf verschiebt alle drei Schwellen: neu messen. */
-@media (max-width: 1953px) {
+@media (max-width: 1990px) {
   :root {
     --toolbar-icon-size: calc(37px * var(--toolbar-scale));
   }
@@ -14240,7 +14435,7 @@ html[data-theme="dark"] .shortcuts-or {
   }
 }
 
-@media (max-width: 1657px) {
+@media (max-width: 1688px) {
   :root {
     --toolbar-icon-size: calc(34px * var(--toolbar-scale));
   }
@@ -14261,7 +14456,7 @@ html[data-theme="dark"] .shortcuts-or {
    hides tools and cuts off every menu that hangs beneath it. The bar grows,
    and the editor passes its real height on (see --editor-toolbar-height).
    A new button in the bar moves both thresholds up: measure again. */
-@media (max-width: 1523px) {
+@media (max-width: 1544px) {
   .toolbar-mode-content,
   .sketch-toolbar-ribbon {
     flex-wrap: wrap;

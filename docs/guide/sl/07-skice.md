@@ -7,10 +7,11 @@ Vsega ni mogoče sestaviti iz osnovnih oblik. Za dele z lastnim obrisom, na prim
 
 ## Začetek skice
 
-Zgoraj preklopi z {{ui:editor.modeGeometry}} na {{ui:editor.modeSketch}}. V skupini {{ui:sketch.group.create}} traku stojita drug ob drugem dva gumba za to, kaj naj postane obris:
+Zgoraj preklopi z {{ui:editor.modeGeometry}} na {{ui:editor.modeSketch}}. V skupini {{ui:sketch.group.create}} traku stojijo drug ob drugem trije gumbi za to, kaj naj postane obris:
 
 - **{{ui:sketch.extrude}}:** Obris se potegne v višino, kot modelček za piškote.
 - **{{ui:sketch.revolve}}:** Obris se zavrti okoli osi, kot na stružnici. Tako nastanejo vaze, kozarci, stožci in vse, kar je okroglo.
+- **{{ui:sketch.sweep}}:** Obris se povleče vzdolž poti: kabelski kanal z ovinkom, cev, obroč okoli oblike. Glej spodaj Vleka vzdolž poti.
 
 Potem urejevalnik pokaže list z mrežo. To je tvoja risalna površina.
 
@@ -30,6 +31,8 @@ Telo nastane samo iz **sklenjenega** obrisa.
 
 ![Obris v obliki črke L. Ob izbranem ogliščku zgoraj levo stojita dolžini obeh črt v milimetrih in kot med njima v stopinjah.](shot:sketch-outline)
 
+Tipke [[1]] do [[4]] izberejo orodja za risanje v vrstnem redu vrstice: {{ui:sketch.line}}, {{ui:sketch.bezier}}, {{ui:sketch.smooth}} in {{ui:sketch.refine}}. Delujejo, dokler se ne riše črta; med risanjem črte so številke njena dolžina (glej spodaj).
+
 ## Črte po meri
 
 Ko si z {{ui:sketch.line}} ali {{ui:sketch.smooth}} postavil prvo točko, preprosto vpiši številko: ob črti se odpreta dve polji, {{ui:sketch.typedLength}} v milimetrih in {{ui:sketch.typedAngle}} v stopinjah. S [[<]] ali [[Tab]] preskočiš na kot, tako da »50<30« da 50 mm dolgo črto pod 30°, kot v AutoCADu. [[Enter]] postavi točko in takoj vpišeš naslednjo črto; [[Esc]] zapre polji, ne da bi končal črtni potek.
@@ -38,7 +41,7 @@ Kot šteje od desne proti nasprotni smeri urnega kazalca: 0° v desno, 90° navz
 
 ## Ukrivljanje ravne stranice
 
-Izberi ravno črto in v vrstici, ki se pokaže, klikni {{ui:sketch.curveLine}}: stranica se zaobli v krivuljo kot v Tinkercadu in pokaže svoji dve ročici. Povleci ju, da oblikuješ krivuljo; dlje kot ročica štrli, močnejši je ovinek. {{ui:sketch.straightenLine}} stranico spet naredi ravno. Izbrano točko lahko z {{ui:sketch.smooth}} zaobliš: dobi lastni ročici, črti ob njej pa postaneta krivulji.
+Izberi ravno črto in v vrstici, ki se pokaže, klikni {{ui:sketch.curveLine}}: stranica se zaobli v krivuljo kot v Tinkercadu in pokaže svoji dve ročici. Povleci ju, da oblikuješ krivuljo; dlje kot ročica štrli, močnejši je ovinek. {{ui:sketch.straightenLine}} stranico spet naredi ravno. Izbrano točko lahko z {{ui:sketch.smooth}} zaobliš: dobi lastni ročici, črti ob njej pa postaneta krivulji. Klikni ročaj in zasveti: puščične tipke ga nato premaknejo za en korak mreže, s [[Shift]] za večji korak, tako da krivuljo nastaviš natančno.
 
 ![Spodnja stranica obrisa v obliki L, upognjena v krivuljo, z dvema ročicama na koncih.](shot:sketch-curve)
 
@@ -82,6 +85,18 @@ Z {{ui:inspector.editSketch}} se kadarkoli vrneš v skico, da jo spremeniš. Dvo
 Pri vrtenju narišeš pol preseka **levo od osi**, ki je vrisana v skici. Poleg vidiš 3D-predogled vrtenja. Takoj pokaže, kako telo izgleda. Obris mora biti sklenjen, ali pa odprto črto zgradiš kot potezo, glej spodaj. Na koncu klikneš {{ui:sketch.finishRevolve}}.
 
 Zavrteno telo je natančno telo kot izvlečeno: sprejme posnetja in zaokrožitve ter ga lahko izdolbeš, za kozarec ali vazo. Telo, ki je bilo zavrteno s starejšo različico programa layerling, je mreža; odpri {{ui:inspector.editSketch}} in ga znova zaključi, pa bo natančno. Obris, ki sega čez os, ni mogoče zgraditi natančno in postane kot doslej mreža.
+
+## Vleka vzdolž poti
+
+{{ui:sketch.sweep}} povleče obris vzdolž poti: kabelski kanal, ki zavije za vogal, cev, zaščita okoli jermena, obroč okoli šestkotnika. Gumb stoji ob {{ui:sketch.extrude}} in {{ui:sketch.revolve}} v skupini {{ui:sketch.group.create}}.
+
+Na isti list narišeš dve stvari:
+
+- **Prerez** kot sklenjen obris, kot običajno. Nariši ga tako, kot bi ga videl, če gledaš vzdolž poti z njenega začetka: počez čez pot sta v skici levo in desno, zgoraj je zgoraj na končnem telesu. Votel prerez, kanal ali cev, je obris z drugim v njem. Prerez je počez na sredini poti, telo pa stoji z najnižjo točko prereza na ravnini skice.
+
+- **Pot** kot {{ui:sketch.construction}}: vklopi jo in riši črte ali krivulje, eno samo verigo, odprto ali sklenjeno (sklenjena veriga da obroč). Pot leži ravno v ravnini skice.
+
+Prerez nariši ob tisti konec poti, kjer naj se začne; pot se začne na koncu, ki mu je najbližje. Nato klikni {{ui:sketch.finishSweep}}. Vogal iz ravnih kosov postane zareza na gerung, krivulja ostane gladka, prerez pa ostane pokonci po vsej poti. Telo je natančno kot potegnjeno: zaobljenje, posnetje roba in izvoz STEP delujejo. Če manjka sklenjen obris ali pot, ali je več ločenih poti, layerling to pove. Z {{ui:inspector.editSketch}} se vrneš v skico in spremeniš prerez ali pot.
 
 ## Gradnja kot kontura
 

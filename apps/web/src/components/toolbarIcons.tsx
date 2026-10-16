@@ -303,6 +303,19 @@ export function ToolbarHolePatternIcon(props: IconProps) {
   );
 }
 
+/** A slab with a pad set in from its edges standing on top, and an arrow out of the face: the face tool. */
+export function ToolbarFaceToolIcon(props: IconProps) {
+  return (
+    <ToolbarVectorIcon {...props}>
+      <path d="M6 28h36v13H6Z" {...SOLID} />
+      <path d="M6 28h36v13H6Z" />
+      <rect x="13" y="18" width="22" height="10" rx="3" {...SOLID} />
+      <rect x="13" y="18" width="22" height="10" rx="3" />
+      <path d="M24 14V4M19 9l5-5 5 5" />
+    </ToolbarVectorIcon>
+  );
+}
+
 /** A dashed line with a dot at each end: a construction line in a sketch (#229). */
 export function ToolbarConstructionLineIcon(props: IconProps) {
   return (

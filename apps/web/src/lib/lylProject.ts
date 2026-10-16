@@ -15,6 +15,7 @@ import { importedShapeFromStl } from "@/lib/stlImport";
 import { importedShapeFromSvg } from "@/lib/svgImport";
 import { importedShapeFrom3mf } from "@/lib/threemfImport";
 import { normalizeDesignView, readDesignView, type DesignView } from "@/lib/designView";
+import { isSketchKeyring } from "@/lib/sketchKeyring";
 import { isThreadProfile } from "@/lib/threadProfiles";
 import { normalizeSnapGrid, normalizeWorkspaceSettings } from "@/lib/workplaneSettings";
 import type { CadDisplayEdge, GridSize, ProjectAsset, ProjectAssetSourceFormat, SketchOperation, SketchRevolveSettings, WorkplaneNote, WorkplaneShape, WorkplaneWorkspaceSettings } from "@/types/layerling";
@@ -32,7 +33,7 @@ function knownSchema(schema: unknown) {
 export const LYL_FORMAT_VERSION = 2;
 export const LYL_MINIMUM_READER_VERSION = 2;
 export const LYL_OLDEST_READABLE_FORMAT_VERSION = 1;
-export const LYL_CREATED_WITH_VERSION = "1.76.0";
+export const LYL_CREATED_WITH_VERSION = "1.81.0";
 export const LYL_MEDIA_TYPE = "application/vnd.layerling.project+zip";
 
 export const LYL_LIMITS = {
@@ -50,11 +51,11 @@ export const LYL_LIMITS = {
 
 const SHAPE_KINDS = new Set([
   "box", "roundedBox", "cylinder", "slot", "ellipse", "sphere", "sketch", "scribble", "cone", "pyramid", "roof", "text", "roundRoof",
-  "halfSphere", "torus", "tube", "bentTube", "star", "heart", "crescent", "gear", "honeycomb", "hinge", "knurl", "dovetail", "counterbore", "countersink", "teardrop", "loft", "thread", "spring", "ring", "wedge", "polygon", "icosahedron", "ruler", "mesh",
+  "halfSphere", "torus", "tube", "bentTube", "star", "heart", "crescent", "gear", "honeycomb", "hinge", "knurl", "dovetail", "counterbore", "countersink", "doubleCountersink", "teardrop", "loft", "thread", "spring", "ring", "wedge", "polygon", "icosahedron", "ruler", "mesh",
 ]);
 
 const FEATURE_TYPES = new Set([
-  "group", "boolean-subtraction", "boolean-intersection", "mirror", "sketch-extrusion", "sketch-revolve", "fillet", "chamfer", "shell",
+  "group", "boolean-subtraction", "boolean-intersection", "mirror", "sketch-extrusion", "sketch-revolve", "sketch-sweep", "fillet", "chamfer", "shell",
 ]);
 
 type LylAssetKind = "source" | "derived-mesh" | "brep" | "image" | "display-edges";
@@ -731,6 +732,8 @@ async function serializeShapeNode(
       ...(images.length ? { images } : {}),
       ...(sketchProfile.stroke ? { stroke: sketchProfile.stroke } : {}),
       ...(sketchProfile.silhouette ? { silhouette: true } : {}),
+      ...(sketchProfile.keyring ? { keyring: sketchProfile.keyring } : {}),
+      ...(sketchProfile.inset ? { inset: sketchProfile.inset } : {}),
     };
   }
 
@@ -855,8 +858,8 @@ function activeProjectIndexes(state: LylStateV1) {
     (node.groupedShapeNodeIds ?? []).forEach(visit);
     let previous: string | undefined;
     if (node.definition.sketchProfile) {
-      const operation = node.definition.sketchOperation === "revolve" ? "revolve" : "extrude";
-      const featureType = operation === "revolve" ? "sketch-revolve" : "sketch-extrusion";
+      const operation = node.definition.sketchOperation === "revolve" ? "revolve" : node.definition.sketchOperation === "sweep" ? "sweep" : "extrude";
+      const featureType = operation === "revolve" ? "sketch-revolve" : operation === "sweep" ? "sketch-sweep" : "sketch-extrusion";
       const featureId = `feature/${safeNodeToken(node.nodeId)}/${featureType}`;
       features.push({
         id: featureId,
@@ -866,7 +869,9 @@ function activeProjectIndexes(state: LylStateV1) {
         dependsOnFeatureIds: [],
         parameters: operation === "revolve"
           ? { ...(node.definition.sketchRevolve as Record<string, unknown> | undefined), axis: "vertical-sketch-axis", mode: "create" }
-          : { depth: node.definition.height, direction: "positive-y", mode: "create" },
+          : operation === "sweep"
+            ? { path: "construction-line", mode: "create" }
+            : { depth: node.definition.height, direction: "positive-y", mode: "create" },
       });
       sketches.push({
         id: `sketch/${safeNodeToken(node.objectId)}`,
@@ -1176,6 +1181,13 @@ function validateSketchProfile(value: unknown, label: string) {
     if (segment.construction !== undefined && typeof segment.construction !== "boolean") throw new Error(`${label}.segments[${index}].construction must be true or false`);
   });
   if (profile.silhouette !== undefined && typeof profile.silhouette !== "boolean") throw new Error(`${label}.silhouette must be true or false`);
+  if (profile.keyring !== undefined && !isSketchKeyring(profile.keyring)) throw new Error(`${label}.keyring must be { side, diameter, x, z }`);
+  if (profile.inset !== undefined) {
+    const inset = objectRecord(profile.inset, `${label}.inset`);
+    const distance = finiteNumber(inset.distance, `${label}.inset.distance`);
+    const radius = finiteNumber(inset.radius, `${label}.inset.radius`);
+    if (distance < 0 || radius < 0 || distance > 1e6 || radius > 1e6) throw new Error(`${label}.inset is outside the supported range`);
+  }
 }
 
 const BENT_TUBE_PROFILE_VALUES = new Set(["round", "square", "hexagon", "octagon"]);
@@ -1255,6 +1267,9 @@ function validateShapeDefinition(definition: Record<string, unknown>, label: str
   if (definition.textSilhouette !== undefined && typeof definition.textSilhouette !== "boolean") {
     throw new Error(`${label}.textSilhouette must be true or false`);
   }
+  if (definition.textStretch !== undefined && typeof definition.textStretch !== "boolean") {
+    throw new Error(`${label}.textStretch must be true or false`);
+  }
   // The top edge of a text's letters (#225): round or chamfer, with a size.
   if (definition.textEdge !== undefined && !normalizeTextEdge(definition.textEdge)) {
     throw new Error(`${label}.textEdge must be a round or chamfer edge with a size`);
@@ -1290,7 +1305,7 @@ function validateShapeDefinition(definition: Record<string, unknown>, label: str
     }
   }
   if (definition.sketchProfile) validateSketchProfile(definition.sketchProfile, `${label}.sketchProfile`);
-  if (definition.sketchOperation !== undefined && definition.sketchOperation !== "extrude" && definition.sketchOperation !== "revolve") {
+  if (definition.sketchOperation !== undefined && definition.sketchOperation !== "extrude" && definition.sketchOperation !== "revolve" && definition.sketchOperation !== "sweep") {
     throw new Error(`${label}.sketchOperation is invalid`);
   }
   if (definition.sketchRevolve !== undefined) {
@@ -1486,7 +1501,7 @@ function validateShapeDefinition(definition: Record<string, unknown>, label: str
       }
     }
   }
-  if (kind === "counterbore" || kind === "countersink") {
+  if (kind === "counterbore" || kind === "countersink" || kind === "doubleCountersink") {
     // Lenient on purpose: the geometry clamps the values itself; only nonsense is refused.
     for (const key of ["screwHoleShaft", "screwHoleHeadDepth", "screwHoleAngle"] as const) {
       if (definition[key] === undefined) continue;

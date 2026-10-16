@@ -58,6 +58,8 @@ L'IA fonctionne avec les mêmes fonctions que vous, via le même chemin que votr
 | `layerling_lay_flat` | pose un objet avec une face sur la plaque |
 | `layerling_place_on_face` | pose des objets sur une face d'une autre, également inclinée, comme la touche C |
 | `layerling_perforate_face` | découpe un motif de trous dans une face plate ; les trous restent groupés avec le corps |
+| `layerling_sweep_sketch` | tire une section rectangulaire ou ronde le long d'un chemin de points, comme un seul corps exact ; un chemin fermé donne un anneau |
+| `layerling_push_face` | tire une face plane vers l'extérieur ou y creuse une poche, avec un retrait depuis le bord et un rayon des coins ; la nouvelle pièce est un corps d'esquisse regroupé avec le corps |
 | `layerling_mate_faces` | amène la face d'un objet contre la face d'un autre, face à face ou à fleur |
 | `layerling_open_group` | ouvre un groupe pour que ses parties puissent être modifiées une par une, également un groupe à l'intérieur d'un groupe ouvert |
 | `layerling_close_group` | le referme ("Terminé") ou annule |
@@ -93,6 +95,7 @@ L'IA fonctionne avec les mêmes fonctions que vous, via le même chemin que votr
 | `layerling_set_history_view` | revient sur un état antérieur du projet, comme la vue Historique (la conception réelle reste intacte ; les outils de changement attendent qu'il soit fermé) |
 | `layerling_export_section_svg` | renvoie les contours sur un plan de coupe au format SVG à 1:1, à partir des mêmes corps que l'export |
 | `layerling_export_drawing` | réalise le dessin d'atelier de l'export "2D": trois vues au 1:1 sur une feuille ISO avec les dimensions hors tout et un tableau des alésages ronds, en texte SVG ou PDF |
+| `layerling_export_mesh` | écrit le fichier de la fenêtre d'export en STL, 3MF ou OBJ, à partir des mêmes corps ; vers un chemin de cet ordinateur ou en base64 |
 | `layerling_set_workplane` | place le plan de travail sur un côté d'un corps ou à l'arrière de la plaque de base, et le cache ou l'affiche |
 | `layerling_capture_image` | prend une photo de la vue : de face, de dessus, de côté, en diagonale depuis un coin et plus encore |
 

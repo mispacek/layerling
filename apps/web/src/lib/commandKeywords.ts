@@ -28,6 +28,7 @@ export const COMMAND_KEYWORDS: Readonly<Record<string, readonly string[]>> = {
   pivot: ["pivot", "rotation point", "drehpunkt", "drehen", "rotate"],
   scalePercent: ["scale", "percent", "resize", "bigger", "smaller", "skalieren", "prozent", "vergrößern", "vergroessern", "verkleinern", "größe"],
   holePattern: ["hole pattern", "perforate", "perforation", "perforated", "holes", "vent", "ventilation", "grille", "honeycomb", "hexagon holes", "slots", "lochmuster", "lochraster", "perforieren", "locher", "löcher", "loecher", "lüftung", "lueftung", "gitter", "wabe", "langloch", "luftschlitze"],
+  faceTool: ["face", "push", "pull", "push pull", "extrude", "pad", "boss", "pocket", "recess", "thicken", "thicker", "wall", "inset", "flaeche", "fläche", "herausziehen", "hineinziehen", "tasche", "vertiefung", "aufdicken", "verdicken", "erhebung"],
   array: ["array", "pattern", "repeat", "muster", "reihe", "kreis", "wiederholen", "vervielfachen"],
   split: ["split", "cut", "slice", "teilen", "schneiden", "trennen", "saegen", "sägen", "ebene"],
   snap: ["snap", "grid", "raster", "einrasten", "gitter"],
@@ -59,6 +60,7 @@ export const COMMAND_KEYWORDS: Readonly<Record<string, readonly string[]>> = {
   "sketch-cancel": ["cancel", "abort", "abbrechen", "verwerfen"],
   "sketch-extrude": ["extrude", "pull", "push", "extrudieren", "ziehen", "hochziehen", "aufziehen"],
   "sketch-revolve": ["revolve", "lathe", "rotate", "drehkoerper", "drehkörper", "rotieren"],
+  "sketch-sweep": ["sweep", "extrude along path", "path", "pipe", "conduit", "pfad", "entlang", "rohr", "leitung", "kabelkanal", "sweepen"],
   "sketch-edit": ["edit sketch", "skizze bearbeiten", "nachbearbeiten"],
 };
 

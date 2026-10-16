@@ -198,6 +198,31 @@ describe("editor history snapshots", () => {
     expect(restored.entries[restored.index].shapes[0].x).toBe(60);
   });
 
+  it("keeps the history of a design whose last step was made on a face workplane when no workplane is given (#390)", () => {
+    const face = { origin: { x: 0, y: 20, z: 0 }, normal: { x: 0, y: 1, z: 0 }, xAxis: { x: 1, y: 0, z: 0 }, zAxis: { x: 0, y: 0, z: 1 } };
+    const entries = [
+      editorHistoryEntry([box({ x: 0 })], []),
+      editorHistoryEntry([box({ x: 5 })], [], [], face),
+    ];
+    // The start page builds its cache from a loaded design and knows no workplane.
+    const restored = hydrateEditorHistoryState([box({ x: 5 })], entries, 1);
+
+    expect(restored.entries).toHaveLength(2);
+    expect(restored.index).toBe(1);
+    expect(restored.entries[1].placementWorkplane?.origin.y).toBe(20);
+  });
+
+  it("still drops a history whose last entry belongs to another workplane than the one given", () => {
+    const face = { origin: { x: 0, y: 20, z: 0 }, normal: { x: 0, y: 1, z: 0 }, xAxis: { x: 1, y: 0, z: 0 }, zAxis: { x: 0, y: 0, z: 1 } };
+    const entries = [
+      editorHistoryEntry([box({ x: 0 })], []),
+      editorHistoryEntry([box({ x: 5 })], [], [], face),
+    ];
+    const restored = hydrateEditorHistoryState([box({ x: 5 })], entries, 1, "unlimited", [], { ...face, origin: { x: 0, y: 40, z: 0 } });
+
+    expect(restored.entries).toHaveLength(1);
+  });
+
   it("falls back to the loaded scene when persisted history is stale", () => {
     const stale = [editorHistoryEntry([box({ x: 1 })], [])];
     const restored = hydrateEditorHistoryState([box({ x: 9 })], stale, 0);

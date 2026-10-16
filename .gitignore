@@ -72,3 +72,8 @@ apps/web/public/occt/
 
 # Built Czech user guide.
 apps/web/public/prirucka/
+
+# Built Hungarian user guide.
+apps/web/public/utmutato/
+# Built Danish user guide.
+apps/web/public/vejledning/

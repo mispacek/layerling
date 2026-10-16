@@ -32,6 +32,14 @@ describe("textFonts", () => {
     }
   });
 
+  it("draws the Hungarian accented letters, ő and ű among them, in every face instead of a question mark", async () => {
+    await loadTextFonts();
+    for (const name of ["Multilanguage", "Stencil", "Sans", "Serif", "Script", "Monospace", "Rounded"]) {
+      const glyphs = textFont(name).data.glyphs as Record<string, unknown>;
+      for (const char of "áéíóöőúüűÁÉÍÓÖŐÚÜŰ") expect(glyphs[char], `${name}: ${char}`).toBeDefined();
+    }
+  });
+
   it("draws umlauts, ß, é and € in every face instead of a question mark", async () => {
     await loadTextFonts();
     for (const name of ["Multilanguage", "Stencil", "Sans", "Serif", "Script", "Monospace", "Rounded"]) {

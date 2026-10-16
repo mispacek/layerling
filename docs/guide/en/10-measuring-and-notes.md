@@ -39,6 +39,8 @@ If bodies stand at one of the arms, the framing square shows their dimensions au
 
 When you select a body, the framing square shows in green how far it is from the corner, along both arms and in height. Click a green number to type a distance, and the body moves exactly there. With several bodies selected, they count as one: the ruler measures their shared outline, and a typed value moves them all together without changing their positions relative to each other.
 
+The guide lines of the green numbers run along the floor, the plane the framing square lies in, to the point below or beside the body; the height has its own arrow. The switch of each number sits in the frame of the number. The arms and the ticks are lines in the room: a body in front of them hides them, as a real square would be hidden. The small eye below the handle switches that: with the eye struck through, bodies hide the square (the start); with the eye open, the square stays in view over everything. The numbers on the arms fade where a body stands in front of them.
+
 With the midpoint, the green numbers count to the middle of the body, in height as well. That way you place a sphere with its centre exactly 15 mm from an edge, without subtracting the radius. On a wall you place a hole 40 mm from the left and 190 mm from the top like this: select the hole, switch to midpoint, type 40 and 190. The height there counts outward from the wall.
 
 Both the tape measure and the framing square stay where they are while you sketch and come back to the 3D view. They are not saved with the design and not in the history, and they go when you reload the page.

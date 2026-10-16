@@ -71,30 +71,39 @@ export async function picturePixels(source: Blob | string): Promise<RasterPixels
 /**
  * The part of a picture that is not its background: the background is the part that takes up
  * more of the picture's edge. A black logo on white gives the dark part, a white logo on black
- * the light one. With a transparent edge, the part that has more of the picture's pixels.
+ * the light one. With a mostly transparent edge, the transparency is the background, and the part
+ * is the one that has more of the picture's pixels: a black sticker whose tail touches the border
+ * in a few pixels is still a dark shape, not a dark background (#345).
  */
 export function pictureShapePart(pixels: RasterPixels): RasterPart {
   const { width, height, data } = pixels;
   let dark = 0;
   let light = 0;
-  const count = (x: number, y: number) => {
+  let edgePixels = 0;
+  let opaqueEdgePixels = 0;
+  const count = (x: number, y: number, onEdge: boolean) => {
     const index = (y * width + x) * 4;
+    if (onEdge) edgePixels += 1;
     if (data[index + 3] < 128) return;
+    if (onEdge) opaqueEdgePixels += 1;
     const lightness = (0.2126 * data[index] + 0.7152 * data[index + 1] + 0.0722 * data[index + 2]) / 255;
     if (lightness < 0.5) dark += 1;
     else light += 1;
   };
   for (let x = 0; x < width; x += 1) {
-    count(x, 0);
-    count(x, height - 1);
+    count(x, 0, true);
+    count(x, height - 1, true);
   }
   for (let y = 1; y < height - 1; y += 1) {
-    count(0, y);
-    count(width - 1, y);
+    count(0, y, true);
+    count(width - 1, y, true);
   }
-  if (dark + light === 0) {
+  if (opaqueEdgePixels * 2 < edgePixels) {
+    // The edge is mostly transparent: that is the background, so what counts is the picture itself.
+    dark = 0;
+    light = 0;
     for (let y = 0; y < height; y += 1) {
-      for (let x = 0; x < width; x += 1) count(x, y);
+      for (let x = 0; x < width; x += 1) count(x, y, false);
     }
     return light > dark ? "light" : "dark";
   }

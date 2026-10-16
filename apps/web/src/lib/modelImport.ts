@@ -127,6 +127,7 @@ export async function importModelFiles(
           ? importedShapesFromObj(file.name, new TextDecoder().decode(bytes), prepared.mtlSources)
           : importedShapesFrom3mf(file.name, buffer);
         if ("missingMaterialColors" in colored && colored.missingMaterialColors) result.notes.push(t("status.importObjNoMtl", { name: file.name }));
+        if ("droppedVertexColors" in colored && colored.droppedVertexColors) result.notes.push(t("status.importObjVertexColors", { name: file.name }));
         if ("painted" in colored && colored.painted > 0) result.notes.push(t("status.import3mfPainted", { name: file.name }));
         if (colored.split) {
           result.shapes.push(...colored.shapes);

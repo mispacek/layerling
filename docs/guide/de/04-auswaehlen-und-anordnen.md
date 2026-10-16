@@ -85,7 +85,7 @@ Für Lochraster, Lochkreise und Zahnkränze gibt es das {{ui:editor.tool.array}}
 ![Das Muster im Modus „Kreis“: Die Kopien erscheinen zuerst als Vorschau.](shot:pattern-tool)
 
 - **{{ui:array.mode.row}}:** Die Auswahl wird mit gleichem Abstand wiederholt. Die Reihe läuft in allen drei Achsen zugleich, mit {{ui:array.spacingX}}, {{ui:array.spacingY}} und {{ui:array.spacingZ}}: Einer allein gibt eine gerade Reihe, zwei oder drei eine schräge Reihe oder eine Treppe. Ein negativer Abstand legt die Reihe in die andere Richtung.
-- **{{ui:array.mode.circle}}:** Die Auswahl wird um einen Mittelpunkt verteilt. Wie viele Kopien es gibt, stellst du bei {{ui:array.count}} ein, der {{ui:array.angle}} ist für einen vollen Kreis 360°. Stelle ein, ob sich die Kopien mitdrehen sollen. {{ui:array.rise}} hebt jede Kopie ein Stück höher als die vorige (eine Schraube oder aufsteigende Spirale), und {{ui:array.radiusChange}} rückt sie weiter vom Mittelpunkt weg oder näher heran (eine flache Spirale); zusammen ergeben sie eine kegelige Spirale.
+- **{{ui:array.mode.circle}}:** Die Auswahl wird um einen Mittelpunkt verteilt. Wie viele Kopien es gibt, stellst du bei {{ui:array.count}} ein, der {{ui:array.angle}} ist für einen vollen Kreis 360°. Stelle ein, ob sich die Kopien mitdrehen sollen. {{ui:array.rise}} hebt jede Kopie ein Stück höher als die vorige (eine Schraube oder aufsteigende Spirale), und {{ui:array.radiusChange}} rückt sie weiter vom Mittelpunkt weg oder näher heran (eine flache Spirale); zusammen ergeben sie eine kegelige Spirale. Eine Spirale macht höchstens eine Windung: Ein Winkel über 360° zählt als voller Kreis, und es gibt höchstens 100 Kopien.
 
 Tipp: Setze vorher mit {{ui:editor.tool.rotationPivot}} den Drehpunkt auf eine Fläche, dann liegt der Mittelpunkt des Kreises genau dort.
 
@@ -112,6 +112,23 @@ Für Lüftungsschlitze, Lautsprechergitter, Körbe und Gehäuse verteilt das {{u
 Die Löcher sind ganz gewöhnliche Aussparungen und mit dem Körper gruppiert, genau wie nach {{ui:editor.tool.group}}: Nichts ist eingebacken. {{ui:editor.tool.ungroup}} löst die Gruppe wieder auf und gibt jedes Loch frei, das du dann einzeln verschieben, ändern oder löschen kannst. Das Ganze ist ein Schritt für {{ui:editor.tool.undo}}. Mehr als 400 Löcher auf einmal legt das Werkzeug nicht an; dann machst du die Löcher größer oder den Abstand weiter.
 
 Eine KI kann dasselbe über die MCP-Schnittstelle tun, mit `layerling_perforate_face` (siehe das Kapitel [KI mit MCP](chapter:ki-mit-mcp)).
+
+## Eine Fläche heraus- oder hineinziehen
+
+Für eine dickere Wand, eine Erhebung auf einer Fläche oder eine hineingeschnittene Tasche arbeitet das Werkzeug {{ui:faceTool.title}} an einer ebenen Fläche. Es geht auch bei einem importierten STL, an dem es keine Skizze zu ändern gibt. Wähle genau einen Körper aus und klicke in der Gruppe {{ui:editor.group.modify}} der Werkzeugleiste auf {{ui:faceTool.title}}, gleich neben dem Lochmuster. Du kannst auch mit der rechten Maustaste auf den Körper klicken oder es mit [[Strg]]+[[K]] suchen.
+
+1. Klicke eine ebene Fläche des Körpers an. Wie beim Lochmuster zählt die ganze ebene Fläche um deinen Klick; eine gewölbte Fläche geht nicht.
+2. Im Fenster:
+   - **{{ui:faceTool.direction}}:** {{ui:faceTool.direction.out}} für Material auf der Fläche oder {{ui:faceTool.direction.in}} für eine hineingeschnittene Tasche. Eine Tasche geht nicht tiefer als der Körper hinter der Fläche; bei einem ausgehöhlten Körper kann sie trotzdem bis in den Hohlraum reichen.
+   - **{{ui:faceTool.inset}}:** wie weit der neue Umriss innerhalb der Flächenkante bleibt. Nach außen nimmt 0 die ganze Fläche, so wird eine Wand dicker. Öffnungen in der Fläche werden um denselben Betrag größer.
+   - **{{ui:faceTool.radius}}:** rundet jede Ecke des Umrisses, auch die inneren, so endet eine spitze Ecke in einem Bogen. Eine Kerbe, die schmaler als der doppelte Radius ist, schließt sich, und ein Teil der Fläche, der schmaler ist als das Doppelte von Rand und Radius zusammen, fällt weg.
+   - **{{ui:faceTool.depth}}:** wie weit das neue Teil aus der Fläche ragt oder wie tief die Tasche wird.
+3. Das Ergebnis erscheint sofort als Vorschau und ändert sich mit jedem Wert. Mit {{ui:faceTool.repick}} wählst du eine andere Fläche, [[Esc]] schließt das Werkzeug.
+4. Erst {{ui:faceTool.apply}} legt es an.
+
+Was das Werkzeug anlegt, ist ein ganz gewöhnlicher Skizzenkörper, mit dem Körper gruppiert: Nichts ist eingebacken. {{ui:group.edit}} öffnet die Gruppe, und {{ui:inspector.editSketch}} am neuen Teil zeigt den Umriss, dem es folgt. Auf der Ober- oder Unterseite eines schlichten Skizzenkörpers - ein einziger Bereich, nicht gruppiert, gespiegelt, verjüngt, verdreht oder geneigt, ohne Kontur, Schlüsselringloch, Fase oder Verrundung - ist das der eigene Umriss des Körpers, beim Bauen nach innen versetzt, so bleiben seine Linien und Bögen exakt, wo der CAD-Kern sie versetzen kann, für die Kantenwerkzeuge und den STEP-Export. Später in der Größe geändert, behält das Teil seinen Rand. Auf jeder anderen Fläche, auch auf einem importierten Netz, folgt der Umriss den Dreiecken der Fläche, und eine Kurve besteht aus kurzen geraden Stücken. Das Ganze ist ein Schritt für {{ui:editor.tool.undo}}. Um Rand oder Radius später zu ändern, mach den Schritt rückgängig und nimm das Werkzeug noch einmal. Um die obere Kante danach zu runden, nimm {{ui:editor.tool.fillet}} mit {{ui:edge.topEdges}} an der Gruppe als letzten Schritt: Wie jede Kantenbehandlung an einer Gruppe macht sie die Gruppe zu einem Körper.
+
+Eine KI kann dasselbe über die MCP-Schnittstelle tun, mit `layerling_push_face` (siehe das Kapitel [KI mit MCP](chapter:ki-mit-mcp)).
 
 ## Mehrere Teile auf einmal ändern
 

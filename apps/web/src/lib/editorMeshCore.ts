@@ -451,6 +451,7 @@ function geometryMeshForShape(shape: WorkplaneShape): MeshData | null {
       break;
     case "counterbore":
     case "countersink":
+    case "doubleCountersink":
       geometry = createScrewHoleGeometry({ kind: shape.kind, width, depth, height, screwHoleShaft: shape.screwHoleShaft, screwHoleHeadDepth: shape.screwHoleHeadDepth, screwHoleAngle: shape.screwHoleAngle, sides: roundSideCount(shape.sides, width, depth) });
       break;
     case "teardrop":

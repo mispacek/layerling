@@ -121,6 +121,7 @@ export {
   ToolbarRotationPivotIcon,
   ToolbarPatternIcon,
   ToolbarHolePatternIcon,
+  ToolbarFaceToolIcon,
   ToolbarConstructionLineIcon,
   ToolbarLayFlatIcon,
   ToolbarMateFacesIcon,

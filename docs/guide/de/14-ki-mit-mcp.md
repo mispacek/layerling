@@ -58,6 +58,8 @@ Die KI arbeitet mit denselben Funktionen wie du, sie läuft über denselben Weg 
 | `layerling_lay_flat` | legt ein Objekt mit einer Fläche auf die Platte |
 | `layerling_place_on_face` | setzt Objekte auf eine Fläche eines anderen, auch schräg, wie die Taste C |
 | `layerling_perforate_face` | schneidet ein Lochmuster in eine ebene Fläche, die Löcher bleiben als Aussparungen mit dem Körper gruppiert |
+| `layerling_sweep_sketch` | zieht einen rechteckigen oder runden Querschnitt entlang eines Pfades aus Punkten als einen exakten Körper; ein geschlossener Pfad ergibt einen Ring |
+| `layerling_push_face` | zieht eine ebene Fläche heraus oder schneidet eine Tasche hinein, mit Rand zur Kante und Eckenradius; das neue Teil ist ein Skizzenkörper, mit dem Körper gruppiert |
 | `layerling_mate_faces` | legt eine Fläche eines Objekts an die Fläche eines anderen, gegeneinander oder bündig |
 | `layerling_open_group` | öffnet eine Gruppe, damit ihre Teile einzeln änderbar sind, auch eine Gruppe in einer geöffneten |
 | `layerling_close_group` | schließt sie wieder („Fertig“) oder bricht ab |
@@ -93,6 +95,7 @@ Die KI arbeitet mit denselben Funktionen wie du, sie läuft über denselben Weg 
 | `layerling_set_history_view` | schaut auf einen früheren Stand des Projekts zurück, wie die Verlaufsansicht (der echte Entwurf bleibt unberührt; ändernde Werkzeuge warten, bis sie geschlossen ist) |
 | `layerling_export_section_svg` | liefert die Umrisse auf einer Schnittebene als SVG im Maßstab 1:1, aus denselben Körpern wie der Export |
 | `layerling_export_drawing` | macht die Werkstattzeichnung des Exports „2D“: drei Ansichten im Maßstab 1:1 auf einem ISO-Blatt mit Gesamtmaßen und einer Tabelle der runden Bohrungen, als SVG-Text oder PDF |
+| `layerling_export_mesh` | schreibt die Datei des Exportfensters als STL, 3MF oder OBJ, aus denselben Körpern; an einen Pfad auf diesem Rechner oder als Base64 |
 | `layerling_set_workplane` | legt die Arbeitsebene auf eine Seite eines Körpers, setzt sie auf die Grundplatte zurück oder blendet sie aus und ein |
 | `layerling_capture_image` | nimmt ein Bild der Ansicht auf, von vorn, oben, seitlich, schräg von einer Ecke und mehr |
 

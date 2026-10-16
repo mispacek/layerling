@@ -5,9 +5,11 @@ import { CAD_MODIFIER_RUNTIME_BASE, SKETCH_CAD_DEFLECTION } from "@/lib/cadModif
 import { cadSketchRegions } from "@/lib/sketchCadProfile";
 import { buildRevolvedSketchSolid } from "@/lib/cadSketchRevolve";
 import { buildStrokedSketchSolid } from "@/lib/cadSketchStroke";
+import { buildSweptSketchSolid } from "@/lib/cadSketchSweep";
+import { buildInsetSketchSolid } from "@/lib/cadSketchInset";
 import { pathWire } from "@/lib/sketchCadWire";
 import { buildMessage } from "@/lib/buildStamp";
-import { SKETCH_STROKE_UNSUPPORTED, type SketchCadBuildRequest, type SketchCadBuildResponse } from "@/lib/sketchCadTypes";
+import { SKETCH_INSET_UNSUPPORTED, SKETCH_STROKE_UNSUPPORTED, type SketchCadBuildRequest, type SketchCadBuildResponse } from "@/lib/sketchCadTypes";
 
 let kernelPromise: Promise<OcctKernel> | null = null;
 
@@ -48,10 +50,16 @@ self.onmessage = async (event: MessageEvent<SketchCadBuildRequest>) => {
     let result: ShapeHandle;
     if (request.revolve) {
       result = buildRevolvedSketchSolid(cad, request.profile, request.revolve.startAngle, request.revolve.sweepAngle);
+    } else if (request.sweep) {
+      result = buildSweptSketchSolid(cad, request.profile);
     } else if (request.stroke) {
       const stroked = buildStrokedSketchSolid(cad, request.profile, request.stroke, request.height);
       if (!stroked) throw new Error(SKETCH_STROKE_UNSUPPORTED);
       result = stroked;
+    } else if (request.inset) {
+      const inset = buildInsetSketchSolid(cad, request.profile, request.inset, request.height);
+      if (!inset) throw new Error(SKETCH_INSET_UNSUPPORTED);
+      result = inset;
     } else {
       const regions = cadSketchRegions(request.profile);
       if (regions.length === 0) throw new Error("No closed profile found. Draw at least one closed loop and ensure it has no degenerate (zero-area) geometry.");

@@ -1,6 +1,6 @@
 "use client";
 
-import { Archive, ArrowLeft, Clock3, Copy, EllipsisVertical, FolderInput, FolderKanban, FolderPlus, FolderUp, Grid3X3, List, Pencil, Plus, RefreshCw, Search, Server, SlidersHorizontal, Sparkles, Trash2, X } from "lucide-react";
+import { Archive, ArchiveRestore, ArrowLeft, Clock3, Copy, EllipsisVertical, FolderInput, FolderKanban, FolderPlus, FolderUp, Grid3X3, List, Pencil, Plus, RefreshCw, Search, Server, ShieldAlert, SlidersHorizontal, Sparkles, Trash2, X } from "lucide-react";
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type DragEvent } from "react";
 import { AppFooter } from "@/components/AppFooter";
 import { LanguageSwitch } from "@/components/LanguageSwitch";
@@ -17,6 +17,7 @@ import { DEFAULT_APP_THEME, applyAppTheme, getAppThemePreference, hasStoredAppTh
 import { hydrateEditorHistoryState, notesForHistoryIndex, type EditorHistoryEntry } from "@/lib/editorHistory";
 import { DEFAULT_LANGUAGE, detectLanguage, setLanguage, t, translate, type Language } from "@/lib/i18n";
 import { localizedError } from "@/lib/userErrors";
+import { GuideHelpLink } from "@/components/GuideHelpLink";
 import { WelcomeGuideBody } from "@/components/WelcomeGuide";
 import { InstallAppHint } from "@/components/InstallAppHint";
 import { WhatsNewCard } from "@/components/WhatsNewCard";
@@ -43,7 +44,7 @@ import { writeDesignView } from "@/lib/designView";
 import { useFileAccept } from "@/lib/fileAccept";
 import { lylFileAccessSupported, pickFilesToImport, rememberLylFile, type LylFileHandle } from "@/lib/lylFileAccess";
 import { exportLylProject, importLylProject, LYL_CREATED_WITH_VERSION, LYL_MEDIA_TYPE } from "@/lib/lylProject";
-import { backupEntryNames, backupFileName, isBackupFileName, packBackup, unpackBackup, zipHoldsDesigns } from "@/lib/projectBackup";
+import { backupDesignAlreadyThere, backupEntryNames, backupFileName, isBackupFileName, packBackup, unpackBackup, zipHoldsDesigns } from "@/lib/projectBackup";
 import { customShapesBackupEntries, restoreCustomShapesFromBackup } from "@/lib/myShapes";
 import { SHARED_PROJECTS_ENDPOINT } from "@/lib/sharedProjectsEndpoint";
 import { PICTURE_FILE_ACCEPT } from "@/lib/pictureIcon";
@@ -773,6 +774,7 @@ export default function Home() {
   // Left open on an iPad, which greys out files of types it does not know (#219).
   const dashboardImportAccept = useFileAccept(`.lyl,.skf,.zip,.stl,.obj,.mtl,.3mf,.step,.stp,.svg,image/svg+xml,${PICTURE_FILE_ACCEPT}`);
   const dashboardImportInputRef = useRef<HTMLInputElement | null>(null);
+  const backupRestoreInputRef = useRef<HTMLInputElement | null>(null);
   const nextProjectRevisionRef = useRef(0);
   const projectShapeSaveQueuesRef = useRef<Record<string, Promise<void>>>({});
   const [projectSaveFailure, setProjectSaveFailure] = useState<{ message: string; at: number } | null>(null);
@@ -1791,10 +1793,17 @@ export default function Home() {
     const restoredProjects: DashboardProject[] = [];
     const restoredEntries: Record<string, ProjectShapeCacheEntry> = {};
     let failed = 0;
+    let alreadyThere = 0;
     for (let index = 0; index < entries.length; index += 1) {
       setDashboardNotice(t("notice.restoringBackup", { index: index + 1, total: entries.length }));
       try {
         const restored = await importLylProject(entries[index].bytes);
+        // A restore keeps the creation time of a design, so the same name and creation time means it is already here (#407).
+        const restoredName = restored.projectName || projectNameFromFileName(entries[index].name);
+        if (backupDesignAlreadyThere(projects, { name: restoredName, createdAt: restored.createdAt })) {
+          alreadyThere += 1;
+          continue;
+        }
         const now = Date.now() + index;
         const project: DashboardProject = {
           ...newProject(restored.projectName || projectNameFromFileName(entries[index].name), projects.length + index, restored.shapes.length),
@@ -1818,10 +1827,15 @@ export default function Home() {
     }
     setProjectShapesById((current) => ({ ...current, ...restoredEntries }));
     setProjects((current) => [...restoredProjects, ...current]);
+    const skippedNote = alreadyThere > 0 && restoredProjects.length > 0 ? ` ${t("notice.backupAlreadyThere", { count: alreadyThere })}` : "";
+    if (restoredProjects.length === 0 && failed === 0 && alreadyThere > 0) {
+      setDashboardNotice(t("notice.backupAllThere", { count: alreadyThere, name: file.name }) + shapesNote);
+      return;
+    }
     setDashboardNotice((failed
       ? t("notice.backupRestoredPartly", { count: restoredProjects.length, failed, name: file.name })
-      : t("notice.backupRestored", { count: restoredProjects.length, name: file.name })) + shapesNote);
-  }, [projects.length]);
+      : t("notice.backupRestored", { count: restoredProjects.length, name: file.name })) + skippedNote + shapesNote);
+  }, [projects]);
 
   const importFilesFromDashboard = useCallback(
     async (files: File[], fileHandle?: LylFileHandle) => {
@@ -2123,6 +2137,21 @@ export default function Home() {
           event.currentTarget.value = "";
         }}
       />
+      {/* The backup button in the storage notice: the same restore as "Open a design or import geometry", but asks for a ZIP only. */}
+      <input
+        ref={backupRestoreInputRef}
+        className="hidden-file-input"
+        type="file"
+        accept=".zip,application/zip"
+        aria-label={t("dashboard.restoreBackup")}
+        onChange={(event) => {
+          const files = event.currentTarget.files ? Array.from(event.currentTarget.files) : [];
+          if (files.length) {
+            void importFilesFromDashboard(files);
+          }
+          event.currentTarget.value = "";
+        }}
+      />
       {view === "dashboard" ? (
         <Dashboard
           dashboardSection={dashboardSection}
@@ -2158,6 +2187,7 @@ export default function Home() {
           onDuplicateSharedProject={(project) => void duplicateSharedProject(project)}
           onImportFile={() => void pickDashboardImport()}
           onBackupAll={() => void backupAllProjects()}
+          onRestoreBackup={() => backupRestoreInputRef.current?.click()}
           onOpenSharedProject={(project) => void openSharedProject(project)}
           onOpenProject={openEditor}
           onQueryChange={setQuery}
@@ -2358,6 +2388,7 @@ function Dashboard({
   onDuplicateSharedProject,
   onImportFile,
   onBackupAll,
+  onRestoreBackup,
   newDesignsOnServer,
   newDesignsOnServerLocked,
   onNewDesignsOnServerChange,
@@ -2402,6 +2433,7 @@ function Dashboard({
   onDuplicateSharedProject: (project: SharedProject) => void;
   onImportFile: () => void;
   onBackupAll: () => void;
+  onRestoreBackup: () => void;
   newDesignsOnServer: boolean;
   newDesignsOnServerLocked: boolean;
   onNewDesignsOnServerChange: (on: boolean) => void;
@@ -2932,6 +2964,29 @@ function Dashboard({
               ) : null}
               {whatsNew.view ? <WhatsNewCard view={whatsNew.view} current={LYL_CREATED_WITH_VERSION} onClose={whatsNew.dismiss} /> : null}
               <InstallAppHint />
+              {/* The designs live in the browser, and a browser can fail or break with an update: said plainly and always (not to be closed). */}
+              <aside className="storage-notice" aria-label={t("storageNotice.title")}>
+                <span className="storage-notice-icon" aria-hidden="true">
+                  <ShieldAlert size={24} strokeWidth={2.4} />
+                </span>
+                <div className="storage-notice-text">
+                  <strong>{t("storageNotice.title")}</strong>
+                  <span>{t("storageNotice.body")} <GuideHelpLink chapter="files" section="backingUp" className="storage-notice-help" /></span>
+                </div>
+                <div className="storage-notice-actions">
+                  {projects.length > 0 ? (
+                    <button className="storage-notice-button" type="button" title={t("dashboard.backupAllTitle")} onClick={onBackupAll}>
+                      <Archive size={16} strokeWidth={2.6} />
+                      <span>{t("dashboard.backupAll")}</span>
+                    </button>
+                  ) : null}
+                  {/* Also shown on a new computer with no designs yet: that is where a backup is restored. */}
+                  <button className="storage-notice-button secondary" type="button" title={t("dashboard.restoreBackupTitle")} onClick={onRestoreBackup}>
+                    <ArchiveRestore size={16} strokeWidth={2.6} />
+                    <span>{t("dashboard.restoreBackup")}</span>
+                  </button>
+                </div>
+              </aside>
 
               <div className="dashboard-section-header">
                 <div>

@@ -21,7 +21,14 @@ export const ERROR_RULES: ErrorRule[] = [
   // Drawing export (drawingExport.ts, drawingProjection.ts)
   { pattern: /more than 200 circular holes/i, key: "error.drawingTooManyHoles" },
   { pattern: /drawing exceeds 5,080 mm/i, key: "error.drawingTooLarge" },
-  { pattern: /Drawing views support up to 100,000 triangles/i, key: "error.drawingTooManyTriangles" },
+  {
+    pattern: /Drawing views support up to ([\d,]+) triangles; these views have ([\d,]+)/i,
+    key: "error.drawingTooManyTriangles",
+    values: (m) => {
+      const format = new Intl.NumberFormat(getLanguage());
+      return { limit: format.format(Number(m[1].replace(/,/g, ""))), count: format.format(Number(m[2].replace(/,/g, ""))) };
+    },
+  },
   { pattern: /view has too many drawing edges/i, key: "error.drawingTooManyEdges" },
   { pattern: /view has no solid geometry/i, key: "error.drawingNoGeometry" },
   // History view (also the answers the AI bridge gives while it is open)
@@ -49,6 +56,9 @@ export const ERROR_RULES: ErrorRule[] = [
   { pattern: /could not be mapped to its solid component/i, key: "error.edgeNotMapped" },
   { pattern: /Prepare an object before previewing/i, key: "error.prepareFirst" },
   { pattern: /isValid is not a function/i, key: "edge.errorKernelFailed" },
+  { pattern: /CAD kernel needs WebAssembly SIMD/i, key: "error.kernelNeedsSimd" },
+  // The browser has no room left for a step on a very large design: the allocation of a big buffer fails (#383).
+  { pattern: /Array buffer allocation failed|Invalid array length|Invalid typed array length|Out of memory|Cannot allocate memory|allocation failed/i, key: "error.outOfMemory" },
   { pattern: /does not leave a closed solid/i, key: "edge.errorNoSolidResult" },
   { pattern: /stored STEP body holds no solid/i, key: "error.storedStepNoSolid" },
   { pattern: /Text fonts are not loaded yet/i, key: "error.fontsNotLoaded" },

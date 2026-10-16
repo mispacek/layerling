@@ -69,7 +69,7 @@ Die {{ui:shell.edges}} wirken nur dort, wo die Innenwände auseinanderlaufen - a
 
 ![Derselbe Quader, nur an der Vorderseite offen: ein Schlitz für eine Schublade.](shot:hollow-sides)
 
-Für jede offene Seite braucht der Körper ganz außen auf dieser Seite eine ebene Fläche. Kugeln und freie Formen lassen sich deshalb so nicht aushöhlen. Wenn die Wand zu dick für den Körper ist, meldet layerling das und bittet um eine dünnere.
+Für jede offene Seite braucht der Körper ganz außen auf dieser Seite eine ebene Fläche. Kugeln und freie Formen lassen sich deshalb so nicht aushöhlen. Wenn die Wand zu dick für den Körper ist, meldet layerling das und bittet um eine dünnere. Eine abgerundete Box, deren Ober- und Unterkanten ebenfalls gerundet sind, ist so ein Fall: Ihre Wand muss deutlich dünner sein als diese Rundung, oder setze die Rundung vorher auf 0.
 
 Auch ein Körper mit einer Tasche lässt sich aushöhlen, etwa ein Block mit einem Loch, das nicht ganz hindurchgeht (eine Gruppe aus einem Quader und einem hochgesetzten Loch), und zwar mit offener Oberseite: Auch die Wände um die Tasche werden ausgehöhlt, so dass zwischen der Außenwand und der Tasche ein Ring aus Hohlraum bleibt, oben offen, und unter dem Boden der Tasche ein dünner Hohlraum liegt.
 

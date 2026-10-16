@@ -7,10 +7,11 @@ Ne každý díl lze pohodlně sestavit ze základních tvarů. Pro držák, prof
 
 ## Zahájení náčrtu
 
-Nahoře přepněte z {{ui:editor.modeGeometry}} na {{ui:editor.modeSketch}}. Ve skupině {{ui:sketch.group.create}} na pásu nástrojů jsou vedle sebe dvě tlačítka pro výsledné těleso:
+Nahoře přepněte z {{ui:editor.modeGeometry}} na {{ui:editor.modeSketch}}. Ve skupině {{ui:sketch.group.create}} na pásu nástrojů jsou vedle sebe tři tlačítka pro výsledné těleso:
 
 - **{{ui:sketch.extrude}}:** vysune obrys vzhůru, například jako vykrajovátko.
 - **{{ui:sketch.revolve}}:** otočí profil kolem osy jako na soustruhu. Vznikají tak vázy, nádoby, kužely a další rotační díly.
+- **{{ui:sketch.sweep}}:** protáhne obrys podél dráhy: kabelový žlab se zatáčkou, potrubí, prstenec kolem tvaru. Viz níže Protažení podél dráhy.
 
 Zobrazí se kreslicí list s mřížkou.
 
@@ -30,6 +31,8 @@ Těleso vzniká pouze z **uzavřeného** obrysu.
 
 ![Obrys tvaru L. U vybraného levého horního rohu jsou délky obou úseček v mm a jejich úhel ve stupních.](shot:sketch-outline)
 
+Klávesy [[1]] až [[4]] vybírají kreslicí nástroje v pořadí lišty: {{ui:sketch.line}}, {{ui:sketch.bezier}}, {{ui:sketch.smooth}} a {{ui:sketch.refine}}. Fungují, dokud se nekreslí úsečka; během úsečky jsou číslice její délka (viz níže).
+
 ## Číselné zadání úseček
 
 Po prvním bodu nástroje {{ui:sketch.line}} nebo {{ui:sketch.smooth}} začněte psát číslo. Otevřou se {{ui:sketch.typedLength}} v mm a {{ui:sketch.typedAngle}} ve stupních. [[<]] nebo [[Tab]] přepne na úhel. Zápis „50<30“ vytvoří úsečku délky 50 mm pod úhlem 30° jako v AutoCADu. [[Enter]] položí bod a můžete zadávat další úsek. [[Esc]] zavře pole, ale neukončí kreslení řetězce.
@@ -38,7 +41,7 @@ Po prvním bodu nástroje {{ui:sketch.line}} nebo {{ui:sketch.smooth}} začněte
 
 ## Prohnutí přímé strany
 
-Vyberte úsečku a v zobrazené liště zvolte {{ui:sketch.curveLine}}. Změní se na křivku se dvěma úchyty. Jejich tažením řídíte prohnutí; vzdálenější úchyt ohýbá více. {{ui:sketch.straightenLine}} obnoví přímku. Vybraný bod lze převést na plynulý pomocí {{ui:sketch.smooth}}; dostane úchyty a okolní úseky se stanou křivkami.
+Vyberte úsečku a v zobrazené liště zvolte {{ui:sketch.curveLine}}. Změní se na křivku se dvěma úchyty. Jejich tažením řídíte prohnutí; vzdálenější úchyt ohýbá více. {{ui:sketch.straightenLine}} obnoví přímku. Vybraný bod lze převést na plynulý pomocí {{ui:sketch.smooth}}; dostane úchyty a okolní úseky se stanou křivkami. Klikněte na úchyt a rozsvítí se: šipky ho pak posunou o krok mřížky, se [[Shift]] o větší krok, takže křivku nastavíte přesně.
 
 ![Spodní strana obrysu L je prohnutá a má úchyty u obou konců.](shot:sketch-curve)
 
@@ -82,6 +85,18 @@ Je-li pracovní rovina na boční ploše, kreslíte při pohledu na ni a horní 
 Nakreslete polovinu průřezu **nalevo od zobrazené osy**. Vedle náčrtu uvidíte průběžný 3D náhled. Obrys musí být uzavřený, nebo můžete použít otevřenou čáru rozšířenou na pás, viz níže. Dokončíte jej přes {{ui:sketch.finishRevolve}}.
 
 Rotační těleso má přesnou geometrii stejně jako vysunuté. Podporuje zaoblení, zkosení a dutiny pro nádoby či vázy. Starší verze vytvářely síť; otevřením {{ui:inspector.editSketch}} a opětovným dokončením získáte přesné těleso. Profil přesahující přes osu zůstává sítí, protože jej nelze přesně sestavit.
+
+## Protažení podél dráhy
+
+{{ui:sketch.sweep}} protáhne obrys podél dráhy: kabelový žlab, který zahýbá za roh, potrubí, kryt kolem řemene, prstenec kolem šestiúhelníku. Tlačítko je vedle {{ui:sketch.extrude}} a {{ui:sketch.revolve}} ve skupině {{ui:sketch.group.create}}.
+
+Na stejný list kreslíte dvě věci:
+
+- **Průřez** jako uzavřený obrys, jako obvykle. Kreslete ho tak, jak byste ho viděli při pohledu podél dráhy od jejího začátku: napříč dráhou je v náčrtu vlevo a vpravo, nahoře je nahoře na hotovém tělese. Dutý průřez, žlab nebo trubka, je obrys s dalším uvnitř. Průřez je napříč vystředěný na dráhu a těleso stojí nejnižším bodem průřezu na rovině náčrtu.
+
+- **Dráhu** jako {{ui:sketch.construction}}: zapněte ji a kreslete úsečky nebo křivky, jediný řetězec, otevřený nebo uzavřený (uzavřený řetězec dá prstenec). Dráha leží naplocho v rovině náčrtu.
+
+Nakreslete průřez u toho konce dráhy, kde má začínat; dráha začíná od nejbližšího konce. Pak klikněte na {{ui:sketch.finishSweep}}. Roh z rovných kousků se stane pokosem, křivka zůstane hladká a průřez zůstává po celé délce svislý. Těleso je přesné jako vytažené: zaoblení, zkosení a export STEP fungují. Chybí-li uzavřený obrys nebo dráha, nebo je několik oddělených drah, layerling to řekne. Přes {{ui:inspector.editSketch}} se vrátíte do náčrtu a změníte průřez nebo dráhu.
 
 ## Těleso z rozšířené čáry
 

@@ -26,7 +26,7 @@ When layerling is open in several tabs, they look out for each other: if another
 
 ## Language and appearance
 
-You set the language at the top right, German or English. The colour scheme beside it offers {{ui:theme.short.system}} (follows the operating system), {{ui:theme.short.light}}, {{ui:theme.short.dark}} and {{ui:theme.short.graphite}}, a neutral dark grey.
+You choose the language at the top right, from the language list. The colour scheme beside it offers {{ui:theme.short.system}} (follows the operating system), {{ui:theme.short.light}}, {{ui:theme.short.dark}} and {{ui:theme.short.graphite}}, a neutral dark grey.
 
 ## Running it yourself
 

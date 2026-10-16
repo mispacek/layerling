@@ -143,4 +143,6 @@ Stejně se prověšuje vodorovný **závitový otvor**. Přidejte {{ui:shape.tea
 
 Pro zapuštěnou hlavu šroubu slouží {{ui:shape.counterbore}} jako válcová kapsa pro válcovou hlavu DIN 912 a {{ui:shape.countersink}} jako kužel pro zápustnou hlavu DIN 7991. Oba tvary míří hlavou vzhůru. {{ui:prop.screwHoleHead}} je průměr kapsy či kužele, {{ui:prop.screwHoleShaft}} průměr průchozího otvoru a {{ui:prop.screwHoleLength}} celková délka. U válcového nastavujete {{ui:prop.screwHoleHeadDepth}}, u kuželového {{ui:prop.screwHoleAngle}}, obvykle 90°. Výchozí hodnoty odpovídají M3.
 
+{{ui:shape.doubleCountersink}} je otvor se zkosením na obou stranách pro desku, která má vepředu i vzadu vypadat čistě: na každém konci se kužel otevírá na {{ui:prop.screwHoleHead}} a mezi nimi je {{ui:prop.screwHoleShaft}}. {{ui:prop.screwHoleAngle}} a {{ui:prop.screwHoleLength}} nastavíte jako dosud. Je-li otvor příliš krátký na dva celé kužely, setkají se uprostřed s tímto úhlem a dřík zůstane širší, než jste nastavili: hlava 10 mm, dřík 6 mm, 90° a délka 2 mm dají dva kužely z 10 na 8 mm. Jako výřez ji protáhnete dílem jako ostatní.
+
 Přepněte tvar na výřez a slučte s dílem. Horní konec nechte trochu vyčnívat nad povrch, aby se kapsa čistě otevřela. Pro šestihrannou matici použijte {{ui:shape.polygon}} se šesti stranami jako výřez.

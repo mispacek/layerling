@@ -69,7 +69,7 @@ Le {{ui:shell.edges}} n'a d'importance que là où les parois intérieures s'éc
 
 ![La même boîte avec seulement la face avant ouverte : un emplacement pour un tiroir.](shot:hollow-sides)
 
-Pour chaque côté ouvert, le corps a besoin d’une face plate tout au bord de ce côté. Les sphères et les formes libres ne peuvent donc pas être creusées de cette façon. Si le mur est trop épais pour le corps, layerling vous le signale et en demande un plus fin.
+Pour chaque côté ouvert, le corps a besoin d’une face plate tout au bord de ce côté. Les sphères et les formes libres ne peuvent donc pas être creusées de cette façon. Si le mur est trop épais pour le corps, layerling vous le signale et en demande un plus fin. Une boîte arrondie dont les bords supérieur et inférieur sont aussi arrondis en est un exemple : son mur doit être nettement plus fin que cet arrondi, ou mettez d'abord l'arrondi à 0.
 
 Un corps avec une poche - un bloc avec un trou qui ne traverse pas complètement, réalisé en regroupant une boîte avec un trou surélevé - peut également être creusé, avec le dessus ouvert : les parois autour de la poche sont également creusées, de sorte qu'un anneau de cavité reste entre la paroi extérieure et la poche, ouvert en haut, et une fine cavité se trouve sous le fond de la poche.
 

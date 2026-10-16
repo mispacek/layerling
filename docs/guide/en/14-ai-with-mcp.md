@@ -1,9 +1,9 @@
 ---
 title: Building with an AI (MCP)
-summary: How an AI assistant such as Claude or Codex creates and changes shapes, groups them and takes pictures of the view in your open editor.
+summary: How an AI assistant such as Gemini, Claude or Codex creates and changes shapes, groups them and takes pictures of the view in your open editor.
 ---
 
-layerling comes with an MCP server. MCP is a standard through which an AI assistant can use tools in other programs. With it an AI client such as Claude or Codex sees an open editor tab and works in it: it creates shapes, changes dimensions, groups, cuts, rounds edges, reads out the scene and takes pictures of the view. You describe the part, the AI builds it, you watch and can step in at any moment.
+layerling comes with an MCP server. MCP is a standard through which an AI assistant can use tools in other programs. With it an AI client such as Gemini, Claude or Codex sees an open editor tab and works in it: it creates shapes, changes dimensions, groups, cuts, rounds edges, reads out the scene and takes pictures of the view. You describe the part, the AI builds it, you watch and can step in at any moment.
 
 The bridge between AI client and editor runs **locally on your computer**. Keep in mind, though: what the AI reads, meaning the scene and the pictures of the view, goes to the provider of your AI client, like any other input there.
 
@@ -27,7 +27,11 @@ Claude Desktop does not read project files. Enter the server in its own configur
 
 Copy the skill from `docs/skills/layerling-mcp-skill` into your Codex skills folder, enter the server in your Codex configuration using `docs/mcp/codex-config.example.toml`, and restart Codex.
 
-The detailed instructions for all three are in the [README on GitHub](https://github.com/henmedia/layerling/blob/main/README.md#layerling-mcp-skill).
+### Gemini & Antigravity
+
+Antigravity auto-discovers the workspace skill in `.agents/skills/layerling-mcp-skill`. For Gemini CLI, copy the skill from `docs/skills/layerling-mcp-skill` into your global skills folder (`~/.gemini/skills/`), add the server to your settings using `docs/mcp/gemini-config.example.json`, and restart the client.
+
+The detailed instructions for each client are in the [README on GitHub](https://github.com/henmedia/layerling/blob/main/README.md#layerling-mcp-skill).
 
 ## A copy on a NAS or server
 
@@ -58,6 +62,8 @@ The AI works with the same functions as you, through the same path as your opera
 | `layerling_lay_flat` | lays an object with one face on the plate |
 | `layerling_place_on_face` | sets objects down on a face of another, sloped ones too, like the C key |
 | `layerling_perforate_face` | cuts a hole pattern into a flat face; the holes stay as holes grouped with the body |
+| `layerling_sweep_sketch` | pulls a rectangular or round cross-section along a path of points as one exact body; a closed path makes a ring |
+| `layerling_push_face` | pushes a flat face out or cuts a pocket into it, with an inset from the edge and a corner radius; the new part is a sketch body grouped with the body |
 | `layerling_mate_faces` | brings a face of one object against a face of another, face to face or flush |
 | `layerling_open_group` | opens a group so its parts can be changed one by one, also a group inside an open one |
 | `layerling_close_group` | closes it again ("Done") or cancels |
@@ -93,6 +99,7 @@ The AI works with the same functions as you, through the same path as your opera
 | `layerling_set_history_view` | looks back at an earlier state of the project, like the History view (the real design stays untouched; changing tools wait until it is closed) |
 | `layerling_export_section_svg` | returns the outlines on a cutting plane as an SVG at 1:1, from the same bodies as the export |
 | `layerling_export_drawing` | makes the workshop drawing of the "2D" export: three views at 1:1 on an ISO sheet with overall sizes and a table of the round bores, as SVG text or PDF |
+| `layerling_export_mesh` | writes the file of the export window as STL, 3MF or OBJ, from the same bodies; to a path on this computer, or as base64 |
 | `layerling_set_workplane` | puts the workplane on a side of a body or back on the base plate, and hides or shows it |
 | `layerling_capture_image` | takes a picture of the view: front, top, side, diagonally from a corner and more |
 

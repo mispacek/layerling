@@ -69,7 +69,7 @@ Volba {{ui:shell.edges}} se projeví pouze tam, kde se vnitřní stěny rozestup
 
 ![Stejná krabička s otevřenou přední stranou jako prostor pro zásuvku.](shot:hollow-sides)
 
-Na každé otevřené straně potřebuje těleso rovinnou plochu na svém krajním povrchu. Koule a volně tvarovaná tělesa proto nelze tímto způsobem otevřít. Je-li stěna pro těleso příliš silná, program požádá o menší tloušťku.
+Na každé otevřené straně potřebuje těleso rovinnou plochu na svém krajním povrchu. Koule a volně tvarovaná tělesa proto nelze tímto způsobem otevřít. Je-li stěna pro těleso příliš silná, program požádá o menší tloušťku. Takovým případem je zaoblená krabice, jejíž horní a dolní hrany jsou také zaoblené: její stěna musí být zřetelně tenčí než toto zaoblení, nebo nejdřív nastavte zaoblení na 0.
 
 Vytvořit dutinu lze i v tělese s kapsou, tedy kvádru se slepým otvorem vzniklým sloučením s nadzvednutým výřezem. Při otevřené horní straně se vytvoří stěny i kolem kapsy. Mezi kapsou a vnějším pláštěm zůstane prstencová dutina otevřená nahoře a pod dnem kapsy tenká dutina.
 

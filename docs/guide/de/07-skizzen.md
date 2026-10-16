@@ -7,10 +7,11 @@ Nicht alles lässt sich aus Grundformen zusammensetzen. Für Teile mit eigener K
 
 ## Eine Skizze beginnen
 
-Wechsle oben von {{ui:editor.modeGeometry}} auf {{ui:editor.modeSketch}}. In der Gruppe {{ui:sketch.group.create}} des Menübands stehen zwei Knöpfe nebeneinander dafür, was aus dem Umriss werden soll:
+Wechsle oben von {{ui:editor.modeGeometry}} auf {{ui:editor.modeSketch}}. In der Gruppe {{ui:sketch.group.create}} des Menübands stehen drei Knöpfe nebeneinander dafür, was aus dem Umriss werden soll:
 
 - **{{ui:sketch.extrude}}:** Der Umriss wird in die Höhe gezogen, wie eine Ausstechform.
 - **{{ui:sketch.revolve}}:** Der Umriss wird um eine Achse gedreht, wie bei einer Drehbank. So entstehen Vasen, Becher, Kegel und alles, was rund ist.
+- **{{ui:sketch.sweep}}:** Der Umriss wird an einem Pfad entlanggezogen: ein Kabelkanal mit Ecke, eine Leitung, ein Ring um eine Form. Siehe unten „Entlang eines Pfades ziehen".
 
 Danach zeigt der Editor ein Blatt mit Gitter. Das ist deine Zeichenfläche.
 
@@ -30,6 +31,8 @@ Ein Körper entsteht nur aus einem **geschlossenen** Umriss.
 
 ![Ein L-förmiger Umriss. Am gewählten Eckpunkt oben links stehen die Längen der beiden Linien in Millimetern und der Winkel dazwischen in Grad.](shot:sketch-outline)
 
+Die Tasten [[1]] bis [[4]] wählen die Zeichenwerkzeuge, in der Reihenfolge der Leiste: {{ui:sketch.line}}, {{ui:sketch.bezier}}, {{ui:sketch.smooth}} und {{ui:sketch.refine}}. Sie gelten, solange keine Linie gezeichnet wird; während einer Linie sind die Ziffern ihre Länge (siehe unten).
+
 ## Linien nach Maß
 
 Hast du mit {{ui:sketch.line}} oder {{ui:sketch.smooth}} den ersten Punkt gesetzt, tippst du einfach eine Zahl: Neben der Linie öffnen sich zwei Felder, {{ui:sketch.typedLength}} in Millimetern und {{ui:sketch.typedAngle}} in Grad. Mit [[<]] oder [[Tab]] wechselst du zum Winkel, so dass „50<30“ eine 50 mm lange Linie unter 30° ergibt, wie in AutoCAD. [[Enter]] setzt den Punkt, und du tippst gleich die nächste Linie; [[Esc]] schließt die Felder, ohne den Linienzug zu beenden.
@@ -38,7 +41,7 @@ Der Winkel zählt von rechts gegen den Uhrzeigersinn: 0° nach rechts, 90° nach
 
 ## Eine gerade Seite krümmen
 
-Wähle eine gerade Linie und klicke in der Leiste, die erscheint, auf {{ui:sketch.curveLine}}: Die Seite wölbt sich wie bei Tinkercad zu einer Kurve und zeigt ihre beiden Griffe. Ziehe daran, um die Kurve zu formen; je weiter ein Griff absteht, desto stärker die Biegung. {{ui:sketch.straightenLine}} macht die Seite wieder gerade. Einen gewählten Punkt kannst du mit {{ui:sketch.smooth}} rund machen: Er bekommt eigene Griffe, und die Linien daneben werden zu Kurven.
+Wähle eine gerade Linie und klicke in der Leiste, die erscheint, auf {{ui:sketch.curveLine}}: Die Seite wölbt sich wie bei Tinkercad zu einer Kurve und zeigt ihre beiden Griffe. Ziehe daran, um die Kurve zu formen; je weiter ein Griff absteht, desto stärker die Biegung. {{ui:sketch.straightenLine}} macht die Seite wieder gerade. Einen gewählten Punkt kannst du mit {{ui:sketch.smooth}} rund machen: Er bekommt eigene Griffe, und die Linien daneben werden zu Kurven. Klick auf einen Griff, und er leuchtet auf: Die Pfeiltasten verschieben ihn dann um einen Rasterschritt, mit [[Shift]] um einen größeren, so stellst du eine Kurve genau ein.
 
 ![Die untere Seite des L-förmigen Umrisses zu einer Kurve gebogen, mit ihren zwei Griffen an den Enden.](shot:sketch-curve)
 
@@ -82,6 +85,18 @@ Mit {{ui:inspector.editSketch}} kehrst du jederzeit in die Skizze zurück, um si
 Beim Rotieren zeichnest du den halben Querschnitt **links von der Achse**, die in der Skizze eingezeichnet ist. Daneben siehst du eine 3D-Vorschau der Drehung. Sie zeigt sofort, wie der Körper aussieht. Der Umriss muss geschlossen sein, oder du baust eine offene Linie als Kontur, siehe unten. Zum Schluss klickst du auf {{ui:sketch.finishRevolve}}.
 
 Ein gedrehter Körper ist ein exakter Körper wie ein ausgezogener: Er nimmt Fasen und Verrundungen an, und du kannst ihn aushöhlen, für einen Becher oder eine Vase. Ein Körper, der mit einer älteren layerling-Fassung gedreht wurde, ist ein Netz; öffne {{ui:inspector.editSketch}} und schließe ihn neu ab, dann ist er exakt. Ein Umriss, der über die Achse hinausreicht, lässt sich nicht exakt bauen und wird wie bisher ein Netz.
+
+## Entlang eines Pfades ziehen
+
+{{ui:sketch.sweep}} zieht einen Umriss an einem Pfad entlang: ein Kabelkanal, der um die Ecke geht, eine Leitung, ein Schutz um einen Riemen, ein Ring um ein Sechseck. Der Knopf steht neben {{ui:sketch.extrude}} und {{ui:sketch.revolve}} in der Gruppe {{ui:sketch.group.create}}.
+
+Du zeichnest zwei Dinge auf dasselbe Blatt:
+
+- **Der Querschnitt** als geschlossener Umriss, wie sonst auch. Zeichne ihn so, wie du ihn sähest, wenn du vom Anfang des Pfades aus am Pfad entlangblickst: quer zum Pfad ist links und rechts in der Skizze, oben ist oben am fertigen Körper. Ein hohler Querschnitt, ein Kanal oder ein Rohr, ist ein Umriss mit einem zweiten darin. Der Querschnitt sitzt quer mittig auf dem Pfad, und der Körper steht mit dem tiefsten Punkt des Querschnitts auf der Skizzenebene.
+
+- **Der Pfad** als {{ui:sketch.construction}}: Schalte sie ein und zeichne Linien oder Kurven, eine einzige Kette, offen oder geschlossen (eine geschlossene Kette ergibt einen Ring). Der Pfad liegt flach in der Skizzenebene.
+
+Zeichne den Querschnitt an das Ende des Pfades, wo er beginnen soll; der Pfad beginnt an dem Ende, das ihm am nächsten liegt. Klicke dann auf {{ui:sketch.finishSweep}}. Eine Ecke aus geraden Stücken wird eine Gehrung, eine Kurve bleibt glatt, und der Querschnitt bleibt auf der ganzen Strecke aufrecht. Der Körper ist exakt wie ein hochgezogener: Verrundung, Fase und STEP-Export gehen. Fehlt ein geschlossener Umriss oder ein Pfad, oder gibt es mehrere getrennte Pfade, sagt layerling es. Mit {{ui:inspector.editSketch}} gehst du zurück in die Skizze und änderst Querschnitt oder Pfad.
 
 ## Als Kontur bauen
 

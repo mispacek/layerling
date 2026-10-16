@@ -86,30 +86,37 @@ export const DEFAULT_WORKPLANE_WORKSPACE: WorkplaneWorkspaceSettings = {
 };
 
 const ZOOM_SPEED_SLIDER_MIN = 1;
-const ZOOM_SPEED_SLIDER_MAX = 10;
+/** The slider's top. Up to 10 it is the range it always had; the steps above go on at the same rate (#331). */
+export const ZOOM_SPEED_SLIDER_MAX = 14;
+const ZOOM_SPEED_STEPS_TO_FAST = 9;
 const ZOOM_SPEED_FAST_TO_SLOW = 20;
+/** Each slider step changes the rate by this factor, in the first ten steps and above them. */
+const ZOOM_SPEED_STEP = ZOOM_SPEED_FAST_TO_SLOW ** (1 / ZOOM_SPEED_STEPS_TO_FAST);
+/** The buttons and keys +/- stop at this slider position: above it only the wheel gets faster. */
+const ZOOM_BUTTON_SLIDER_MAX = 10;
 // OrbitControls.zoomSpeed at the default slider position. The old mapping was
 // 0.28 + slider * 0.09, which left the fast end only about three times the slow end.
 export const DEFAULT_ORBIT_ZOOM_SPEED = 0.73;
 
 /**
- * Maps the 1–10 zoom slider onto OrbitControls.zoomSpeed.
+ * Maps the zoom slider onto OrbitControls.zoomSpeed.
  * Each wheel event scales camera distance by 0.95^(zoomSpeed * |deltaY| / 100),
- * so this value is the zoom rate. The curve is geometric: the fast end is
- * twenty times the slow end, and the default slider position keeps the old rate.
+ * so this value is the zoom rate. The curve is geometric: from 1 to 10 the fast end is
+ * twenty times the slow end, the default slider position keeps the old rate, and the
+ * steps from 10 to the top go on with the same factor per step.
  */
 export function orbitControlsZoomSpeed(slider: number): number {
-  const span = ZOOM_SPEED_SLIDER_MAX - ZOOM_SPEED_SLIDER_MIN;
   const position = Number.isFinite(slider)
     ? Math.min(ZOOM_SPEED_SLIDER_MAX, Math.max(ZOOM_SPEED_SLIDER_MIN, slider))
     : DEFAULT_WORKPLANE_WORKSPACE.zoomSpeed;
-  const slowest = DEFAULT_ORBIT_ZOOM_SPEED / ZOOM_SPEED_FAST_TO_SLOW ** ((DEFAULT_WORKPLANE_WORKSPACE.zoomSpeed - ZOOM_SPEED_SLIDER_MIN) / span);
-  return slowest * ZOOM_SPEED_FAST_TO_SLOW ** ((position - ZOOM_SPEED_SLIDER_MIN) / span);
+  const slowest = DEFAULT_ORBIT_ZOOM_SPEED / ZOOM_SPEED_STEP ** (DEFAULT_WORKPLANE_WORKSPACE.zoomSpeed - ZOOM_SPEED_SLIDER_MIN);
+  return slowest * ZOOM_SPEED_STEP ** (position - ZOOM_SPEED_SLIDER_MIN);
 }
 
-/** Raises a fixed distance multiplier by the slider's rate, so buttons match the wheel. */
+/** Raises a fixed distance multiplier by the slider's rate, so buttons match the wheel (up to 10, see ZOOM_BUTTON_SLIDER_MAX). */
 export function zoomDistanceScale(step: number, slider: number): number {
-  return step ** (orbitControlsZoomSpeed(slider) / DEFAULT_ORBIT_ZOOM_SPEED);
+  const position = Number.isFinite(slider) ? Math.min(slider, ZOOM_BUTTON_SLIDER_MAX) : slider;
+  return step ** (orbitControlsZoomSpeed(position) / DEFAULT_ORBIT_ZOOM_SPEED);
 }
 
 const METRIC_SNAP_GRIDS: GridSize[] = ["Off", "0.1 mm", "0.25 mm", "0.5 mm", "1.0 mm", "2.0 mm", "5.0 mm", "Brick"];
@@ -216,7 +223,7 @@ export function snapGridForUnits(units: string, snap: GridSize): GridSize {
 }
 const customizableShapeKinds: ShapeKind[] = [
   "box", "roundedBox", "cylinder", "slot", "ellipse", "sphere", "sketch", "scribble", "cone", "pyramid", "roof", "text", "roundRoof",
-  "halfSphere", "torus", "tube", "bentTube", "star", "heart", "crescent", "gear", "honeycomb", "hinge", "knurl", "dovetail", "counterbore", "countersink", "teardrop", "loft", "thread", "spring", "ring", "wedge", "polygon", "icosahedron", "ruler", "mesh",
+  "halfSphere", "torus", "tube", "bentTube", "star", "heart", "crescent", "gear", "honeycomb", "hinge", "knurl", "dovetail", "counterbore", "countersink", "doubleCountersink", "teardrop", "loft", "thread", "spring", "ring", "wedge", "polygon", "icosahedron", "ruler", "mesh",
 ];
 
 function numberOrDefault(value: unknown, fallback: number) {
@@ -288,7 +295,7 @@ export function normalizeShapeCustomizations(value: unknown, fallback: ShapeCust
     if (kind === "torus") {
       entry.sides = optionalShapeNumber(source.sides, fallbackEntry?.sides, 12, MAX_HIGH_RESOLUTION_SIDES, true);
     }
-    if (kind === "cylinder" || kind === "ellipse" || kind === "slot" || kind === "cone" || kind === "tube" || kind === "ring" || kind === "counterbore" || kind === "countersink" || kind === "teardrop") {
+    if (kind === "cylinder" || kind === "ellipse" || kind === "slot" || kind === "cone" || kind === "tube" || kind === "ring" || kind === "counterbore" || kind === "countersink" || kind === "doubleCountersink" || kind === "teardrop") {
       entry.sides = optionalShapeNumber(source.sides, fallbackEntry?.sides, 3, MAX_HIGH_RESOLUTION_SIDES, true);
     } else if (kind === "pyramid" || kind === "polygon") {
       entry.sides = optionalShapeNumber(source.sides, fallbackEntry?.sides, 3, 24, true);
@@ -327,7 +334,7 @@ export function normalizeShapeCustomizations(value: unknown, fallback: ShapeCust
       entry.honeycombWallThickness = optionalShapeNumber(source.honeycombWallThickness, fallbackEntry?.honeycombWallThickness, 0.4, 50);
       entry.honeycombFrameWidth = optionalShapeNumber(source.honeycombFrameWidth, fallbackEntry?.honeycombFrameWidth, 0, 100);
     }
-    if (kind === "counterbore" || kind === "countersink") {
+    if (kind === "counterbore" || kind === "countersink" || kind === "doubleCountersink") {
       entry.screwHoleShaft = optionalShapeNumber(source.screwHoleShaft, fallbackEntry?.screwHoleShaft, 0.1, MAX_CUSTOM_SHAPE_DIMENSION);
       entry.screwHoleHeadDepth = optionalShapeNumber(source.screwHoleHeadDepth, fallbackEntry?.screwHoleHeadDepth, 0.1, MAX_CUSTOM_SHAPE_DIMENSION);
       entry.screwHoleAngle = optionalShapeNumber(source.screwHoleAngle, fallbackEntry?.screwHoleAngle, 30, 150);
@@ -483,6 +490,20 @@ export const DEFAULT_TAPER_DIMENSION_MAX = 480;
 
 export function shapeDimensionLimit(workspace: WorkplaneWorkspaceSettings, kind: ShapeKind, appDefault: number) {
   return workspace.shapeCustomizations[kind]?.maxDimension ?? appDefault;
+}
+
+/**
+ * The most a position can be typed in, in mm (100 m): far beyond any plate, only a guard against a typo
+ * such as 1e9 (#425). The sliders and handles reach as far as the plate does, see `positionReach`.
+ */
+export const POSITION_TYPED_LIMIT = 100_000;
+
+/**
+ * How far the sliders of a position reach, along the plate and up: a plate and a half across, up to the
+ * printer's height, never less than the 220 mm they always had. A number can be typed beyond it.
+ */
+export function positionReach(workspace: Pick<WorkplaneWorkspaceSettings, "width" | "depth">, printerHeight?: number | null) {
+  return Math.max(220, Math.max(workspace.width, workspace.depth) * 1.5, printerHeight ?? 0);
 }
 
 /**

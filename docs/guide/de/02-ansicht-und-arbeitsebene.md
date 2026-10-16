@@ -15,9 +15,9 @@ Mit der Maus:
 | Mausrad | hinein- und herauszoomen |
 | [[Strg]] halten und mit links ziehen | ebenfalls verschieben |
 
-Wie schnell das Mausrad zoomt, stellst du in den Einstellungen unter {{ui:workspace.appearance}} mit {{ui:workspace.zoomSpeed}} ein: ein Regler von 1 bis 10, zu Beginn 5.
+Wie schnell das Mausrad zoomt, stellst du in den Einstellungen unter {{ui:workspace.appearance}} mit {{ui:workspace.zoomSpeed}} ein: ein Regler von 1 bis 14, zu Beginn 5; über 10 wird nur das Mausrad schneller. Eine Raste des Mausrads zoomt in jedem Browser gleich stark, ein Trackpad zoomt danach, wie weit du streichst.
 
-Auf einem Tablet oder Handy zoomen zwei Finger (spreizen und zusammenziehen) und verschieben die Ansicht (gemeinsam schieben). Ein Finger arbeitet am Entwurf, so wie die linke Maustaste. Wer mit einem Finger drehen möchte, schaltet in der Kameraleiste {{ui:camera.touchRotate}} ein. Der Schalter erscheint nur auf Geräten mit Touchscreen.
+Auf einem Tablet oder Handy zoomen zwei Finger (spreizen und zusammenziehen) und verschieben die Ansicht (gemeinsam schieben). Ein Finger auf leerer Fläche dreht die Ansicht, und ein Antippen dort hebt die Auswahl auf; auf einer Form oder einem Griff arbeitet er am Entwurf, so wie die linke Maustaste. Wer auch mit einem Finger drehen möchte, der auf einer Form beginnt, schaltet in der Kameraleiste {{ui:camera.touchRotate}} ein. Der Schalter erscheint auf Geräten mit Touchscreen.
 
 Ein Grafiktablett mit Stift verhält sich wie eine Maus: Die Spitze ist die linke Taste, die Seitentaste am Stift die rechte, zum Drehen der Ansicht und für das Menü. Die Schnelltasten des Tabletts belegst du in dessen Treiber mit layerlings [Tastenkürzeln](chapter:tastenkuerzel).
 
@@ -58,7 +58,7 @@ Ein Entwurf öffnet sich so, wie du ihn verlassen hast: Blickwinkel, Zoom und Au
 
 Das Fenster hängt an seinem Knopf. Verdeckt es etwas, ziehst du es an seiner Titelleiste frei über die Arbeitsfläche; dort öffnet es sich auch beim nächsten Mal. Ein Doppelklick auf die Titelleiste oder das Ablegen am Knopf bringt es zurück.
 
-[[Esc]] schließt das Fenster; der Schnitt bleibt, bis du ihn ausschaltest oder zur Entwurfsübersicht zurückgehst. Solange er an ist, ist der Knopf hervorgehoben. Was du dann auf der weggeschnittenen Seite ablegst, siehst du erst, wenn du den Schnitt ausschaltest.
+Das X und [[Esc]] schließen das Fenster; läuft gerade eine Messung, beendet [[Esc]] zuerst sie. Der Schnitt bleibt, bis du ihn mit {{ui:camera.sectionActive}} ausschaltest oder zur Entwurfsübersicht zurückgehst. Solange er an ist, ist der Knopf hervorgehoben. Was du dann auf der weggeschnittenen Seite ablegst, siehst du erst, wenn du den Schnitt ausschaltest. Ein Tablet hat kein [[Esc]], deshalb hat das Fenster dort zwei Knöpfe mehr: {{ui:camera.sectionBack}} beendet die Messung, falls eine läuft, und schließt sonst das Fenster, {{ui:camera.sectionConfirm}} schließt das Fenster in einem Schritt. Ein Computer zeigt sie nicht.
 
 ## Die Arbeitsebene
 

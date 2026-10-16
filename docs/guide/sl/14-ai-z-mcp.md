@@ -58,6 +58,8 @@ Umetna inteligenca dela z istimi funkcijami kot ti, teče po isti poti kot tvoje
 | `layerling_lay_flat` | položi objekt s ploskvijo na ploščo |
 | `layerling_place_on_face` | postavi objekte na ploskev drugega, tudi poševno, kot tipka C |
 | `layerling_perforate_face` | vreže vzorec lukenj v ravno ploskev, luknje ostanejo kot luknje, združene v skupino s telesom |
+| `layerling_sweep_sketch` | povleče pravokoten ali okrogel prerez vzdolž poti iz točk kot eno natančno telo; sklenjena pot da obroč |
+| `layerling_push_face` | ravno ploskev potegne navzven ali vanjo izreže žep, z odmikom od roba in polmerom vogalov; nov del je telo iz skice, združeno v skupino s telesom |
 | `layerling_mate_faces` | položi ploskev enega objekta na ploskev drugega, drugo proti drugemu ali poravnano |
 | `layerling_open_group` | odpre skupino, da so njeni deli posamezno spremenljivi, tudi skupino v odprti |
 | `layerling_close_group` | jo spet zapre (»Končano«) ali prekine |
@@ -92,6 +94,7 @@ Umetna inteligenca dela z istimi funkcijami kot ti, teče po isti poti kot tvoje
 | `layerling_clear_history` | za vedno izbriše vse korake razveljavitve, kot gumb »Izbriši zgodovino« v pogledu zgodovine; potrebuje `confirm: true` |
 | `layerling_set_history_view` | pogleda nazaj na prejšnje stanje projekta, kot pogled zgodovine (pravi načrt ostane nedotaknjen; orodja, ki spreminjajo, počakajo, da se zapre) |
 | `layerling_export_drawing` | naredi delavniško risbo izvoza »2D«: trije pogledi v merilu 1:1 na listu ISO s skupnimi merami in tabelo okroglih izvrtin, kot besedilo SVG ali PDF |
+| `layerling_export_mesh` | zapiše datoteko izvoznega okna kot STL, 3MF ali OBJ iz istih teles; na pot v tem računalniku ali kot base64 |
 | `layerling_export_section_svg` | izda obrise na ravnini prereza kot SVG v merilu 1:1, iz istih teles kot izvoz |
 | `layerling_set_workplane` | položi delovno ravnino na stran telesa, jo ponastavi na osnovno ploščo ali jo skrije in prikaže |
 | `layerling_capture_image` | posname sliko pogleda, od spredaj, zgoraj, s strani, poševno z vogala in več |

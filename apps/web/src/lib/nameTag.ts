@@ -1,4 +1,4 @@
-import { curvedTextPatch, DEFAULT_TEXT_SIZE, displayTextOf, textBoxAroundLetters, textLetterBox } from "@/lib/textGeometry";
+import { curvedTextPatch, DEFAULT_TEXT_SIZE, displayTextOf, textBoxAroundLetters, textFitScale, textLetterBox } from "@/lib/textGeometry";
 import { customFontRevision, textFont } from "@/lib/textFonts";
 import { DEFAULT_TEXT_LAYERS, MAX_TEXT_LAYERS, MAX_TEXT_LAYER_GROW, type TextLayer, type textLayersOf } from "@/lib/textLayers";
 import type { WorkplaneShape } from "@/types/layerling";
@@ -101,7 +101,8 @@ export function textLetterSize(shape: WorkplaneShape): number {
   if (shape.textCurved) return Math.max(0.5, shape.textSize ?? DEFAULT_TEXT_SIZE);
   const measures = layoutMeasures(shape);
   const letters = textLetterBox(shape);
-  return Math.min(letters.width / measures.width, letters.depth / measures.depth) * measures.cap;
+  // A stretched text (#382) has the height of its box: that is how tall its capitals stand.
+  return textFitScale(shape, letters, measures).y * measures.cap;
 }
 
 /**
@@ -114,6 +115,8 @@ export function textLetterSizePatch(shape: WorkplaneShape, size: number): Partia
   if (shape.textCurved) return curvedTextPatch(shape, { textSize: letterSize });
   const measures = layoutMeasures(shape);
   const scale = letterSize / measures.cap;
+  // A stretched text (#382) keeps the width of its box and changes only its depth.
+  const width = shape.textStretch ? textLetterBox(shape).width : measures.width * scale;
   // Round the letters the fill's reach all round, and a key ring's ear on its side.
-  return textBoxAroundLetters(shape, { width: measures.width * scale, depth: measures.depth * scale });
+  return textBoxAroundLetters(shape, { width, depth: measures.depth * scale });
 }

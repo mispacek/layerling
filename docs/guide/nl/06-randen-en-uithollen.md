@@ -69,7 +69,7 @@ De {{ui:shell.edges}} doen er alleen toe waar de binnenwanden uit elkaar gaan: b
 
 ![Hetzelfde blok met alleen de voorkant open: een sleuf voor een lade.](shot:hollow-sides)
 
-Voor elke open zijde heeft het lichaam aan die kant een plat vlak helemaal aan de rand nodig. Bollen en vrije vormen kun je daarom niet op deze manier uithollen. Is de wand te dik voor het lichaam, dan meldt layerling dat en vraagt om een dunnere.
+Voor elke open zijde heeft het lichaam aan die kant een plat vlak helemaal aan de rand nodig. Bollen en vrije vormen kun je daarom niet op deze manier uithollen. Is de wand te dik voor het lichaam, dan meldt layerling dat en vraagt om een dunnere. Een afgeronde doos waarvan ook de boven- en onderranden zijn afgerond, is zo'n geval: de wand moet duidelijk dunner zijn dan die afronding, of zet de afronding eerst op 0.
 
 Een lichaam met een kamer, een blok met een gat dat niet helemaal doorloopt, gemaakt door een blok te groeperen met een opgetild gat, kun je ook uithollen, met de bovenkant open: de wanden rond de kamer worden ook uitgehold, zodat er tussen de buitenwand en de kamer een ring van holte blijft, aan de bovenkant open, en onder de bodem van de kamer een dunne holte ligt.
 

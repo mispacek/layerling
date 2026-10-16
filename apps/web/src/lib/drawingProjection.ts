@@ -8,7 +8,9 @@ export type DrawingPoint3 = [number, number, number];
 export type DrawingMesh = { vertices: readonly DrawingPoint3[]; faces: readonly [number, number, number][] };
 export type DrawingLine = { a: DrawingPoint; b: DrawingPoint; hidden: boolean };
 export type DrawingProjection = { lines: DrawingLine[]; center: DrawingPoint3; width: number; height: number };
-export const MAX_DRAWING_TRIANGLES = 100_000;
+// A smooth, curved body is cut into very many triangles at export quality, so this is generous: the projection
+// takes about 0.6 s per 250,000 of them (#414). The edges, not the triangles, are what makes a view slow.
+export const MAX_DRAWING_TRIANGLES = 400_000;
 export const MAX_DRAWING_EDGES = 12_000;
 
 export function drawingRotation(rotation: DrawingPoint3) {
@@ -19,7 +21,7 @@ export function drawingRotation(rotation: DrawingPoint3) {
 export function projectDrawingMeshes(meshes: readonly DrawingMesh[], rotation: DrawingPoint3): DrawingProjection {
   const triangleCount = meshes.reduce((sum, mesh) => sum + mesh.faces.length, 0);
   if (!triangleCount) throw new Error("This view has no solid geometry");
-  if (triangleCount > MAX_DRAWING_TRIANGLES) throw new Error("Drawing views support up to 100,000 triangles. Choose fewer or simpler objects.");
+  if (triangleCount > MAX_DRAWING_TRIANGLES) throw new Error(`Drawing views support up to ${MAX_DRAWING_TRIANGLES.toLocaleString("en-US")} triangles; these views have ${triangleCount.toLocaleString("en-US")}. Choose fewer or simpler objects.`);
   if (meshes.reduce((sum, mesh) => sum + mesh.vertices.length, 0) > MAX_DRAWING_TRIANGLES * 3) throw new Error("Drawing source has too many vertices");
   const matrix = drawingRotation(rotation);
   const points: THREE.Vector3[] = [];

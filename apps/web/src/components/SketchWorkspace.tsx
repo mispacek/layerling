@@ -35,6 +35,8 @@ import { constrainToAngle, sketchLineAngle, sketchPolarPoint, splitTypedLine } f
 
 export type { SketchPrimitive } from "@/lib/sketchPrimitives";
 export type SketchTool = "line" | "bezier" | "smooth" | SketchPrimitive | "select" | "refine" | "erase" | "measure";
+/** The keys 1 to 4 and the drawing tool each picks, in the order of the tools on the left (#347). */
+export const SKETCH_TOOL_KEYS: Readonly<Record<string, SketchTool>> = { "1": "line", "2": "bezier", "3": "smooth", "4": "refine" };
 export type { SketchSelection } from "@/lib/sketchSelection";
 export type SketchMeasurement = { start: SketchPoint; end: SketchPoint } | null;
 
@@ -72,7 +74,9 @@ type SketchWorkspaceProps = {
   onDeleteSegment: (id: string) => void;
   onMovePoint: (id: string, point: { x: number; z: number }) => void;
   onTransformPoints: (points: SketchPoint[], message?: string, keyRunKey?: string) => void;
-  onMoveHandle: (id: string, handle: "in" | "out", point: { x: number; z: number }) => void;
+  onMoveHandle: (id: string, handle: "in" | "out", point: { x: number; z: number }, keyRunKey?: string) => void;
+  /** The keys 1 to 4 pick Line, Bezier, Smooth Curve and Add or Remove Points, as in Tinkercad (#347). */
+  onSelectTool?: (tool: SketchTool) => void;
   onInsertPoint: (segmentId: string, point: { x: number; z: number }, amount: number) => void;
   onSetPointMode: (id: string, mode: "corner" | "smooth" | "split") => void;
   /** Bends a straight side into a curve with handles, or makes a curved side straight again. */
@@ -528,6 +532,7 @@ export function SketchWorkspace({
   onMovePoint,
   onTransformPoints,
   onMoveHandle,
+  onSelectTool,
   onInsertPoint,
   onSetPointMode,
   onCurveSegment,
@@ -565,6 +570,11 @@ export function SketchWorkspace({
   const [view, setView] = useState<SketchView>({ zoom: 1, pan: { x: 0, z: 0 } });
   const { zoom, pan } = view;
   const [hover, setHover] = useState<{ x: number; z: number } | null>(null);
+  // A handle that was clicked (#347): the arrow keys then move it by one grid step, for a precise shape.
+  const [selectedHandle, setSelectedHandle] = useState<{ pointId: string; handle: "in" | "out" } | null>(null);
+  useEffect(() => {
+    setSelectedHandle(null);
+  }, [selected, tool]);
   const lastPointerRef = useRef<{ clientX: number; clientY: number } | null>(null);
   const [refinePreview, setRefinePreview] = useState<{ segmentId: string; placement: SketchSegmentPlacement } | null>(null);
   const [pointerAction, setPointerAction] = useState<PointerAction | null>(null);
@@ -1316,12 +1326,28 @@ export function SketchWorkspace({
       } else if (event.key === "-" || event.key === "_") {
         event.preventDefault();
         zoomByButton(1.28);
+      } else if (onSelectTool && !activePoint && !pointerAction && SKETCH_TOOL_KEYS[event.key]) {
+        // 1 to 4 pick the drawing tools, as in Tinkercad (#347). While a line is being drawn the digits
+        // are its length (above), so they only come here when no line is in progress.
+        event.preventDefault();
+        onSelectTool(SKETCH_TOOL_KEYS[event.key]);
       } else if (tool === "select" && !pointerAction && ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) {
         // Fine moves, as on the workplane: one grid step, or a coarser one with
         // Shift. What moves is the selection - points, the ends of lines, an image.
         const step = keyboardNudgeStep(snap, event.shiftKey, keyboardNudgeCoarseFactor(workspace));
         const dx = event.key === "ArrowLeft" ? -step : event.key === "ArrowRight" ? step : 0;
         const dz = event.key === "ArrowUp" ? -step : event.key === "ArrowDown" ? step : 0;
+        // A clicked handle goes first (#347): it moves alone, a smooth point's other handle with it.
+        const handlePoint = selectedHandle ? profile.points.find((point) => point.id === selectedHandle.pointId) : undefined;
+        const handleAt = handlePoint && selectedHandle ? (selectedHandle.handle === "in" ? handlePoint.handleIn : handlePoint.handleOut) : undefined;
+        if (selectedHandle && handleAt) {
+          event.preventDefault();
+          const moved = { x: clamp(handleAt.x + dx, -workspace.width / 2, workspace.width / 2), z: clamp(handleAt.z + dz, -workspace.depth / 2, workspace.depth / 2) };
+          if (moved.x === handleAt.x && moved.z === handleAt.z) return;
+          // A run of arrow presses is one step of the history, as for points (#370).
+          onMoveHandle(selectedHandle.pointId, selectedHandle.handle, moved, `handle:${selectedHandle.pointId}:${selectedHandle.handle}`);
+          return;
+        }
         if (selected?.kind === "image") {
           const image = (profile.images ?? []).find((entry) => entry.id === selected.id);
           if (!image || image.locked) return;
@@ -1353,7 +1379,7 @@ export function SketchWorkspace({
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [activePoint, focusSelection, onTransformPoints, onUpdateImage, pendingMeasurementStart, pointerAction, profile, resetView, selected, snap, tool, workspace.depth, workspace.width, workspace.zoomSpeed]);
+  }, [activePoint, focusSelection, onMoveHandle, onSelectTool, onTransformPoints, onUpdateImage, pendingMeasurementStart, pointerAction, profile, resetView, selected, selectedHandle, snap, tool, workspace.depth, workspace.width, workspace.zoomSpeed]);
 
   const beginEntityDrag = (event: ReactPointerEvent<SVGElement>, action: PointerAction) => {
     if (event.button !== 0) return;
@@ -1361,6 +1387,15 @@ export function SketchWorkspace({
     event.stopPropagation();
     capturePointer(svgRef.current, event.pointerId);
     setPointerAction(action);
+  };
+
+  const pressHandle = (event: ReactPointerEvent<SVGElement>, pointId: string, handle: "in" | "out", current: { x: number; z: number }) => {
+    if (event.button === 1) {
+      beginPan(event);
+      return;
+    }
+    if (event.button === 0) setSelectedHandle({ pointId, handle });
+    beginEntityDrag(event, { kind: "move-handle", pointerId: event.pointerId, pointId, handle, current });
   };
 
   const measurementLength = measurement ? Math.hypot(measurement.end.x - measurement.start.x, measurement.end.z - measurement.start.z) : 0;
@@ -1600,7 +1635,7 @@ export function SketchWorkspace({
 
   return (
     <main className="sketch-workspace-stage" style={sketchColorStyle}>
-      <div className="sketch-mode-badge">{operation === "revolve" ? t("sketch.modeBadgeRevolve") : t("sketch.modeBadge")}</div>
+      <div className="sketch-mode-badge">{operation === "revolve" ? t("sketch.modeBadgeRevolve") : operation === "sweep" ? t("sketch.modeBadgeSweep") : t("sketch.modeBadge")}</div>
       {operation === "revolve" ? <SketchRevolvePreview positions={revolvePreviewPositions} /> : null}
       <div className="camera-controls sketch-camera-controls" aria-label={t("sketch.viewControls")}>
         <button aria-label={t("sketch.resetView")} aria-keyshortcuts="F" title={t("camera.shortcut", { label: t("sketch.resetView"), keys: "F" })} onClick={resetView}><Home size={28} /></button>
@@ -2148,16 +2183,16 @@ export function SketchWorkspace({
             return (
               <g className="sketch-curve-handles">
                 <line x1={start.x} y1={start.z} x2={start.handleOut.x} y2={start.handleOut.z} />
-                <circle data-sketch-entity="handle" cx={start.handleOut.x} cy={start.handleOut.z} r={controlPointRadius} onPointerDown={(event) => event.button === 1 ? beginPan(event) : beginEntityDrag(event, { kind: "move-handle", pointerId: event.pointerId, pointId: start.id, handle: "out", current: start.handleOut! })} />
+                <circle data-sketch-entity="handle" cx={start.handleOut.x} cy={start.handleOut.z} r={controlPointRadius} className={selectedHandle?.pointId === start.id && selectedHandle.handle === "out" ? "sketch-handle-selected" : undefined} onPointerDown={(event) => pressHandle(event, start.id, "out", start.handleOut!)} />
                 <line x1={end.x} y1={end.z} x2={end.handleIn.x} y2={end.handleIn.z} />
-                <circle data-sketch-entity="handle" cx={end.handleIn.x} cy={end.handleIn.z} r={controlPointRadius} onPointerDown={(event) => event.button === 1 ? beginPan(event) : beginEntityDrag(event, { kind: "move-handle", pointerId: event.pointerId, pointId: end.id, handle: "in", current: end.handleIn! })} />
+                <circle data-sketch-entity="handle" cx={end.handleIn.x} cy={end.handleIn.z} r={controlPointRadius} className={selectedHandle?.pointId === end.id && selectedHandle.handle === "in" ? "sketch-handle-selected" : undefined} onPointerDown={(event) => pressHandle(event, end.id, "in", end.handleIn!)} />
               </g>
             );
           })() : null}
           {selectedPoint && tool === "select" ? (
             <g className="sketch-curve-handles">
-              {selectedPoint.handleIn ? <><line x1={selectedPoint.x} y1={selectedPoint.z} x2={selectedPoint.handleIn.x} y2={selectedPoint.handleIn.z} /><circle data-sketch-entity="handle" cx={selectedPoint.handleIn.x} cy={selectedPoint.handleIn.z} r={controlPointRadius} onPointerDown={(event) => event.button === 1 ? beginPan(event) : beginEntityDrag(event, { kind: "move-handle", pointerId: event.pointerId, pointId: selectedPoint.id, handle: "in", current: selectedPoint.handleIn! })} /></> : null}
-              {selectedPoint.handleOut ? <><line x1={selectedPoint.x} y1={selectedPoint.z} x2={selectedPoint.handleOut.x} y2={selectedPoint.handleOut.z} /><circle data-sketch-entity="handle" cx={selectedPoint.handleOut.x} cy={selectedPoint.handleOut.z} r={controlPointRadius} onPointerDown={(event) => event.button === 1 ? beginPan(event) : beginEntityDrag(event, { kind: "move-handle", pointerId: event.pointerId, pointId: selectedPoint.id, handle: "out", current: selectedPoint.handleOut! })} /></> : null}
+              {selectedPoint.handleIn ? <><line x1={selectedPoint.x} y1={selectedPoint.z} x2={selectedPoint.handleIn.x} y2={selectedPoint.handleIn.z} /><circle data-sketch-entity="handle" cx={selectedPoint.handleIn.x} cy={selectedPoint.handleIn.z} r={controlPointRadius} className={selectedHandle?.pointId === selectedPoint.id && selectedHandle.handle === "in" ? "sketch-handle-selected" : undefined} onPointerDown={(event) => pressHandle(event, selectedPoint.id, "in", selectedPoint.handleIn!)} /></> : null}
+              {selectedPoint.handleOut ? <><line x1={selectedPoint.x} y1={selectedPoint.z} x2={selectedPoint.handleOut.x} y2={selectedPoint.handleOut.z} /><circle data-sketch-entity="handle" cx={selectedPoint.handleOut.x} cy={selectedPoint.handleOut.z} r={controlPointRadius} className={selectedHandle?.pointId === selectedPoint.id && selectedHandle.handle === "out" ? "sketch-handle-selected" : undefined} onPointerDown={(event) => pressHandle(event, selectedPoint.id, "out", selectedPoint.handleOut!)} /></> : null}
             </g>
           ) : null}
           <g className="sketch-points">

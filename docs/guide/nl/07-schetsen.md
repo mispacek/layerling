@@ -7,10 +7,11 @@ Niet alles laat zich uit basisvormen samenstellen. Voor onderdelen met een eigen
 
 ## Een schets beginnen
 
-Schakel bovenaan over van {{ui:editor.modeGeometry}} naar {{ui:editor.modeSketch}}. In de groep {{ui:sketch.group.create}} van het lint staan twee knoppen naast elkaar voor wat de omtrek moet worden:
+Schakel bovenaan over van {{ui:editor.modeGeometry}} naar {{ui:editor.modeSketch}}. In de groep {{ui:sketch.group.create}} van het lint staan drie knoppen naast elkaar voor wat de omtrek moet worden:
 
 - **{{ui:sketch.extrude}}:** De omtrek wordt omhoog getrokken, als een koekjesvorm.
 - **{{ui:sketch.revolve}}:** De omtrek wordt om een as gedraaid, als op een draaibank. Zo krijg je vazen, bekers, kegels en alles wat rond is.
+- **{{ui:sketch.sweep}}:** De omtrek wordt langs een pad getrokken: een kabelgoot met een hoek, een leiding, een ring om een vorm. Zie hieronder Langs een pad trekken.
 
 De editor toont dan een vel met een raster. Dat is je tekenvlak.
 
@@ -30,6 +31,8 @@ Een lichaam ontstaat alleen uit een **gesloten** omtrek.
 
 ![Een L-vormige omtrek. Bij het geselecteerde hoekpunt linksboven staan de lengtes van de twee lijnen in millimeters, en de hoek ertussen in graden.](shot:sketch-outline)
 
+De toetsen [[1]] tot en met [[4]] kiezen de tekengereedschappen, in de volgorde van de balk: {{ui:sketch.line}}, {{ui:sketch.bezier}}, {{ui:sketch.smooth}} en {{ui:sketch.refine}}. Ze werken zolang er geen lijn wordt getekend; tijdens een lijn zijn de cijfers de lengte ervan (zie hieronder).
+
 ## Lijnen met getallen
 
 Heb je met {{ui:sketch.line}} of {{ui:sketch.smooth}} het eerste punt gezet, typ dan gewoon een getal: naast de lijn openen twee velden, {{ui:sketch.typedLength}} in millimeters en {{ui:sketch.typedAngle}} in graden. [[<]] of [[Tab]] springt naar de hoek, dus "50<30" geeft een lijn van 50 mm lang onder 30°, zoals in AutoCAD. [[Enter]] zet het punt, en je kunt meteen de volgende lijn intypen; [[Esc]] sluit de velden zonder de lijnketen te beëindigen.
@@ -38,7 +41,7 @@ De hoek telt tegen de klok in vanaf rechts: 0° naar rechts, 90° omhoog, 180° 
 
 ## Een rechte zijde buigen
 
-Selecteer een rechte lijn en klik op {{ui:sketch.curveLine}} in de balk die verschijnt: de zijde buigt uit tot een curve, zoals in Tinkercad, en toont zijn twee handgrepen. Sleep eraan om de curve te vormen; hoe verder een handgreep uitsteekt, hoe sterker de bocht. {{ui:sketch.straightenLine}} maakt de zijde weer recht. Een punt dat je selecteert kun je met {{ui:sketch.smooth}} rond maken: het krijgt eigen handgrepen en de lijnen ernaast worden curves.
+Selecteer een rechte lijn en klik op {{ui:sketch.curveLine}} in de balk die verschijnt: de zijde buigt uit tot een curve, zoals in Tinkercad, en toont zijn twee handgrepen. Sleep eraan om de curve te vormen; hoe verder een handgreep uitsteekt, hoe sterker de bocht. {{ui:sketch.straightenLine}} maakt de zijde weer recht. Een punt dat je selecteert kun je met {{ui:sketch.smooth}} rond maken: het krijgt eigen handgrepen en de lijnen ernaast worden curves. Klik op een greep en hij licht op: de pijltoetsen verplaatsen hem dan één rasterstap, met [[Shift]] een grotere stap, zodat je een kromme nauwkeurig instelt.
 
 ![De onderzijde van de L-vormige omtrek gebogen tot een curve, met zijn twee handgrepen aan de uiteinden.](shot:sketch-curve)
 
@@ -82,6 +85,18 @@ Met {{ui:inspector.editSketch}} kun je op elk moment terug naar de schets om hem
 Bij draaien teken je de halve doorsnede **links van de as** die in de schets getoond wordt. Daarnaast zie je een 3D-voorbeeld van het draaien. Dat laat meteen zien hoe het lichaam eruit gaat zien. De omtrek moet gesloten zijn, of je bouwt een open lijn als lijn met dikte, zie hieronder. Klik aan het eind op {{ui:sketch.finishRevolve}}.
 
 Een gedraaid lichaam is een exact lichaam, net als een geëxtrudeerd: het neemt afschuiningen en afrondingen aan, en je kunt het uithollen, voor een beker of een vaas. Een lichaam dat met een oudere layerling gedraaid is, is een mesh; open {{ui:inspector.editSketch}} en voltooi het opnieuw om het exact te maken. Een profiel dat over de as heen reikt, kan niet exact gebouwd worden en wordt, zoals voorheen, een mesh.
+
+## Langs een pad trekken
+
+{{ui:sketch.sweep}} trekt een omtrek langs een pad: een kabelgoot die om de hoek gaat, een leiding, een beschermkap om een riem, een ring om een zeshoek. De knop staat naast {{ui:sketch.extrude}} en {{ui:sketch.revolve}} in de groep {{ui:sketch.group.create}}.
+
+Je tekent twee dingen op hetzelfde blad:
+
+- **De dwarsdoorsnede** als gesloten omtrek, zoals gewoonlijk. Teken haar zoals je haar zou zien als je vanaf het begin van het pad langs het pad kijkt: dwars op het pad is links en rechts in de schets, boven is boven op het eindresultaat. Een holle doorsnede, een goot of een buis, is een omtrek met een tweede erin. De doorsnede staat dwars gecentreerd op het pad, en het lichaam staat met het laagste punt van de doorsnede op het schetsvlak.
+
+- **Het pad** als {{ui:sketch.construction}}: zet haar aan en teken lijnen of krommen, één enkele reeks, open of gesloten (een gesloten reeks geeft een ring). Het pad ligt plat in het schetsvlak.
+
+Teken de doorsnede bij het uiteinde van het pad waar ze moet beginnen; het pad begint bij het uiteinde dat er het dichtst bij ligt. Klik dan op {{ui:sketch.finishSweep}}. Een hoek van rechte stukken wordt een verstek, een kromme blijft glad en de doorsnede blijft over de hele lengte rechtop. Het lichaam is exact, net als een omhooggetrokken lichaam: afronden, afschuinen en STEP-export werken erop. Ontbreekt een gesloten omtrek of een pad, of zijn er meerdere losse paden, dan zegt layerling het. Met {{ui:inspector.editSketch}} ga je terug naar de schets en verander je doorsnede of pad.
 
 ## Als lijn opbouwen
 

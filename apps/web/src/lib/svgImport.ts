@@ -339,10 +339,44 @@ function ringsIntersect(a: THREE.Vector2[], b: THREE.Vector2[]) {
   return false;
 }
 
+/** The longest piece of a curve is this fraction of the drawing's size (#420). */
+const SVG_CURVE_CHORD_FRACTION = 1 / 200;
+const SVG_MAX_CURVE_SEGMENTS = 400;
+
+/**
+ * The points of a path, each curve cut into pieces by its length: three.js cuts every curve into the same few
+ * pieces, so a large circle had about 32 corners that could be seen. A short curve keeps the old number
+ * of pieces, a long one gets as many as it needs to stay round.
+ */
+function pathPointsByLength(path: THREE.Path, longestPiece: number) {
+  const points: THREE.Vector2[] = [];
+  for (const curve of path.curves) {
+    let pieces = 1;
+    if (!(curve instanceof THREE.LineCurve)) {
+      // three.js gave an ellipse twice the pieces of other curves; that stays the least it gets.
+      const fewest = curve instanceof THREE.EllipseCurve ? SVG_CURVE_SEGMENTS * 2 : SVG_CURVE_SEGMENTS;
+      pieces = Math.min(SVG_MAX_CURVE_SEGMENTS, Math.max(fewest, Math.ceil(curve.getLength() / longestPiece)));
+    }
+    for (const point of curve.getPoints(pieces)) {
+      const last = points[points.length - 1];
+      if (last && last.equals(point)) continue;
+      points.push(point);
+    }
+  }
+  if (path.autoClose && points.length > 1 && !points[0].equals(points[points.length - 1])) points.push(points[0]);
+  return points;
+}
+
 function composeNestedRings(shapes: THREE.Shape[]) {
   const rings: SvgRing[] = [];
+  // The size of the drawing, from a rough reading of its outlines.
+  let extentOfDrawing = 0;
   for (const shape of shapes) {
-    const extracted = shape.extractPoints(SVG_CURVE_SEGMENTS);
+    for (const rough of shape.getPoints(SVG_CURVE_SEGMENTS)) extentOfDrawing = Math.max(extentOfDrawing, Math.abs(rough.x), Math.abs(rough.y));
+  }
+  const longestPiece = Math.max(extentOfDrawing * SVG_CURVE_CHORD_FRACTION, 1e-6);
+  for (const shape of shapes) {
+    const extracted = { shape: pathPointsByLength(shape, longestPiece), holes: shape.holes.map((hole) => pathPointsByLength(hole, longestPiece)) };
     for (const rawPoints of [extracted.shape, ...extracted.holes]) {
       const points = cleanRingPoints(rawPoints);
       if (points.length < 3) continue;

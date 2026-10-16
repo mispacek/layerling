@@ -13,7 +13,7 @@ Nevýhodou je ztráta projektů při vymazání úložiště prohlížeče nebo 
 
 ## Zálohování a předávání
 
-Každý projekt na úvodní stránce má nabídku přejmenování, duplikování a smazání. {{ui:dashboard.backupAll}} zabalí všechny projekty do jediného souboru. Přes {{ui:dashboard.importGeometry}} je obnovíte i v jiném prohlížeči nebo počítači. Součástí zálohy jsou také {{ui:myShapes.title}} z tohoto prohlížeče ve složce `Custom shapes`, viz [Tvary](chapter:shapes).
+Každý projekt na úvodní stránce má nabídku přejmenování, duplikování a smazání. {{ui:dashboard.backupAll}} zabalí všechny projekty do jediného souboru. Přes {{ui:dashboard.importGeometry}} je obnovíte i v jiném prohlížeči nebo počítači. Součástí zálohy jsou také {{ui:myShapes.title}} z tohoto prohlížeče ve složce `Custom shapes`, viz [Tvary](chapter:shapes). Pokud obnovíte zálohu v prohlížeči, který některé z těchto projektů už má, nepřidají se znovu; zpráva uvede, kolik jich tu už bylo.
 
 Jeden projekt uložíte v editoru přes {{ui:editor.export}}, formát **LYL** a {{ui:export.saveProject}}. LYL je vlastní formát Layerlingu a obsahuje tvary, sloučení, náčrty, CAD data, importované podklady i historii kroků zpět. V {{ui:export.historyTitle}} určíte počet přenášených posledních kroků. Výchozí odpovídá nastavení {{ui:workspace.history}}. Krajní volba {{ui:export.historyNone}} uloží jen současný stav, například pro sdílení bez historie. Export vytvoří kopii pod názvem {{ui:export.fileName}}; historie v prohlížeči zůstává zachovaná. Starší `.skf` lze stále otevřít, ale další uložení používá `.lyl`.
 

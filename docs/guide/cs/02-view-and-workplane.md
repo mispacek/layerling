@@ -15,7 +15,7 @@ Ovládání myší:
 | kolečko | přiblížení a oddálení |
 | [[Ctrl]] a tažení levým tlačítkem | také posun pohledu |
 
-Rychlost přiblížení nastavuje {{ui:workspace.zoomSpeed}} v části {{ui:workspace.appearance}}. Posuvník má rozsah 1 až 10, výchozí je 5.
+Rychlost přiblížení nastavuje {{ui:workspace.zoomSpeed}} v části {{ui:workspace.appearance}}. Posuvník má rozsah 1 až 14, výchozí je 5; nad 10 se zrychluje jen kolečko.
 
 Na tabletu nebo telefonu dvěma prsty přibližujete a oddalujete a společným posunem prstů posouváte pohled. Jeden prst pracuje s modelem jako levé tlačítko myši. Pro otáčení jedním prstem zapněte {{ui:camera.touchRotate}} v liště pohledu. Volba se zobrazuje jen na dotykových zařízeních.
 

@@ -12,6 +12,7 @@ Choisissez {{ui:shape.text}} dans la bibliothèque de formes et placez-le. Dans 
 - **{{ui:prop.height}} :** Dans quelle mesure le lettrage se détache de la surface.
 - **{{ui:prop.bevel}} :** Arrondit les bords des lettres pour qu'ils paraissent plus doux. Avec {{ui:prop.segments}}, vous décidez du nombre d'étapes.
 - **Taille :** Vous définissez la longueur et la largeur de la ligne comme pour n'importe quelle forme. Faites glisser les poignées ou saisissez les dimensions.
+- **{{ui:prop.textStretch}} :** Désactivé au départ : les lettres gardent leurs proportions et restent au milieu du cadre, donc un cadre étiré plus large ou plus profond que le mot n'en a besoin reste plus grand que les lettres. Activez-le et les lettres sont étirées dans les deux directions pour remplir tout le cadre : une majuscule peut être rendue plus basse ou plus étroite, comme dans Tinkercad. Il s'applique au texte droit ; le texte courbe a sa propre taille de lettre.
 
 Le texte est d’abord un seul corps. Si vous souhaitez traiter les lettres individuellement, cliquez sur {{ui:inspector.separateParts}}. Chaque lettre est alors une forme qui lui est propre.
 
@@ -85,7 +86,7 @@ Avec une ligne à l'extérieur, une ligne centrée ou "Plus large", la case du t
 
 ## Calques et balises de nom
 
-Un badge pour une impression multicolore est un texte en couches : les lettres en haut, en dessous le même texte un peu plus large dans une deuxième couleur, en bas une plaque sans trous dans une troisième. layerling le fait en un clic :
+Une balise pour une impression multicolore est un texte en couches : les lettres en haut, en dessous le même texte un peu plus large dans une deuxième couleur, en bas une plaque sans trous dans une troisième. layerling le fait en un clic :
 
 - **Une nouvelle balise de nom :** choisissez {{ui:shape.nameTag}} dans la bibliothèque de formes et placez-la. Il est écrit « Nom » en lettres blanches sur un bord rouge et une plaque sombre.
 - **À partir d'un texte :** sélectionnez le texte et cliquez sur {{ui:nameTag.makeLayers}} en haut de ses paramètres.
@@ -113,12 +114,15 @@ Une balise icône est la même balise avec une icône SVG au lieu de lettres : u
 
 La carte {{ui:iconTag.title}} en haut des paramètres contient :
 
-- **{{ui:iconTag.replace}} :** met une autre icône SVG sur la balise ; les couches et la largeur restent telles quelles.
-- **{{ui:iconTag.iconWidth}} :** la largeur de l'icône en haut, en mm. Toutes les couches suivent et restent alignées.
-- **{{ui:nameTag.layers}} :** les lignes comme sur une étiquette de nom - couleur, combien de largeur, {{ui:nameTag.corners}}, hauteur et {{ui:nameTag.noHoles}}, **+** et **–**, deux à six couches. La rangée du haut est l'icône elle-même.
-- **{{ui:iconTag.count}} :** combien de tags vous souhaitez, de 1 à 100. {{ui:iconTag.fill}} le calcule à partir de la plaque de l'imprimante choisie dans les paramètres, pour les petits logos une plaque pleine. Le bouton du dessous les permet de les disposer, espacés de 5 mm, au milieu de la plaque ; le premier est la balise elle-même.
+- **{{ui:iconTag.replace}} :** place l'icône d'un autre fichier (SVG, PNG ou JPG) sur la balise ; les couches et la largeur restent telles quelles.
+- **{{ui:iconTag.iconWidth}} :** la largeur de l'icône en haut, en mm. Toutes les couches suivent et restent alignées.
+- **{{ui:nameTag.layers}} :** les lignes comme sur une étiquette de nom - couleur, de combien plus large, {{ui:nameTag.corners}}, hauteur et {{ui:nameTag.noHoles}}, **+** et **–**, deux à six couches. La rangée du haut est l'icône elle-même.
+- **{{ui:nameTag.keyring}} :** comme sur une étiquette de nom : un trou pour porte-clés à travers chaque couche, avec une patte à extrémité arrondie sur la couche inférieure, au-delà de l'icône. {{ui:nameTag.keyringDiameter}} et {{ui:nameTag.keyringSide}} déterminent sa taille et son emplacement. La patte est calculée pour épouser le contour de l'icône ; pour une icône très découpée, vérifiez où elle touche le plateau.
+- **{{ui:iconTag.count}} :** combien de balises vous souhaitez, de 1 à 100. {{ui:iconTag.fill}} le calcule à partir du plateau de l'imprimante choisie dans les paramètres, pour une plaque complète de petits logos. Le bouton en dessous les génère, espacés de 5 mm, répartis au milieu du plateau ; la première est la balise d'origine.
 
-Le SVG a besoin de contours fermés ; un dessin de lignes ouvertes uniquement ne peut pas devenir une étiquette. Un corps d'esquisse dont le remplissage est une ligne le conserve : la zone de cette ligne est l'icône.
+Le fichier SVG nécessite des contours fermés ; un dessin composé uniquement de lignes ouvertes ne peut pas former une balise. Un corps d'esquisse dont le remplissage est une ligne le conserve : la surface de cette ligne devient l'icône.
+
+**Une image (PNG ou JPG)** est vectorisée en contour, et l'aperçu affiche ce contour. Sous {{ui:iconTag.part}}, vous choisissez si c'est la partie {{ui:iconTag.part.dark}} ou {{ui:iconTag.part.light}} qui devient l'icône ; au départ, il s'agit de la partie qui n'est pas l'arrière-plan. Les pixels transparents ne font jamais partie de l'icône. Un fichier SVG ne contenant qu'une seule image (comme lorsqu'Inkscape enregistre un bitmap importé) est vectorisé de la même manière. Le contour suit les pixels, de sorte qu'une petite image aura des bords crénelés : les images de quelques centaines de pixels ou plus donnent les meilleurs résultats. {{ui:iconTag.replace}} prend la partie d'une image qui ne constitue pas son arrière-plan.
 
 ## Texte sur un arc de cercle
 

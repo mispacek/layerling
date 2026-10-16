@@ -1,6 +1,6 @@
 import { strToU8, zipSync } from "fflate";
 import { describe, expect, it } from "vitest";
-import { backupEntryNames, backupFileName, packBackup, unpackBackup } from "@/lib/projectBackup";
+import { backupDesignAlreadyThere, backupEntryNames, backupFileName, packBackup, unpackBackup } from "@/lib/projectBackup";
 
 describe("backing up all designs", () => {
   it("names the backup after the day", () => {
@@ -32,5 +32,19 @@ describe("backing up all designs", () => {
   it("reads designs from folders and ignores other files", () => {
     const zip = zipSync({ "Ordner/Alt.skf": new Uint8Array([9]), "liesmich.txt": strToU8("hallo") });
     expect(unpackBackup(zip).map((entry) => entry.name)).toEqual(["Alt.skf"]);
+  });
+});
+
+describe("restoring a backup twice (#407)", () => {
+  const here = [{ name: "Halter", createdAt: 1000 }, { name: "Dose", createdAt: 2000 }];
+
+  it("knows a design that is already there by name and creation time", () => {
+    expect(backupDesignAlreadyThere(here, { name: "Halter", createdAt: 1000 })).toBe(true);
+  });
+
+  it("adds a design that has another creation time or another name", () => {
+    expect(backupDesignAlreadyThere(here, { name: "Halter", createdAt: 1001 })).toBe(false);
+    expect(backupDesignAlreadyThere(here, { name: "Halter 2", createdAt: 1000 })).toBe(false);
+    expect(backupDesignAlreadyThere([], { name: "Halter", createdAt: 1000 })).toBe(false);
   });
 });

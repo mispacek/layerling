@@ -39,6 +39,8 @@ Stehen Körper an einem der Arme, zeigt das Winkellineal automatisch deren Maße
 
 Markierst du einen Körper, zeigt das Winkellineal in Grün, wie weit er von der Ecke entfernt ist, entlang beider Arme und in der Höhe. Ein Klick auf eine grüne Zahl öffnet ein Eingabefeld: Tippe den gewünschten Abstand ein, und der Körper rückt genau dorthin. Sind mehrere Körper markiert, zählen sie zusammen wie einer. Gemessen wird ihr gemeinsamer Umriss, und ein eingetippter Wert verschiebt alle gemeinsam, ohne dass sich ihre Lage zueinander ändert.
 
+Die Hilfslinien der grünen Zahlen laufen am Boden entlang, in der Ebene, in der das Winkellineal liegt, bis zu dem Punkt unter oder neben dem Körper; die Höhe hat ihren eigenen Pfeil. Der Schalter jeder Zahl sitzt im Rahmen der Zahl. Die Arme und die Teilstriche sind Linien im Raum: Ein Körper davor verdeckt sie, wie er ein echtes Lineal verdecken würde. Das kleine Auge unter dem Griff schaltet das um: Mit durchgestrichenem Auge verdecken Körper das Lineal (so beginnt es), mit offenem Auge bleibt es über allem sichtbar. Die Zahlen an den Armen verblassen, wo ein Körper davor steht.
+
 Mit dem Mittelpunkt zählen die grünen Zahlen bis zur Mitte des Körpers, auch in der Höhe. So setzt du etwa eine Kugel mit ihrer Mitte genau 15 mm neben eine Kante, ohne den Radius abzuziehen. Auf einer Wand setzt du so ein Loch 40 mm von links und 190 mm von oben: Loch markieren, Mittelpunkt einschalten, 40 und 190 eintippen. Die Höhe zählt dort von der Wand aus nach außen.
 
 Das Maßband und das Winkellineal bleiben stehen, wenn du eine Skizze machst und in die 3D-Ansicht zurückkehrst. Sie werden nicht mit dem Entwurf gespeichert und stehen nicht im Verlauf, und beim Neuladen der Seite sind sie weg.

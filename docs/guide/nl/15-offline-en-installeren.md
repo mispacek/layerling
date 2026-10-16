@@ -26,7 +26,7 @@ Is layerling in meerdere tabbladen open, dan letten ze op elkaar: draait een and
 
 ## Taal en weergave
 
-De taal stel je rechtsboven in: Nederlands, Duits of Engels. Het kleurenschema ernaast biedt {{ui:theme.short.system}} (volgt het besturingssysteem), {{ui:theme.short.light}}, {{ui:theme.short.dark}} en {{ui:theme.short.graphite}}, een neutraal donkergrijs.
+De taal kies je rechtsboven in de taallijst. Het kleurenschema ernaast biedt {{ui:theme.short.system}} (volgt het besturingssysteem), {{ui:theme.short.light}}, {{ui:theme.short.dark}} en {{ui:theme.short.graphite}}, een neutraal donkergrijs.
 
 ## Zelf draaien
 

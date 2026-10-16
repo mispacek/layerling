@@ -15,7 +15,7 @@ Met de muis:
 | scrollwiel | in- en uitzoomen |
 | [[Ctrl]] ingedrukt houden en slepen met de linkerknop | verschuift ook de weergave |
 
-Hoe snel het muiswiel zoomt, stel je in bij de instellingen onder {{ui:workspace.appearance}} met {{ui:workspace.zoomSpeed}}: een schuifregelaar van 1 tot 10, eerst 5.
+Hoe snel het muiswiel zoomt, stel je in bij de instellingen onder {{ui:workspace.appearance}} met {{ui:workspace.zoomSpeed}}: een schuifregelaar van 1 tot 14, eerst 5; boven 10 wordt alleen het wiel sneller.
 
 Op een tablet of telefoon zoomen twee vingers (spreiden en knijpen) en verschuiven ze de weergave (samen schuiven). Eén vinger werkt op het ontwerp, net als de linkermuisknop. Om met één vinger te draaien, zet je {{ui:camera.touchRotate}} aan in de camerabalk. Die schakelaar verschijnt alleen op apparaten met een touchscreen.
 

@@ -197,7 +197,8 @@ import {
   springWireLimits,
 } from "@/lib/springGeometry";
 import { regularPolygonAspect } from "@/lib/regularPolygonFootprint";
-import { DEFAULT_TAPER_DIMENSION_MAX, MAX_HIGH_RESOLUTION_SIDES, MAX_HIGH_RESOLUTION_STEPS, customSnapGridLabel, shapeDimensionLimit, snapGridOptions, snapGridStep } from "@/lib/workplaneSettings";
+import { DEFAULT_TAPER_DIMENSION_MAX, MAX_HIGH_RESOLUTION_SIDES, MAX_HIGH_RESOLUTION_STEPS, POSITION_TYPED_LIMIT, customSnapGridLabel, positionReach, shapeDimensionLimit, snapGridOptions, snapGridStep } from "@/lib/workplaneSettings";
+import { printerPresetById } from "@/lib/printBed";
 import type { BentTubeInnerProfile, BentTubeProfile, CustomSnapGrid, GearType, GridSize, MeasurementAccuracy, ShapeCustomization, SketchProfile, SketchStroke, SketchStrokeAlign, SketchStrokeJoin, ThreadHead, ThreadProfile, ThreadRole, WorkplaneShape, WorkplaneWorkspaceSettings } from "@/types/layerling";
 import { selectWholeValue } from "@/lib/numberField";
 import { formulaMatchesValue, formulaToRemember, withFieldFormula, type FieldFormulas } from "@/lib/fieldFormulas";
@@ -354,7 +355,7 @@ const RELATIVE_SIZE_PROPERTY_IDS = new Set(["width", "height", "length", "diamet
 const ROTATION_PROPERTY_IDS = new Set(["rotateX", "rotateY", "rotateZ"]);
 
 function propertyUsesLengthUnit(key: string) {
-  return ["textLineWidth", "letterSize", "iconWidth", "keyringDiameter", "positionX", "positionY", "positionZ", "pivotX", "pivotY", "pivotZ", "radius", "length", "width", "height", "bevel", "topRadius", "baseRadius", "thickness", "toothSize", "toothWidth", "gearBacklash", "centerHole", "slotSmallEnd", "slotCentreDistance", "sketchLineWidth", "topLength", "topWidth", "bottomLength", "bottomWidth", "diameter", "pitch", "clearance", "axialClearance", "boltClearance", "threadDepth", "threadCoreDiameter", "threadLength", "headHeight", "chamfer", "chamferBottom", "headChamfer", "wire", "starOuterSize", "starInnerSize", "starOuterFillet", "starInnerFillet", "heartTipFillet", "crescentThickness", "crescentTipFillet", "honeycombCellSize", "honeycombWallThickness", "honeycombFrameWidth", "cornerFillet", "topBottomFillet", "bentTubeSize", "bentTubeWall", "bentTubeSegmentLength", "bentTubeBendRadius", "dovetailNeckWidth", "dovetailClearance", "hingePinDiameter", "hingeLeafThickness", "hingeClearance", "screwHoleShaft", "screwHoleHeadDepth", "knurlDepth", "knurlChamfer", "loftBottomWidth", "loftBottomDepth", "loftTopWidth", "loftTopDepth", "loftBottomCorner", "loftTopCorner", "loftOffsetX", "loftOffsetZ", "loftWall"].includes(key);
+  return ["textLineWidth", "letterSize", "iconWidth", "keyringDiameter", "positionX", "positionY", "positionZ", "pivotX", "pivotY", "pivotZ", "radius", "length", "width", "height", "bevel", "topRadius", "baseRadius", "thickness", "innerDiameter", "toothSize", "toothWidth", "gearBacklash", "centerHole", "slotSmallEnd", "slotCentreDistance", "sketchLineWidth", "topLength", "topWidth", "bottomLength", "bottomWidth", "diameter", "pitch", "clearance", "axialClearance", "boltClearance", "threadDepth", "threadCoreDiameter", "threadLength", "headHeight", "chamfer", "chamferBottom", "headChamfer", "wire", "starOuterSize", "starInnerSize", "starOuterFillet", "starInnerFillet", "heartTipFillet", "crescentThickness", "crescentTipFillet", "honeycombCellSize", "honeycombWallThickness", "honeycombFrameWidth", "cornerFillet", "topBottomFillet", "bentTubeSize", "bentTubeWall", "bentTubeSegmentLength", "bentTubeBendRadius", "dovetailNeckWidth", "dovetailClearance", "hingePinDiameter", "hingeLeafThickness", "hingeClearance", "screwHoleShaft", "screwHoleHeadDepth", "knurlDepth", "knurlChamfer", "loftBottomWidth", "loftBottomDepth", "loftTopWidth", "loftTopDepth", "loftBottomCorner", "loftTopCorner", "loftOffsetX", "loftOffsetZ", "loftWall"].includes(key);
 }
 
 /**
@@ -802,7 +803,7 @@ function getShapePropertiesWithAppLimits(shape: WorkplaneShape, onUpdate: ShapeI
     ];
   }
 
-  if (shape.kind === "counterbore" || shape.kind === "countersink") {
+  if (shape.kind === "counterbore" || shape.kind === "countersink" || shape.kind === "doubleCountersink") {
     const shaft = normalizeScrewHoleShaft(shape.screwHoleShaft, width);
     const shaftProperty: ShapePropertyConfig = {
       id: "screwHoleShaft",
@@ -1207,9 +1208,21 @@ function getShapePropertiesWithAppLimits(shape: WorkplaneShape, onUpdate: ShapeI
   }
 
   if (shape.kind === "tube" || shape.kind === "ring") {
+    // The bore as a size of its own (#384), for a bushing on a shaft of a known size. It is the wall
+    // seen from the other side: width minus twice the wall, so typing it sets the wall from the width.
+    const wall = shape.bevel ?? 4;
+    const wallLimit = Math.max(0.5, Math.min(width, depth) / 2 - 0.1);
     return [
       ...roundSideProperties(shape, width, depth, onUpdate),
-      { id: "thickness", label: t("prop.thickness"), value: shape.bevel ?? 4, min: 0.5, max: 20, onChange: (bevel) => onUpdate({ bevel }) },
+      { id: "thickness", label: t("prop.thickness"), value: wall, min: 0.5, max: 20, onChange: (bevel) => onUpdate({ bevel }) },
+      {
+        id: "innerDiameter",
+        label: t("prop.innerDiameter"),
+        value: Math.max(0.2, width - 2 * Math.min(wall, wallLimit)),
+        min: 0.2,
+        max: Math.max(0.2, width - 1),
+        onChange: (inner) => onUpdate({ bevel: clamp((width - inner) / 2, 0.5, wallLimit) }),
+      },
       { id: "length", label: t("prop.length"), value: depth, min: MIN_SHAPE_SIZE, max: 160, onChange: setDepth },
       { id: "width", label: t("prop.width"), value: width, min: MIN_SHAPE_SIZE, max: 160, onChange: setWidth },
       { id: "height", label: t("prop.height"), value: shape.height, min: MIN_SHAPE_SIZE, max: 160, onChange: setHeight },
@@ -1841,6 +1854,14 @@ function getShapePropertiesWithAppLimits(shape: WorkplaneShape, onUpdate: ShapeI
         { id: "bevel", label: t("prop.bevel"), value: shape.bevel ?? 0, min: 0, max: 8, onChange: (bevel: number) => onUpdate({ bevel }) },
         { id: "segments", label: t("prop.segments"), value: shape.segments ?? 0, min: 0, max: 24, step: 1, onChange: (segments: number) => onUpdate({ segments: Math.round(segments) }) },
       ] satisfies ShapePropertyConfig[]),
+      // Straight text (#382): the letters keep their proportions in the box, or are stretched to fill it.
+      ...(isCurved ? [] : [{
+        type: "toggle",
+        id: "textStretch",
+        label: t("prop.textStretch"),
+        value: Boolean(shape.textStretch),
+        onChange: (textStretch: boolean) => onUpdate({ textStretch: textStretch || undefined }),
+      } satisfies ShapePropertyConfig]),
       {
         type: "toggle",
         id: "textCurved",
@@ -2252,11 +2273,13 @@ export function ShapeInspector({
    */
   const reachX = workspace.width * 1.5;
   const reachY = workspace.depth * 1.5;
+  // Up, the slider reaches as far as the plate does and the printer is high; any number can be typed (#425).
+  const reachZ = positionReach(workspace, printerPresetById(workspace.printer)?.height);
   const positionProperties: ShapePropertyConfig[] = [
     { id: "positionX", label: t("prop.positionX"), value: shape.x, min: -reachX, max: reachX, step: 0.5, onChange: (x) => onUpdate({ x }) },
     // Y counts towards the back, right-handed (#182); inside, z runs towards the viewer.
     { id: "positionY", label: t("prop.positionY"), value: displayY(shape.z), min: -reachY, max: reachY, step: 0.5, onChange: (y) => onUpdate({ z: insideZ(y) }) },
-    { id: "positionZ", label: t("prop.positionZ"), value: shape.elevation ?? 0, min: -180, max: 220, step: 0.5, onChange: (elevation) => onUpdate({ elevation }) },
+    { id: "positionZ", label: t("prop.positionZ"), value: shape.elevation ?? 0, min: -Math.max(180, reachZ), max: reachZ, step: 0.5, onChange: (elevation) => onUpdate({ elevation }) },
   ];
   // The body's turn about X, Y and Z, as it is drawn. A new angle turns it
   // about its centre, or about its own pivot if it has one.
@@ -2290,7 +2313,7 @@ export function ShapeInspector({
     ? [
       { id: "pivotX", label: t("prop.pivotX"), value: pivot.x, min: -reachX, max: reachX, step: 0.5, onChange: (x) => movePivot({ x }) },
       { id: "pivotY", label: t("prop.pivotY"), value: displayY(pivot.z), min: -reachY, max: reachY, step: 0.5, onChange: (y) => movePivot({ z: insideZ(y) }) },
-      { id: "pivotZ", label: t("prop.pivotZ"), value: pivot.y, min: -180, max: 220, step: 0.5, onChange: (y) => movePivot({ y }) },
+      { id: "pivotZ", label: t("prop.pivotZ"), value: pivot.y, min: -Math.max(180, reachZ), max: reachZ, step: 0.5, onChange: (y) => movePivot({ y }) },
     ]
     : [];
   const isSketchRevolve = shape.sketchOperation === "revolve" || Boolean(shape.sketchRevolve);
@@ -3175,7 +3198,7 @@ function NameTagCard({
 }
 
 /** What the icon tag card changes: the icon's width and the layers; the rest stays as it is. */
-export type IconLayerPatch = { width?: number; layers?: TextLayer[] };
+export type IconLayerPatch = { width?: number; layers?: TextLayer[]; keyring?: NameTagKeyring | null };
 
 /**
  * The icon tag card's wiring: the stack as it stands, the build, the copies on the plate, and
@@ -3277,6 +3300,26 @@ function IconTagCard({ shapeId, controls, workspace, disabled, onInteractionActi
           {replaceError ? <p className="name-tag-hint icon-tag-card-error" role="alert">{replaceError}</p> : null}
           <ShapePropertyRows properties={properties.slice(0, 1)} workspace={workspace} disabled={disabled} onInteractionActiveChange={onInteractionActiveChange} />
           <LayerRows layers={stack.layers} firstLabel={t("iconTag.icon")} workspace={workspace} disabled={disabled} onChange={(layers) => onLayer({ layers })} onInteractionActiveChange={onInteractionActiveChange} />
+          {/* The key ring hole as on the name tag (#391): its size and its side; the ear is on the bottom layer. */}
+          <ToggleProperty
+            label={t("nameTag.keyring")}
+            value={Boolean(stack.keyring)}
+            disabled={disabled}
+            onChange={(on) => onLayer({ keyring: on ? { side: "left", diameter: DEFAULT_KEYRING_DIAMETER } : null })}
+          />
+          {stack.keyring ? (
+            <>
+              <RangeProperty id="keyringDiameter" label={t("nameTag.keyringDiameter")} value={stack.keyring.diameter} min={MIN_KEYRING_DIAMETER} max={10} step={0.05} workspace={workspace} disabled={disabled} onChange={(diameter) => onLayer({ keyring: { ...stack.keyring!, diameter } })} onInteractionActiveChange={onInteractionActiveChange} />
+              <div className="name-tag-sides" role="radiogroup" aria-label={t("nameTag.keyringSide")}>
+                <span>{t("nameTag.keyringSide")}</span>
+                {TEXT_KEYRING_SIDES.map((side) => (
+                  <button key={side} type="button" role="radio" aria-checked={stack.keyring!.side === side} className={stack.keyring!.side === side ? "active" : ""} disabled={disabled} onClick={() => onLayer({ keyring: { ...stack.keyring!, side } })}>
+                    {t(`nameTag.side.${side}`)}
+                  </button>
+                ))}
+              </div>
+            </>
+          ) : null}
           <ShapePropertyRows properties={properties.slice(1)} workspace={workspace} disabled={disabled} onInteractionActiveChange={onInteractionActiveChange} />
           <button className="inspector-action-button" type="button" disabled={disabled} onClick={fill}>
             <Grid3x3 size={17} strokeWidth={2.5} />
@@ -3736,7 +3779,9 @@ function RangeProperty({
   const allowsAboveSliderMax = ["length", "width", "height", "starOuterSize", "starInnerSize", "crescentThickness", "honeycombCellSize", "honeycombWallThickness", "honeycombFrameWidth", "bentTubeSize", "bentTubeBendRadius"].includes(id) || id.endsWith("Length") || id.endsWith("Width");
   const isLength = propertyUsesLengthUnit(id);
   const accuracy = workspace.accuracy;
-  const actualValue = Math.max(min, Number.isFinite(value) ? value : min);
+  // A position can be typed beyond the slider, on both sides (#425).
+  const freePosition = id === "positionX" || id === "positionY" || id === "positionZ" || id === "pivotX" || id === "pivotY" || id === "pivotZ";
+  const actualValue = freePosition && Number.isFinite(value) ? value : Math.max(min, Number.isFinite(value) ? value : min);
   const controlValue = isLength ? millimetersToDisplay(actualValue, workspace) : actualValue;
   const controlMin = isLength ? millimetersToDisplay(min, workspace) : min;
   const controlMax = isLength ? millimetersToDisplay(max, workspace) : max;
@@ -3768,7 +3813,7 @@ function RangeProperty({
     const nextModelValue = toModelValue(finiteNext);
     // The formula rides along with the value it set, in the same change; a plain number clears it.
     onFormula?.(Number.isFinite(next) ? formulaToRemember(draft) : null);
-    onChange(allowsAboveSliderMax ? Math.max(min, nextModelValue) : clamp(nextModelValue, min, max));
+    onChange(freePosition ? clamp(nextModelValue, -POSITION_TYPED_LIMIT, POSITION_TYPED_LIMIT) : allowsAboveSliderMax ? Math.max(min, nextModelValue) : clamp(nextModelValue, min, max));
     onFormula?.(undefined);
     setEditing(false);
     holdInteraction(false);

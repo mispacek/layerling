@@ -12,6 +12,7 @@ Kies {{ui:shape.text}} in de vormenbibliotheek en plaats de tekst. Typ rechts in
 - **{{ui:prop.height}}:** Hoe ver de belettering boven het oppervlak uitsteekt.
 - **{{ui:prop.bevel}}:** Rondt de randen van de letters af, zodat ze zachter ogen. Met {{ui:prop.segments}} bepaal je in hoeveel stappen.
 - **Grootte:** Lengte en breedte van de regel stel je in zoals bij elke vorm. Sleep aan de grepen of typ de maten in.
+- **{{ui:prop.textStretch}}:** In het begin uit: de letters houden hun verhoudingen en staan in het midden van het kader, dus een kader dat breder of dieper is getrokken dan het woord nodig heeft, blijft groter dan de letters. Zet je het aan, dan worden de letters in beide richtingen over het hele kader uitgerekt: een hoofdletter kun je lager of smaller maken, zoals in Tinkercad. Het geldt voor rechte tekst; gebogen tekst heeft een eigen lettergrootte.
 
 Tekst is eerst één lichaam. Wil je de letters afzonderlijk bewerken, klik dan op {{ui:inspector.separateParts}}. Dan is elke letter een eigen vorm.
 

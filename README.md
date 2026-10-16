@@ -52,7 +52,7 @@ layerling sits a step beyond Tinkercad towards Fusion 360: it is operated the sa
 
 It is not a full CAD package: there is no parametric timeline and no assemblies. And you can **run it yourself**: install it as an app (it then starts without internet), or host your own copy on Windows, a NAS or a home server – see [Getting Started](#getting-started).
 
-> **An AI can build along with you.** layerling ships an MCP server. An AI client such as Codex or Claude sees an open
+> **An AI can build along with you.** layerling ships an MCP server. An AI client such as Gemini, Claude or Codex sees an open
 > editor tab and works in it: add shapes, change measurements, group, cut, round edges, read the scene back, take pictures
 > of the viewport. You describe the part, the AI builds it, you watch it happen and step in whenever you want. This runs
 > locally, with nothing leaving the browser – see [layerling MCP Skill](#layerling-mcp-skill) for the setup.
@@ -92,6 +92,7 @@ It is not a full CAD package: there is no parametric timeline and no assemblies.
 - **Hollowing** – turn a body into walls of one thickness, open on any sides you choose (top, bottom, front, back, left, right, in any combination) or closed – for boxes, cups and cases.
 - **Custom shapes** – keep bodies you need again and again at the top of the shape library and insert them into any design with a click or by dragging; in the browser, or with the shared store on the server for every device. "Back up all" takes them along.
 - **Hole pattern** – perforate a flat face of a body: pick the face, choose round, square, rectangular, hexagonal or slot holes, set size, spacing, grid or staggered, the margin to the edge and the depth (through the whole part or a set depth), and see the holes as a preview before creating them. They stay ordinary holes grouped with the body, so ungrouping frees them again.
+- **Face** – push a flat face of a body out or cut a pocket into it: pick the face, choose Out or In, set an inset from the edge, a corner radius and the depth, and see the result as a preview. It works on imported STLs too, and what it adds stays an ordinary sketch body grouped with the body.
 - **Wrap around a cylinder** – lay an SVG pattern, a logo or lettering onto the wall of a cup or tube, raised or engraved, and centre it on the cylinder.
 
 ### Files
@@ -219,6 +220,8 @@ Everyday commands:
 - **Restart:** `docker compose -f docker/compose.yml up -d`
 - **Update** (after pulling new code or extracting a new ZIP): `docker compose -f docker/compose.yml up -d --build`; with the ready-made image `docker compose -f docker/compose.yml pull` and then `up -d`
 
+**Installing as an app and offline use need https, and the static export.** A browser installs an app and keeps it for offline use only on `https://` or on `localhost`; on a plain `http://192.168.x.x:3000` address it offers neither (layerling hides its install hint there). Even with https, the offline files (`sw.js`) are written only into the static export (see [Static Hosting](#static-hosting-plain-files-on-a-web-server)), not into this image, which runs the server version. For installing and offline use on a network, serve the static export over https; for an https address in front of the container, use a reverse proxy such as Caddy or nginx with a certificate (for example from mkcert).
+
 The image runs `next start` in production mode, so the MCP bridge is off there unless you switch it on (see [Letting an AI client reach a copy on a NAS or server](#letting-an-ai-client-reach-a-copy-on-a-nas-or-server)). To offer a shared project folder, bind a writable directory and set `LAYERLING_SHARED_PROJECTS_DIR` in `compose.yml` to the path inside the container where it is mounted, for example `./shared-projects:/shared-projects` with `LAYERLING_SHARED_PROJECTS_DIR: "/shared-projects"` (see [Shared Designs on a Network](#shared-designs-on-a-network)). The container runs as the user with the number 999, so that user must be allowed to write to the folder: `sudo chown 999:999 ./shared-projects`, or add `user: "1000:1000"` to the service (your own user and group numbers, `id -u` and `id -g` show them) so that the container runs as you. Without it the folder shows up on the start page but nothing can be saved there. After changing it, run `docker compose up -d`: `docker compose restart` keeps the old setting. `docker exec <container> printenv LAYERLING_SHARED_PROJECTS_DIR` shows the one in use.
 
 To choose the colour theme people get on their first visit, set `LAYERLING_DEFAULT_THEME` to `system`, `light`, `dark` or `graphite` (the same way, in `compose.yml` or in the environment of `npm run start`). Anyone who has opened layerling before keeps the theme their browser already has, and anyone can still change it with the theme switch. Without the setting the theme follows the system. A copy served as plain files has no server to read it, so it does not apply there.
@@ -236,11 +239,12 @@ npm run export
 
 The finished site is in **`apps/web/.next-export/`**. Copy the **contents** of that folder (not the folder itself) into the web server's document root, so that `index.html` lies directly in it.
 
-Three things to know:
+Four things to know:
 
 - **layerling needs an address of its own.** The files refer to each other with paths that start at the root (`/_next/...`), so layerling must be served at the root of an address, such as `https://layerling.example.com/` or `http://192.168.0.5:8080/`. It does not work in a subfolder (`https://example.com/layerling/`) and cannot be opened from disk (`file://`). If you only see a block of plain text without any styling, the script and style files did not load: open the browser's developer tools (F12), look at the Network tab for red `/_next/...` entries and compare their address with where you put the files.
 - **Folders that start with an underscore must be served.** Some servers hide them (GitHub Pages does without a `.nojekyll` file, for example), and `_next` holds the whole program.
 - **A quick test on your own computer:** `npx serve apps/web/.next-export` and open the address it prints.
+- **Installing as an app and offline use need https.** The export holds the offline files (`sw.js`), but a browser uses them only on an `https://` address or on `localhost`, not on a plain `http://` address in your network.
 
 ### Shared Designs on a Network
 
@@ -320,6 +324,8 @@ No Git? Press the green **Code** button on the GitHub page, choose **Download ZI
 extracted folder and start with `npm install`.
 
 Then open `http://127.0.0.1:3000/`. Leave the terminal open while you use the app; `Ctrl+C` stops the development server.
+
+To open the development server from another computer by a name, such as `http://myhost.local:3000/`, list that name in the environment variable `LAYERLING_ALLOWED_DEV_ORIGINS` before you start (several names separated by commas, `*.local` for every name ending in `.local`). Without it, the development server answers only to `localhost` and `127.0.0.1`. The static export and `npm run start` do not need it.
 
 On Linux and macOS, `scripts/start-layerling.sh` does the daily start for you: it updates the checkout first (skipped if you changed files in it), starts the server, waits until it answers and then opens the browser. Run it from anywhere, for example `~/layerling/scripts/start-layerling.sh`. It needs Git and Node.js, as above. If layerling already runs on that port, it only opens the browser instead of starting a second server. Port 3000 taken by something else? Start it with `PORT=3100 scripts/start-layerling.sh`. It has been tried on Debian Linux (without a desktop, so the browser step only prints the address) and in a Windows shell; macOS is untested – if it misbehaves on your system, please tell us in the discussions.
 
@@ -415,6 +421,30 @@ as the template and replacing the script path with the absolute path on your mac
 
 ```text
 Use $layerling-mcp-skill to list my open layerling editors and inspect the current scene.
+```
+
+### Gemini & Antigravity
+
+For Antigravity, the repo ships a copy of the skill at `.agents/skills/layerling-mcp-skill`, which Antigravity discovers automatically. For Gemini CLI, copy the skill from `docs/skills/layerling-mcp-skill` into your global skills folder.
+
+Windows PowerShell:
+
+```powershell
+New-Item -ItemType Directory -Force "$env:USERPROFILE\.gemini\skills" | Out-Null
+Copy-Item -Recurse -Force "docs\skills\layerling-mcp-skill" "$env:USERPROFILE\.gemini\skills\layerling-mcp-skill"
+```
+
+macOS or Linux:
+
+```bash
+mkdir -p ~/.gemini/skills
+cp -R docs/skills/layerling-mcp-skill ~/.gemini/skills/
+```
+
+Then add the server to your Gemini CLI `settings.json` or Antigravity `mcp_config.json`, using [`docs/mcp/gemini-config.example.json`](docs/mcp/gemini-config.example.json) as the template and replacing the script path with the absolute path on your machine. Restart the client and ask:
+
+```text
+Use the layerling MCP tools to list my open layerling editors and inspect the current scene.
 ```
 
 ### Letting an AI client reach a copy on a NAS or server

@@ -85,7 +85,7 @@ Pour les grilles de trous, les cercles de boulons et les anneaux de dents, il ex
 ![Le motif en mode "Cercle" : les copies apparaissent d'abord en aperçu.](shot:pattern-tool)
 
 - **{{ui:array.mode.row}} :** La sélection est répétée à distances égales. La rangée suit les trois axes à la fois, avec {{ui:array.spacingX}}, {{ui:array.spacingY}} et {{ui:array.spacingZ}} : l'un d'eux donne une rangée droite, deux ou trois une rangée diagonale ou un escalier. Un espacement négatif place la rangée dans l’autre sens.
-- **{{ui:array.mode.circle}} :** La sélection est répartie autour d'un centre. Combien de copies avez-vous défini sous {{ui:array.count}}, et {{ui:array.angle}} fait 360° pour un cercle complet. Choisissez si les copies tournent. {{ui:array.rise}} soulève chaque copie un peu plus que la précédente (une vis ou une spirale ascendante), et {{ui:array.radiusChange}} l'éloigne du centre ou la rapproche de celui-ci (une spirale plate) ; ensemble, ils donnent une spirale conique.
+- **{{ui:array.mode.circle}} :** La sélection est répartie autour d'un centre. Combien de copies avez-vous défini sous {{ui:array.count}}, et {{ui:array.angle}} fait 360° pour un cercle complet. Choisissez si les copies tournent. {{ui:array.rise}} soulève chaque copie un peu plus que la précédente (une vis ou une spirale ascendante), et {{ui:array.radiusChange}} l'éloigne du centre ou la rapproche de celui-ci (une spirale plate) ; ensemble, ils donnent une spirale conique. Une spirale ne fait qu'un tour au plus : un angle supérieur à 360° compte comme un cercle complet, et il y a au plus 100 copies.
 
 Astuce : placez d'abord le pivot sur une face avec {{ui:editor.tool.rotationPivot}}, puis le centre du cercle se trouve exactement là.
 
@@ -112,6 +112,23 @@ Pour les évents, les grilles d'enceintes, les paniers et les enceintes, le {{ui
 Les trous sont des trous ordinaires regroupés avec le corps, tout comme après {{ui:editor.tool.group}} : rien n'est cuit. {{ui:editor.tool.ungroup}} dissout à nouveau le groupe et libère chaque trou, que vous pouvez ensuite déplacer, modifier ou supprimer un par un. Le tout est une étape pour {{ui:editor.tool.undo}}. L'outil ne fait pas plus de 400 trous à la fois ; agrandissez ensuite les trous ou élargissez l'espacement.
 
 Une IA peut faire la même chose via le pont MCP avec `layerling_perforate_face` (voir le chapitre [AI avec MCP](chapter:ai-with-mcp)).
+
+## Tirer une face vers l'extérieur ou l'intérieur
+
+Pour une paroi plus épaisse, un bossage sur une face ou une poche creusée dedans, l'outil {{ui:faceTool.title}} travaille sur une face plane. Il fonctionne aussi sur un STL importé, qui n'a pas d'esquisse à modifier. Sélectionnez exactement un corps et cliquez sur {{ui:faceTool.title}} dans le groupe {{ui:editor.group.modify}} de la barre d'outils, à côté du motif de trous. Vous pouvez également cliquer avec le bouton droit sur le corps ou le trouver avec [[Ctrl]]+[[K]].
+
+1. Cliquez sur une face plane du corps. Comme pour le motif de trous, toute la face plane autour de votre clic compte ; une face courbe ne fonctionne pas.
+2. Dans la fenêtre :
+   - **{{ui:faceTool.direction}} :** {{ui:faceTool.direction.out}} pour de la matière sur la face, ou {{ui:faceTool.direction.in}} pour une poche creusée dedans. Une poche ne va pas plus loin que le corps derrière la face ; dans un corps évidé, elle peut quand même atteindre la cavité.
+   - **{{ui:faceTool.inset}} :** la distance entre le nouveau contour et le bord de la face. Vers l'extérieur, 0 prend toute la face, ce qui épaissit une paroi. Les ouvertures de la face s'agrandissent d'autant.
+   - **{{ui:faceTool.radius}} :** arrondit chaque coin du contour, les coins intérieurs aussi, si bien qu'une pointe se termine par un arc. Une encoche plus étroite que deux fois le rayon se referme, et une partie de la face plus étroite que deux fois le retrait et le rayon réunis disparaît.
+   - **{{ui:faceTool.depth}} :** la hauteur de la nouvelle pièce au-dessus de la face, ou la profondeur de la poche.
+3. Le résultat s'affiche aussitôt en aperçu et suit chaque valeur. {{ui:faceTool.repick}} choisit une autre face, [[Esc]] ferme l'outil.
+4. Seul {{ui:faceTool.apply}} le crée.
+
+Ce que l'outil ajoute est un corps d'esquisse ordinaire, regroupé avec le corps : rien n'est figé. {{ui:group.edit}} ouvre le groupe, et {{ui:inspector.editSketch}} sur la nouvelle pièce montre le contour qu'elle suit. Sur le dessus ou le dessous d'un corps d'esquisse simple - une seule zone, ni regroupé, ni en miroir, ni effilé, ni vrillé, ni incliné, sans trait, anneau porte-clés, chanfrein ni congé - c'est le contour du corps lui-même, décalé vers l'intérieur à la construction, si bien que ses lignes et ses arcs restent exacts là où le noyau CAO peut les décaler, pour les outils d'arête et l'export STEP. Redimensionnée plus tard, la pièce garde son retrait. Sur toute autre face, un maillage importé compris, le contour suit les triangles de la face, et une courbe est faite de petits segments droits. Le tout est une étape pour {{ui:editor.tool.undo}}. Pour changer le retrait ou le rayon plus tard, annulez et relancez l'outil. Pour arrondir ensuite l'arête supérieure, utilisez {{ui:editor.tool.fillet}} avec {{ui:edge.topEdges}} sur le groupe en dernier : comme tout traitement d'arête sur un groupe, il fait du groupe un seul corps.
+
+Une IA peut faire la même chose via le pont MCP avec `layerling_push_face` (voir le chapitre [AI avec MCP](chapter:ai-with-mcp)).
 
 ## Changer plusieurs pièces à la fois
 

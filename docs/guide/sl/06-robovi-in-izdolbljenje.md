@@ -69,7 +69,7 @@ Stene rastejo navznoter. Zunaj ostane vse, kot je.
 
 ![Isti kvader, odprt samo na sprednji strani: reža za predal.](shot:hollow-sides)
 
-Za vsako odprto stran telo potrebuje čisto na zunaj na tej strani ravno ploskev. Krogel in prostih oblik zato na ta način ni mogoče izdolbiti. Če je stena predebela za telo, layerling to javi in prosi za tanjšo.
+Za vsako odprto stran telo potrebuje čisto na zunaj na tej strani ravno ploskev. Krogel in prostih oblik zato na ta način ni mogoče izdolbiti. Če je stena predebela za telo, layerling to javi in prosi za tanjšo. Tak primer je zaobljena škatla, ki ima zaobljene tudi zgornje in spodnje robove: njena stena mora biti jasno tanjša od tega zaobljenja, ali pa zaobljenje prej nastavi na 0.
 
 Izdolbiš lahko tudi telo z žepom, na primer kvader z luknjo, ki ne gre skozi do konca in je narejen z združitvijo škatle z dvignjeno luknjo, in sicer z odprtim vrhom: izdolbejo se tudi stene okoli žepa, tako da med zunanjo steno in žepom ostane obroč votline, zgoraj odprt, pod dnom žepa pa tanka votlina.
 

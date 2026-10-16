@@ -149,6 +149,19 @@ export function textKeyringReach(shape: Pick<WorkplaneShape, "textKeyring" | "te
   return Math.max(0, keyring.offset + keyringEarRadius(keyring.diameter) - textFillExtent(shape));
 }
 
+/**
+ * The scale that fits a straight line of this size into the letters' box (#382): one for both
+ * directions, so the letters keep their proportions, or - with `textStretch` - one for each, so
+ * they fill the box and can be made lower or narrower.
+ */
+export function textFitScale(shape: Pick<WorkplaneShape, "textStretch" | "textCurved">, letters: { width: number; depth: number }, line: { width: number; depth: number }) {
+  const x = letters.width / line.width;
+  const y = letters.depth / line.depth;
+  if (shape.textStretch && !shape.textCurved) return { x, y };
+  const scale = Math.min(x, y);
+  return { x: scale, y: scale };
+}
+
 /** The box the letters themselves are laid out in: the shape's box less the fill's reach and the ear's. */
 export function textLetterBox(shape: WorkplaneShape) {
   const extent = textFillExtent(shape);
@@ -449,12 +462,12 @@ export function textGlyphShapes(shape: WorkplaneShape): { glyphs: TextGlyphShape
       }));
     });
     const letters = textLetterBox(shape);
-    const scale = Math.min(letters.width / Math.max(1, maxX - minX), letters.depth / Math.max(1, maxY - minY));
+    const scale = textFitScale(shape, letters, { width: Math.max(1, maxX - minX), depth: Math.max(1, maxY - minY) });
     // Scaled, turned flat (font y becomes -z) and centred, as the display does - beside an ear, off centre by it.
     const middle = textLetterOffset(shape);
     const map = (point: THREE.Vector2) => ({
-      x: scale * point.x - (scale * (minX + maxX)) / 2 + middle.x,
-      z: -scale * point.y + (scale * (minY + maxY)) / 2 + middle.z,
+      x: scale.x * point.x - (scale.x * (minX + maxX)) / 2 + middle.x,
+      z: -scale.y * point.y + (scale.y * (minY + maxY)) / 2 + middle.z,
     });
     shapes.forEach((glyph) => glyphs.push({ glyph, map }));
   }
@@ -480,8 +493,8 @@ export function createTextGeometry(shape: WorkplaneShape): THREE.BufferGeometry 
     const textWidth = Math.max(1, box.max.x - box.min.x);
     const textDepth = Math.max(1, box.max.y - box.min.y);
     const letters = textLetterBox(shape);
-    const scale = Math.min(letters.width / textWidth, letters.depth / textDepth);
-    geometry.scale(scale, scale, 1);
+    const scale = textFitScale(shape, letters, { width: textWidth, depth: textDepth });
+    geometry.scale(scale.x, scale.y, 1);
   }
 
   geometry.rotateX(-Math.PI / 2);

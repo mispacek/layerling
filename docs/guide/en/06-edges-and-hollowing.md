@@ -69,7 +69,7 @@ The {{ui:shell.edges}} only matter where the inner walls move apart - at a step 
 
 ![The same box with only the front side open: a slot for a drawer.](shot:hollow-sides)
 
-For every open side, the body needs a flat face at its very edge on that side. Spheres and free-form shapes therefore cannot be hollowed this way. If the wall is too thick for the body, layerling tells you and asks for a thinner one.
+For every open side, the body needs a flat face at its very edge on that side. Spheres and free-form shapes therefore cannot be hollowed this way. If the wall is too thick for the body, layerling tells you and asks for a thinner one. A rounded box whose top and bottom edges are rounded as well is such a case: its wall has to be clearly thinner than that rounding, or set the rounding to 0 first.
 
 A body with a pocket - a block with a hole that does not go all the way through, made by grouping a box with a raised hole - can be hollowed too, with the top open: the walls round the pocket are hollowed as well, so a ring of cavity stays between the outer wall and the pocket, open at the top, and a thin cavity lies under the pocket's floor.
 

@@ -40,10 +40,14 @@ const nextConfig: NextConfig = {
   // without a `turbopack` entry. The empty entry accepts Turbopack's defaults
   // there; Next.js 15 ignores it for webpack builds (#217).
   turbopack: {},
-  webpack: (config) => {
+  webpack: (config, { dev }) => {
     // The webpack cache on disk grew to gigabytes over many builds; entries nobody used for three
-    // days can go (the default is two months).
-    if (config.cache && typeof config.cache === "object") config.cache.maxAge = 3 * 24 * 60 * 60 * 1000;
+    // days can go (the default is two months). Production builds write it uncompressed by default
+    // (Next leaves that to its own hosting), which was about three times the size.
+    if (config.cache && typeof config.cache === "object") {
+      config.cache.maxAge = 3 * 24 * 60 * 60 * 1000;
+      if (!dev) config.cache.compression = "gzip";
+    }
     config.resolve.alias = {
       ...config.resolve.alias,
       "brepkit-wasm": false,

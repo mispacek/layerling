@@ -146,11 +146,11 @@ export function mcpShapeSummary(shape: WorkplaneShape): LayerlingMcpShapeSummary
     cadDisplayEdgeCount: shape.cadDisplayEdges?.length ?? null,
     sketchPointCount: shape.sketchProfile?.points.length ?? 0,
     sketchSegmentCount: shape.sketchProfile?.segments.length ?? 0,
-    ...(shape.sketchProfile && shape.sketchOperation !== "revolve"
-      ? { sketchStroke: shape.sketchProfile.stroke ?? null, silhouette: Boolean(shape.sketchProfile.silhouette) }
+    ...(shape.sketchProfile && shape.sketchOperation !== "revolve" && shape.sketchOperation !== "sweep"
+      ? { sketchStroke: shape.sketchProfile.stroke ?? null, silhouette: Boolean(shape.sketchProfile.silhouette), sketchInset: shape.sketchProfile.inset ?? null }
       : {}),
     // A text's fill (#215) reads like a sketch body's: its stroke, and whether the counters are left out.
-    ...(shape.kind === "text" ? { textStroke: shape.textStroke ?? null, textSilhouette: Boolean(shape.textSilhouette), textEdge: shape.textEdge ?? null } : {}),
+    ...(shape.kind === "text" ? { textStroke: shape.textStroke ?? null, textSilhouette: Boolean(shape.textSilhouette), textStretch: Boolean(shape.textStretch), textEdge: shape.textEdge ?? null } : {}),
     // A name tag's key ring hole (#215), on the layers it goes through; the bottom one carries the ear.
     ...(shape.kind === "text" && shape.textKeyring ? { textKeyring: shape.textKeyring } : {}),
     ...(shape.layeredText ? { layeredText: true } : {}),

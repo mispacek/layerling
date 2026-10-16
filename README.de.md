@@ -93,6 +93,7 @@ Ein vollständiges CAD-Paket ist es nicht: Es gibt keine parametrische Zeitleist
 - **Aushöhlen** – aus einem Körper Wände gleicher Stärke machen, auf jeder gewünschten Seite offen (oben, unten, vorne, hinten, links, rechts, beliebig kombiniert) oder ganz geschlossen – für Dosen, Becher und Gehäuse.
 - **Eigene Formen** – Körper, die du immer wieder brauchst, oben in der Formenliste ablegen und per Klick oder Ziehen in jeden Entwurf setzen; im Browser oder, mit dem Serverspeicher, auf dem Server für jedes Gerät. „Alle sichern“ nimmt sie mit.
 - **Lochmuster** – eine ebene Fläche eines Körpers perforieren: Fläche anklicken, runde, quadratische, rechteckige, sechseckige oder Langlöcher wählen, Größe, Abstand, Raster oder versetzt, Rand zur Kante und Tiefe (durch das ganze Teil oder ein Maß) einstellen und die Löcher vor dem Erzeugen als Vorschau sehen. Sie bleiben normale Aussparungen, mit dem Körper gruppiert, und lassen sich durch Auflösen der Gruppe wieder freigeben.
+- **Fläche** – eine ebene Fläche eines Körpers herausziehen oder eine Tasche hineinschneiden: Fläche anklicken, Heraus oder Hinein wählen, Rand zur Kante, Eckenradius und Tiefe einstellen und das Ergebnis als Vorschau sehen. Das geht auch bei importierten STL-Dateien, und was das Werkzeug anlegt, bleibt ein normaler Skizzenkörper, mit dem Körper gruppiert.
 - **Um einen Zylinder wickeln** – ein SVG-Muster, ein Logo oder einen Schriftzug auf die Wand eines Bechers oder Rohrs legen, erhaben oder als Gravur, und mittig am Zylinder ausrichten.
 
 ### Dateien

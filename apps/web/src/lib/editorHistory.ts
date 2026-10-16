@@ -541,7 +541,14 @@ export function hydrateEditorHistoryState(
     const index = Number.isInteger(requestedIndex)
       ? Math.min(Math.max(0, requestedIndex as number), normalized.length - 1)
       : normalized.length - 1;
-    if (normalized[index]?.fingerprint !== fallback.fingerprint) {
+    // A caller that knows no workplane (the start page building its cache from a loaded design) takes the one
+    // the entry itself was recorded on; comparing it to the base plate threw away the whole history of any
+    // design whose last step was made on a face workplane (#390).
+    const stored = normalized[index];
+    const expected = currentWorkplane === undefined && stored?.placementWorkplane
+      ? editorHistoryEntry(currentShapes, [], currentNotes, stored.placementWorkplane)
+      : fallback;
+    if (stored?.fingerprint !== expected.fingerprint) {
       return { entries: [fallback], index: 0 };
     }
 

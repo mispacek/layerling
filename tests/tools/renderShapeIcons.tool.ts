@@ -434,6 +434,14 @@ describe("palette icons", () => {
       build: () => createScrewHoleGeometry({ kind: "countersink", width: 16, depth: 16, height: 20, screwHoleShaft: 8, screwHoleAngle: 90 }),
     });
     render({
+      name: "apps/web/public/assets/editor/shape-icons-gray/doubleCountersink.png",
+      height: 12,
+      lay: false,
+      azimuth: 35,
+      elevation: 32,
+      build: () => createScrewHoleGeometry({ kind: "doubleCountersink", width: 16, depth: 16, height: 20, screwHoleShaft: 8, screwHoleAngle: 90 }),
+    });
+    render({
       // Schraeg von vorn auf die Stirnseite, damit Rundung und Spitze zu sehen sind.
       name: "apps/web/public/assets/editor/shape-icons-gray/teardrop.png",
       height: teardropHeightForTipAngle(16, 90),

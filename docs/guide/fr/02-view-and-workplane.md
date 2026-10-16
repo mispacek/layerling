@@ -15,7 +15,7 @@ Avec la souris :
 | molette de la souris | zoomer et dézoomer |
 | maintenez [[Ctrl]] et faites glisser avec le bouton gauche | déplace également la vue |
 
-La vitesse de zoom de la molette se règle avec {{ui:workspace.zoomSpeed}} dans les paramètres, sous {{ui:workspace.appearance}} : un curseur de 1 à 10, réglé sur 5 au départ.
+La vitesse de zoom de la molette se règle avec {{ui:workspace.zoomSpeed}} dans les paramètres, sous {{ui:workspace.appearance}} : un curseur de 1 à 14, réglé sur 5 au départ ; au-dessus de 10, seule la molette devient plus rapide.
 
 Sur une tablette ou un téléphone, deux doigts zooment (écartent et pincent) et déplacent la vue (glissent ensemble). Un doigt travaille sur le design, tout comme le bouton gauche de la souris. Pour faire pivoter avec un doigt, activez {{ui:camera.touchRotate}} dans la barre de la caméra. Ce commutateur ne s'affiche que sur les appareils dotés d'un écran tactile.
 

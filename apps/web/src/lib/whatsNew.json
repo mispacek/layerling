@@ -1,5 +1,385 @@
 [
   {
+    "version": "1.81.0",
+    "items": [
+      {
+        "title": {
+          "de": "Sicherung wiederherstellen: eigener Knopf",
+          "en": "Restore backup: a button of its own",
+          "cs": "Samostatné tlačítko pro obnovu zálohy"
+        },
+        "body": {
+          "de": "Neben „Alle sichern“ gibt es jetzt den Knopf „Sicherung wiederherstellen“. Du wählst die Sicherungsdatei, und alle Entwürfe und eigenen Formen kommen zurück; was schon da ist, wird übersprungen. Der Knopf steht auch auf einem neuen Rechner ohne Entwürfe da.",
+          "en": "Next to “Back up all” there is a “Restore backup” button now. You pick the backup file, and all designs and custom shapes come back; whatever is already there is skipped. The button is also there on a new computer with no designs yet.",
+          "cs": "Vedle „Zálohovat vše“ je nové tlačítko „Obnovit ze zálohy“. Vyberete soubor zálohy a obnoví se projekty i vlastní tvary. Projekty, které už v prohlížeči jsou, se přeskočí. Tlačítko je dostupné i na novém počítači bez uložených projektů."
+        }
+      },
+      {
+        "title": {
+          "de": "Große Kreise aus einer SVG sind rund",
+          "en": "Large circles from an SVG are round",
+          "cs": "Velké kružnice z SVG zůstávají kulaté"
+        },
+        "body": {
+          "de": "Ein großer Kreis oder eine lange Kurve in einer importierten SVG kam bisher mit sichtbaren Ecken an, weil jede Kurve in gleich wenige Stücke zerlegt wurde. Jetzt richtet sich die Zahl der Stücke nach der Länge der Kurve: Große Kreise werden rund, kleine Kurven bleiben so leicht wie zuvor. Eine Einstellung ist dafür nicht nötig.",
+          "en": "A large circle or a long curve in an imported SVG used to arrive with visible corners, because every curve was cut into the same few pieces. Now the number of pieces follows the length of the curve: large circles come out round, and small curves stay as light as before. No setting is needed.",
+          "cs": "Velké kružnice a dlouhé křivky z importovaných SVG dříve měly viditelné rohy, protože se každá křivka dělila na stejný malý počet úseků. Počet úseků se nyní řídí délkou křivky. Velké kružnice jsou hladší a malé křivky zůstávají stejně nenáročné. Není potřeba nic nastavovat."
+        }
+      },
+      {
+        "title": {
+          "de": "Maßzahl an gedrehten Körpern",
+          "en": "Edge numbers on turned bodies",
+          "cs": "Rozměry u otočených těles"
+        },
+        "body": {
+          "de": "Wenn ein Körper um 90° gedreht ist und die Arbeitsebene auf einer Fläche liegt, änderte die Zahl an der langen Kante die andere Seite. Jetzt ändert die Zahl an einer Kante die Seite, an der sie steht, und die festgehaltene Kante bleibt, wo sie war.",
+          "en": "When a body is turned by 90° and the workplane is on a face, the number on the long edge used to change the other side. Now the number on an edge changes the side it stands at, and the edge that was held stays where it was.",
+          "cs": "U tělesa otočeného o 90° s pracovní rovinou na jeho ploše mohla kóta u delší hrany měnit jiný rozměr. Nyní číslo u hrany mění příslušnou stranu a protější přidržovaná hrana zůstává na místě."
+        }
+      },
+      {
+        "title": {
+          "de": "Winzige lose Stücke kommen nicht mehr in den Export",
+          "en": "Tiny loose pieces stay out of the export",
+          "cs": "Export bez drobných oddělených úlomků"
+        },
+        "body": {
+          "de": "Ein Schnitt und die Farbtrennung beim 3MF-Export können viele winzige lose Stücke hinterlassen, kleine Körnchen in oder auf einer Schicht. Im Editor sieht man sie nicht, im Slicer erscheinen sie als Spitzen und können einen flachen Entwurf von der Platte abheben. STL, 3MF und OBJ lassen sie jetzt weg, und die Meldung sagt, wie viele. Der Körper selbst und kleine gewollte Teile bleiben.",
+          "en": "A cut and the colour separation of a 3MF export can leave many tiny loose pieces behind, small grains in or on a layer. You do not see them in the editor, but a slicer shows them as spikes, and they can lift a flat design off the plate. STL, 3MF and OBJ now leave them out, and the notice says how many. The body itself and small parts you drew stay.",
+          "cs": "Po řezu nebo rozdělení barev při exportu 3MF mohou zůstat drobné oddělené úlomky. V editoru nejsou patrné, ale slicer je může zobrazit jako výčnělky nebo kvůli nim zvednout plochý díl nad podložku. Export STL, 3MF a OBJ je nyní vynechává a hlášení uvede jejich počet. Vlastní těleso i malé díly, které jste záměrně vytvořili, zůstávají zachované."
+        }
+      },
+      {
+        "title": {
+          "de": "Höhe über 220 mm",
+          "en": "Heights above 220 mm",
+          "cs": "Výška nad 220 mm"
+        },
+        "body": {
+          "de": "Das Feld „Z (Höhe)“ sprang bisher bei 220 mm zurück, auch im Modus „Kein Drucker – freie Größe“. Jetzt lässt sich dort jede Zahl eintippen, nach oben und unten, und ebenso bei X und Y. Der Regler reicht so weit wie die Platte und die Druckhöhe.",
+          "en": "The field “Z (height)” used to jump back at 220 mm, also in the mode “No printer – free size”. Now any number can be typed in, up and down, and the same for X and Y. The slider reaches as far as the plate and the printer height.",
+          "cs": "Pole „Z (výška)“ dříve nepřijalo hodnotu nad 220 mm ani při volbě bez tiskárny s vlastními rozměry. Nyní lze zadávat vyšší i záporné hodnoty; stejné pravidlo platí pro X a Y. Rozsah posuvníku se řídí rozměry podložky a výškou tiskárny."
+        }
+      },
+      {
+        "title": {
+          "de": "STL, 3MF und OBJ über die KI-Anbindung",
+          "en": "STL, 3MF and OBJ over the AI connection",
+          "cs": "STL, 3MF a OBJ přes propojení s AI"
+        },
+        "body": {
+          "de": "Die MCP-Anbindung kann jetzt auch das Modell als STL, 3MF oder OBJ schreiben, aus denselben Körpern wie das Exportfenster. Eine KI kann so einen Entwurf bauen und gleich die Druckdatei an einen Pfad auf dem Rechner legen lassen.",
+          "en": "The MCP connection can now write the model as STL, 3MF or OBJ as well, from the same bodies as the export window. An AI can build a design and have the print file written straight to a path on the computer.",
+          "cs": "Připojení MCP nově umí uložit model také jako STL, 3MF nebo OBJ ze stejných těles jako běžné exportní okno. AI tak může sestavit návrh a uložit tiskový soubor přímo do zvolené cesty v počítači."
+        }
+      },
+      {
+        "title": {
+          "de": "2D-Zeichnung glatter, runder Teile",
+          "en": "2D drawing of smooth, round parts",
+          "cs": "2D výkres hladkých oblých dílů"
+        },
+        "body": {
+          "de": "Die 2D-Zeichnung lehnte kleine Teile mit vielen gewölbten Flächen ab, weil sie zu viele Dreiecke hatten. Die Grenze liegt jetzt viermal so hoch, und die Meldung sagt, wie viele Dreiecke die Ansichten wirklich brauchen.",
+          "en": "The 2D drawing refused small parts with many curved faces because they had too many triangles. The limit is four times as high now, and the message says how many triangles the views really need.",
+          "cs": "2D výkres dříve odmítal i malé díly s mnoha zakřivenými plochami kvůli počtu trojúhelníků. Limit je nyní čtyřnásobný a hlášení uvádí skutečný počet trojúhelníků potřebný pro jednotlivé pohledy."
+        }
+      },
+      {
+        "title": {
+          "de": "Gruppieren sagt, wenn nur zusammengelegt wurde",
+          "en": "Grouping says when parts were only laid together",
+          "cs": "Upozornění na neprovedené sloučení"
+        },
+        "body": {
+          "de": "Über der Dreiecksgrenze werden importierte Körper beim Gruppieren nicht verschmolzen, sondern nur zusammengelegt, und ein Slicer meldet dann Kanten, die nicht in Ordnung sind. Die Statuszeile sagt das jetzt mit der Dreieckszahl und der Grenze.",
+          "en": "Above the triangle limit, grouping imported bodies does not merge them but only lays them together, and a slicer then reports faulty edges. The status line now says so, with the triangle count and the limit.",
+          "cs": "Při překročení limitu trojúhelníků se importovaná tělesa místo skutečného geometrického sloučení pouze spojí do jednoho celku. Slicer pak může hlásit chyby hran. Stavový řádek na to nově výslovně upozorní a uvede počet trojúhelníků i nastavený limit."
+        }
+      },
+      {
+        "title": {
+          "de": "Bild mit durchsichtigem Rand wird als Figur nachgezeichnet",
+          "en": "A picture with a transparent edge is traced as its figure",
+          "cs": "Obrys obrázku s průhledným okrajem"
+        },
+        "body": {
+          "de": "Ein schwarzer Aufkleber auf durchsichtigem Grund kam als lose Einzelteile an statt als eine Umrisslinie. Ist der Rand des Bildes überwiegend durchsichtig, gilt jetzt das Durchsichtige als Hintergrund, und die Figur wird nachgezeichnet.",
+          "en": "A black sticker on a transparent background came in as loose pieces instead of one outline. When most of the edge of the picture is transparent, the transparency now counts as the background, and the figure is traced.",
+          "cs": "Černý symbol na průhledném pozadí se mohl importovat jako několik oddělených částí místo jediného obrysu. Pokud je většina okraje obrázku průhledná, nově se za pozadí považuje průhlednost a obkreslí se celý tvar symbolu."
+        }
+      }
+    ]
+  },
+  {
+    "version": "1.80.0",
+    "items": [
+      {
+        "title": {
+          "de": "Eine Fläche heraus- oder hineinziehen",
+          "en": "Push a face out or in",
+          "cs": "Vysunutí plochy ven nebo dovnitř"
+        },
+        "body": {
+          "de": "Eine Wand dicker machen oder eine Tasche in ein fertiges Teil schneiden ging bisher nur über Arbeitsebene, nachgezeichnete Skizze und Gruppe. Das neue Werkzeug „Fläche“ neben dem Lochmuster setzt Material auf eine ebene Fläche oder schneidet eine Tasche hinein, auf Wunsch mit Abstand zum Rand und mit runden Ecken, auch bei einem importierten STL. Was es anlegt, bleibt ein gewöhnlicher Skizzenkörper in einer Gruppe.",
+          "en": "Making a wall thicker or cutting a pocket into a finished part took a workplane, a traced sketch and a group, and on an imported STL there was no other way. The new tool \"Face\" next to the hole pattern adds material on a flat face or cuts a pocket into it, set in from the edge and with rounded corners if you like. What it adds stays an ordinary sketch body in a group.",
+          "cs": "Zesílení stěny nebo vyříznutí kapsy do hotového dílu dříve vyžadovalo pracovní rovinu, obkreslení náčrtu a sloučení těles. Nový nástroj „Plocha“ vedle rastru otvorů přidá materiál na rovnou plochu nebo do ní vyřízne kapsu. Umožňuje odsazení od okraje i zaoblení rohů. Přidaná geometrie zůstává běžným tělesem z náčrtu uvnitř sloučeného celku; nástroj funguje i na importovaném STL."
+        }
+      },
+      {
+        "title": {
+          "de": "Backup zweimal einspielen verdoppelt nichts mehr",
+          "en": "Restoring a backup twice no longer doubles your designs",
+          "cs": "Opakovaná obnova zálohy nevytváří duplicitní projekty"
+        },
+        "body": {
+          "de": "Spielst du ein Backup in einen Browser ein, der einen Entwurf daraus schon hat, wird dieser übersprungen, und die Meldung sagt, wie viele schon da waren. Der Hinweis am Knopf „Alle sichern“ nennt jetzt auch, über welchen Knopf ein Backup zurückkommt.",
+          "en": "If you restore a backup into a browser that already has one of its designs, that one is skipped, and the notice says how many were already there. The tooltip of \"Back up all\" now also names the button that brings a backup back.",
+          "cs": "Při obnově zálohy se přeskočí projekty, které už v prohlížeči jsou. Hlášení uvede jejich počet. Nápověda tlačítka „Zálohovat vše“ nově připomíná také způsob obnovy zálohy."
+        }
+      },
+      {
+        "title": {
+          "de": "Rückgängig-Schritte bleiben nach dem Neuladen erhalten",
+          "en": "Undo steps survive a reload",
+          "cs": "Historie zůstává zachovaná po obnovení stránky"
+        },
+        "body": {
+          "de": "Hattest du den letzten Schritt mit der Arbeitsebene auf einer Fläche gemacht, ging der ganze Rückgängig-Verlauf beim erneuten Laden verloren, etwa nach einem Update mit „Speichern und neu laden“. Der Entwurf kam vollständig zurück, aber Rückgängig, Wiederholen und die Verlaufsansicht waren grau. Das ist behoben, der Verlauf bleibt.",
+          "en": "If the last step was made with the workplane on a face, the whole undo history was lost when the design was loaded again, for instance after an update with Save and reload. The design came back complete, but Undo, Redo and the history view were greyed out. That is fixed, the history stays.",
+          "cs": "Pokud poslední úprava proběhla s pracovní rovinou na ploše tělesa, mohlo opětovné načtení projektu vymazat jeho historii. Model se obnovil, ale příkazy Zpět, Znovu i přehled historie byly neaktivní. Oprava historii zachovává také při aktualizaci přes uložení a opětovné načtení stránky."
+        }
+      },
+      {
+        "title": {
+          "de": "Dänisch als Sprache",
+          "en": "Danish as a language",
+          "cs": "Dánský překlad"
+        },
+        "body": {
+          "de": "layerling gibt es jetzt auch auf Dänisch (Dansk): die ganze Oberfläche und die 16 Kapitel der Anleitung. Die Sprache wird für einen Browser mit dänischer Einstellung von selbst gewählt und lässt sich in der Sprachliste ändern. Übersetzt mit KI-Hilfe und von einem Dänischsprachigen durchgelesen; falsche Wörter lassen sich mit einem kleinen Pull Request auf GitHub verbessern.",
+          "en": "layerling now speaks Danish (Dansk): the whole interface and the 16 chapters of the guide. The language is chosen automatically for a browser set to Danish and can be changed in the language list. It was translated with AI help and read through by a Danish speaker; wrong words are fixed with a small pull request on GitHub.",
+          "cs": "Původní Layerling nově nabízí dánštinu (Dansk): rozhraní i všech 16 kapitol příručky. Jazyk lze vybrat v jazykové nabídce. Překlad vznikl s pomocí AI a prošel kontrolou dánsky mluvícího uživatele; opravy lze poslat pull requestem. Naše instalace zachovává výchozí češtinu a pro dosud nepřeložené doplňky LEGO používá anglický náhradní text."
+        }
+      }
+    ]
+  },
+  {
+    "version": "1.79.0",
+    "items": [
+      {
+        "title": {
+          "de": "Winkellineal verdeckbar, Hilfslinien am Boden",
+          "en": "The framing square can hide, guide lines on the floor",
+          "cs": "Úhelník za tělesem a vodicí čáry na podložce"
+        },
+        "body": {
+          "de": "Das Winkellineal besteht jetzt aus Linien im Raum: Ein Körper davor verdeckt es, die Zahlen an den Armen verblassen dort. Das kleine Auge unter dem Griff schaltet um, damit das Lineal über allem sichtbar bleibt. Die Hilfslinien der grünen Zahlen laufen am Boden entlang, und der Schalter jeder Zahl sitzt in ihrem Rahmen.",
+          "en": "The framing square is now made of lines in the room: a body in front of it hides it, and the numbers on the arms fade there. The small eye below the handle switches that, to keep the square in view over everything. The guide lines of the green numbers run along the floor, and the switch of each number sits in its frame.",
+          "cs": "Úhelník je nyní vykreslený jako prostorové čáry, takže jej těleso před ním zakryje a příslušné údaje na ramenech zeslábnou. Tlačítko s okem pod úchytem dovoluje ponechat úhelník viditelný přes ostatní objekty. Vodicí čáry zelených kót leží na podložce a přepínač každé kóty je přímo v jejím rámečku."
+        }
+      },
+      {
+        "title": {
+          "de": "Skizze entlang eines Pfades ziehen",
+          "en": "Sweep a sketch along a path",
+          "cs": "Tažení náčrtu podél dráhy"
+        },
+        "body": {
+          "de": "Neben „Skizze hochziehen“ und „Skizze rotieren“ gibt es einen dritten Weg: Die neue **Skizze entlang Pfad** zieht einen Querschnitt an einem Pfad entlang, etwa einen Kabelkanal mit Ecke, eine Leitung oder einen Ring um ein Sechseck. Du zeichnest den Querschnitt als geschlossenen Umriss (ein zweiter Umriss darin macht ihn hohl) und den Pfad als Hilfslinie, eine Kette aus Linien oder Kurven, offen oder geschlossen. Ecken aus geraden Stücken werden eine Gehrung. Der Körper ist exakt, Verrundung, Fase und STEP-Export gehen. Die MCP-Brücke baut ihn aus Zahlen mit `layerling_sweep_sketch`.",
+          "en": "Next to Extrude and Revolve there is a third way: the new **Sweep sketch** pulls a cross-section along a path, for a cable channel that turns a corner, a conduit or a ring round a hexagon. You draw the cross-section as a closed outline (a second outline inside makes it hollow) and the path as a construction line, a chain of lines or curves, open or closed. A corner of straight pieces becomes a mitre. The body is exact, so Fillet, Chamfer and the STEP export work. The MCP bridge builds one from numbers with `layerling_sweep_sketch`.",
+          "cs": "Vedle vysunutí a rotace je nová možnost „Náčrt podél dráhy“. Protáhne průřez po zvolené dráze, například pro kabelový kanál s ohybem nebo prstenec kolem šestiúhelníku. Průřez tvoří uzavřený obrys; vnitřní obrys vytvoří dutinu. Dráhou může být pomocná konstrukční čára nebo řetězec úseček a křivek, otevřený i uzavřený. Rohy úseček se spojí pokosově. Těleso má přesnou CAD geometrii, takže funguje zaoblení, zkosení i export STEP. MCP nabízí příkaz `layerling_sweep_sketch`."
+        }
+      },
+      {
+        "title": {
+          "de": "Schnittansicht: Zurück und Schließen nur auf dem Tablet",
+          "en": "Section view: Back and Close only on a tablet",
+          "cs": "Tlačítka Zpět a Zavřít v řezu pouze na tabletu"
+        },
+        "body": {
+          "de": "Die Knöpfe „Zurück“ und „Schließen“ (früher „Bestätigen“) am Fenster der Schnittansicht gibt es für ein Tablet ohne Esc-Taste. Auf einem Computer erscheinen sie nicht mehr, denn dort schließen das X und Esc das Fenster. Die Anleitung beschreibt das Schließen genauer.",
+          "en": "The buttons \"Back\" and \"Close\" (before \"Confirm\") on the section view panel are for a tablet without an Esc key. A computer does not show them any more, as there the X and Esc close the panel. The guide describes the closing in more detail.",
+          "cs": "Tlačítka „Zpět“ a „Zavřít“ (dříve „Potvrdit“) na panelu řezu slouží především tabletům bez klávesy Esc. Na počítači se již nezobrazují, protože panel zavírá křížek nebo Esc. Příručka nyní podrobněji popisuje jednotlivé způsoby zavření."
+        }
+      },
+      {
+        "title": {
+          "de": "Verrunden an Körpern mit gruppierten Löchern",
+          "en": "Fillet on bodies with grouped holes",
+          "cs": "Zaoblení těles s předem spojenými výřezy"
+        },
+        "body": {
+          "de": "Wenn du mehrere Löcher zuerst zu einer Gruppe machst und diese dann mit einem Körper gruppierst, lassen sich Kanten jetzt verrunden oder abfasen. Vorher kam die Meldung, das Netz sei offen. Die Löcher bleiben dabei exakte Formen, ihr Rand ist eine echte Kurve.",
+          "en": "When you group several holes first and then group that with a body, its edges can be filleted or chamfered now. Before, a message said the mesh was open. The holes stay exact shapes, and their rim is a true curve.",
+          "cs": "Pokud nejprve spojíte několik výřezů a potom je sloučíte s tělesem, lze nyní jeho hrany zaoblit i zkosit. Dříve se mohlo objevit hlášení o neuzavřené síti. Výřezy si zachovávají přesnou geometrii a jejich okraje jsou skutečné křivky."
+        }
+      },
+      {
+        "title": {
+          "de": "Aushöhlen: die Meldung nennt den Grund",
+          "en": "Hollow: the message names the reason",
+          "cs": "Dutina: hlášení vysvětlí příčinu"
+        },
+        "body": {
+          "de": "Eine abgerundete Box, deren Ober- und Unterkanten ebenfalls gerundet sind, lässt sich nur mit einer deutlich dünneren Wand aushöhlen. Früher stand dort nur, dass die Wände nicht so dick sein können. Jetzt sagt das Fenster, woran es liegt und was du tun kannst: eine dünnere Wand wählen oder die Rundung vorher auf 0 setzen. Es verweist auch auf „Fehlerbericht“ in der Fußzeile.",
+          "en": "A rounded box whose top and bottom edges are rounded as well can only be hollowed with a much thinner wall. The panel used to say only that the walls cannot be this thick. Now it says why and what to do: choose a thinner wall or set the rounding to 0 first. It also points to the Bug report button in the footer.",
+          "cs": "Zaoblený kvádr, který má zaoblené také horní a spodní hrany, může pro vytvoření dutiny vyžadovat výrazně tenčí stěnu. Panel dříve pouze oznámil, že stěny nemohou být tak silné. Nyní vysvětlí příčinu a doporučí tenčí stěnu nebo nejprve nastavit zaoblení na 0. Připomíná také tlačítko pro nahlášení chyby v zápatí."
+        }
+      }
+    ]
+  },
+  {
+    "version": "1.78.0",
+    "items": [
+      {
+        "title": {
+          "de": "Skizze: Tasten 1 bis 4 und Pfeiltasten am Griff",
+          "en": "Sketch: keys 1 to 4 and arrow keys on a handle",
+          "cs": "Klávesy 1 až 4 a posun úchytu křivky šipkami"
+        },
+        "body": {
+          "de": "In der Skizze und der Dreh-Skizze wählen die Tasten 1, 2, 3 und 4 Linie, Bézier-Kurve, Weiche Kurve und Punkte setzen oder entfernen, wie in Tinkercad. Wird gerade eine Linie gezeichnet, bleiben die Ziffern ihre Länge. Ein angeklickter Kurvengriff leuchtet auf, und die Pfeiltasten verschieben ihn um einen Rasterschritt (Umschalt: größer), bei einem weichen Punkt zieht der Gegengriff mit. So lässt sich eine Kurve genau einstellen.",
+          "en": "In the sketch and the revolve sketch the keys 1, 2, 3 and 4 pick Line, Bezier Curve, Smooth Curve and Add or Remove Points, as in Tinkercad. While a line is being drawn the digits stay its length. A curve handle that you click lights up, and the arrow keys move it by one grid step (Shift: a larger step), a smooth point's other handle with it. That way a curve can be set precisely.",
+          "cs": "V běžném náčrtu i náčrtu pro rotaci vybírají klávesy 1, 2, 3 a 4 nástroje pro úsečku, Bézierovu křivku, hladkou křivku a přidávání či odebírání bodů. Během kreslení čáry číslice nadále zadávají délku. Vybraný úchyt křivky se zvýrazní a šipky jej posouvají o krok mřížky; se Shiftem je krok větší. U hladkého bodu se odpovídajícím způsobem pohybuje i protější úchyt."
+        }
+      },
+      {
+        "title": {
+          "de": "Doppelsenkung",
+          "en": "Double Countersink",
+          "cs": "Oboustranné kuželové zahloubení"
+        },
+        "body": {
+          "de": "Neue Form in der Formenliste, nach der Senkbohrung: ein Loch mit Fase auf beiden Seiten, für eine Platte, die vorn und hinten sauber aussehen soll. An jedem Ende öffnet sich ein Kegel auf den Kopfdurchmesser, dazwischen liegt der Schaft. Du stellst Kopfdurchmesser, Schaftdurchmesser, Kegelwinkel und Gesamtlänge ein. Ist das Loch zu kurz für zwei ganze Kegel, treffen sie sich in der Mitte, und der Schaft bleibt breiter als eingestellt. Als exakter Körper funktionieren Kantenwerkzeug und STEP-Export. Als Lochmuster gibt es sie noch nicht.",
+          "en": "A new shape in the library, after the Countersink: a hole chamfered on both faces, for a plate that should look neat front and back. A cone at each end opens to the head diameter, the shaft sits between them. You set the head diameter, the shaft diameter, the cone angle and the total length. If the hole is too short for two full cones they meet in the middle and the shaft stays wider than set. As an exact body it works with the edge tools and the STEP export. It is not available as a pattern hole yet.",
+          "cs": "Za kuželovým zahloubením přibyl nový tvar: otvor zahloubený z obou stran, vhodný například pro desku s upraveným čelním i zadním povrchem. Na obou koncích je kužel přecházející z průměru hlavy do průměru otvoru. Nastavíte oba průměry, úhel kužele a celkovou délku. U příliš krátkého otvoru se kužely setkají uprostřed a nejmenší průměr zůstane větší než zadaný. Tvar má přesnou CAD geometrii pro úpravy hran a STEP. V rastru otvorů zatím dostupný není."
+        }
+      },
+      {
+        "title": {
+          "de": "Schlüsselring-Loch am Symbolschild",
+          "en": "A key ring hole on the icon tag",
+          "cs": "Otvor na kroužek u štítku se symbolem"
+        },
+        "body": {
+          "de": "Das Symbolschild hat jetzt wie das Namensschild ein Loch für den Schlüsselring: in der Karte des Schilds anschalten, Durchmesser und Seite wählen. Das Loch geht durch alle Schichten, die Lasche sitzt an der untersten Schicht außerhalb des Symbols, und die Schichten bleiben ausgerichtet.",
+          "en": "The icon tag now has a key ring hole like the name tag: switch it on in the tag's card and choose the diameter and the side. The hole goes through all layers, the tab sits on the bottom layer beyond the icon, and the layers stay lined up.",
+          "cs": "Štítek se symbolem nově nabízí otvor na kroužek stejně jako jmenovka. Zapnete jej ve vlastnostech štítku a vyberete průměr i stranu. Otvor prochází všemi vrstvami, ouško navazuje na spodní vrstvu vně symbolu a všechny vrstvy zůstávají zarovnané."
+        }
+      },
+      {
+        "title": {
+          "de": "Gesperrtes Objekt umbenennen und verstecken",
+          "en": "Rename and hide a locked object",
+          "cs": "Přejmenování a skrytí zamčeného objektu"
+        },
+        "body": {
+          "de": "Ein gesperrtes Objekt ließ sich in der Objektliste und mit den Tasten umbenennen oder verstecken, im Eigenschaftenfenster wurde das still verweigert. Jetzt geht es auch dort.",
+          "en": "A locked object could be renamed or hidden in the object list and with the keys, but the properties window silently refused. Now it works there too.",
+          "cs": "Zamčený objekt šlo přejmenovat nebo skrýt v seznamu objektů a pomocí kláves, ale panel vlastností tyto akce bez vysvětlení odmítal. Nyní fungují také v něm."
+        }
+      }
+    ]
+  },
+  {
+    "version": "1.77.0",
+    "items": [
+      {
+        "title": {
+          "de": "Ungarisch als Sprache",
+          "en": "Hungarian as a language",
+          "hu": "Magyar nyelv",
+          "cs": "Maďarský překlad"
+        },
+        "body": {
+          "de": "layerling gibt es jetzt auch auf Ungarisch (Magyar): die ganze Oberfläche und die 16 Kapitel der Anleitung. Die Sprache wird für einen Browser mit ungarischer Einstellung von selbst gewählt und lässt sich in der Sprachliste ändern. Übersetzt mit einem KI-Assistenten; falsche Wörter lassen sich mit einem kleinen Pull Request auf GitHub verbessern.",
+          "en": "layerling now speaks Hungarian (Magyar): the whole interface and the 16 chapters of the guide. The language is chosen automatically for a browser set to Hungarian and can be changed in the language list. It was translated with an AI assistant; wrong words are fixed with a small pull request on GitHub.",
+          "hu": "A layerling mostantól magyarul is beszél: a teljes kezelőfelület és az útmutató 16 fejezete magyar. Magyarra állított böngészőben a nyelv magától kiválasztódik, és a nyelvlistában módosítható. A fordítás MI-asszisztenssel készült; a hibás szavakat egy kis pull requesttel lehet javítani a GitHubon.",
+          "cs": "Původní Layerling nově nabízí maďarštinu (Magyar): rozhraní i všech 16 kapitol příručky. Jazyk lze vybrat v jazykové nabídce. Překlad vznikl s pomocí AI a případné nepřesnosti lze opravit pull requestem. Naše instalace nadále používá výchozí češtinu; nepřeložené doplňky LEGO se zobrazí anglicky."
+        }
+      },
+      {
+        "title": {
+          "de": "Mausrad zoomt überall gleich",
+          "en": "The mouse wheel zooms alike everywhere",
+          "cs": "Sjednocené přibližování kolečkem myši"
+        },
+        "body": {
+          "de": "Eine Raste des Mausrads zoomte in Safari auf einem Mac mit einer einfachen Maus nur etwa ein Achtel so stark wie in Chrome unter Windows, selbst mit der Zoomgeschwindigkeit auf 10. Ein einzelner kleiner Schritt zählt jetzt wie eine ganze Raste. Ein Trackpad, ein weich laufendes Rad und das Spreizen auf dem Trackpad bleiben, wie sie waren.",
+          "en": "A notch of the mouse wheel zoomed only about an eighth as much in Safari on a Mac with a plain mouse as in Chrome on Windows, even with Zoom speed at 10. A single small step now counts like a whole notch. A trackpad, a smooth wheel and the pinch on a trackpad stay as they were.",
+          "cs": "Jeden krok obyčejného kolečka přibližoval v Safari na Macu přibližně osmkrát méně než v Chromu na Windows, a to i při nejvyšší rychlosti přiblížení. Nově se samostatný malý krok vyhodnotí jako celý krok kolečka. Chování trackpadu, plynulého kolečka a gesta sevření prstů zůstává zachované."
+        }
+      },
+      {
+        "title": {
+          "de": "Buchstaben auf den Rahmen strecken",
+          "en": "Stretch letters to the frame",
+          "cs": "Roztažení písmen na celý rámeček"
+        },
+        "body": {
+          "de": "Eine gerade Schrift hielt bisher die Proportionen ihrer Buchstaben und blieb in der Mitte des Rahmens, auch wenn der Rahmen breiter oder tiefer gezogen war. Der neue Schalter „Buchstaben auf den Rahmen strecken“ in den Einstellungen des Textes füllt den ganzen Rahmen in beide Richtungen: Ein Großbuchstabe lässt sich niedriger oder schmaler machen, wie in Tinkercad. Die Umrisse für das Kantenwerkzeug und die Füllarten folgen.",
+          "en": "A straight text used to keep the proportions of its letters and stay in the middle of its frame, even when the frame was pulled wider or deeper. The new switch \"Stretch letters to the frame\" in the text's settings fills the whole frame in both directions: a capital can be made lower or narrower, as in Tinkercad. The outlines for the edge tool and the fill modes follow.",
+          "cs": "Rovný text dříve zachovával proporce písmen a zůstával uprostřed rámečku i po jeho roztažení. Nová volba „Roztáhnout písmena na rámeček“ ve vlastnostech textu vyplní rámeček v obou směrech. Velká písmena tak lze snížit nebo zúžit. Změnu zohledňují také obrysy pro úpravy hran a jednotlivé režimy výplně."
+        }
+      },
+      {
+        "title": {
+          "de": "Rohr und Ring mit Innendurchmesser",
+          "en": "Tube and ring with an inner diameter",
+          "cs": "Trubka a prstenec s vnitřním průměrem"
+        },
+        "body": {
+          "de": "Rohr und Ring hatten nur die Wandstärke. Jetzt steht daneben der Innendurchmesser: Tippst du das Maß der Welle ein, ergibt sich die Wand aus der Breite, ideal für eine Buchse. Stell zuerst die Breite ein; änderst du sie später, bleibt die Wand, und der Innendurchmesser ändert sich mit.",
+          "en": "The tube and the ring had only the wall thickness. Now the inner diameter stands beside it: type the size of the shaft and the wall follows from the width, handy for a bushing. Set the width first; if you change it later, the wall stays and the inner diameter changes with it.",
+          "cs": "Vedle tloušťky stěny mají trubka a prstenec nově také vnitřní průměr. Můžete přímo zadat průměr hřídele a tloušťka stěny se dopočítá, což usnadňuje například tvorbu pouzdra. Nejprve nastavte vnější rozměr. Pokud jej změníte později, zachová se tloušťka stěny a změní se vnitřní průměr."
+        }
+      }
+    ]
+  },
+  {
+    "version": "1.76.1",
+    "items": [
+      {
+        "title": {
+          "de": "OBJ mit Farbverlauf lässt sich öffnen",
+          "en": "OBJ files with a colour gradient open",
+          "cs": "Import OBJ s barevným přechodem"
+        },
+        "body": {
+          "de": "Eine OBJ-Datei, die an jedem Punkt eine eigene Farbe trägt, wie Scans und KI-Modelle (zum Beispiel aus Tripo), machte aus jeder Farbe einen eigenen Körper, oft Hunderttausende. Der Editor stürzte dabei ab. Solche Dateien kommen jetzt als ein Körper in einer Farbe herein, mit einem Hinweis, dass der Farbverlauf nicht übernommen wird. Dateien mit wenigen Farben bleiben wie bisher ein Körper je Farbe.",
+          "en": "An OBJ file with its own colour at every point, like scans and AI-made models (from Tripo, for example), became one body per colour, often hundreds of thousands of them. The editor crashed on that. Such files now come in as one body in a single colour, with a note that the colour gradient is not kept. Files with just a few colours stay one body per colour, as before.",
+          "cs": "OBJ s vlastní barvou každého vrcholu, například skeny nebo modely vytvořené AI, se dříve rozdělilo na obrovské množství těles podle barev a mohlo editor shodit. Takové soubory se nyní načítají jako jediné jednobarevné těleso s upozorněním, že barevný přechod nebyl zachován. Modely s několika málo barvami se nadále rozdělí podle barev."
+        }
+      },
+      {
+        "title": {
+          "de": "Griff über die Gegenseite hinaus ziehen",
+          "en": "Drag a handle past the other side",
+          "cs": "Tažení úchytu přes protější stranu"
+        },
+        "body": {
+          "de": "Zieht man einen Seiten- oder Eckgriff einer Form oder Auswahl, oder den Pfeil oben, über die gegenüberliegende Seite hinaus, bleibt die Größe nicht mehr stehen: Die Form wächst auf der anderen Seite der Kante weiter, wie bei Tinkercad. Eine Auswahl wird dabei gespiegelt. Körper aus einem Netz bleiben bei der Höhe an der kleinsten Größe.",
+          "en": "Drag a side or corner handle of a shape or a selection, or the arrow on top, past the opposite side and the size no longer stops there: the shape keeps growing on the other side of that edge, as in Tinkercad. A selection is mirrored as it goes. A body made of a mesh still stops at the smallest height.",
+          "cs": "Boční nebo rohový úchyt tvaru či výběru a šipku výšky lze přetáhnout přes protější hranu. Rozměr se na ní již nezastaví a tvar pokračuje na její druhé straně. Výběr se při překročení zrcadlí. U tělesa tvořeného polygonovou sítí zůstává zachovaná minimální výška."
+        }
+      },
+      {
+        "title": {
+          "de": "Besser auf dem Tablet",
+          "en": "Easier on a tablet",
+          "cs": "Pohodlnější ovládání na tabletu"
+        },
+        "body": {
+          "de": "Ein Finger auf leerer Fläche dreht jetzt die Ansicht, und ein Antippen dort hebt die Auswahl auf; der Drehen-Schalter ist dafür nicht mehr nötig und erscheint auch auf einem iPad, das sich nicht als Touchgerät meldet. In der Schnittansicht gibt es die Knöpfe „Bestätigen“ und „Zurück“, weil ein Tablet kein Enter und kein Esc hat. Ein Finger auf einer Form oder einem Griff arbeitet wie bisher.",
+          "en": "One finger on empty space now turns the view, and a tap there clears the selection, so the turn switch is not needed for it; the switch also shows on an iPad that does not report itself as a touch device. The section view has \"Confirm\" and \"Back\" buttons, because a tablet has no Enter or Esc. A finger on a shape or a handle works as before.",
+          "cs": "Tažení jedním prstem v prázdném prostoru nyní otáčí pohled a klepnutí ruší výběr. Není proto nutné přepínat režim otáčení; přepínač se navíc zobrazí i na iPadu, který se nehlásí jako dotykové zařízení. Panel řezu získal tlačítka pro potvrzení a návrat, která nahrazují chybějící Enter a Esc. Ovládání prstem na tělesech a úchytech se nemění."
+        }
+      }
+    ]
+  },
+  {
     "version": "1.76.0",
     "items": [
       {
