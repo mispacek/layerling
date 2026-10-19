@@ -10,7 +10,7 @@ Ostri robovi na natisnjenem delu redko dobro izgledajo in tudi niso posebno stab
 1. Izberi telo (ali skupino).
 2. V orodni vrstici klikni {{ui:editor.tool.fillet}} ali {{ui:editor.tool.chamfer}}, pritisni [[B]] za zaokrožitev ali [[Shift]]+[[B]] za posnetje, ali klikni z desnim gumbom na telo in izberi v meniju.
 3. Robovi telesa se poudarijo. Klikni tiste, ki naj bodo prizadeti. Še en klik jih spet odvzame. S [[Shift]] dodaš posamezen rob ali ga odvzameš.
-4. Nastavi mero in potrdi z {{ui:edge.apply}} ali [[Enter]].
+4. Nastavi mero in potrdi z {{ui:edge.apply}} ali [[Enter]]. Nato okno ostane odprto na novem telesu z isto velikostjo, tako da lahko takoj sledi naslednje zaobljenje ali posnetje; zapre ga {{ui:edge.done}}, [[Esc]] ali križec. S [[Shift]] ali [[Ctrl]] klik na {{ui:edge.topEdges}}, {{ui:edge.bottomEdges}}, {{ui:edge.verticalEdges}} ali {{ui:edge.horizontalEdges}} doda te robove izbranim, namesto da bi jih zamenjal.
 
 ![Orodje »Zaokroži robove«: vsi ostri robovi so izbrani, na sliki je predogled s polmerom 4 mm.](shot:fillet-preview)
 
@@ -24,6 +24,8 @@ V oknu najdeš:
 - **{{ui:edge.radius}}** pri zaokrožitvi. Pri posnetju nastaviš {{ui:edge.distance}} ali {{ui:edge.angle}}.
 - {{ui:edge.sharpThreshold}} določa, kateri robovi sploh veljajo za ostre. Vrednost 25° obravnava kot rob samo izrazite pregibe in pusti ploske prehode pri miru.
 - {{ui:edge.topEdges}} izbere samo robove čisto na vrhu telesa. To je hitra pot za modelček za piškote: obris v skici zgradiš kot konturo, nato posneš zgornje robove. Kako strmo je posnetje, nastaviš z {{ui:edge.angle}}; daljše kot je stena debela, ne more postati.
+- {{ui:edge.bottomEdges}} izbere samo robove čisto na dnu telesa, nasprotje gumba {{ui:edge.topEdges}}. Tako hitro zaobliš ali posnameš samo vznožje dela.
+- {{ui:edge.chamfillet}}, izbran na vrhu okna posnetja ob {{ui:editor.tool.chamfer}}, naredi natisljivo stopo dela: posnetje pri plošči, ki se tangentno steče v zaokrožitev proti steni, tako da prve plasti ne potrebujejo podpor, rob pa vseeno konča mehko. {{ui:edge.distance}} je višina, ki jo stopa zavzame, {{ui:edge.angle}} (15° do 75°) strmina posnetja pri plošči. Robove izberete z {{ui:edge.bottomEdges}}.
 - {{ui:edge.onlyVisibleEdges}} skrije robove, ki ležijo za telesom, gledano od tam, kjer gledaš. Privzeto se vsak rob vidi skozi telo, kar je pri zahtevnem delu zmedeno; ko je stikalo vklopljeno, vidiš in lahko klikneš samo robove, obrnjene proti tebi. Za druge zasukaj pogled. Rob, narisan rdeče (glej spodaj), se vedno pokaže.
 - {{ui:edge.tangentChains}}: Klik potem izbere tudi robove, ki mehko prehajajo drug v drugega, na primer vse robove okoli ploskve z zaobljenimi vogali. Stikalo določa samo, kaj klik izbere: jedro CAD posnetje ali zaokrožitev vedno nadaljuje na takih gladko povezanih robovih. Tabla ti potem pove, na koliko dodatnih robovih se to zgodi.
 - {{ui:edge.keepSize}} ohrani posnetje ali zaokrožitev tako veliko, kot sta, tudi če telo pozneje povečaš.
@@ -43,7 +45,7 @@ Obdelano telo lahko kadarkoli obdelaš še enkrat. Izberi ga znova in odpri orod
 
 Ob posnetju, zaokrožitvi ali izdolbljenju je poleg tega {{ui:edge.editAction}}. Obdelavo prekliče enako, a orodje takoj spet odpre z istimi robovi in staro vrednostjo. Spremeniš vrednost in jo uporabiš znova: tako iz zaokrožitve 3 mm nastane ta 5 mm, ne da bi ti bilo treba robove znova klikati. Če so nad njo novejše obdelave, gredo tudi tu zraven. To velja za obdelave robov, ki jih narediš od zdaj; pri starejših stoji samo preklic, pri posameznih delih skupine prav tako.
 
-Pri skupini, na primer valju z izvrtino, obdelani rob spada k dokončanemu telesu, ne k posameznemu delu. Zato iz skupine pri tem nastane eno samo telo, {{ui:editor.tool.ungroup}} pa ni več na voljo. Če obdelavo prekličeš, kot je opisano zgoraj, je skupina z vsemi deli spet tu. Najlažje je robove obdelati šele čisto na koncu. To velja tudi za navoje: orodje za robove vzame navoj kot natančno telo, blok z navojno izvrtino torej dobi svoje zaokrožitve skupaj z navojem v njem. Ugotavljanje robov navoja traja dlje kot pri preprosti obliki, nekaj sekund pri M6 in približno pol minute pri cevnem navoju G1/2.
+Pri skupini, na primer valju z izvrtino, obdelani rob spada k dokončanemu telesu, ne k posameznemu delu. Zato iz skupine pri tem nastane eno samo telo. {{ui:editor.tool.ungroup}} kljub temu deluje: najprej razveljavi obdelave robov in nato skupino razdruži, v enem koraku, ki ga [[Ctrl]]+[[Z]] razveljavi. Če obdelavo prekličeš, kot je opisano zgoraj, je skupina z vsemi deli spet tu. Najlažje je robove obdelati šele čisto na koncu. To velja tudi za navoje: orodje za robove vzame navoj kot natančno telo, blok z navojno izvrtino torej dobi svoje zaokrožitve skupaj z navojem v njem. Ugotavljanje robov navoja traja dlje kot pri preprosti obliki, nekaj sekund pri M6 in približno pol minute pri cevnem navoju G1/2.
 
 > **Dobro je vedeti:** layerling pri zaokrožitvah in posnetjih računa z resnično geometrijo CAD, ne samo z mrežo trikotnikov. Zato zaokrožen rob ostane zaokrožen tudi v izvozu STEP.
 
@@ -78,3 +80,17 @@ Izdolbiš lahko tudi telo z žepom, na primer kvader z luknjo, ki ne gre skozi d
 Če pozneje spremeniš velikost izdolbenega telesa, ga layerling takoj znova izdolbe v novi velikosti. Stena ostane tako debela, kot si jo izbral, tudi pri okroglih telesih. Valj, ki ga pri tem v eno smer povlečeš bolj kot v drugo, postane elipsa.
 
 > **Namig:** Pri šobi 0,4 mm je dobro izhodišče debelina stene od 1,2 do 2 mm: dovolj tanka, da prihraniš material, dovolj debela za stabilen del.
+
+## Brisanje ploskev
+
+Zaokrožitev, ki moti, luknja na napačnem mestu, izboklina, ki je ne potrebuješ več: {{ui:editor.tool.deleteFace}} jih spet odstrani s telesa, ne da bi ga moral graditi na novo.
+
+1. Izberi telo in klikni {{ui:editor.tool.deleteFace}}, ali klikni z desnim gumbom na telo in izberi v meniju.
+2. Klikni vsako ploskev tistega, kar naj izgine: ploskve zaobljenega roba, steno luknje, stranico in vrh izbokline. Izbrana ploskev zasveti; ob ponovnem kliku jo spet odstraniš iz izbire. Okno šteje ploskve.
+3. Klikni {{ui:deleteFace.apply}} ali pritisni [[Del]]. [[Esc]] zapre orodje, ne da bi kaj spremenil.
+
+Okoliške ploskve rastejo, dokler se vrzel ne zapre. Kvader z zaobljenimi zgornjimi robovi dobi nazaj ostre robove, luknja se zapolni, izboklina izgine. Telo ostane natančno: lahko ga znova zaokrožiš in posnameš, izvoz STEP pa ohrani njegove prave ploskve. [[Ctrl]]+[[Z]] brisanje prekliče v enem koraku. Poleg tega je pod {{ui:edge.featureHistory}} tako kot zaokrožitve in posnetja, kjer ga prekliče {{ui:edge.revertAction}}; {{ui:edge.editAction}} zanj ni. Pri skupini iz tega nastane eno samo telo, kot pri obdelavi robov.
+
+Izberi vse ploskve tistega, kar naj izgine, in samo te. Če okoliške ploskve vrzeli ne morejo zapreti, ti layerling to pove in nič se ne spremeni: glavna stranica kvadra na primer nima sosednje ploskve, ki bi stopila na njeno mesto. Če izbrišeš samo dno žepa, nastane luknja skoz in skoz, ker se stene žepa nadaljujejo do druge strani.
+
+{{ui:editor.tool.deleteFace}} potrebuje natančne ploskve: deluje na delih, uvoženih kot STEP, in na oblikah layerlinga. Kar layerling hrani kot mrežo, jih nima: uvožen STL, OBJ ali 3MF, razdeljeno, okoli valja ovito ali poenostavljeno telo ali zelo podrobna oblika, na primer dolgo besedilo. Če lahko, uvozi del kot STEP. Pri podrobnem uvoženem delu je lahko nekaj ploskev preveč za jedro CAD: po 45 sekundah se brisanje ustavi in nič se ne spremeni. Telo, ki mu je bila po obdelavi robov z ohranjeno velikostjo robov spremenjena velikost, v novi velikosti nima natančnih ploskev, dokler sprememba velikosti ni preklicana.

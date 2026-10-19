@@ -5,9 +5,11 @@ summary: Výběr objektů, seznam objektů, zarovnání, zrcadlení, otáčení,
 
 ## Výběr
 
-Kliknutí vybere tvar, [[Shift]] přidává nebo odebírá další. Kliknutí na prázdné místo a [[Esc]] výběr zruší. Tažením rámečku na prázdné pracovní ploše vyberete všechny dotčené tvary. Se [[Shift]] se dosud nevybrané přidají a vybrané odeberou. [[Ctrl]]+[[A]] vybere všechna viditelná tělesa.
+Kliknutí vybere tvar, [[Shift]] přidává nebo odebírá další. Dokud držíte [[Shift]] a jsou vybrány dva nebo více tvarů, počítá je malé číslo pod ukazatelem myši. Kliknutí na prázdné místo a [[Esc]] výběr zruší. Tažením rámečku na prázdné pracovní ploše vyberete všechny dotčené tvary. Se [[Shift]] se dosud nevybrané přidají a vybrané odeberou. [[Ctrl]]+[[A]] vybere všechna viditelná tělesa. Když táhneš těleso nebo úchyt rámečku, [[Esc]] akci zruší, dokud je tlačítko myši ještě stisknuté: vše se vrátí do původního stavu a do historie se nic nepřidá.
 
 Překážející objekt skryjte pomocí {{ui:editor.tool.hideSelected}}, [[Ctrl]]+[[H]]. V projektu zůstane, ale nebude viditelný ani zahrnutý v exportu. Exportní okno předem uvede počet skrytých dílů. [[Ctrl]]+[[Shift]]+[[H]] všechny zobrazí. Proti nechtěným změnám chrání zámek nahoře v nastavení nebo [[Ctrl]]+[[L]]. Zamčený tvar nelze přesouvat, měnit jeho rozměry, otáčet, přebarvovat ani mazat. Úchyty zešednou, u horní šipky se objeví zámek a editační nástroje se vypnou. Rozměry lze stále zjistit najetím na úchyt. Klávesa pro změnu ohlásí zamčený objekt. Obsahuje-li výběr zamčený tvar, nemění se ani ostatní části. Skrytí, přejmenování, kopírování a duplikování zůstávají dostupné.
+
+Číslo na tlačítku skupiny {{ui:editor.group.visibility}} říká, kolik tvarů je skrytých, a kliknutím na něj se všechny znovu zobrazí. Projekt otevřený se skrytými tvary to jednou oznámí zprávou s tlačítkem pro jejich zobrazení.
 
 ## Seznam objektů
 
@@ -153,8 +155,10 @@ Změnu provede až {{ui:scalePercent.apply}} a jediný krok Zpět ji vrátí. Se
 
 ## Prohlížení historie
 
-{{ui:editor.tool.history}} vedle Zpět a Znovu umožní prohlížet starší stavy bez změny projektu. Pracovní plocha ukazuje minulou podobu a spodní posuvník prochází kroky. Současný stav je vpravo, předchozí vlevo; již vrácené kroky leží napravo od současného. Šipky procházejí stavy a [[Esc]] vrátí současnost. Pohled můžete otáčet a přibližovat, ale nic nelze vybírat ani měnit. Lištu lze přetáhnout za záhlaví a dvojklikem vrátit.
+{{ui:editor.tool.history}} vedle Zpět a Znovu umožní prohlížet starší stavy bez změny projektu. Pracovní plocha ukazuje minulou podobu a spodní posuvník prochází kroky. Současný stav je vpravo, předchozí vlevo; již vrácené kroky leží napravo od současného. Šipky procházejí stavy a [[Esc]] vrátí současnost. Pohled můžete otáčet a přibližovat a klepnutím vybírat objekty k vrácení (viz níže), ale nic nelze měnit. Lištu lze přetáhnout za záhlaví a dvojklikem vrátit.
 
 Ze staršího stavu můžete vytvořit {{ui:historyView.createProject}}. Nový projekt má původní název doplněný časem stavu; u starých dat bez času označení kopie. Obsahuje historii až do daného okamžiku, takže Zpět nadále funguje. {{ui:historyView.export}} otevře běžný export tohoto stavu jako STL, 3MF, STEP, obrázek nebo LYL včetně příslušné historie.
+
+Do návrhu můžete vrátit i jednotlivé objekty. Klikněte na objekt v zobrazeném stavu - [[Shift]]+klik přidá další nebo jeden odebere, klik do prázdna nevybere nic - a zvolte {{ui:historyView.bringBack}}. Pohled se zavře a kopie každého objektu přibude do současného návrhu přesně tak, jak byl v tomto stavu, a na místě, kde tehdy stál, vybraná, vedle všeho, co návrh obsahuje teď; nic jiného se nemění. Je to jeden krok, Zpět ho vrátí. Hodí se pro starší verzi dílu, který jste mezitím změnili nebo smazali. Skupina se vrátí celá; poznámky a referenční body objektu zůstanou. Jeho název nese čas daného stavu, například „Kvádr (12:32)“, aby se snadno odlišil od současné verze. Chcete-li vrátit díl ze skupiny, vyberte skupinu a zvolte {{ui:historyView.openGroup}} nebo stiskněte [[E]], stejně jako v návrhu: její díly se rozloží tam, kam by je dala úprava skupiny, připravené k výběru, a lišta ukáže, ve které skupině jste. {{ui:historyView.backOut}} ji znovu zavře. Slouží jen k prohlížení - skupina, návrh i historie zůstanou beze změny.
 
 {{ui:historyView.delete}} vlevo dole po potvrzení trvale vymaže všechny minulé kroky. Zachová skutečný současný stav, nikoli právě prohlížený. Zpět už nemá kam přejít a později uložený soubor neobsahuje historii. Použijte pro nový začátek historie nebo sdílení bez minulosti. Nelze vrátit. Chcete-li sdílet soubor bez zásahu do vlastního projektu, zvolte při exportu {{ui:export.historyNone}}.

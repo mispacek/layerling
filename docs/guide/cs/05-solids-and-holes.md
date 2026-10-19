@@ -80,6 +80,6 @@ Poloviny jsou běžné polygonové sítě. Parametry původního tvaru, napřík
 
 ## Oddělení částí
 
-Skládá-li se tvar z více nespojených částí, například text z jednotlivých písmen, {{ui:inspector.separateParts}} je oddělí do samostatných tvarů.
+Skládá-li se tvar z více nespojených částí, například text z jednotlivých písmen, {{ui:inspector.separateParts}} je oddělí do samostatných tvarů. Položku najdeš také v nabídce, která se otevře pravým kliknutím na tvar.
 
 > **Tip:** Výřezy dělejte o něco delší než díl, kterým mají projít. Pokud končí přesně na jeho povrchu, může zůstat velmi tenká blána. Přesah o jeden milimetr tomu pomůže předejít.

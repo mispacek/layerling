@@ -31,6 +31,9 @@ export const GUIDE_LANGUAGES = Object.fromEntries(
   }),
 );
 
+/** Languages written right to left; their guide pages get dir="rtl". */
+const RTL_LANGUAGES = new Set(["ar", "fa", "he", "ur"]);
+
 /** KEY=VALUE lines of an env file; comments and empty lines are skipped. */
 export function parseEnv(text) {
   const values = {};
@@ -115,7 +118,7 @@ const CYRILLIC_TRANSLITERATION = {
 export function slugify(text) {
   return text
     .toLowerCase()
-    .replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/ß/g, "ss").replace(/č/g, "c").replace(/š/g, "s").replace(/ž/g, "z").replace(/đ/g, "d")
+    .replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/ß/g, "ss").replace(/č/g, "c").replace(/š/g, "s").replace(/ž/g, "z").replace(/đ/g, "d").replace(/ł/g, "l")
     // Cyrillic is spelled out first - the accent stripping below would take the
     // breve off "й" and leave "и", which would spell "Настройки" as "nastroiki"
     // and move the id a Russian heading already had.
@@ -165,11 +168,16 @@ export function renderInline(text, context) {
   });
   work = escapeHtml(work);
   const [open, close] = GUIDE_LANGUAGES[context.language].quotes;
-  work = work.replace(/\{\{ui:([A-Za-z0-9_.-]+)\}\}/g, (_, key) => {
+  // {{ui:key|10}} fills the {count} of a sentence that counts something, so "{count} grid steps" reads "10 grid steps".
+  work = work.replace(/\{\{ui:([A-Za-z0-9_.-]+)(?:\|(\d+))?\}\}/g, (_, key, count) => {
     const label = context.messages?.[key];
     context.references?.uiKeys.add(key);
     if (label === undefined) throw new Error(`Unknown interface text {{ui:${key}}}`);
-    return `<strong class="ui">${open}${escapeHtml(label)}${close}</strong>`;
+    // Without a number a count in brackets is left out ("Show earlier versions ({count})" is a button whose
+    // number changes); any other {count} needs its number, or the page would print the placeholder.
+    const written = (count === undefined ? label.replace(/\s*[(（]\{count\}[)）]/g, "") : label).replace(/\{count\}/g, count ?? "{count}");
+    if (written.includes("{count}")) throw new Error(`{{ui:${key}}} needs a number: {{ui:${key}|10}}`);
+    return `<strong class="ui">${open}${escapeHtml(written)}${close}</strong>`;
   });
   work = work.replace(/\{\{value:([A-Za-z0-9_]+)\}\}/g, (_, name) => {
     const value = context.values?.[name];
@@ -177,8 +185,13 @@ export function renderInline(text, context) {
     return new Intl.NumberFormat(GUIDE_LANGUAGES[context.language].htmlLang, { maximumFractionDigits: 6, useGrouping: false }).format(value);
   });
   // "+" joins keys, so [[Ctrl+K]] is two; on its own, [[+]] is the plus key.
-  work = work.replace(/\[\[([^\]]+)\]\]/g, (_, keys) =>
-    keys.trim() === "+" ? "<kbd>+</kbd>" : keys.split("+").map((key) => `<kbd>${key.trim()}</kbd>`).join("+"));
+  // A combination such as [[Ctrl]]+[[S]] keeps its left-to-right order on a right-to-left page too.
+  const kbd = (keys) => keys.trim() === "+" ? "<kbd>+</kbd>" : keys.split("+").map((key) => `<kbd>${key.trim()}</kbd>`).join("+");
+  work = work.replace(/\[\[([^\]]+)\]\](?:\+\[\[([^\]]+)\]\])*/g, (combo) => {
+    const parts = [...combo.matchAll(/\[\[([^\]]+)\]\]/g)].map((match) => kbd(match[1]));
+    const html = parts.join("+");
+    return parts.length > 1 || /<\/kbd>\+<kbd>/.test(html) ? `<span dir="ltr">${html}</span>` : html;
+  });
   work = work.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_, label, target) => {
     const chapter = /^chapter:([\w-]+)$/.exec(target);
     if (chapter) {
@@ -317,7 +330,7 @@ export async function readShortcutGroups() {
 export function renderShortcuts(groups, messages, language) {
   const names = LANGUAGE_INFO[language]?.keyNames ?? {};
   const key = (name) => `<kbd>${escapeHtml(names[name] ?? name)}</kbd>`;
-  const combo = (text) => (text === "+" || text === "−" ? key(text) : text.split("+").map((part) => key(part.trim())).join("+"));
+  const combo = (text) => (text === "+" || text === "−" ? key(text) : text.includes("+") ? `<span dir="ltr">${text.split("+").map((part) => key(part.trim())).join("+")}</span>` : key(text.trim()));
   const or = messages["shortcuts.or"] ?? "or";
   return groups
     .map((group) => {
@@ -405,7 +418,7 @@ li { margin-bottom: 4px; }
 strong.ui { font-weight: 700; white-space: nowrap; }
 kbd { padding: 1px 6px; border: 1px solid var(--edge); border-bottom-width: 2px; border-radius: 5px; background: var(--card); font: 600 0.86em/1.5 ui-monospace, Consolas, monospace; }
 code { padding: 1px 5px; border-radius: 5px; background: var(--code); font: 0.9em ui-monospace, Consolas, monospace; }
-pre { overflow-x: auto; padding: 14px 16px; border-radius: 8px; background: var(--code); }
+pre { overflow-x: auto; padding: 14px 16px; border-radius: 8px; background: var(--code); direction: ltr; text-align: left; }
 pre code { padding: 0; background: none; }
 figure { margin: 22px 0; }
 figure img { display: block; width: 100%; height: auto; border: 1px solid var(--edge); border-radius: 8px; background: var(--card); }
@@ -416,15 +429,18 @@ aside.tip > :last-child { margin-bottom: 0; }
 table { border-collapse: collapse; font-size: 15px; min-width: 100%; }
 table.keys { table-layout: fixed; }
 table.keys td:first-child { width: 42%; }
-th, td { padding: 7px 12px; border-bottom: 1px solid var(--edge); text-align: left; vertical-align: top; }
+th, td { padding: 7px 12px; border-bottom: 1px solid var(--edge); text-align: start; vertical-align: top; }
 th { color: var(--muted); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; }
+/* Where a link from the program lands, the section is outlined from its heading to its end. */
+.guide-part:has(> :is(h2, h3):target) { outline: 3px solid var(--accent); outline-offset: 10px; border-radius: 6px; }
+:is(h2, h3):target { scroll-margin-top: 24px; }
 .toc { margin: 0 0 24px; padding: 12px 16px; border: 1px solid var(--edge); border-radius: 8px; background: var(--card); font-size: 14.5px; }
 .toc b { display: block; margin-bottom: 4px; color: var(--muted); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; }
-.toc ul { margin: 0; padding-left: 18px; }
+.toc ul { margin: 0; padding-inline-start: 18px; }
 .pager { display: flex; justify-content: space-between; gap: 12px; margin-top: 44px; padding-top: 18px; border-top: 1px solid var(--edge); }
 .pager a { display: block; max-width: 48%; padding: 10px 14px; border: 1px solid var(--edge); border-radius: 8px; background: var(--card); text-decoration: none; color: var(--ink); }
 .pager a small { display: block; color: var(--muted); font-size: 12px; }
-.pager a.next { margin-left: auto; text-align: right; }
+.pager a.next { margin-inline-start: auto; text-align: end; }
 .cards { list-style: none; margin: 24px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
 .cards a { display: block; height: 100%; padding: 14px 16px; border: 1px solid var(--edge); border-radius: 8px; background: var(--card); text-decoration: none; color: var(--ink); }
 .cards a:hover { border-color: var(--accent); }
@@ -456,7 +472,7 @@ footer.note { max-width: 1100px; margin: 0 auto; padding: 0 16px 12px; color: va
 .print-actions button { padding: 8px 16px; border: 0; border-radius: 8px; background: var(--accent); color: var(--accent-ink); font: inherit; font-weight: 700; cursor: pointer; }
 .print-chapter { margin-top: 56px; padding-top: 8px; border-top: 1px solid var(--edge); }
 .print-chapter > h2 { margin-top: 20px; font-size: 28px; }
-.print-contents { margin: 0 0 24px; padding-left: 22px; columns: 2; column-gap: 32px; }
+.print-contents { margin: 0 0 24px; padding-inline-start: 22px; columns: 2; column-gap: 32px; }
 .print-contents li { break-inside: avoid; }
 @media (max-width: 560px) { .print-contents { columns: 1; } }
 @media print {
@@ -522,48 +538,35 @@ export function searchEntries({ title, summary, html, path }) {
 }
 
 /**
- * The matching, kept apart from the page so a test can run it. It folds case and accents one letter
- * for one letter (so a position in the folded text is a position in the real one), wants every word
- * of the query somewhere in a section, and ranks a word in the heading above one in the chapter's
- * title above one in the text. "ss" and the sharp s are the same to it, whichever one is typed and
- * whichever one the text has; where people write "ae", "oe" and "ue" for the umlauts, those find
- * them too. Written for browsers, so plain ES5 and no backslashes.
+ * Wraps every section of a chapter (a heading and what follows it up to the next heading of the same
+ * or a higher level) in an element of its own, so the section a link points at can be outlined as a
+ * whole: `.guide-part:has(> h2:target)`. Only the chapter page gets this, the search index and the
+ * print page keep the plain text.
  */
-export const GUIDE_SEARCH_CORE = `
-function guideFold(text){var out="";for(var i=0;i<text.length;i++){out+=text.charAt(i).toLowerCase().normalize("NFD").charAt(0);}return out;}
-function guideForms(word,umlauts){
-  var forms=[word];
-  if(umlauts){var plain=word.split("ae").join("a").split("oe").join("o").split("ue").join("u");if(plain!==word)forms.push(plain);}
-  if(word.indexOf("ss")>=0)forms.push(word.split("ss").join(String.fromCharCode(223)));
-  if(word.indexOf(String.fromCharCode(223))>=0)forms.push(word.split(String.fromCharCode(223)).join("ss"));
-  return forms;
+export function wrapSections(html) {
+  const open = [];
+  let out = "";
+  let last = 0;
+  for (const match of html.matchAll(HEADING_PATTERN)) {
+    out += html.slice(last, match.index);
+    const level = Number(match[1]);
+    while (open.length && open[open.length - 1] >= level) { open.pop(); out += "</section>"; }
+    open.push(level);
+    out += '<section class="guide-part">';
+    last = match.index;
+  }
+  out += html.slice(last);
+  while (open.length) { open.pop(); out += "</section>"; }
+  return out;
 }
-function guideFind(text,forms,from){
-  var best=null;
-  for(var i=0;i<forms.length;i++){var k=text.indexOf(forms[i],from);if(k>=0&&(!best||k<best.at))best={at:k,len:forms[i].length};}
-  return best;
-}
-function guidePrepare(entries){return entries.map(function(e){return {e:e,c:guideFold(e.c),h:guideFold(e.h),t:guideFold(e.t)};});}
-function guideTokens(query){return guideFold(query).split(" ").filter(function(w){return w.length>0;});}
-function guideSearch(prepared,query,limit,umlauts){
-  var tokens=guideTokens(query);if(!tokens.length)return [];
-  var forms=tokens.map(function(w){return guideForms(w,umlauts);}),phrase=guideForms(tokens.join(" "),umlauts),found=[];
-  prepared.forEach(function(p){
-    var score=0;
-    for(var i=0;i<tokens.length;i++){
-      var inH=guideFind(p.h,forms[i],0),inC=guideFind(p.c,forms[i],0),at=guideFind(p.t,forms[i],0);
-      if(!inH&&!inC&&!at)return;
-      if(inH)score+=10;
-      if(inC)score+=3;
-      if(at){score+=1;var n=0,k=at;while(k&&n<5){n++;k=guideFind(p.t,forms[i],k.at+k.len);}score+=n*0.3;}
-    }
-    if(tokens.length>1&&(guideFind(p.h,phrase,0)||guideFind(p.t,phrase,0)))score+=6;
-    found.push({entry:p.e,score:score,folded:p.t,forms:forms});
-  });
-  found.sort(function(a,b){return b.score-a.score;});
-  return found.slice(0,limit||8);
-}
-`;
+
+/**
+ * The matching, kept apart from the page so a test can run it and the editor's Interactive Help can
+ * use it: the functions live in apps/web/src/lib/guideSearchCore.ts, and this is their text, which
+ * every page embeds. Written for browsers, so plain ES5 and no backslashes there.
+ */
+const searchCore = await import(pathToFileURL(join(root, "apps", "web", "src", "lib", "guideSearchCore.ts")).href);
+export const GUIDE_SEARCH_CORE = "\n" + searchCore.GUIDE_SEARCH_CORE_FUNCTIONS.map((fn) => fn.toString()).join("\n") + "\n";
 
 const GUIDE_SEARCH_PAGE = `
 function guideSnippet(hit){
@@ -639,7 +642,7 @@ function pageShell({ language, title, description, path, alternates, chapters, c
     .map(([code, href]) => `<link rel="alternate" hreflang="${code}" href="${SITE}${href}">`)
     .join("\n    ");
   return `<!doctype html>
-<html lang="${strings.htmlLang}">
+<html lang="${strings.htmlLang}"${RTL_LANGUAGES.has(strings.htmlLang.split("-")[0]) ? ' dir="rtl"' : ""}>
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -847,7 +850,7 @@ export async function buildGuide({ log = console.log } = {}) {
         : "";
       const pager = `<div class="pager">${previous ? `<a href="/${strings.dir}/${previous.slug}.html"><small>${escapeHtml(strings.previous)}</small>${escapeHtml(previous.title)}</a>` : ""}${next ? `<a class="next" href="/${strings.dir}/${next.slug}.html"><small>${escapeHtml(strings.next)}</small>${escapeHtml(next.title)}</a>` : ""}</div>`;
       const notice = chapter.fallback ? `<p class="not-translated" role="note" lang="${strings.htmlLang}">${escapeHtml(strings.notTranslated)}</p>\n` : "";
-      const body = `<h1>${escapeHtml(chapter.title)}</h1>\n<p class="lead">${escapeHtml(chapter.summary)}</p>\n${notice}${toc}\n${rendered.html}\n${pager}`;
+      const body = `<h1>${escapeHtml(chapter.title)}</h1>\n<p class="lead">${escapeHtml(chapter.summary)}</p>\n${notice}${toc}\n${wrapSections(rendered.html)}\n${pager}`;
       const page = pageShell({
         language, title: `${chapter.title} - ${strings.site}`, description: chapter.summary, path, alternates, chapters,
         current: chapter.slug, body, footer, languageLinks: languageLinksFor(chapter.number), englishPath,

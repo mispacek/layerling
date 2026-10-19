@@ -83,6 +83,7 @@ export function TransformOverlay({
   onCancelCornerEdit,
   onEditingDimensionChange,
   onCommitDimensionEdit,
+  onTabDimensionEdit,
   onCancelDimensionEdit,
   onBeginRotationEdit,
   onEditingRotationChange,
@@ -96,7 +97,7 @@ export function TransformOverlay({
   const keepVisible = visibleWorkArea(rootRef.current, box.width, box.height);
   const marks = measureKey
     ? (box.dimensions[measureKey] ?? [])
-    : box.alwaysVisibleDimensionKeys.flatMap((key) => box.dimensions[key] ?? []);
+    : box.alwaysVisibleDimensionKeys.flatMap((key) => (box.dimensions[key] ?? []).filter((mark) => !mark.labelOnly));
   const visibleMarks = (hideDimensionMarks ? [] : marks).filter((mark) => mark.key !== editingDimension?.key && !editingCorner?.entries.some((entry) => entry.key === mark.key));
   const handleMeasureKey = (handle: TransformOverlayState["handles"][number]) => measureKeyForHandle(handle.kind, handle.key, box);
   // A tick for every step the turn snaps to: 22.5°, and 11.25° while Shift is held inside the wheel.
@@ -194,7 +195,7 @@ export function TransformOverlay({
         {box.guides.map((line, index) => (
           <line key={`guide-${index}`} x1={line.x1} y1={line.y1} x2={line.x2} y2={line.y2} />
         ))}
-        {visibleMarks.map((mark) => (
+        {visibleMarks.filter((mark) => !mark.labelOnly).map((mark) => (
           <g key={mark.key} className="dimension-mark">
             <line className="dimension-extension" x1={mark.e1x1} y1={mark.e1y1} x2={mark.e1x2} y2={mark.e1y2} />
             <line className="dimension-extension" x1={mark.e2x1} y1={mark.e2y1} x2={mark.e2x2} y2={mark.e2y2} />
@@ -232,6 +233,10 @@ export function TransformOverlay({
             }
             if (event.key === "Escape") {
               onCancelDimensionEdit();
+            }
+            if (event.key === "Tab") {
+              event.preventDefault();
+              onTabDimensionEdit(event.shiftKey);
             }
           }}
         />

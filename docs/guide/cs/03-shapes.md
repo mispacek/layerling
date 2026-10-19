@@ -11,6 +11,8 @@ Kliknutím na {{ui:editor.addShape}} otevřete knihovnu.
 
 ![Knihovna tvarů. Náhledy jsou vykreslené ze skutečné geometrie jednotlivých tvarů.](shot:shape-menu)
 
+Knihovna se zavře po každém vybraném tvaru. Záhlavím ji přesunete tam, kde nezakrývá místo, na které míříte, třeba nad panel Vlastnosti; dvojklik na záhlaví ji vrátí pod její tlačítko a kde jste ji nechali, si pamatuje prohlížeč. Připínáček v záhlaví drží knihovnu otevřenou, dokud umisťujete několik tvarů za sebou. Okraji a rohy měníte její velikost, tak široce a vysoko, jak vaše obrazovka dovolí; i tu si prohlížeč pamatuje a dvojklik na okraj ji vrátí zpět. Když knihovnu zúžíte, vynechá názvy a ukáže jen obrázky; název se objeví, když na tvar ukážete.
+
 Vybraný tvar sleduje myš a položí se kliknutím. Nad tělesem se orientuje podle plochy pod ukazatelem, i šikmé, podobně jako Cruise v Tinkercadu. Nad prázdnou podložkou dopadne na pracovní rovinu. [[Esc]] umísťování zruší. Nástroje čekající na kliknutí, například měření, úhelník, poznámka, {{ui:camera.placeWorkplane}}, {{ui:editor.tool.layFlat}} nebo úpravy hran, se při výběru tvaru vypnou. Kliknutí pak skutečně umístí tvar. Obráceně zapnutí takového nástroje ukončí umísťování tvaru. Chcete-li nové tvary rovnou uprostřed podložky, vypněte {{ui:workspace.cruise}} v části {{ui:workspace.appearance}}.
 
 Knihovna nabízí:
@@ -19,7 +21,7 @@ Knihovna nabízí:
 - **Trubky:** {{ui:shape.tube}}, {{ui:shape.bentTube}} až z dvanácti přímých úseků spojených ohyby a {{ui:shape.loft}} mezi různými obrysy, například čtvercem a kruhem.
 - **Dekorace:** {{ui:shape.star}}, {{ui:shape.heart}} a {{ui:shape.crescent}}.
 - **Nápisy:** {{ui:shape.text}}, i po oblouku, viz [Text](chapter:text).
-- **Mechanické díly:** {{ui:shape.thread}} jako závitová tyč, šroub, matice a závitový otvor, dále {{ui:shape.spring}}, {{ui:shape.gear}} a {{ui:shape.knurl}} pro úchopy. Viz [Závity a mechanické díly](chapter:threads-and-mechanics).
+- **Mechanické díly:** {{ui:shape.thread}} jako závitová tyč, šroub, matice a závitový otvor, dále {{ui:shape.spring}}, krabičky a nosné desky {{ui:shape.gridfinity}}, {{ui:shape.gear}} a {{ui:shape.knurl}} pro úchopy. Viz [Závity a mechanické díly](chapter:threads-and-mechanics).
 - **Konstrukční prvky:** {{ui:shape.hinge}} tisknutelný vcelku, {{ui:shape.dovetail}}, {{ui:shape.teardrop}} pro vodorovné otvory, {{ui:shape.counterbore}}, {{ui:shape.countersink}} pro hlavy šroubů a {{ui:shape.ruler}}, které pouze měří a neexportuje se.
 
 Trojúhelník získáte dvěma způsoby. {{ui:shape.polygon}} se třemi stranami tvoří rovnoramenný trojúhelník, obdobu střechy v Tinkercadu. {{ui:shape.wedge}} má pravoúhlý trojúhelník. Oba jsou skutečné trojboké hranoly. Pro trojúhelníkový otvor tvar zkopírujte, zmenšete, přepněte na výřez a zarovnejte přes {{ui:editor.tool.centerOnWorkplane}} nebo {{ui:editor.tool.align}}. Při práci s ohraničením pamatujte, že jde o nejmenší kvádr obklopující tvar: i polovina čtverce má stejné krajní rozměry jako celý čtverec. Vyhledávání [[Ctrl]]+[[K]] najde oba tvary i pod názvy „triangle“ nebo „roof“.
@@ -34,7 +36,7 @@ Panel je ukotvený u pravého okraje. Tažením záhlaví jej můžete nechat pl
 
 ![Nastavení válce: plné těleso nebo výřez, číselný průměr a výška i posuvníky.](shot:editor-overview)
 
-- **{{ui:inspector.solid}} / {{ui:inspector.hole}}:** plné těleso zůstává, výřez odebírá materiál. Kliknutí na {{ui:inspector.solid}} otevře barvy. Posledních osm vlastních barev zůstává v {{ui:inspector.recentColors}}. Více v [Tělesech a výřezech](chapter:solids-and-holes).
+- **{{ui:inspector.solid}} / {{ui:inspector.hole}}:** plné těleso zůstává, výřez odebírá materiál. Kliknutí na {{ui:inspector.solid}} otevře barvy. Posledních osm vlastních barev zůstává v {{ui:inspector.recentColors}}. Více v [Tělesech a výřezech](chapter:solids-and-holes). Špendlík v řadě {{ui:inspector.keptColors}} ponechá zvolenou barvu navždy: stojí ve vlastní řadě, novější barvy ji nikdy nevytlačí a týmž špendlíkem ji zase pustíte; v tomto prohlížeči se uchová až 21 barev.
 - **{{ui:inspector.transparent}}:** umožňuje vidět skrz těleso, například na objekt za ním.
 - **{{ui:inspector.multicolor}}:** pro sloučené celky; přepíná se i pomocí [[Shift]]+[[M]]. Zachová barvy částí i po odečtení výřezů; stěna otvoru má barvu tělesa, do kterého je vyříznuta. Volba společné barvy tento režim vypne. Pouhé skupiny zachovávají barvy vždy. Ve 3MF má každá část svou barvu pro přiřazení filamentu, OBJ ji ukládá do vrcholů a přechod mezi barvami je proto hrubší.
 - **{{ui:inspector.properties}}:** rozměry a parametry konkrétního tvaru. U válce průměr, výška a počet stran, u kola zuby, u pružiny závity. U hodnoty odlišné od výchozí se objeví šipka pro obnovení pouze tohoto parametru, bez vracení ostatních změn jako u Zpět. Dvojklik na posuvník obnoví výchozí hodnotu stejně jako tato šipka, a to i u posuvníků v nastavení pracovní plochy. Tažený posuvník délky se přichytává podle kroku, s výjimkou vypnutého přichytávání a krátkých posuvníků. Číselné zadání i klávesové šipky zůstávají přesné. {{ui:inspector.saveDefaults}} uloží aktuální parametry jako výchozí pro daný tvar, stejně jako {{ui:workspace.shapeDefaults}}. {{ui:inspector.resetDefaults}} obnoví výchozí parametry aplikace.
@@ -44,9 +46,11 @@ Panel je ukotvený u pravého okraje. Tažením záhlaví jej můžete nechat pl
 
 ![Sloučení oranžového kvádru, modrého kolíku a výřezu. Vícebarevný režim zachová barvy a stěny otvoru převezmou oranžovou.](shot:group-multicolor)
 
-Zúžení a zkroucení podporuje většina tvarů. Výjimkami jsou ozubené kolo, závit, pružina, rýhovaný úchop, pant, jehlan, ohnutá trubka, kapkovitý otvor, zahloubení pro šrouby a pravítko. Mají vlastní pevné rozměry nebo již vlastní podobu vrcholu.
+Zúžení a zkroucení podporuje většina tvarů. Výjimkami jsou ozubené kolo, závit, pružina, Gridfinity, rýhovaný úchop, pant, jehlan, ohnutá trubka, kapkovitý otvor, zahloubení pro šrouby a pravítko. Mají vlastní pevné rozměry nebo již vlastní podobu vrcholu.
 
 ![Změněný poloměr vrcholu a výška kuželu. Šipka obnoví jednotlivou hodnotu; spodní tlačítka ukládají a obnovují výchozí nastavení.](shot:property-reset)
+
+{{ui:inspector.saveDefaults}} si zapamatuje, co jste na tomto tvaru změnili, jako začátek každého nového tvaru tohoto druhu: rozměry, nastavení tvaru a jeho barvu. Obarvěte válec zeleně a stiskněte tlačítko, každý válec, který potom přidáte, bude zelený; ostatní druhy si ponechají své barvy. {{ui:inspector.resetDefaults}} vrátí druh k tomu, s čím ho program začíná. Které druhy mají vlastní výchozí hodnoty, je označeno v nastavení pod {{ui:workspace.shapeDefaults}}. Také nový návrh, který založíte z úvodní stránky, jimi začíná; hodnoty si pamatuje tento prohlížeč.
 
 Zúžený či nakloněný kvádr, válec, elipsa, mnohoúhelník, trubka a prstenec zachovávají přesné těleso. Platí to i pro kapsli, hvězdu, srdce, srpek, rybinu a zaoblený kvádr bez zaoblení horní a spodní hrany. Lze upravovat jejich hrany a exportovat je do STEP. Stejně funguje zkroucení: průřez se po výšce přesně natáčí a boky přecházejí rovnoměrně odspodu nahoru.
 
@@ -86,12 +90,12 @@ Vedle číselných polí jsou úchyty přímo na tvaru:
 - **Rohy a hrany** mění velikost. [[Shift]] při tažení rohu zachovává poměr šířky, hloubky a výšky, [[Alt]] mění velikost vůči středu místo protějšího rohu. Bez držení klávesy zapněte {{ui:inspector.keepProportions}}. Rohy pak zachovávají poměry vždy a zadání jednoho rozměru přepočítá zbývající. Volba se pamatuje.
 - **Horní šipka** mění výšku, **prostřední úchyt** zvedá nebo spouští celé těleso.
 - **Obloukové šipky** otáčejí.
-- **Čísla** vedle tělesa umožňují přímé zadání. [[Enter]] mění rozměr od protějšího okraje jako tažení; [[Alt]]+[[Enter]] souměrně vůči středu, aby se zachovalo zarovnání. Platí pro délku a šířku. Výška roste vždy od spodní strany vzhůru. Pravý panel zachovává střed i bez klávesy.
+- **Čísla** vedle tělesa umožňují přímé zadání. [[Enter]] mění rozměr od protějšího okraje jako tažení; [[Alt]]+[[Enter]] souměrně vůči středu, aby se zachovalo zarovnání. Platí pro délku a šířku. Výška roste vždy od spodní strany vzhůru. Pravý panel zachovává střed i bez klávesy. [[Tab]] převezme číslo a otevře další pole (šířka, hloubka, výška); [[Shift]]+[[Tab]] jde zpět. V poli vlastností, na které jste klikli, mění hodnotu i kolečko myši: jednotku na zub, desetinásobek s [[Shift]], desetinu s [[Ctrl]] a setinu s [[Alt]]. Pole, na které jste neklikli, nechává kolečko panelu, který se posouvá.
 - **Kliknutí na roh bez tažení** otevře šířku a hloubku společně. Zadejte první, [[Tab]] přejděte na druhou a [[Enter]] potvrďte obě. [[Esc]] zruší změnu.
 
 Po natočení o pravý úhel, například položením přes {{ui:editor.tool.layFlat}}, odpovídají názvy rozměrů jejich současným směrům: {{ui:prop.height}} jde vzhůru, {{ui:prop.width}} podél X a {{ui:prop.length}} podél Y. Změna výšky ležícího dílu proto upraví svislý rozměr a spodek zůstane na podložce. U jiných úhlů panel ukazuje vlastní rozměry tělesa a doplní vysvětlení.
 
-Šipky přesouvají výběr po kroku přichytávání, při vypnutí po 0,01 mm. Se [[Shift]] po pěti krocích, případně deseti, pokud v {{ui:workspace.appearance}} nastavíte {{ui:workspace.gridMajorEvery}} na 10 {{ui:workspace.gridMajorSteps}}. Posun tak odpovídá vzdálenosti hlavních čar jako v Tinkercadu. Směr se řídí pohledem: [[→]] doprava na obrazovce, [[↑]] od vás, i po otočení podložky. Pohled následuje objekt přesunutý mimo obraz. [[Ctrl]]+[[↑]] a [[Ctrl]]+[[↓]] zvedají a spouštějí. Série stisků šipek tvoří jeden krok historie, pokud mezi nimi neuplyne více než 1,5 sekundy. Příkaz Zpět pak vrátí celou sérii najednou. [[R]] otáčí po 45°, [[Shift]]+[[R]] po 22,5° a [[D]] položí výběr na pracovní rovinu.
+Šipky přesouvají výběr po kroku přichytávání, při vypnutí po 0,01 mm. Se [[Shift]] po pěti krocích, případně deseti, pokud v {{ui:workspace.appearance}} nastavíte {{ui:workspace.gridMajorEvery}} na {{ui:workspace.gridMajorSteps|10}}. Posun tak odpovídá vzdálenosti hlavních čar jako v Tinkercadu. Směr se řídí pohledem: [[→]] doprava na obrazovce, [[↑]] od vás, i po otočení podložky. Pohled následuje objekt přesunutý mimo obraz. [[Ctrl]]+[[↑]] a [[Ctrl]]+[[↓]] zvedají a spouštějí. Série stisků šipek tvoří jeden krok historie, pokud mezi nimi neuplyne více než 1,5 sekundy. Příkaz Zpět pak vrátí celou sérii najednou. [[R]] otáčí po 45°, [[Shift]]+[[R]] po 22,5° a [[D]] položí výběr na pracovní rovinu.
 
 Úchyty dovolují velikost až podle rozměrů podložky, nejméně 220 mm v obou vodorovných směrech. Číselné zadání dovolí i větší těleso a další uchopení jej nezmenší. Vlastní maximální rozměry pro jednotlivé tvary nastavíte v {{ui:workspace.shapeDefaults}} přes {{ui:workspace.customLimit}}.
 
@@ -109,11 +113,17 @@ Opakovaně používaný držák, úchop nebo desku uložte do {{ui:myShapes.titl
 
 1. Vyberte jedno či více těles, výřezů, sloučených celků nebo importovaných modelů.
 2. Otevřete knihovnu, zvolte {{ui:myShapes.saveSelection}}, pojmenujte tvar a potvrďte {{ui:common.save}}.
-3. V libovolném projektu jej vložte kliknutím na dlaždici nebo přetažením na pracovní rovinu, kde dopadne na místo uvolnění.
+3. V libovolném projektu jej vložte kliknutím na dlaždici nebo přetažením na pracovní rovinu, kde dopadne na místo uvolnění. Tvar pak visí na ukazateli jako každý jiný: následuje ho, i po plochách jiných těles, kliknutí ho položí, [[Esc]] ho odloží.
 
 Více těles zachová vzájemné rozmístění a každé lze vybírat samostatně. Tužka přejmenuje tvar, koš jej po potvrzení odstraní. Již vložená tělesa se nezmění.
 
 Vlastní tvary jsou v tomto prohlížeči odděleně od projektů a zůstanou i po dalším spuštění. {{ui:dashboard.backupAll}} zálohuje obojí a otevření zálohy obnoví obojí. Pro přenos samotných tvarů použijte {{ui:myShapes.backup}}, šipku dolů, která vytvoří ZIP, a {{ui:myShapes.load}}, šipku nahoru. Načíst lze i jednotlivé `.lyl`; každý se stane vlastním tvarem. Shodné existující tvary se nepřidávají znovu.
+
+### Složky
+
+Mnoho vlastních tvarů se lépe třídí do složek. {{ui:myShapes.newFolder}} (složka s plusem vedle {{ui:myShapes.saveSelection}}) se zeptá na název a vytvoří složku nahoře; složka s plusem u složky, {{ui:myShapes.newSubfolder}}, vytvoří složku uvnitř ní. Složky mají nejvýše tři úrovně: složka na třetí úrovni pojme tvary, ale už žádné další složky. Složky stojí nad tvary, které nejsou v žádné, seřazené podle názvu, a otevírají a zavírají se šipkou; číslo u složky počítá tvary v ní i ve složkách pod ní. Při ukládání zvolte složku v seznamu vedle názvu; s {{ui:myShapes.noFolder}} zůstane tvar nahoře.
+
+Složka se šipkou na dlaždici přesune tvar do jiné složky, nebo s {{ui:myShapes.noFolder}} zase ven. Tužka u složky ji přejmenuje, koš ji po dotazu smaže i se složkami a tvary v ní. Samotnou složku přesunout nelze: vytvořte novou tam, kam patří, a tvary do ní přesuňte. Záloha složky zachová a při načtení se tvary vrátí na stejné místo. Na serveru jsou složky složkami uvnitř `Custom shapes`.
 
 ### Vlastní tvary na serveru
 

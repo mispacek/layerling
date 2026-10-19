@@ -12,6 +12,11 @@ export const SPLINTER_MAX_TRIANGLES_TINY = 1000;
 export const SPLINTER_MAX_VOLUME = 0.5;
 /** A piece with an edge of its box longer than this, in millimetres, is never a splinter. */
 export const SPLINTER_MAX_SIZE = 6;
+/**
+ * A piece that holds less than this, in cubic millimetres, holds nothing: a flat sheet of two faces on each other, a
+ * leftover of a cut. It goes whatever its size and number of triangles.
+ */
+export const SPLINTER_NO_VOLUME = 0.01;
 /** A thin shard of a few triangles: its volume is this share of the box round it, or less. */
 export const SPLINTER_THIN_SHARE = 0.05;
 
@@ -62,9 +67,7 @@ export function removeLooseSplinters(mesh: MeshData): { mesh: MeshData; removed:
     triangles.set(root, (triangles.get(root) ?? 0) + 1);
   }
   const candidates = new Set<number>();
-  triangles.forEach((count, root) => {
-    if (count <= SPLINTER_MAX_TRIANGLES_TINY) candidates.add(root);
-  });
+  triangles.forEach((_count, root) => candidates.add(root));
   // The piece with the most triangles is the body itself, whatever its size.
   let largestRoot = -1;
   let largestCount = -1;
@@ -82,7 +85,8 @@ export function removeLooseSplinters(mesh: MeshData): { mesh: MeshData; removed:
   const openRoots = new Set<number>();
   for (const [a, b, c] of mesh.faces) {
     const root = find(corner[a]);
-    if (!candidates.has(root)) continue;
+    // Whether a piece is open is only asked of the small ones.
+    if (!candidates.has(root) || (triangles.get(root) ?? 0) > SPLINTER_MAX_TRIANGLES_TINY) continue;
     for (const [from, to] of [[a, b], [b, c], [c, a]]) {
       const low = Math.min(corner[from], corner[to]);
       const high = Math.max(corner[from], corner[to]);
@@ -120,15 +124,19 @@ export function removeLooseSplinters(mesh: MeshData): { mesh: MeshData; removed:
     const bounds = box.get(root)!;
     const boxVolume = (bounds[3] - bounds[0]) * (bounds[4] - bounds[1]) * (bounds[5] - bounds[2]);
     const solid = Math.abs(volume.get(root) ?? 0);
+    if (solid < SPLINTER_NO_VOLUME) {
+      splinters.add(root);
+      return;
+    }
     if (Math.max(bounds[3] - bounds[0], bounds[4] - bounds[1], bounds[5] - bounds[2]) >= SPLINTER_MAX_SIZE) return;
     if ((triangles.get(root) ?? 0) <= SPLINTER_MAX_TRIANGLES) {
       // A handful of triangles is never a part, open or closed, when it is tiny or a thin shard.
       if (solid < SPLINTER_MAX_VOLUME || solid < boxVolume * SPLINTER_THIN_SHARE) splinters.add(root);
-    } else if (openRoots.has(root)) {
+    } else if ((triangles.get(root) ?? 0) <= SPLINTER_MAX_TRIANGLES_TINY && openRoots.has(root)) {
       // An open shell holds no volume at all: the leftover of a cut, a sheet of no thickness.
       splinters.add(root);
     } else if (solid < SPLINTER_MAX_VOLUME) {
-      // A closed shell goes when it is that tiny; a thin ring stays.
+      // A closed shell, or one of many triangles, goes when it is that tiny; a thin ring stays.
       splinters.add(root);
     }
   });

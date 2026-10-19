@@ -7,9 +7,20 @@ summary: Kde jsou projekty uložené, jak je zálohovat, podporované formáty a
 
 Layerling ukládá vše do prohlížeče na vašem počítači. Nemáte účet a nic se neodesílá na server. Každá změna se ukládá automaticky. Náhled na úvodní stránce zachycuje poslední pohled před návratem přes {{ui:editor.homeDashboard}}. Ve stejném prohlížeči najdete projekty i po několika dnech.
 
-Při návratu z prázdného projektu se program zeptá, zda jej ponechat. {{ui:confirm.yes}} nebo [[Enter]] jej zachová, {{ui:confirm.no}} odstraní, aby se nehromadily prázdné projekty. Na projekty ve sdílené serverové složce se toto potvrzení nevztahuje.
+Při návratu z prázdného projektu se program zeptá, zda jej ponechat. {{ui:confirm.yes}} nebo [[Enter]] jej zachová, {{ui:confirm.no}} odstraní, aby se nehromadily prázdné projekty. U projektu ve sdílené serverové složce {{ui:confirm.no}} smaže soubor ze serveru, a to pro všechny, kdo server používají.
 
 Nevýhodou je ztráta projektů při vymazání úložiště prohlížeče nebo přechodu na jiný počítač. **Důležitou práci proto zálohujte do souboru.**
+
+## Složky pro projekty
+
+Při desítkách projektů jeden seznam nestačí. Na úvodní stránce vytvoří {{ui:shared.newFolder}} složku pro projekty tohoto prohlížeče; kliknutím na složku ji otevřete. Složky mohou obsahovat další složky.
+
+- **Do složky:** přetáhněte projekt na složku nebo v nabídce projektu zvolte {{ui:shared.moveTo}}, kde jsou všechny složky. Nový projekt i soubor, který otevřete nebo importujete, se uloží do právě otevřené složky.
+- **Zase ven:** první dlaždice ve složce, `..`, a řádek pod {{ui:dashboard.projects}} vedou zpět; i na ně lze projekt přetáhnout. Složka přetažená na jinou složku se do ní vloží.
+- **Přejmenovat a smazat** najdete v nabídce složky. Smazáním složky se nesmaže žádný projekt: její obsah se posune o úroveň výš.
+- **Vyhledávání** prochází všechny složky; nalezený projekt ukazuje svou složku a kliknutím na ni ji otevřete.
+
+{{ui:dashboard.backupAll}} zachová složky: projekty jsou v záložním souboru ve svých složkách a obnovení je vrátí na místo. Složky tohoto prohlížeče jsou oddělené od složek na serveru.
 
 ## Zálohování a předávání
 

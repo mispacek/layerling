@@ -22,7 +22,7 @@ Le ruban à mesurer se trouve à l'extrémité inférieure de la barre de la cam
 
 ## Le dirigeant
 
-Vous récupérez le {{ui:shape.ruler}} dans la bibliothèque de formes. Il s'agit d'un simple outil de mesure : il n'apparaît dans aucun export et ne peut être ni regroupé ni découpé. Pour chaque corps qui touche ou chevauche la règle, l'étendue est affichée sous forme de nombre flottant directement dans la vue. Vous pouvez modifier ce numéro ici, et le corps suit. Le symbole plus flottant crée une copie de la forme mesurée.
+Vous récupérez le {{ui:shape.ruler}} dans la bibliothèque de formes. Il s'agit d'un simple outil de mesure : il n'apparaît dans aucun export et ne peut être ni regroupé ni découpé. Pour chaque corps qui touche ou chevauche la règle, l'étendue est affichée sous forme de nombre flottant directement dans la vue. Vous pouvez modifier ce numéro ici, et le corps suit. Le symbole plus flottant crée une copie de la forme mesurée. Son échelle imprimée est en millimètres ; si l'on passe l'unité en pouces (le commutateur en bas à droite), elle est en pouces, avec un trait tous les seizièmes de pouce et les pouces entiers numérotés.
 
 ## Le carré de cadrage
 
@@ -59,6 +59,8 @@ Une note enregistre ce que la géométrie ne dit pas : "Cette vis est trop serr�
 - Si vous placez le billet **sur un corps**, il voyage avec lui.
 - Si vous le placez **à côté**, il reste sur le plan de travail ({{ui:note.free}}).
 - {{ui:note.detach}} libère une note jointe du corps.
+- {{ui:editor.tool.group}} emporte une note jointe dans le groupe ; {{ui:editor.tool.ungroup}} la confie à la partie visible située dessous, y compris un groupe imbriqué. Tant qu'un groupe est ouvert avec {{ui:group.edit}}, ses notes suivent la partie située dessous et reviennent au groupe avec {{ui:group.done}} ; annuler les remet telles qu'elles étaient.
+- Si son corps est supprimé, ou si plus aucun corps visible ne se trouve dessous, la note reste là où elle était, sur le plan de travail.
 - Faire glisser déplace la note, un clic l'ouvre pour l'éditer.
 - Pendant que vous écrivez, [[Enter]] conserve le texte et [[Esc]] le remet tel qu'il était avant de commencer ; [[Shift]]+[[Enter]] démarre une nouvelle ligne.
 

@@ -11,6 +11,7 @@ V knihovně vyberte {{ui:shape.text}} a položte jej na plochu. Do pole {{ui:pro
 - **{{ui:nameTag.letterSize}}:** velikost písmen při pohledu shora; jejich tloušťku určuje {{ui:prop.height}}.
 - **{{ui:prop.height}}:** vzdálenost, o kterou nápis vystupuje z povrchu.
 - **{{ui:prop.bevel}}:** změkčí hrany písmen. Počet kroků určuje {{ui:prop.segments}}.
+- **{{ui:nameTag.letterEdge}}:** zaoblí nebo zkosí horní hranu písmen, jako u jmenovky: {{ui:nameTag.edge.none}}, {{ui:nameTag.edge.round}} nebo {{ui:nameTag.edge.chamfer}}, s hodnotou {{ui:nameTag.letterEdgeSize}} (nejdřív 0,4 mm, nejvýš tak vysoká jako text). Jde dál než {{ui:prop.bevel}}, ale jen tak daleko, jak jsou tahy široké: kde je tah tenčí než dvojnásobek velikosti, hrana skončí užší horní plochou. Spodek zůstává rovný, takže jednotlivá písmena lze pak nalepit. Dokud je hrana zvolená, nahrazuje {{ui:prop.bevel}}.
 - **Rozměry:** délku a šířku nápisu upravíte úchyty nebo číselně stejně jako u jiných tvarů.
 - **{{ui:prop.textStretch}}:** Zpočátku vypnuto: písmena si drží proporce a stojí uprostřed rámečku, takže rámeček natažený víc do šířky nebo do hloubky, než slovo potřebuje, zůstane větší než písmena. Po zapnutí se písmena natáhnou v obou směrech na celý rámeček: velké písmeno lze udělat nižší nebo užší jako v Tinkercadu. Platí pro rovný text; zakřivený text má vlastní velikost písmen.
 
@@ -120,6 +121,27 @@ Karta {{ui:iconTag.title}} obsahuje:
 SVG musí obsahovat uzavřené obrysy. Pouhé otevřené čáry nelze převést na štítek. Náčrt s výplní typu čára ji zachová a symbol tvoří plocha rozšířené čáry.
 
 **Obrázek PNG nebo JPG** se převede na obrys, který se zobrazí v náhledu. V {{ui:iconTag.part}} vyberte, zda se symbolem stane {{ui:iconTag.part.dark}}, nebo {{ui:iconTag.part.light}}; výchozí je část, která netvoří pozadí. Průhledné pixely do symbolu nikdy nepatří. Stejně se zpracuje SVG obsahující pouze jeden rastrový obrázek, jaké vznikne například při uložení vložené bitmapy v Inkscapu. Obrys sleduje pixely, takže malý obrázek vytvoří hrubé okraje. Nejlépe fungují obrázky o velikosti alespoň několika set pixelů. Při {{ui:iconTag.replace}} se použije část mimo pozadí.
+
+## QR kódy
+
+QR kód udělá z textu nebo webové adresy vzor, který přečte fotoaparát telefonu: odkaz na váš obchod na cedulce, název Wi-Fi na podtácku, telefonní číslo na přívěsku na klíče.
+
+V knihovně tvarů zvolte {{ui:shape.qrCode}}. Otevře se okno; kurzor už stojí v textovém poli:
+
+- **{{ui:qrCode.text}}:** co kód říká. Enter vytvoří kód, Shift+Enter začne nový řádek. Pod polem vidíte, kolik místa je obsazeno; písmena s diakritikou a jiné zvláštní znaky zabírají dva bajty. Je-li text příliš dlouhý, pole to řekne.
+- **{{ui:qrCode.errorCorrection}}:** L, M, Q nebo H. Vyšší úroveň se přečte, i když je část kódu špinavá nebo poškrábaná (L asi 7 %, M 15 %, Q 25 %, H 30 %), pro stejný text ale potřebuje více modulů, takže každý modul bude menší. Nejprve je zvoleno M.
+- **{{ui:qrCode.style}}:** {{ui:qrCode.style.code}} vytvoří samotný kód, vysoký 4 mm. {{ui:qrCode.style.raised}} ho postaví 1 mm vysoko na bílou destičku tlustou 3 mm, jako seskupení dvou barev, takže vícebarevný tisk vytiskne kód tmavě a destičku světle. {{ui:qrCode.style.engraved}} vyřízne kód 1 mm hluboko do destičky.
+- **{{ui:qrCode.sizeBy}}:** zadejte {{ui:qrCode.sizeBy.width}} celého kódu (nejprve 40 mm) nebo velikost jednoho modulu; druhé číslo je uvedeno pod ním. Moduly menší než 0,8 mm dostanou varování. Je to orientační pravidlo pro trysku 0,4 mm, ne záruka: roli hraje tiskárna, materiál, barvy i telefon.
+- **{{ui:qrCode.quietZone}}:** skenery potřebují kolem kódu prázdný okraj široký čtyři moduly. Na destičce je okraj součástí destičky; vypněte ho jen tehdy, když destička leží na větší světlé ploše. Samotný kód nemá vlastní okraj: nechte místo kolem něj volné.
+- **Výšky:** výška kódu, na destičce výška kódu nebo hloubka rytí, a tloušťka destičky.
+
+Náhled ukazuje kód tak, jak bude vytvořen. {{ui:qrCode.ok}} ho postaví doprostřed podložky.
+
+Kód je těleso jako každé jiné: posuňte ho, otočte, změňte velikost (šířku a hloubku nechte stejné, jinak se kód zdeformuje), slučte ho, nebo z něj udělejte otvor a slučte ho s vlastním dílem, abyste ho do něj vyryli. Změna velikosti mění celý kód; každý modul zůstane čtvercový.
+
+Karta {{ui:qrCode.title}} nahoře v jeho nastavení obsahuje text. Změňte ho a klikněte na {{ui:qrCode.regenerate}}: kód se vytvoří znovu tam, kde stojí, a tak široký, jaký je teď. Oprava chyb, klidová zóna a provedení zůstanou, jak byly zvoleny; pro jiné volby vytvořte nový kód z knihovny.
+
+Před tiskem kód naskenujte telefonem a po tisku ještě jednou. Nejlépe se čte tmavé na světlém; světlý kód na tmavé destičce nepřečte každý telefon.
 
 ## Text po kruhovém oblouku
 

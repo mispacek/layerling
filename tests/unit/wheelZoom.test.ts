@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { wheelZoomDelta, WHEEL_ALONE_GAP_MS, WHEEL_NOTCH_DELTA } from "@/lib/wheelZoom";
+import { wheelZoomDelta, WHEEL_ALONE_GAP_MS, WHEEL_NOTCH_DELTA, pinchWheelDelta } from "@/lib/wheelZoom";
 
 const pixels = (deltaY: number, ctrlKey = false) => ({ deltaY, deltaMode: 0, ctrlKey });
 
@@ -29,5 +29,33 @@ describe("wheelZoomDelta (#331)", () => {
   it("does not turn a step of zero into a notch, and takes the first step ever as one that stands alone", () => {
     expect(wheelZoomDelta(pixels(0), 500)).toBe(0);
     expect(wheelZoomDelta(pixels(-12), Number.POSITIVE_INFINITY)).toBe(-WHEEL_NOTCH_DELTA);
+  });
+});
+
+describe("a pinch on a trackpad in Safari zooms as far as the wheel step it stands for (forum)", () => {
+  // OrbitControls scales the distance by 0.95 ^ (zoom speed * step / 100).
+  const distanceScale = (step: number, zoomSpeed: number) => Math.pow(0.95, zoomSpeed * Math.abs(step) * 0.01);
+
+  it("a spread comes closer by the inverse of the scale it grew by", () => {
+    const step = pinchWheelDelta(1.2, 1)!;
+    expect(step).toBeLessThan(0);
+    expect(distanceScale(step, 1)).toBeCloseTo(1 / 1.2, 6);
+  });
+
+  it("a pinch together goes away by the inverse of the scale it shrank by", () => {
+    const step = pinchWheelDelta(0.8, 1)!;
+    expect(step).toBeGreaterThan(0);
+    expect(distanceScale(step, 1)).toBeCloseTo(0.8, 6);
+  });
+
+  it("follows the zoom speed: twice as fast, half the step", () => {
+    expect(pinchWheelDelta(1.1, 2)!).toBeCloseTo(pinchWheelDelta(1.1, 1)! / 2, 9);
+  });
+
+  it("ignores no change and nonsense", () => {
+    expect(pinchWheelDelta(1, 1)).toBeNull();
+    expect(pinchWheelDelta(Number.NaN, 1)).toBeNull();
+    expect(pinchWheelDelta(0, 1)).toBeNull();
+    expect(pinchWheelDelta(1.1, 0)).toBeNull();
   });
 });

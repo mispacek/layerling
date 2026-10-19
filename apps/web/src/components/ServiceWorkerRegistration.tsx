@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { offlineAvailable } from "@/lib/offlineSupport";
 
 /**
  * Registers the service worker that keeps layerling on the visitor's computer
@@ -11,8 +12,7 @@ import { useEffect } from "react";
  */
 export function ServiceWorkerRegistration() {
   useEffect(() => {
-    if (process.env.NEXT_PUBLIC_STATIC_EXPORT !== "true") return;
-    if (!("serviceWorker" in navigator) || !window.isSecureContext) return;
+    if (!offlineAvailable()) return;
     navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch(() => {
       // Without it layerling works exactly as before, just not offline.
     });

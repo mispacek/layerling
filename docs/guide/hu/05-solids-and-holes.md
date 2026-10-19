@@ -80,6 +80,6 @@ A felek egyszerű hálók: az olyan beállítások, mint egy henger oldalszáma 
 
 ## Részek szétválasztása
 
-Ha egy alakzat több különálló darabból áll, például egyes betűkből álló szöveg, a {{ui:inspector.separateParts}} önálló alakzatokra bontja.
+Ha egy alakzat több különálló darabból áll, például egyes betűkből álló szöveg, a {{ui:inspector.separateParts}} önálló alakzatokra bontja. A tétel a formán jobb gombbal megnyitott menüben is megtalálható.
 
 > **Tipp:** A lyukakat mindig építsd kicsit hosszabbra, mint az alkatrész, amelyen át kell menniük. Ha a lyuk pontosan a lappal egy síkban végződik, néha egy leheletvékony hártya marad. Egy milliméter túlnyúlás biztosra megy.

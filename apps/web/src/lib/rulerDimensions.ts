@@ -362,3 +362,32 @@ export function computeCornerRulerShift(
   return { x: shift.x, z: shift.z };
 }
 
+/** One line of a ruler's printed scale: how far along it stands (mm), how long it is across the ruler (a share of its width), and a number when it carries one. */
+export type RulerTick = { offset: number; height: number; label?: string };
+
+const MM_PER_INCH = 25.4;
+
+/**
+ * The printed scale of a ruler `length` mm long (#500): a line every millimetre, longer at five and at ten, with
+ * the tens numbered; or, for someone who works in inches, a line every sixteenth of an inch, longer at the eighths,
+ * quarters, halves and whole inches, with the whole inches numbered.
+ */
+export function rulerTicks(length: number, inches = false): RulerTick[] {
+  const ticks: RulerTick[] = [];
+  if (!(length > 0)) return ticks;
+  if (inches) {
+    const last = Math.floor((length / MM_PER_INCH) * 16);
+    for (let step = 0; step <= last; step += 1) {
+      const whole = step % 16 === 0;
+      const height = whole ? 0.62 : step % 8 === 0 ? 0.5 : step % 4 === 0 ? 0.42 : step % 2 === 0 ? 0.34 : 0.26;
+      ticks.push({ offset: (step * MM_PER_INCH) / 16, height, ...(whole ? { label: String(step / 16) } : {}) });
+    }
+    return ticks;
+  }
+  const last = Math.floor(length);
+  for (let value = 0; value <= last; value += 1) {
+    const ten = value % 10 === 0;
+    ticks.push({ offset: value, height: ten ? 0.62 : value % 5 === 0 ? 0.42 : 0.26, ...(ten ? { label: String(value) } : {}) });
+  }
+  return ticks;
+}

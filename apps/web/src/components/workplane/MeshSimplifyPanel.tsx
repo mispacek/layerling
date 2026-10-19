@@ -320,6 +320,7 @@ export function MeshSimplifyPanel({
       className={`mesh-compare ${movable.moved ? "floating" : ""} ${movable.dragging ? "moving" : ""}`}
       role="dialog"
       aria-label={t("simplify.title")}
+      data-help-panel={t("simplify.title")}
       style={movable.moved ? { ...movable.style, width: dockedSize?.width, height: dockedSize?.height } : { right: rightInset }}
     >
       <div className="mesh-compare-header movable" title={t("panel.moveHint")} {...movable.handleProps}>

@@ -11,6 +11,7 @@ Válaszd az alakzattárban a {{ui:shape.text}} alakzatot, és helyezd el. Jobbra
 - **{{ui:nameTag.letterSize}}:** Milyen nagyok a betűk felülről nézve; a {{ui:prop.height}} azt adja meg, milyen vastagok.
 - **{{ui:prop.height}}:** Milyen messze áll ki a felirat a felületből.
 - **{{ui:prop.bevel}}:** Lekerekíti a betűk éleit, hogy lágyabbnak tűnjenek. A {{ui:prop.segments}} értékkel döntöd el, hány lépésben.
+- **{{ui:nameTag.letterEdge}}:** lekerekíti vagy letöri a betűk felső élét, ahogy egy névtáblán: {{ui:nameTag.edge.none}}, {{ui:nameTag.edge.round}} vagy {{ui:nameTag.edge.chamfer}}, a {{ui:nameTag.letterEdgeSize}} értékkel (kezdetben 0,4 mm, legfeljebb olyan magas, mint a szöveg). Tovább megy, mint a {{ui:prop.bevel}}, de csak addig, amíg a vonások szélesek: ahol egy vonás vékonyabb a méret kétszeresénél, az él keskenyebb tetőben végződik. Az alja lapos marad, így az egyes betűk utólag felragaszthatók. Amíg egy él ki van választva, az a {{ui:prop.bevel}} helyét veszi át.
 - **Méret:** A sor hosszát és szélességét úgy állítod, mint bármely alakzatnál. Húzd a fogantyúkat, vagy gépeld be a méreteket.
 
 A szöveg kezdetben egyetlen test. Ha a betűket egyenként kezelnéd, kattints a {{ui:inspector.separateParts}} gombra. Ekkor minden betű önálló alakzat lesz.
@@ -121,6 +122,27 @@ A beállítások tetején lévő {{ui:iconTag.title}} kártyán ezek vannak:
 Az SVG-nek zárt körvonalak kellenek; egy csak nyitott vonalakból álló rajzból nem lehet címke. Az a vázlattest, amelynek a kitöltése vonal, megtartja ezt: ennek a vonalnak a felülete az ikon.
 
 **Egy kép (PNG vagy JPG)** körvonallá alakul, és az előnézet a körvonalat mutatja. A {{ui:iconTag.part}} alatt választod ki, hogy a {{ui:iconTag.part.dark}} vagy a {{ui:iconTag.part.light}} legyen az ikon; kezdetben az a rész, amelyik nem a háttér. Az átlátszó pixelek sosem tartoznak az ikonhoz. Egy olyan SVG, amely csak egyetlen képet tartalmaz – az Inkscape így menti az importált bitképet –, ugyanígy alakul körvonallá. A körvonal a pixeleket követi, ezért egy kis kép durva szélt ad: a néhány száz vagy annál több pixeles képek működnek a legjobban. A {{ui:iconTag.replace}} egy képnek azt a részét veszi, amelyik nem a háttere.
+
+## QR-kódok
+
+A QR-kód egy szövegből vagy webcímből olyan mintát készít, amelyet a telefon kamerája elolvas: link a boltodra egy táblán, a Wi-Fi neve egy poháralátéten, telefonszám egy kulcstartón.
+
+Válaszd az alakzatkönyvtárban a {{ui:shape.qrCode}} elemet. Megnyílik egy ablak; a kurzor már a szövegmezőben áll:
+
+- **{{ui:qrCode.text}}:** amit a kód mond. Az Enter elkészíti a kódot, a Shift+Enter új sort kezd. A mező alatt látod, mennyi hely foglalt; az ékezetes betűk és más különleges jelek két bájtot foglalnak. Ha a szöveg túl hosszú, a mező jelzi.
+- **{{ui:qrCode.errorCorrection}}:** L, M, Q vagy H. A magasabb szint akkor is olvasható, ha a kód egy része piszkos vagy karcos (L kb. 7 %, M 15 %, Q 25 %, H 30 %), de ugyanahhoz a szöveghez több modul kell, így minden modul kisebb lesz. Először az M van kiválasztva.
+- **{{ui:qrCode.style}}:** a {{ui:qrCode.style.code}} csak a kódot építi meg, 4 mm magasan. A {{ui:qrCode.style.raised}} 1 mm magasan egy 3 mm vastag fehér lapra teszi, két szín kötegeként, így a többszínű nyomtatás a kódot sötéten, a lapot világosan nyomtatja. A {{ui:qrCode.style.engraved}} 1 mm mélyen bevágja a kódot a lapba.
+- **{{ui:qrCode.sizeBy}}:** írd be az egész kód {{ui:qrCode.sizeBy.width}} értékét (először 40 mm) vagy egy modul méretét; a másik szám alatta látható. A 0,8 mm alatti modulok figyelmeztetést kapnak. Ez ökölszabály egy 0,4 mm-es fúvókához, nem garancia: a nyomtató, az anyag, a színek és a telefon is számít.
+- **{{ui:qrCode.quietZone}}:** a szkennereknek négy modul széles üres szegély kell a kód körül. Lapon a szegély a lap része; csak akkor kapcsold ki, ha a lap egy nagyobb világos felületen ül. A lap nélküli kódnak nincs saját szegélye: hagyd szabadon körülötte a helyet.
+- **Magasságok:** a kód magassága, lapon a kód magassága vagy a gravírozás mélysége, és a lap vastagsága.
+
+Az előnézet úgy mutatja a kódot, ahogy megépül. Az {{ui:qrCode.ok}} a tárgyasztal közepére teszi.
+
+A kód olyan test, mint bármelyik másik: mozgasd, forgasd, méretezd (a szélesség és a mélység maradjon egyforma, különben a kód torzul), csoportosítsd, vagy tedd üreggé, és csoportosítsd egy saját alkatrészbe, hogy oda gravírozd. A méretezés az egész kódot méretezi; minden modul négyzet marad.
+
+A beállításai tetején lévő {{ui:qrCode.title}} kártya tartalmazza a szöveget. Módosítsd, és kattints az {{ui:qrCode.regenerate}} gombra: a kód ott épül újra, ahol áll, és olyan szélesen, amilyen most. A hibajavítás, a csendes zóna és a kivitel olyan marad, ahogy választottad; más beállításokhoz készíts új kódot a könyvtárból.
+
+Nyomtatás előtt olvasd be a kódot a telefonoddal, és nyomtatás után még egyszer. A sötét a világoson olvasható a legjobban; a sötét lapon lévő világos kódot nem minden telefon olvassa el.
 
 ## Szöveg körív mentén
 

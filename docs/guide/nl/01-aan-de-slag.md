@@ -25,6 +25,66 @@ Al je ontwerpen verschijnen later op de startpagina met een voorbeeldafbeelding.
 - **Links** staat de camerabediening, met de weergavekubus erboven. Daarmee beweeg je door de scène, meer daarover in [Weergave en werkvlak](chapter:weergave-en-werkvlak).
 - **Helemaal bovenaan** wissel je tussen {{ui:editor.modeGeometry}} en {{ui:editor.modeSketch}}, geef je het ontwerp een andere naam en kies je taal en kleurenschema.
 
+## De knoppen rond het werkvlak
+
+Houd de muis boven een knop om de naam te zien. Weet je niet zeker wat een knop doet, klik dan in het gebied {{ui:editor.group.help}} op {{ui:interactiveHelp.title}} ([[Shift]]+[[F1]]) en daarna op de knop. Hier staan de knoppen waar het vaakst naar gevraagd wordt.
+
+### Plakken
+
+{{ui:editor.tool.paste}} ([[Ctrl]]+[[V]]) voegt wat je met {{ui:editor.tool.copy}} kopieerde toe aan het ontwerp. {{ui:common.duplicate}} kopieert en plakt in één stap.
+
+### Verwijderen
+
+{{ui:common.delete}} ([[Delete]]) verwijdert de geselecteerde vormen. {{ui:editor.tool.undo}} haalt ze terug.
+
+### Groep opheffen
+
+{{ui:editor.tool.ungroup}} ([[Ctrl]]+[[Shift]]+[[G]]) haalt de geselecteerde groep weer uit elkaar in de vormen waaruit ze gemaakt is.
+
+### Werkruimte-instellingen
+
+{{ui:editor.workspaceSettings}} opent de instellingen van het werkvlak: eenheid, grootte van de plaat, printer, raster, kleuren, licht en meer. Meer in [Beeld en werkvlak](chapter:weergave-en-werkvlak).
+
+### Thema
+
+{{ui:common.theme}} helemaal bovenaan bepaalt hoe layerling eruitziet: zoals je systeem, licht, donker of grafiet.
+
+### Ontwerp hernoemen
+
+{{ui:editor.renameProject}}: het potlood naast de naam helemaal bovenaan. Typ de nieuwe naam en druk op [[Enter]].
+
+### Naam van het ontwerp
+
+De naam van het ontwerp ({{ui:confirm.projectName}}) staat helemaal bovenaan. Klik erop, typ, en [[Enter]] houdt de naam.
+
+### Zichtbaarheidsopties
+
+{{ui:editor.visibilityOptions}}, de pijl naast het oog, bevat wat je kunt tonen of verbergen: de lijst met objecten, alles wat je verborgen hebt, de notities en de overhangen van de print. Meer in [Selecteren en schikken](chapter:selecteren-en-schikken).
+
+### Selectie verbergen
+
+{{ui:editor.tool.hideSelected}} ([[Ctrl]]+[[H]]) verbergt de geselecteerde vormen. Ze blijven in het ontwerp en in de objectlijst; {{ui:editor.visibilityOptions}} toont ze weer.
+
+### Opdrachten zoeken
+
+{{ui:palette.open}}: typ wat je zoekt, een gereedschap, een vorm of een instelling, en klik op het resultaat.
+
+### Camerabediening verbergen
+
+{{ui:camera.hide}} klapt de camerabediening links weg en geeft het werkvlak meer ruimte; {{ui:camera.show}} haalt ze terug.
+
+### Uitlijnraster
+
+{{ui:inspector.snapGrid}}, onderaan de eigenschappen, is de stap waarop verplaatsen en vergroten vastklikt. Ernaast verandert de kleine schakelaar **mm | in** de eenheid. Meer in [Beeld en werkvlak](chapter:weergave-en-werkvlak).
+
+### Eenheid: millimeters of inches
+
+De schakelaar **mm | in** naast {{ui:inspector.snapGrid}} verandert de eenheid, het raster van de plaat en de vangstap, voor dit ontwerp.
+
+### De voettekst
+
+Onderaan het venster: {{ui:dashboard.sponsor}} leidt naar de pagina waar je het project kunt steunen; {{ui:dashboard.userGuide}} opent deze handleiding; {{ui:dashboard.forum}} leidt naar de plek voor vragen, ideeën en foutmeldingen (de discussies op GitHub, in het Duits het forum van drucktipps3d); {{ui:editor.bugReport}} maakt een ZIP voor een foutmelding; {{ui:dashboard.projectOnGitHub}} leidt naar het project op GitHub, en het versienummer opent de versienotities. De links naar het impressum en het privacybeleid horen bij wie de kopie van layerling beheert die je gebruikt.
+
 ## Je eerste onderdeel
 
 Als voorbeeld bouwen we een blok met een gat.

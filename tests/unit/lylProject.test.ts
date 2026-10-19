@@ -287,6 +287,19 @@ describe("layerling .lyl project packages", () => {
     expect(restored.shapes[0].edgeTreatmentHistory?.[0].before.kind).toBe("box");
   });
 
+  it("saves deleted faces as their own operation and reads them back", async () => {
+    const body = shape("box", "body", {
+      cadBrep: "BREP exact payload",
+      edgeTreatments: [{ kind: "deleteFace", amount: 0, edgeCount: 0, faceIds: [6], faceCount: 1 }],
+    });
+    const exported = await exportLylProject(input([body]));
+    const { document } = packageDocument(exported);
+
+    expect(document.features.map((feature) => feature.type)).toEqual(["delete-face"]);
+    const restored = await importLylProject(exported);
+    expect(restored.shapes[0].edgeTreatments).toEqual([{ kind: "deleteFace", amount: 0, edgeCount: 0, faceIds: [6], faceCount: 1 }]);
+  });
+
   it("keeps a bundle a bundle, with its hole as a part and no cut", async () => {
     const plate = shape("box", "plate", { color: "#222222" });
     const logo = shape("box", "logo", { color: "#ffffff", width: 10, depth: 10 });

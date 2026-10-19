@@ -80,6 +80,6 @@ Polovici sta preprosti mreži: nastavitve, kot je število stranic valja ali čr
 
 ## Ločevanje delov
 
-Če oblika sestoji iz več med seboj ločenih kosov, na primer besedilo iz posameznih črk, jo lahko z {{ui:inspector.separateParts}} razstaviš v samostojne oblike.
+Če oblika sestoji iz več med seboj ločenih kosov, na primer besedilo iz posameznih črk, jo lahko z {{ui:inspector.separateParts}} razstaviš v samostojne oblike. Ukaz je tudi v meniju, ki se odpre z desnim klikom na obliko.
 
 > **Namig:** Luknje vedno naredi malo daljše od dela, ki naj ga prebodejo. Če luknja zaključi natanko s ploskvijo, včasih ostane čisto tanka kožica. En milimeter preseka da varnost.

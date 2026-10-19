@@ -3,7 +3,7 @@
 import { displayY, displayYTurn, insideZ, insideZTurn } from "@/lib/displayAxes";
 import { GuideHelpLink } from "@/components/GuideHelpLink";
 import { guideChapterForShape, guideSectionForShape } from "@/lib/guideLinks";
-import { ChevronDown, ChevronUp, Cylinder, Eye, EyeOff, FolderOpen, Grid3x3, Layers, Lock, Minus, Pencil, Plus, RotateCcw, Split, Tags, Unlock } from "lucide-react";
+import { ChevronDown, ChevronUp, Cylinder, Eye, EyeOff, FolderOpen, Grid3x3, Layers, Lock, Minus, Pencil, Plus, RefreshCw, RotateCcw, Split, Tags, Unlock } from "lucide-react";
 import { Fragment, createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type Dispatch, type ReactNode, type SetStateAction } from "react";
 import {
   DEFAULT_GEAR_HELIX_ANGLE,
@@ -164,19 +164,48 @@ import { MAX_SCREW_HOLE_ANGLE, MIN_SCREW_HOLE_ANGLE, normalizeScrewHoleAngle, no
 import { MAX_TEARDROP_TIP_ANGLE, MIN_TEARDROP_TIP_ANGLE, normalizeTeardropTipAngle, teardropHeightForTipAngle, teardropTipAngle } from "@/lib/teardropGeometry";
 import { MAX_DOVETAIL_CLEARANCE, normalizeDovetailClearance, normalizeDovetailNeckWidth } from "@/lib/dovetailGeometry";
 import { DEFAULT_SKETCH_STROKE, MAX_SKETCH_STROKE_WIDTH, MIN_SKETCH_STROKE_WIDTH, normalizeSketchStroke, SKETCH_STROKE_JOINS } from "@/lib/sketchStroke";
-import { MAX_TEXT_EDGE, MIN_TEXT_EDGE } from "@/lib/textEdge";
+import { MAX_TEXT_EDGE, MIN_TEXT_EDGE, normalizeTextEdge } from "@/lib/textEdge";
+import { wheelBaseStep, wheelNextValue, wheelTurn } from "@/lib/wheelValueStep";
 import { textHasFill } from "@/lib/textFill";
 import { TEXT_FILL_CHOICES, textFillChoice, textLineSettingsInView, textStrokeForChoice, textStrokeWider, type TextFillChoice } from "@/lib/textFillChoice";
 import { MAX_TEXT_LAYERS, MAX_TEXT_LAYER_GROW, MIN_TEXT_LAYER_HEIGHT, namesFromList, type NameTagKeyring, type TextLayer } from "@/lib/textLayers";
 import { DEFAULT_KEYRING_DIAMETER, MIN_KEYRING_DIAMETER, TEXT_KEYRING_SIDES } from "@/lib/textGeometry";
 import { addTextLayer, MIN_LETTER_SIZE, MIN_NAME_TAG_LAYERS, NAME_TAG_GAP, NAME_TAG_LAYERS, NAME_TAG_LETTER_SIZE, removeTextLayer, textLetterSize, textLetterSizePatch, type NameTagStack } from "@/lib/nameTag";
 import { FONT_MANAGER_OPTION, requestFontManager } from "@/lib/fontManagerEvents";
+import { QR_BYTE_CAPACITY, qrByteLength, qrTextFits, type QrCodeSettings } from "@/lib/qrCode";
 import { ICON_TAG_LAYERS, iconTagFitCount, MAX_ICON_TAG_WIDTH, MAX_ICON_TAGS, MIN_ICON_TAG_WIDTH, normalizeIconTagCount, type IconLayerStack } from "@/lib/iconTag";
 import { PICTURE_FILE_ACCEPT } from "@/lib/pictureIcon";
 import { customFontList, textFontLabel } from "@/lib/textFonts";
 import { MIN_SLOT_END_RATIO, normalizeSlotEndRatio, taperedSlotOutline } from "@/lib/slotGeometry";
 import { loftMeasures, loftShapePatch, loftTiltLimit, maxLoftWall, MAX_LOFT_SIDES, MAX_LOFT_TWIST, MIN_LOFT_SIDES, MIN_LOFT_SIZE, normalizeLoftOutline, type LoftMeasures } from "@/lib/loftGeometry";
 import { MAX_KNURL_ANGLE, MIN_KNURL_ANGLE, MIN_KNURL_COUNT, MIN_KNURL_DEPTH, knurlSettings, maxKnurlChamfer, maxKnurlCount, maxKnurlDepth, maxRoundKnurlDepth, normalizeKnurlAngle, normalizeKnurlChamfer, normalizeKnurlCount, normalizeKnurlDepth, normalizeKnurlPattern } from "@/lib/knurlGeometry";
+import {
+  DEFAULT_GRIDFINITY_LABEL_CORNER,
+  GRIDFINITY_LABEL_WALL_KEYS,
+  GRIDFINITY_SCOOP_WALL_KEYS,
+  MAX_GRIDFINITY_HEIGHT_UNITS,
+  MIN_GRIDFINITY_FLOOR_HEIGHT,
+  MIN_GRIDFINITY_LABEL_WIDTH,
+  MIN_GRIDFINITY_SCOOP_RADIUS,
+  MIN_GRIDFINITY_UNITS,
+  gridfinityFloorFits,
+  gridfinityFloorHeight,
+  gridfinityFloorMaxHeight,
+  gridfinityLabelCornerSize,
+  gridfinityLabelFits,
+  gridfinityLabelLength,
+  gridfinityLabelLimits,
+  gridfinityLabelMaxCornerSize,
+  gridfinityLabelMaxWidth,
+  gridfinityLabelWidth,
+  gridfinityMaxUnits,
+  gridfinityPlan,
+  gridfinityScoopFits,
+  gridfinityScoopMaxRadius,
+  gridfinityScoopRadius,
+  gridfinityShapePatch,
+  normalizeGridfinityType,
+} from "@/lib/gridfinityGeometry";
 import { MAX_HINGE_CLEARANCE, MAX_HINGE_KNUCKLES, MIN_HINGE_CLEARANCE, MIN_HINGE_KNUCKLES, hingePlan, minimumHingeDepth, normalizeHingeClearance, normalizeHingeKnuckles, normalizeHingeLeafThickness, normalizeHingePinDiameter } from "@/lib/hingeGeometry";
 import { useLanguage } from "@/lib/useLanguage";
 import { useMovablePanel, type MovablePanelOptions } from "@/lib/useMovablePanel";
@@ -197,16 +226,18 @@ import {
   springWireLimits,
 } from "@/lib/springGeometry";
 import { regularPolygonAspect } from "@/lib/regularPolygonFootprint";
-import { DEFAULT_TAPER_DIMENSION_MAX, MAX_HIGH_RESOLUTION_SIDES, MAX_HIGH_RESOLUTION_STEPS, POSITION_TYPED_LIMIT, customSnapGridLabel, positionReach, shapeDimensionLimit, snapGridOptions, snapGridStep } from "@/lib/workplaneSettings";
+import { DEFAULT_TAPER_DIMENSION_MAX, MAX_HIGH_RESOLUTION_SIDES, MAX_HIGH_RESOLUTION_STEPS, POSITION_TYPED_LIMIT, RULER_MAX_LENGTH, customSnapGridLabel, positionReach, shapeDimensionLimit, snapGridOptions, snapGridStep } from "@/lib/workplaneSettings";
 import { printerPresetById } from "@/lib/printBed";
 import type { BentTubeInnerProfile, BentTubeProfile, CustomSnapGrid, GearType, GridSize, MeasurementAccuracy, ShapeCustomization, SketchProfile, SketchStroke, SketchStrokeAlign, SketchStrokeJoin, ThreadHead, ThreadProfile, ThreadRole, WorkplaneShape, WorkplaneWorkspaceSettings } from "@/types/layerling";
 import { selectWholeValue } from "@/lib/numberField";
 import { formulaMatchesValue, formulaToRemember, withFieldFormula, type FieldFormulas } from "@/lib/fieldFormulas";
-import { useRecentColors } from "@/lib/recentColors";
+import { useKeptColors, useRecentColors } from "@/lib/recentColors";
+import { ColorKeepRows } from "@/components/workplane/ColorKeepRows";
 import { canToggleGroupColors, groupShowsPartColors } from "@/lib/groupColors";
 import { shapePivotFromWorld, shapePivotWorld } from "@/lib/rotationPivot";
 import { signedDegrees } from "@/lib/geometryRotation";
 import { orientedMeasures, withOrientedMeasures } from "@/lib/orientedMeasures";
+import { tubeAfterInner, tubeAfterOuter, tubeInnerDiameter } from "@/lib/tubeDiameters";
 
 /**
  * Docked at the right edge, full height. Moved away, it floats: no longer
@@ -248,7 +279,7 @@ const SOLID_COLORS = [
   "#4b5563",
   "#111111",
 ];
-const TEXT_FONT_OPTIONS = ["Multilanguage", "Sans", "Serif", "Script", "Monospace", "Rounded", "Stencil"];
+const TEXT_FONT_OPTIONS = ["Multilanguage", "Sans", "Serif", "Script", "Monospace", "Rounded", "Stencil", "Japanese"];
 /** `label` traegt den Katalogschluessel, nicht den fertigen Text. */
 const GEAR_TYPE_OPTIONS: Array<{ value: GearType; label: MessageKey }> = [
   { value: "spur", label: "gear.spur" },
@@ -355,7 +386,7 @@ const RELATIVE_SIZE_PROPERTY_IDS = new Set(["width", "height", "length", "diamet
 const ROTATION_PROPERTY_IDS = new Set(["rotateX", "rotateY", "rotateZ"]);
 
 function propertyUsesLengthUnit(key: string) {
-  return ["textLineWidth", "letterSize", "iconWidth", "keyringDiameter", "positionX", "positionY", "positionZ", "pivotX", "pivotY", "pivotZ", "radius", "length", "width", "height", "bevel", "topRadius", "baseRadius", "thickness", "innerDiameter", "toothSize", "toothWidth", "gearBacklash", "centerHole", "slotSmallEnd", "slotCentreDistance", "sketchLineWidth", "topLength", "topWidth", "bottomLength", "bottomWidth", "diameter", "pitch", "clearance", "axialClearance", "boltClearance", "threadDepth", "threadCoreDiameter", "threadLength", "headHeight", "chamfer", "chamferBottom", "headChamfer", "wire", "starOuterSize", "starInnerSize", "starOuterFillet", "starInnerFillet", "heartTipFillet", "crescentThickness", "crescentTipFillet", "honeycombCellSize", "honeycombWallThickness", "honeycombFrameWidth", "cornerFillet", "topBottomFillet", "bentTubeSize", "bentTubeWall", "bentTubeSegmentLength", "bentTubeBendRadius", "dovetailNeckWidth", "dovetailClearance", "hingePinDiameter", "hingeLeafThickness", "hingeClearance", "screwHoleShaft", "screwHoleHeadDepth", "knurlDepth", "knurlChamfer", "loftBottomWidth", "loftBottomDepth", "loftTopWidth", "loftTopDepth", "loftBottomCorner", "loftTopCorner", "loftOffsetX", "loftOffsetZ", "loftWall"].includes(key);
+  return ["textLineWidth", "textEdgeSize", "letterSize", "iconWidth", "keyringDiameter", "positionX", "positionY", "positionZ", "pivotX", "pivotY", "pivotZ", "radius", "length", "width", "height", "bevel", "topRadius", "baseRadius", "thickness", "outerDiameter", "innerDiameter", "textRadius", "extrudeTopOffsetX", "extrudeTopOffsetZ", "toothSize", "toothWidth", "gearBacklash", "centerHole", "slotSmallEnd", "slotCentreDistance", "sketchLineWidth", "topLength", "topWidth", "bottomLength", "bottomWidth", "diameter", "pitch", "clearance", "axialClearance", "boltClearance", "threadDepth", "threadCoreDiameter", "threadLength", "headHeight", "chamfer", "chamferBottom", "headChamfer", "wire", "starOuterSize", "starInnerSize", "starOuterFillet", "starInnerFillet", "heartTipFillet", "crescentThickness", "crescentTipFillet", "honeycombCellSize", "honeycombWallThickness", "honeycombFrameWidth", "cornerFillet", "topBottomFillet", "bentTubeSize", "bentTubeWall", "bentTubeSegmentLength", "bentTubeBendRadius", "dovetailNeckWidth", "dovetailClearance", "hingePinDiameter", "hingeLeafThickness", "hingeClearance", "screwHoleShaft", "screwHoleHeadDepth", "knurlDepth", "knurlChamfer", "loftBottomWidth", "loftBottomDepth", "loftTopWidth", "loftTopDepth", "loftBottomCorner", "loftTopCorner", "loftOffsetX", "loftOffsetZ", "loftWall", "gridfinityLabelBackLength", "gridfinityLabelBackOffset", "gridfinityLabelBackWidth", "gridfinityLabelCornerSize", "gridfinityLabelFrontLength", "gridfinityLabelFrontOffset", "gridfinityLabelFrontWidth", "gridfinityLabelLeftLength", "gridfinityLabelLeftOffset", "gridfinityLabelLeftWidth", "gridfinityLabelRightLength", "gridfinityLabelRightOffset", "gridfinityLabelRightWidth", "gridfinityScoopRadius", "gridfinityFloorHeight"].includes(key);
 }
 
 /**
@@ -899,6 +930,105 @@ function getShapePropertiesWithAppLimits(shape: WorkplaneShape, onUpdate: ShapeI
     return properties;
   }
 
+  if (shape.kind === "gridfinity") {
+    const plan = gridfinityPlan({ ...shape, depth });
+    // The size is whole grid units; every change writes the box they make.
+    const apply = (next: Parameters<typeof gridfinityShapePatch>[1]) => {
+      const patch = gridfinityShapePatch({ ...shape, depth }, next);
+      onUpdate({ ...patch, size: resizedShapeSize(patch.width, patch.depth) });
+    };
+    const properties: ShapePropertyConfig[] = [
+      {
+        type: "select",
+        id: "gridfinityType",
+        label: t("prop.gridfinityType"),
+        value: plan.type,
+        options: [{ value: "bin", label: t("gridfinity.bin") }, { value: "baseplate", label: t("gridfinity.baseplate") }],
+        hint: t(plan.type === "bin" ? "gridfinity.binHint" : "gridfinity.baseplateHint"),
+        onChange: (value) => apply({ type: normalizeGridfinityType(value) }),
+      },
+    ];
+    if (plan.type === "bin") {
+      properties.push({ type: "toggle", id: "gridfinityHalfGrid", label: t("prop.gridfinityHalfGrid"), value: plan.halfGrid, onChange: (value) => apply({ halfGrid: value }) });
+    }
+    const maxUnits = gridfinityMaxUnits(shape);
+    properties.push(
+      { id: "gridfinityUnitsX", label: t("prop.gridfinityUnitsX"), value: plan.count.x, min: MIN_GRIDFINITY_UNITS, max: maxUnits, step: 1, hint: plan.halfGrid ? t("gridfinity.halfGridHint") : undefined, onChange: (value) => apply({ x: Math.round(value) }) },
+      { id: "gridfinityUnitsZ", label: t("prop.gridfinityUnitsZ"), value: plan.count.z, min: MIN_GRIDFINITY_UNITS, max: maxUnits, step: 1, onChange: (value) => apply({ z: Math.round(value) }) },
+    );
+    if (plan.type === "bin") {
+      properties.push(
+        { id: "gridfinityUnitsY", label: t("prop.gridfinityUnitsY"), value: plan.count.y, min: MIN_GRIDFINITY_UNITS, max: MAX_GRIDFINITY_HEIGHT_UNITS, step: 1, onChange: (value) => apply({ y: Math.round(value) }) },
+        { type: "toggle", id: "gridfinityLip", label: t("prop.gridfinityLip"), value: plan.lip, onChange: (value) => apply({ lip: value }) },
+        { type: "toggle", id: "gridfinityMagnets", label: t("prop.gridfinityMagnets"), value: plan.magnets, onChange: (value) => onUpdate({ gridfinityMagnets: value }) },
+      );
+    }
+    const fields = { ...shape, depth };
+    if (gridfinityFloorFits(fields)) {
+      // The floor (#455): raised, it leaves a bin blank to cut shapes into; it decides what room the shelves and scoops have.
+      const maxFloor = gridfinityFloorMaxHeight(fields);
+      properties.push({ id: "gridfinityFloorHeight", label: t("prop.gridfinityFloorHeight"), value: gridfinityFloorHeight(fields), min: MIN_GRIDFINITY_FLOOR_HEIGHT, max: maxFloor, step: 0.05, hint: t("gridfinity.floorHeightHint"), onChange: (value) => onUpdate({ gridfinityFloorHeight: clamp(value, MIN_GRIDFINITY_FLOOR_HEIGHT, maxFloor) }) });
+    }
+    if (gridfinityLabelFits(fields)) {
+      // Label shelves (#455): each wall's switch with its own width, length and position under it, then the corners they share.
+      const walls = [
+        { wall: "back", label: "prop.gridfinityLabelBack" },
+        { wall: "front", label: "prop.gridfinityLabelFront" },
+        { wall: "left", label: "prop.gridfinityLabelLeft" },
+        { wall: "right", label: "prop.gridfinityLabelRight" },
+      ] as const;
+      walls.forEach(({ wall, label }) => {
+        const keys = GRIDFINITY_LABEL_WALL_KEYS[wall];
+        const { on } = keys;
+        properties.push({ type: "toggle", id: on, label: t(label), value: shape[on] === true, onChange: (value) => onUpdate({ [on]: value }) });
+        if (shape[on] !== true) return;
+        const maxWidth = gridfinityLabelMaxWidth(fields, wall);
+        const limits = gridfinityLabelLimits(fields, wall);
+        // What the geometry builds: 0 for wall to wall, else at least the shortest shelf. A typed length is kept within the wall,
+        // a typed width within the bin across it.
+        const length = gridfinityLabelLength(fields, wall);
+        properties.push(
+          { id: keys.width, label: t("prop.gridfinityLabelWidth"), value: gridfinityLabelWidth(fields, wall), min: MIN_GRIDFINITY_LABEL_WIDTH, max: Math.max(MIN_GRIDFINITY_LABEL_WIDTH, maxWidth), step: 0.5, onChange: (value) => onUpdate({ [keys.width]: clamp(value, MIN_GRIDFINITY_LABEL_WIDTH, limits.across) }) },
+          { id: keys.length, label: t("prop.gridfinityLabelLength"), value: Math.min(length, limits.length), min: 0, max: limits.length, step: 1, hint: t("gridfinity.labelLengthHint"), onChange: (value) => onUpdate({ [keys.length]: clamp(value, 0, limits.length) }) },
+        );
+        if (limits.offset > 0) {
+          properties.push({ id: keys.offset, label: t("prop.gridfinityLabelOffset"), value: clamp(shape[keys.offset] ?? 0, -limits.offset, limits.offset), min: -limits.offset, max: limits.offset, step: 1, onChange: (value) => onUpdate({ [keys.offset]: value }) });
+        }
+      });
+      if (walls.some(({ wall }) => shape[GRIDFINITY_LABEL_WALL_KEYS[wall].on] === true)) {
+        properties.push(
+          {
+            type: "select",
+            id: "gridfinityLabelCorner",
+            label: t("prop.gridfinityLabelCorner"),
+            value: shape.gridfinityLabelCorner ?? DEFAULT_GRIDFINITY_LABEL_CORNER,
+            options: [{ value: "round", label: t("gridfinity.labelRound") }, { value: "chamfer", label: t("gridfinity.labelChamfer") }],
+            onChange: (value) => onUpdate({ gridfinityLabelCorner: value === "chamfer" ? "chamfer" : "round" }),
+          },
+          { id: "gridfinityLabelCornerSize", label: t("prop.gridfinityLabelCornerSize"), value: gridfinityLabelCornerSize(fields), min: 0, max: gridfinityLabelMaxCornerSize(plan), step: 0.5, onChange: (value) => onUpdate({ gridfinityLabelCornerSize: value }) },
+        );
+      }
+    }
+    if (gridfinityScoopFits(fields)) {
+      // Finger scoops (#455): a switch for each wall, then the radius they share.
+      const walls = [
+        { wall: "back", label: "prop.gridfinityScoopBack" },
+        { wall: "front", label: "prop.gridfinityScoopFront" },
+        { wall: "left", label: "prop.gridfinityScoopLeft" },
+        { wall: "right", label: "prop.gridfinityScoopRight" },
+      ] as const;
+      walls.forEach(({ wall, label }) => {
+        const key = GRIDFINITY_SCOOP_WALL_KEYS[wall];
+        properties.push({ type: "toggle", id: key, label: t(label), value: shape[key] === true, onChange: (value) => onUpdate({ [key]: value }) });
+      });
+      if (walls.some(({ wall }) => shape[GRIDFINITY_SCOOP_WALL_KEYS[wall]] === true)) {
+        const max = Math.max(MIN_GRIDFINITY_SCOOP_RADIUS, gridfinityScoopMaxRadius(fields));
+        properties.push({ id: "gridfinityScoopRadius", label: t("prop.gridfinityScoopRadius"), value: gridfinityScoopRadius(fields), min: MIN_GRIDFINITY_SCOOP_RADIUS, max, step: 0.5, onChange: (value) => onUpdate({ gridfinityScoopRadius: clamp(value, MIN_GRIDFINITY_SCOOP_RADIUS, max) }) });
+      }
+    }
+    return properties;
+  }
+
   if (shape.kind === "hinge") {
     const plan = hingePlan({ ...shape, depth });
     return [
@@ -935,6 +1065,7 @@ function getShapePropertiesWithAppLimits(shape: WorkplaneShape, onUpdate: ShapeI
         step: 0.1,
         onChange: (value) => onUpdate({ hingeLeafThickness: normalizeHingeLeafThickness(value, shape.height, plan.pinRadius * 2, plan.clearance) }),
       },
+      { type: "toggle", id: "hingePinless", label: t("prop.hingePinless"), value: plan.pinless, onChange: (value) => onUpdate({ hingePinless: value }) },
       {
         id: "hingeClearance",
         label: t("prop.hingeClearance"),
@@ -1100,7 +1231,7 @@ function getShapePropertiesWithAppLimits(shape: WorkplaneShape, onUpdate: ShapeI
   if (shape.kind === "ruler") {
     // Nur die Laenge ist einstellbar - Kreuzbreite und Dicke des Lineals stehen fest.
     return [
-      { id: "width", label: t("prop.length"), value: width, min: 30, max: 500, onChange: setWidth },
+      { id: "width", label: t("prop.length"), value: width, min: 30, max: RULER_MAX_LENGTH, onChange: setWidth },
     ];
   }
 
@@ -1212,6 +1343,38 @@ function getShapePropertiesWithAppLimits(shape: WorkplaneShape, onUpdate: ShapeI
     // seen from the other side: width minus twice the wall, so typing it sets the wall from the width.
     const wall = shape.bevel ?? 4;
     const wallLimit = Math.max(0.5, Math.min(width, depth) / 2 - 0.1);
+    if (Math.abs(width - depth) < 0.01) {
+      // A round tube has one outer diameter, and outer, inner and wall follow one another whatever is typed
+      // first (see tubeDiameters.ts); the two sides Length and Width only come back for an oval one.
+      const inner = tubeInnerDiameter(width, wall);
+      return [
+        ...roundSideProperties(shape, width, depth, onUpdate),
+        {
+          id: "outerDiameter",
+          label: t("prop.outerDiameter"),
+          value: width,
+          min: MIN_SHAPE_SIZE,
+          max: 160,
+          onChange: (outer) => {
+            const next = tubeAfterOuter(outer, inner);
+            onUpdate({ ...widthPatch(next.outer), depth: next.outer, size: resizedShapeSize(next.outer, next.outer), bevel: next.wall }, { resizeAxis: "width" });
+          },
+        },
+        {
+          id: "innerDiameter",
+          label: t("prop.innerDiameter"),
+          value: inner,
+          min: 0.2,
+          max: Math.max(0.2, width - 1),
+          onChange: (typed) => {
+            const next = tubeAfterInner(typed, width, wall);
+            onUpdate({ ...widthPatch(next.outer), depth: next.outer, size: resizedShapeSize(next.outer, next.outer), bevel: next.wall }, { resizeAxis: "width" });
+          },
+        },
+        { id: "thickness", label: t("prop.thickness"), value: wall, min: 0.5, max: 20, onChange: (bevel) => onUpdate({ bevel: clamp(bevel, 0.5, wallLimit) }) },
+        { id: "height", label: t("prop.height"), value: shape.height, min: MIN_SHAPE_SIZE, max: 160, onChange: setHeight },
+      ];
+    }
     return [
       ...roundSideProperties(shape, width, depth, onUpdate),
       { id: "thickness", label: t("prop.thickness"), value: wall, min: 0.5, max: 20, onChange: (bevel) => onUpdate({ bevel }) },
@@ -1849,8 +2012,10 @@ function getShapePropertiesWithAppLimits(shape: WorkplaneShape, onUpdate: ShapeI
       { id: "letterSize", label: t("nameTag.letterSize"), value: textLetterSize(shape), min: MIN_LETTER_SIZE, max: 60, step: 0.5, hint: t("nameTag.letterSizeHint"), onChange: (size) => onUpdate(textLetterSizePatch(shape, size)) },
       { id: "height", label: t("prop.height"), value: shape.height, min: MIN_SHAPE_SIZE, max: 40, hint: t("prop.textHeightHint"), onChange: setHeight },
       ...textFillProperties(shape, onUpdate),
+      // The top edge of the letters (#499), as on a name tag; a rounded or chamfered edge takes the place of the bevel.
+      ...textEdgeProperties(shape, onUpdate),
       // A fill mode or the silhouette draws the letters flat; bevel and segments belong to the filled letters.
-      ...(textHasFill(shape) ? [] : [
+      ...(textHasFill(shape) || shape.textEdge ? [] : [
         { id: "bevel", label: t("prop.bevel"), value: shape.bevel ?? 0, min: 0, max: 8, onChange: (bevel: number) => onUpdate({ bevel }) },
         { id: "segments", label: t("prop.segments"), value: shape.segments ?? 0, min: 0, max: 24, step: 1, onChange: (segments: number) => onUpdate({ segments: Math.round(segments) }) },
       ] satisfies ShapePropertyConfig[]),
@@ -1917,6 +2082,30 @@ function getShapePropertiesWithAppLimits(shape: WorkplaneShape, onUpdate: ShapeI
  */
 const TEXT_FILL_MORE_IDS = new Set(["textWiderCorners", "textSilhouette", "textWider"]);
 const TEXT_FILL_IN_VIEW_IDS = new Set(["textFill", "textLineWidth", "textCorners"]);
+
+/** The letters' top edge, round or chamfered, and how large (#499): the setting the name tag has for its top layer. */
+function textEdgeProperties(shape: WorkplaneShape, onUpdate: ShapeInspectorUpdate): ShapePropertyConfig[] {
+  const edge = normalizeTextEdge(shape.textEdge);
+  return [
+    {
+      type: "select",
+      id: "textEdge",
+      label: t("nameTag.letterEdge"),
+      value: edge?.kind ?? "none",
+      options: (["none", "round", "chamfer"] as const).map((value) => ({ value, label: t(`nameTag.edge.${value}`) })),
+      onChange: (value) => onUpdate({ textEdge: value === "round" || value === "chamfer" ? { kind: value, size: edge?.size ?? Math.min(0.4, shape.height) } : undefined }),
+    },
+    ...(edge ? [{
+      id: "textEdgeSize",
+      label: t("nameTag.letterEdgeSize"),
+      value: edge.size,
+      min: MIN_TEXT_EDGE,
+      max: Math.max(MIN_TEXT_EDGE, Math.min(MAX_TEXT_EDGE, shape.height)),
+      step: 0.05,
+      onChange: (size: number) => onUpdate({ textEdge: { kind: edge.kind, size } }),
+    } satisfies ShapePropertyConfig] : []),
+  ];
+}
 
 function textFillProperties(shape: WorkplaneShape, onUpdate: ShapeInspectorUpdate): ShapePropertyConfig[] {
   const stroke = normalizeSketchStroke(shape.textStroke);
@@ -2089,6 +2278,7 @@ export function ShapeInspector({
   onUpdate: onUpdateShape,
   onSnapChange,
   onSnapOpenChange,
+  onUnitsChange,
   onObjectSnapChange,
   onEditSketch,
   onOpenGroup,
@@ -2099,6 +2289,7 @@ export function ShapeInspector({
   onTextTags,
   textLayerStack: nameTagStack,
   iconTag,
+  qrCode,
   onInteractionActiveChange,
   onSnapGridAwayChange,
   proportionLock = false,
@@ -2113,6 +2304,7 @@ export function ShapeInspector({
   onUpdate: ShapeInspectorUpdate;
   onSnapChange: Dispatch<SetStateAction<GridSize>>;
   onSnapOpenChange: Dispatch<SetStateAction<boolean>>;
+  onUnitsChange?: (units: string) => void;
   onObjectSnapChange?: (enabled: boolean) => void;
   onEditSketch?: () => void;
   /** Opens a group so its parts can be changed one by one. */
@@ -2129,6 +2321,8 @@ export function ShapeInspector({
   textLayerStack?: NameTagStack | null;
   /** The icon tag card's wiring, for a sketch body or an icon tag; null for anything else. */
   iconTag?: IconTagControls | null;
+  /** The QR code card's wiring (#553), for a QR code; null for anything else. */
+  qrCode?: QrCodeControls | null;
   onInteractionActiveChange?: (active: boolean) => void;
   /** The snap control lives in the expanded panel; collapsed, the workplane shows its own. */
   /** Called with true while the inspector does not carry the snap grid control (collapsed, or floating), so the workplane shows it. */
@@ -2331,6 +2525,7 @@ export function ShapeInspector({
   const [gearHelixOpen, setGearHelixOpen] = useState(true);
   const [colorOpen, setColorOpen] = useState(false);
   const { colors: recentColors, remember: rememberColor } = useRecentColors(SOLID_COLORS);
+  const { colors: keptColors, toggle: toggleKeptColor } = useKeptColors();
   const [minimized, setMinimized] = useState(false);
   // Renaming here works like the pencil in the object list.
   const [nameDraft, setNameDraft] = useState<string | null>(null);
@@ -2431,6 +2626,7 @@ export function ShapeInspector({
         />
       ) : null}
       {shape.kind === "text" && onLayerText ? <MakeLayersButton disabled={locked} onLayerText={onLayerText} /> : null}
+      {qrCode ? <QrCodeCard key={`qr-code-${shape.id}`} shapeId={shape.id} controls={qrCode} disabled={locked} /> : null}
       {iconTag?.isTag ? (
         <IconTagCard key={`icon-tag-${shape.id}`} shapeId={shape.id} controls={iconTag} workspace={workspace} disabled={locked} onInteractionActiveChange={onInteractionActiveChange} />
       ) : iconTag ? (
@@ -2519,29 +2715,20 @@ export function ShapeInspector({
               <span>{t("inspector.custom")}</span>
             </label>
           </div>
-          {recentColors.length > 0 ? (
-            <div className="color-recent">
-              <span className="color-recent-label">{t("inspector.recentColors")}</span>
-              <div className="color-grid">
-                {recentColors.map((color) => (
-                  <button
-                    key={color}
-                    className={solidColor.toLowerCase() === color && !shape.hole ? "selected" : ""}
-                    type="button"
-                    style={{ "--shape-swatch": color } as CSSProperties}
-                    title={color.toUpperCase()}
-                    aria-label={t("aria.setColor", { color })}
-                    disabled={locked}
-                    onClick={() => {
-                      onUpdate({ color, hole: false, ...singleColorPatch });
-                      rememberColor(color);
-                      setColorOpen(false);
-                    }}
-                  />
-                ))}
-              </div>
-            </div>
-          ) : null}
+          <ColorKeepRows
+            recent={recentColors}
+            kept={keptColors}
+            current={shape.hole ? null : solidColor}
+            palette={SOLID_COLORS}
+            disabled={locked}
+            isSelected={(color) => solidColor.toLowerCase() === color && !shape.hole}
+            onPick={(color) => {
+              onUpdate({ color, hole: false, ...singleColorPatch });
+              if (!keptColors.includes(color)) rememberColor(color);
+              setColorOpen(false);
+            }}
+            onToggleKeep={toggleKeptColor}
+          />
         </div>
       ) : null}
 
@@ -2852,7 +3039,7 @@ export function ShapeInspector({
       ) : null}
       {!movable.moved ? (
         <div className="inspector-snap-dock">
-          <SnapGridControl units={workspace.units} customGrids={workspace.customSnapGrids} snap={snap} snapOpen={snapOpen} onSnapChange={onSnapChange} onSnapOpenChange={onSnapOpenChange} objectSnap={workspace.objectSnap} onObjectSnapChange={onObjectSnapChange} />
+          <SnapGridControl units={workspace.units} onUnitsChange={onUnitsChange} customGrids={workspace.customSnapGrids} snap={snap} snapOpen={snapOpen} onSnapChange={onSnapChange} onSnapOpenChange={onSnapOpenChange} objectSnap={workspace.objectSnap} onObjectSnapChange={onObjectSnapChange} />
         </div>
       ) : null}
         </>
@@ -3216,6 +3403,78 @@ export type IconTagControls = {
   /** Puts another SVG's icon on the tag, keeping its layers and width. */
   onReplaceSvg: (file: File) => Promise<void>;
 };
+
+/** The QR code card's wiring (#553): the settings the code was made with, and making it again with a new text. */
+export type QrCodeControls = {
+  settings: QrCodeSettings;
+  onRegenerate: (text: string) => Promise<void>;
+};
+
+/**
+ * The QR code card, open and first: the code's text, and "Make again" to build the code anew with
+ * it - where it stands, as wide as it is now. The other choices stay as they were made.
+ */
+function QrCodeCard({ shapeId, controls, disabled }: { shapeId: string; controls: QrCodeControls; disabled: boolean }) {
+  const [open, setOpen] = useState(true);
+  const [text, setText] = useState(controls.settings.text);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  useEffect(() => setText(controls.settings.text), [controls.settings.text]);
+  const fits = qrTextFits(text, controls.settings.errorCorrection);
+  const capacity = QR_BYTE_CAPACITY[controls.settings.errorCorrection];
+  const ready = Boolean(text) && fits && text !== controls.settings.text && !busy && !disabled;
+  const regenerate = () => {
+    if (!ready) return;
+    setBusy(true);
+    setError("");
+    controls.onRegenerate(text)
+      .catch((reason) => setError(reason instanceof Error ? localizedError(reason.message) : String(reason)))
+      .finally(() => setBusy(false));
+  };
+  return (
+    <div className={`property-card name-tag-card qr-code-card ${open ? "" : "collapsed"}`}>
+      <button className="property-card-header" type="button" aria-expanded={open} aria-controls={`qr-code-${shapeId}`} onClick={() => setOpen((current) => !current)}>
+        <span>{t("qrCode.title")}</span>
+        <ChevronUp className={open ? "" : "collapsed"} size={25} strokeWidth={2.8} />
+      </button>
+      {open ? (
+        <p className="name-tag-hint">
+          {t("qrCode.cardHint")}
+          <GuideHelpLink chapter="text" section="qrCode" className="inspector-help-link" />
+        </p>
+      ) : null}
+      {open ? (
+        <div className="property-list name-tag-body" id={`qr-code-${shapeId}`}>
+          <label className="qr-code-text">
+            <span>{t("qrCode.text")}</span>
+            <textarea
+              rows={3}
+              value={text}
+              disabled={disabled || busy}
+              aria-invalid={!fits}
+              data-testid="qr-code-card-text"
+              onChange={(event) => setText(event.currentTarget.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) {
+                  event.preventDefault();
+                  regenerate();
+                }
+              }}
+            />
+            <small className={fits ? "" : "qr-code-warning"}>
+              {fits ? t("qrCode.count", { used: qrByteLength(text), max: capacity }) : t("qrCode.tooLong", { used: qrByteLength(text), max: capacity })}
+            </small>
+          </label>
+          <button className="inspector-action-button" type="button" disabled={!ready} onClick={regenerate}>
+            <RefreshCw size={17} strokeWidth={2.5} />
+            <span>{busy ? t("qrCode.building") : t("qrCode.regenerate")}</span>
+          </button>
+          {error ? <p className="name-tag-hint icon-tag-card-error" role="alert">{error}</p> : null}
+        </div>
+      ) : null}
+    </div>
+  );
+}
 
 /** A sketch body's way to an icon tag, first in its settings: one click splits it into the start layers. */
 function MakeIconLayersButton({ disabled, onLayer }: { disabled: boolean; onLayer: (patch: IconLayerPatch) => void }) {
@@ -3642,8 +3901,11 @@ export function SnapGridControl({
   onSnapOpenChange,
   objectSnap,
   onObjectSnapChange,
+  onUnitsChange,
 }: {
   units: string;
+  /** Switches between millimetres and inches without the settings window (#422). */
+  onUnitsChange?: (units: string) => void;
   /** The user's own snap measures, listed after the fixed steps. */
   customGrids?: CustomSnapGrid[];
   snap: GridSize;
@@ -3658,10 +3920,16 @@ export function SnapGridControl({
   return (
     <div className="snap-row">
       <span>{t("inspector.snapGrid")}</span>
-      <button className="snap-select" onClick={() => onSnapOpenChange((value) => !value)}>
+      <button className="snap-select" data-help={t("inspector.snapGrid")} onClick={() => onSnapOpenChange((value) => !value)}>
         <span className="snap-select-label">{label(snap)}</span>
         <ChevronDown size={12} fill="currentColor" />
       </button>
+      {onUnitsChange ? (
+        <span className="snap-units" role="group" aria-label={t("inspector.unitsSwitch")} title={t("inspector.unitsSwitch")}>
+          <button type="button" data-help={t("inspector.unitsSwitch")} aria-pressed={units === "Metric (Default)"} onClick={() => onUnitsChange("Metric (Default)")}>mm</button>
+          <button type="button" data-help={t("inspector.unitsSwitch")} aria-pressed={units === "Imperial"} onClick={() => onUnitsChange("Imperial")}>in</button>
+        </span>
+      ) : null}
       {snapOpen ? (
         <div className="snap-menu">
           {snapGridOptions(units, customGrids).map((size) => (
@@ -3776,7 +4044,7 @@ function RangeProperty({
     window.clearTimeout(sliderReleaseTimerRef.current);
     sliderReleaseTimerRef.current = window.setTimeout(() => { draggingSliderRef.current = false; }, 120);
   };
-  const allowsAboveSliderMax = ["length", "width", "height", "starOuterSize", "starInnerSize", "crescentThickness", "honeycombCellSize", "honeycombWallThickness", "honeycombFrameWidth", "bentTubeSize", "bentTubeBendRadius"].includes(id) || id.endsWith("Length") || id.endsWith("Width");
+  const allowsAboveSliderMax = ["length", "width", "height", "outerDiameter", "innerDiameter", "starOuterSize", "starInnerSize", "crescentThickness", "honeycombCellSize", "honeycombWallThickness", "honeycombFrameWidth", "bentTubeSize", "bentTubeBendRadius"].includes(id) || id.endsWith("Length") || id.endsWith("Width");
   const isLength = propertyUsesLengthUnit(id);
   const accuracy = workspace.accuracy;
   // A position can be typed beyond the slider, on both sides (#425).
@@ -3789,10 +4057,13 @@ function RangeProperty({
   const sliderValue = clamp(controlValue, controlMin, controlMax);
   const position = ((sliderValue - controlMin) / Math.max(Number.EPSILON, controlMax - controlMin)) * 100;
   const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState(formatPropertyNumber(controlValue, accuracy, controlStep));
+  const [draft, setDraft] = useState(ROTATION_PROPERTY_IDS.has(id) ? String(Number(controlValue.toFixed(2))) : formatPropertyNumber(controlValue, accuracy, controlStep));
   const unit = isLength ? lengthDisplayUnit(workspace).label : ROTATION_PROPERTY_IDS.has(id) ? "°" : null;
   // Inches read as fractions (1⅝), like similar tools; the slider and typed decimals stay exact.
-  const formatShown = (shown: number) => (unit === "in" && showsInchFractions(workspace) ? formatFractionalInches(shown) : formatPropertyNumber(shown, accuracy, controlStep));
+  // An angle keeps two decimals (11.25 stays 11.25, #552); the other whole-step fields show whole numbers.
+  const formatShown = (shown: number) => (unit === "in" && showsInchFractions(workspace)
+    ? formatFractionalInches(shown)
+    : ROTATION_PROPERTY_IDS.has(id) ? String(Number(shown.toFixed(2))) : formatPropertyNumber(shown, accuracy, controlStep));
   const toModelValue = (nextValue: number) => isLength ? displayToMillimeters(nextValue, workspace) : nextValue;
   // The calculation the field was last set from comes back when it is entered (#180), as long as
   // the value still equals it; a value changed by a handle or the slider shows the number again.
@@ -3818,6 +4089,42 @@ function RangeProperty({
     setEditing(false);
     holdInteraction(false);
   };
+  // The mouse wheel in a field that has the focus changes its value (#226). Only a field that was clicked, so the
+  // panel still scrolls under a pointer that merely passes over one. A listener of its own, as the browser treats a wheel
+  // listener of React as one that may not stop the scroll.
+  const numberInputRef = useRef<HTMLInputElement>(null);
+  const keepSelectedRef = useRef(false);
+  const wheelHandlerRef = useRef<((event: WheelEvent) => void) | null>(null);
+  wheelHandlerRef.current = (event: WheelEvent) => {
+    const input = numberInputRef.current;
+    const turn = wheelTurn(event);
+    if (!input || disabled || !editing || document.activeElement !== input || turn === 0) return;
+    event.preventDefault();
+    const base = wheelBaseStep(controlMin, controlMax, controlStep, unit === "in");
+    const parsed = parseMeasurementInput(draft);
+    const current = Number.isFinite(parsed) ? parsed : controlValue;
+    const next = wheelNextValue(current, turn < 0 ? 1 : -1, base, { shift: event.shiftKey, ctrl: event.ctrlKey, alt: event.altKey });
+    const nextModelValue = toModelValue(next);
+    onChange(freePosition ? clamp(nextModelValue, -POSITION_TYPED_LIMIT, POSITION_TYPED_LIMIT) : allowsAboveSliderMax ? Math.max(min, nextModelValue) : clamp(nextModelValue, min, max));
+    const shown = formatShown(freePosition || allowsAboveSliderMax ? next : clamp(next, controlMin, controlMax));
+    // What is shown is the new starting point, so leaving the field keeps the exact value and does not read it again.
+    openedWithRef.current = shown;
+    setDraft(shown);
+    // The whole value stays selected, so that typing after the wheel replaces it, as after the click (#226).
+    // Every render until a key is typed puts the selection back, as the field's value is written again.
+    keepSelectedRef.current = true;
+  };
+  useLayoutEffect(() => {
+    const input = numberInputRef.current;
+    if (keepSelectedRef.current && input && document.activeElement === input) selectWholeValue(input);
+  });
+  useEffect(() => {
+    const input = numberInputRef.current;
+    if (!input) return;
+    const onWheel = (event: WheelEvent) => wheelHandlerRef.current?.(event);
+    input.addEventListener("wheel", onWheel, { passive: false });
+    return () => input.removeEventListener("wheel", onWheel);
+  }, []);
   const handleSliderChange = (nextValue: number) => {
     let next = clamp(Number.isFinite(nextValue) ? nextValue : controlMin, controlMin, controlMax);
     // Dragged with the mouse on a long slider: onto the snap grid (not for a short one, which the grid would only make coarse).
@@ -3834,6 +4141,7 @@ function RangeProperty({
         <span className="range-property-name">{label}{onReset ? <PropertyResetButton onClick={onReset} /> : null}</span>
         <span className="range-value-control">
           <input
+            ref={numberInputRef}
             type="text"
             value={editing ? draft : formatShown(controlValue)}
             disabled={disabled}
@@ -3848,8 +4156,14 @@ function RangeProperty({
               setEditing(true);
               selectWholeValue(event.currentTarget);
             }}
-            onChange={(event) => setDraft(event.currentTarget.value)}
-            onBlur={commitDraft}
+            onChange={(event) => {
+              keepSelectedRef.current = false;
+              setDraft(event.currentTarget.value);
+            }}
+            onBlur={() => {
+              keepSelectedRef.current = false;
+              commitDraft();
+            }}
             onKeyDown={(event) => {
               if (event.key === "Enter") {
                 event.currentTarget.blur();
@@ -4121,18 +4435,23 @@ export function SelectionInspector({
   onSetHole,
   onSetColor,
   onToggleLocked,
+  onToggleHidden,
   onInteractionActiveChange,
 }: {
   shapes: readonly WorkplaneShape[];
   onSetHole: (hole: boolean) => void;
   onSetColor: (color: string) => void;
   onToggleLocked: () => void;
+  /** Hides the selected parts, or shows them again when all of them are hidden (#491); the button of a single part's panel. */
+  onToggleHidden?: () => void;
   onInteractionActiveChange?: (active: boolean) => void;
 }) {
   useLanguage();
   const movable = useMovablePanel<HTMLElement>("layerling.editor.inspectorPosition", INSPECTOR_PANEL);
+  const allHidden = shapes.length > 0 && shapes.every((shape) => shape.hidden);
   const [colorOpen, setColorOpen] = useState(false);
   const { colors: recentColors, remember: rememberColor } = useRecentColors(SOLID_COLORS);
+  const { colors: keptColors, toggle: toggleKeptColor } = useKeptColors();
   const solidKinds = shapes.filter((shape) => !isNonSolidShapeKind(shape.kind));
   const allLocked = shapes.length > 0 && shapes.every((shape) => shape.locked);
   const anyLocked = shapes.some((shape) => shape.locked);
@@ -4165,6 +4484,11 @@ export function SelectionInspector({
           <button className={allLocked ? "inspector-header-icon active" : "inspector-header-icon"} aria-label={allLocked ? t("outliner.unlock") : t("outliner.lock")} aria-keyshortcuts="Control+L" title={t("camera.shortcut", { label: allLocked ? t("outliner.unlock") : t("outliner.lock"), keys: "Ctrl+L" })} onClick={onToggleLocked}>
             {allLocked ? <Lock size={16} /> : <Unlock size={16} />}
           </button>
+          {onToggleHidden ? (
+            <button className={allHidden ? "inspector-header-icon active" : "inspector-header-icon"} aria-label={allHidden ? t("outliner.show") : t("outliner.hide")} aria-keyshortcuts="Control+H" title={t("camera.shortcut", { label: allHidden ? t("outliner.show") : t("outliner.hide"), keys: "Ctrl+H" })} onClick={onToggleHidden}>
+              {allHidden ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          ) : null}
         </div>
       </div>
       {solidKinds.length > 0 ? (
@@ -4221,25 +4545,16 @@ export function SelectionInspector({
               <span>{t("inspector.custom")}</span>
             </label>
           </div>
-          {recentColors.length > 0 ? (
-            <div className="color-recent">
-              <span className="color-recent-label">{t("inspector.recentColors")}</span>
-              <div className="color-grid">
-                {recentColors.map((color) => (
-                  <button
-                    key={color}
-                    className={sharedColor?.toLowerCase() === color ? "selected" : ""}
-                    type="button"
-                    style={{ "--shape-swatch": color } as CSSProperties}
-                    title={color.toUpperCase()}
-                    aria-label={t("aria.setColor", { color })}
-                    disabled={anyLocked}
-                    onClick={() => pick(color)}
-                  />
-                ))}
-              </div>
-            </div>
-          ) : null}
+          <ColorKeepRows
+            recent={recentColors}
+            kept={keptColors}
+            current={sharedColor}
+            palette={SOLID_COLORS}
+            disabled={anyLocked}
+            isSelected={(color) => sharedColor?.toLowerCase() === color}
+            onPick={pick}
+            onToggleKeep={toggleKeptColor}
+          />
         </div>
       ) : null}
       {gearPair ? (

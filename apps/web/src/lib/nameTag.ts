@@ -1,5 +1,5 @@
 import { curvedTextPatch, DEFAULT_TEXT_SIZE, displayTextOf, textBoxAroundLetters, textFitScale, textLetterBox } from "@/lib/textGeometry";
-import { customFontRevision, textFont } from "@/lib/textFonts";
+import { customFontRevision, ensureJapaneseGlyphs, textFont } from "@/lib/textFonts";
 import { DEFAULT_TEXT_LAYERS, MAX_TEXT_LAYERS, MAX_TEXT_LAYER_GROW, type TextLayer, type textLayersOf } from "@/lib/textLayers";
 import type { WorkplaneShape } from "@/types/layerling";
 
@@ -52,7 +52,11 @@ export function removeTextLayer(layers: readonly TextLayer[]): TextLayer[] {
 // at this font size, its outlines sampled with these curve segments, an empty text as a space.
 const LAYOUT_SIZE = 20;
 const curveSegmentsOf = (fontName: string) => (fontName === "Stencil" ? 1 : 8);
-const wordsOf = (shape: Pick<WorkplaneShape, "text">) => (shape.text ?? "TEXT").trim() || " ";
+const wordsOf = (shape: Pick<WorkplaneShape, "text">) => {
+  const words = (shape.text ?? "TEXT").trim() || " ";
+  ensureJapaneseGlyphs(words);
+  return words;
+};
 
 const measuresCache = new Map<string, { width: number; depth: number; cap: number }>();
 
@@ -103,6 +107,23 @@ export function textLetterSize(shape: WorkplaneShape): number {
   const letters = textLetterBox(shape);
   // A stretched text (#382) has the height of its box: that is how tall its capitals stand.
   return textFitScale(shape, letters, measures).y * measures.cap;
+}
+
+/**
+ * A straight text shrunk by its box takes the box with it (#432): the letters fit their box in one scale, so a box
+ * made lower than the line needs leaves it much wider than the letters, and the measures and handles stand far from
+ * them. When a change of the box makes the letters smaller, the box becomes the one the letters at that size need.
+ * A box made larger leaves the letters and the box as they are, and a stretched text fills its box anyway.
+ */
+export function textShrinkPatch(shape: WorkplaneShape, patch: Partial<WorkplaneShape>): Partial<WorkplaneShape> {
+  if (shape.kind !== "text" || shape.textCurved || !("width" in patch || "depth" in patch)) return patch;
+  const next = { ...shape, ...patch } as WorkplaneShape;
+  if (next.textStretch || next.textCurved) return patch;
+  const measures = layoutMeasures(next);
+  const before = textFitScale(shape, textLetterBox(shape), measures).x;
+  const after = textFitScale(next, textLetterBox(next), measures).x;
+  if (!(after < before - 1e-6)) return patch;
+  return { ...patch, ...textBoxAroundLetters(next, { width: measures.width * after, depth: measures.depth * after }) };
 }
 
 /**

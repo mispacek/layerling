@@ -60,9 +60,16 @@ describe("workplane shape helpers", () => {
     expect(normalizeDegrees(-90)).toBe(270);
     expect(normalizeDegrees(450)).toBe(90);
     expect(cleanRotationDegrees(Number.NaN)).toBe(0);
-    expect(cleanRotationDegrees(-0.2)).toBe(0);
-    expect(cleanRotationDegrees(359.8)).toBe(0);
-    expect(cleanRotationDegrees(12.34)).toBe(12.3);
+    expect(cleanRotationDegrees(-0.02)).toBe(0);
+    expect(cleanRotationDegrees(359.98)).toBe(0);
+    expect(cleanRotationDegrees(12.347)).toBe(12.35);
+  });
+
+  it("keeps an angle to two decimals, so half of 22.5 degrees stays 11.25 (#552)", () => {
+    expect(cleanRotationDegrees(11.25)).toBe(11.25);
+    expect(cleanRotationDegrees(-11.25)).toBe(348.75);
+    expect(cleanRotationDegrees(22.5)).toBe(22.5);
+    expect(canonicalizeShape({ id: "a", name: "A", kind: "box", color: "#ff0000", x: 0, z: 0, elevation: 0, size: 10, width: 10, depth: 10, height: 10, rotation: 11.25, locked: false, hidden: false }).rotation).toBe(11.25);
   });
 
   it("preserves the meaningful yaw of low-sided circular primitives", () => {
@@ -184,7 +191,7 @@ describe("workplane shape helpers", () => {
 
     expect(canonical.rotation).toBe(0);
     expect(canonical.rotationX).toBe(0);
-    expect(canonical.rotationZ).toBe(45);
+    expect(canonical.rotationZ).toBe(45.04);
     expect(canonical.mirrorX).toBeUndefined();
     expect(canonical.mirrorY).toBe(true);
     expect(canonical.groupedShapes?.[0].rotation).toBe(0);
@@ -211,6 +218,13 @@ describe("workplane shape helpers", () => {
     const rack = canonicalizeShape(shape({ kind: "gear", gearType: "rack", gearProfile: "involute", width: 75.4, depth: 7.5 }));
     expect(rack.width).toBe(75.4);
     expect(rack.depth).toBe(7.5);
+  });
+
+  it("rounds a Gridfinity bin or baseplate to whole grid units, however its box was dragged", () => {
+    const bin = canonicalizeShape(shape({ kind: "gridfinity", gridfinityType: "bin", width: 100, depth: 30, height: 40 }));
+    expect(bin).toMatchObject({ width: 83.5, depth: 41.5, height: 39.4, size: 83.5 });
+    const plate = canonicalizeShape(shape({ kind: "gridfinity", gridfinityType: "baseplate", width: 130, depth: 90, height: 12 }));
+    expect(plate).toMatchObject({ width: 126, depth: 84, height: 5, size: 126 });
   });
 
   it("keeps rotated groups editable so they can still be ungrouped", () => {

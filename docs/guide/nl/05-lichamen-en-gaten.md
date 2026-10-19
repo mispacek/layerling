@@ -80,6 +80,6 @@ De helften zijn gewone meshes: instellingen zoals het aantal zijden van een cili
 
 ## Onderdelen scheiden
 
-Bestaat een vorm uit meerdere losse stukken, zoals tekst van losse letters, dan splitst {{ui:inspector.separateParts}} die in zelfstandige vormen.
+Bestaat een vorm uit meerdere losse stukken, zoals tekst van losse letters, dan splitst {{ui:inspector.separateParts}} die in zelfstandige vormen. Je vindt de optie ook in het menu dat opent met een rechtsklik op de vorm.
 
 > **Tip:** Maak gaten altijd iets langer dan het onderdeel waar ze doorheen moeten. Eindigt het gat precies gelijk met het vlak, dan blijft er soms een flinterdun velletje over. Eén millimeter extra maakt het zeker.

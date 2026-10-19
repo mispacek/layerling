@@ -369,6 +369,17 @@ export function ToolbarHollowIcon(props: IconProps) {
   );
 }
 
+/** A block whose boss on top is drawn dashed: the faces that go, the top closed again. */
+export function ToolbarDeleteFaceIcon(props: IconProps) {
+  return (
+    <ToolbarVectorIcon {...props}>
+      <path d="M8 20h32v20H8Z" {...SOLID} />
+      <path d="M8 20h32v20H8Z" />
+      <path d="M17 20V9h14v11" strokeDasharray="4 3" />
+    </ToolbarVectorIcon>
+  );
+}
+
 /** A dense mesh on the left, the same outline with a few large triangles on the right. */
 export function ToolbarSimplifyIcon(props: IconProps) {
   return (

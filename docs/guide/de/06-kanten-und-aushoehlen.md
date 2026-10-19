@@ -10,7 +10,7 @@ Scharfe Kanten sehen an einem gedruckten Teil selten gut aus, und sie sind auch 
 1. Wähle den Körper aus (oder die Gruppe).
 2. Klicke im Menüband auf {{ui:editor.tool.fillet}} oder {{ui:editor.tool.chamfer}}, drücke [[B]] für die Verrundung oder [[Shift+B]] für die Fase, oder klicke mit der rechten Maustaste auf den Körper und wähle es im Menü.
 3. Die Kanten des Körpers werden hervorgehoben. Klicke die an, die betroffen sein sollen. Ein weiterer Klick nimmt sie wieder heraus. Mit [[Umschalt]] fügst du eine einzelne Kante hinzu oder nimmst sie weg.
-4. Stelle das Maß ein und bestätige mit {{ui:edge.apply}} oder [[Enter]].
+4. Stelle das Maß ein und bestätige mit {{ui:edge.apply}} oder [[Enter]]. Danach bleibt das Fenster mit derselben Größe auf dem neuen Körper offen, damit gleich die nächste Verrundung oder Fase folgen kann; {{ui:edge.done}}, [[Esc]] oder das Kreuz schließt es. Mit [[Umschalt]] oder [[Strg]] fügt ein Klick auf {{ui:edge.topEdges}}, {{ui:edge.bottomEdges}}, {{ui:edge.verticalEdges}} oder {{ui:edge.horizontalEdges}} diese Kanten zu den gewählten hinzu, statt sie zu ersetzen.
 
 ![Das Werkzeug „Kanten verrunden“: alle scharfen Kanten sind ausgewählt, im Bild siehst du die Vorschau mit 4 mm Radius.](shot:fillet-preview)
 
@@ -23,7 +23,10 @@ Im Fenster findest du:
 - {{ui:edge.allSharpEdges}} wählt sämtliche Kanten auf einmal, {{ui:edge.clear}} leert die Auswahl.
 - **{{ui:edge.radius}}** bei der Verrundung. Bei der Fase stellst du {{ui:edge.distance}} oder {{ui:edge.angle}} ein.
 - {{ui:edge.sharpThreshold}} legt fest, welche Kanten überhaupt als scharf gelten. Ein Wert von 25° behandelt nur deutliche Knicke als Kante und lässt flache Übergänge in Ruhe.
+- {{ui:edge.verticalEdges}} wählt die Kanten, die senkrecht stehen, etwa die Ecken eines Quaders: Eine Verrundung rundet dann alle senkrechten Ecken auf einmal.
 - {{ui:edge.topEdges}} wählt nur die Kanten ganz oben am Körper. Das ist der schnelle Weg für eine Ausstechform: Umriss in der Skizze als Kontur bauen, dann die oberen Kanten fasen. Wie steil die Fase wird, stellst du mit {{ui:edge.angle}} ein; länger als die Wand dick ist, kann sie nicht werden.
+- {{ui:edge.bottomEdges}} wählt nur die Kanten ganz unten am Körper, das Gegenstück zu {{ui:edge.topEdges}}. So rundest oder fasst du schnell nur den Fuß eines Teils.
+- {{ui:edge.chamfillet}}, oben im Fasen-Fenster neben {{ui:editor.tool.chamfer}} gewählt, macht den druckbaren Fuß eines Teils: eine Fase an der Platte, die tangential in eine Rundung zur Wand übergeht, sodass die ersten Schichten keine Stützen brauchen und die Kante trotzdem weich endet. {{ui:edge.distance}} ist die Höhe, die der Fuß einnimmt, {{ui:edge.angle}} (15° bis 75°) die Steilheit der Fase an der Platte. Die Kanten wählst du mit {{ui:edge.bottomEdges}}.
 - {{ui:edge.onlyVisibleEdges}} blendet die Kanten aus, die von deinem Blickwinkel aus hinter dem Körper liegen. Ohne den Schalter scheinen alle Kanten durch den Körper hindurch, was bei einem vielteiligen Körper verwirrt; mit ihm siehst du nur die dir zugewandten Kanten und kannst nur diese anklicken. Für die anderen drehst du die Ansicht. Eine rot gezeichnete Kante (siehe unten) bleibt immer sichtbar.
 - {{ui:edge.tangentChains}}: Ein Klick wählt dann auch die Kanten, die sanft ineinander übergehen, zum Beispiel alle Kanten rund um eine Fläche mit gerundeten Ecken. Der Schalter bestimmt nur, was ein Klick auswählt: Der CAD-Kern führt eine Fase oder Rundung immer an solchen glatt anschließenden Kanten weiter. Die Tafel sagt dir dann, an wie vielen weiteren Kanten das geschieht.
 - {{ui:edge.keepSize}} hält Fase oder Rundung so groß, wie sie sind, auch wenn du den Körper später skalierst.
@@ -43,7 +46,7 @@ Ein behandelter Körper lässt sich jederzeit noch einmal behandeln. Wähle ihn 
 
 Neben einer Fase, einer Verrundung oder einer Aushöhlung steht außerdem {{ui:edge.editAction}}. Es nimmt die Bearbeitung genauso zurück, öffnet das Werkzeug aber gleich wieder mit denselben Kanten und dem alten Wert. Du änderst den Wert und wendest ihn neu an: So wird aus einer Verrundung von 3 mm eine von 5 mm, ohne dass du die Kanten noch einmal anklicken musst. Liegen neuere Bearbeitungen darüber, gehen sie auch hier mit. Das gilt für Kantenbearbeitungen, die du ab jetzt machst; bei älteren steht nur das Zurücknehmen da, und bei einzelnen Teilen einer Gruppe ebenfalls.
 
-Bei einer Gruppe, etwa einem Zylinder mit einer Bohrung, gehört die bearbeitete Kante zum fertigen Körper, nicht zu einem einzelnen Teil. Deshalb wird aus der Gruppe dabei ein einziger Körper, und {{ui:editor.tool.ungroup}} steht nicht mehr zur Verfügung. Nimmst du die Bearbeitung wie oben beschrieben zurück, ist die Gruppe mit allen Teilen wieder da. Am einfachsten ist es, Kanten erst ganz am Schluss zu bearbeiten. Das gilt auch für Gewinde: Das Kantenwerkzeug nimmt ein Gewinde als exakten Körper, ein Block mit einer Gewindebohrung bekommt seine Rundungen also mit dem Gewinde darin. Die Kanten eines Gewindes zu ermitteln dauert länger als bei einer einfachen Form, ein paar Sekunden bei M6 und etwa eine halbe Minute bei einem G1/2-Rohrgewinde.
+Bei einer Gruppe, etwa einem Zylinder mit einer Bohrung, gehört die bearbeitete Kante zum fertigen Körper, nicht zu einem einzelnen Teil. Deshalb wird aus der Gruppe dabei ein einziger Körper. {{ui:editor.tool.ungroup}} geht trotzdem: Es nimmt zuerst die Kantenmerkmale zurück und löst dann die Gruppe auf, in einem Schritt, den [[Strg]]+[[Z]] rückgängig macht. Nimmst du die Bearbeitung wie oben beschrieben zurück, ist die Gruppe mit allen Teilen wieder da. Am einfachsten ist es, Kanten erst ganz am Schluss zu bearbeiten. Das gilt auch für Gewinde: Das Kantenwerkzeug nimmt ein Gewinde als exakten Körper, ein Block mit einer Gewindebohrung bekommt seine Rundungen also mit dem Gewinde darin. Die Kanten eines Gewindes zu ermitteln dauert länger als bei einer einfachen Form, ein paar Sekunden bei M6 und etwa eine halbe Minute bei einem G1/2-Rohrgewinde.
 
 > **Gut zu wissen:** layerling rechnet bei Rundungen und Fasen mit echter CAD-Geometrie, nicht nur mit einem Dreiecksnetz. Deshalb bleibt eine verrundete Kante auch im STEP-Export eine verrundete Kante.
 
@@ -78,3 +81,17 @@ Auch ein Körper mit einer Tasche lässt sich aushöhlen, etwa ein Block mit ein
 Änderst du später die Größe des ausgehöhlten Körpers, höhlt layerling ihn in der neuen Größe gleich noch einmal aus. Die Wand bleibt so dick, wie du sie gewählt hast, auch bei runden Körpern. Ein Zylinder, den du dabei in eine Richtung mehr ziehst als in die andere, wird zur Ellipse.
 
 > **Tipp:** Bei einer 0,4-mm-Düse sind 1,2 bis 2 mm Wandstärke ein guter Anfang: dünn genug, um Material zu sparen, dick genug für ein stabiles Teil.
+
+## Flächen löschen
+
+Eine Verrundung, die stört, ein Loch an der falschen Stelle, ein Zapfen, der nicht mehr gebraucht wird: {{ui:editor.tool.deleteFace}} nimmt sie wieder vom Körper, ohne dass du ihn neu bauen musst.
+
+1. Wähle den Körper aus und klicke auf {{ui:editor.tool.deleteFace}}, oder klicke mit der rechten Maustaste auf den Körper und wähle es im Menü.
+2. Klicke alle Flächen des Teils an, das weg soll: die Flächen einer gerundeten Kante, die Wand eines Lochs, Seite und Deckel eines Zapfens. Eine gewählte Fläche leuchtet auf; ein zweiter Klick nimmt sie wieder heraus. Das Fenster zählt die Flächen.
+3. Klicke auf {{ui:deleteFace.apply}} oder drücke [[Entf]]. [[Esc]] schließt das Werkzeug, ohne etwas zu ändern.
+
+Die Flächen ringsum wachsen, bis die Lücke geschlossen ist. Ein Quader mit gerundeten Oberkanten bekommt seine scharfen Kanten zurück, ein Loch ist geschlossen, ein Zapfen ist weg. Der Körper bleibt exakt: Er lässt sich wieder verrunden und fasen, und der STEP-Export behält seine echten Flächen. [[Strg]]+[[Z]] nimmt das Löschen in einem Schritt zurück. Es steht außerdem unter {{ui:edge.featureHistory}} bei den Verrundungen und Fasen, wo {{ui:edge.revertAction}} es zurücknimmt; {{ui:edge.editAction}} gibt es dafür nicht. Bei einer Gruppe wird daraus ein einziger Körper, wie bei einer Kantenbearbeitung.
+
+Wähle alle Flächen des Teils, das weg soll, und nur diese. Können die Flächen ringsum die Lücke nicht schließen, sagt layerling das, und nichts ändert sich: Eine Hauptseite eines Quaders etwa hat keine Nachbarfläche, die an ihre Stelle treten könnte. Löschst du nur den Boden einer Tasche, wird daraus ein durchgehendes Loch, weil die Wände der Tasche bis zur anderen Seite weiterlaufen.
+
+{{ui:editor.tool.deleteFace}} braucht exakte Flächen: Es geht bei Teilen, die als STEP importiert wurden, und bei layerlings Formen. Was layerling als Netz führt, hat keine: eine importierte STL-, OBJ- oder 3MF-Datei, ein geteilter, um einen Zylinder gewickelter oder vereinfachter Körper oder eine sehr detailreiche Form wie ein langer Text. Importiere ein Teil als STEP, wenn es das gibt. Bei einem detailreichen importierten Teil können einzelne Flächen den CAD-Rechenkern überfordern: Nach 45 Sekunden wird das Löschen abgebrochen, und nichts ändert sich. Ein Körper, der nach einer Kantenbearbeitung mit beibehaltener Kantengröße in der Größe geändert wurde, hat in der neuen Größe keine exakten Flächen, bis die Größenänderung zurückgenommen ist.

@@ -7,9 +7,20 @@ summary: Waar je ontwerpen staan, hoe je er een back-up van maakt, welke formate
 
 layerling slaat alles op in de browser op je computer. Er is geen account en er wordt niets geüpload. Elke wijziging slaat zichzelf op. De voorbeeldafbeelding op de startpagina toont de weergave die je het laatst voor je had toen je met {{ui:editor.homeDashboard}} terugging. Open je layerling dagen later in dezelfde browser, dan staat alles er nog.
 
-Ga je terug naar de startpagina vanuit een ontwerp waar niets in staat, dan vraagt layerling of het bewaard moet blijven. {{ui:confirm.yes}} of [[Enter]] bewaart het, {{ui:confirm.no}} verwijdert het, zodat lege ontwerpen zich niet opstapelen. Bij ontwerpen in een gedeelde map op een server wordt dat niet gevraagd.
+Ga je terug naar de startpagina vanuit een ontwerp waar niets in staat, dan vraagt layerling of het bewaard moet blijven. {{ui:confirm.yes}} of [[Enter]] bewaart het, {{ui:confirm.no}} verwijdert het, zodat lege ontwerpen zich niet opstapelen. Bij een ontwerp in een gedeelde map op een server verwijdert {{ui:confirm.no}} het bestand van de server, voor iedereen die die server gebruikt.
 
 Dat heeft een keerzijde: wie de browseropslag wist of op een andere computer verdergaat, is de ontwerpen kwijt. **Maak van belangrijk werk dus een back-up in een bestand.**
+
+## Mappen voor je ontwerpen
+
+Met tientallen ontwerpen is één lijst niet genoeg. Op de startpagina maakt {{ui:shared.newFolder}} een map voor de ontwerpen in deze browser; een klik op de map opent haar. Mappen kunnen mappen bevatten.
+
+- **In een map:** sleep een ontwerp op de map, of kies {{ui:shared.moveTo}} in het menu van het ontwerp, dat elke map aanbiedt. Een nieuw ontwerp, en een bestand dat je opent of importeert, komt in de map die op dat moment open is.
+- **Er weer uit:** de eerste tegel in een map, `..`, en de regel onder {{ui:dashboard.projects}} leiden terug; je kunt er ook een ontwerp op slepen. Een map die je op een andere map sleept, gaat daarin.
+- **Hernoemen en verwijderen** staan in het menu van de map. Een map verwijderen verwijdert geen ontwerp: wat erin zat, gaat een niveau omhoog.
+- **Zoeken** kijkt in elke map; een gevonden ontwerp toont zijn map, en een klik erop opent die.
+
+{{ui:dashboard.backupAll}} neemt de mappen mee: de ontwerpen staan in het back-upbestand in hun mappen, en bij het terugzetten komen ze daar weer. De mappen van deze browser staan los van de mappen op een server.
 
 ## Back-up maken en doorgeven
 

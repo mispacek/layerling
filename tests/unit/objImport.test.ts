@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { exportMeshesToObj } from "@/lib/objExport";
 import { importedShapeFromObj } from "@/lib/objImport";
 
 describe("importedShapeFromObj", () => {
@@ -69,6 +70,19 @@ describe("importedShapeFromObj", () => {
       -1, 3, 0,
       1, 0, 0,
     ]);
+  });
+  it("stands an OBJ that layerling exported upright again (#541)", () => {
+    // 2 wide (x), 3 high (y), 1 deep (z) in the editor's Y-up coordinates.
+    const obj = exportMeshesToObj([{
+      name: "roundtrip",
+      vertices: [[0, 0, 0], [2, 0, 0], [0, 3, 0], [0, 0, 1]],
+      faces: [[0, 2, 1], [0, 1, 3], [1, 2, 3], [0, 3, 2]],
+    }]);
+    const shape = importedShapeFromObj("roundtrip.obj", obj);
+
+    expect(shape.width).toBe(2);
+    expect(shape.height).toBe(3);
+    expect(shape.depth).toBe(1);
   });
   it("uses OBJ normals to correct reversed triangle winding", () => {
     const shape = importedShapeFromObj("reversed.obj", [

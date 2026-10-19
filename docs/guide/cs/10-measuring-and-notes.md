@@ -22,7 +22,7 @@ Nástroj je ve spodní části levé lišty pohledu, {{ui:camera.tapeTools}}. M�
 
 ## Pravítko
 
-{{ui:shape.ruler}} vložíte z knihovny tvarů. Je to pouze měřicí pomůcka: neexportuje se a nelze ji slučovat ani odečítat. U těles dotýkajících se pravítka nebo zasahujících přes něj zobrazí rozměr přímo v pohledu. Číselný údaj lze upravit a těleso se podle něj změní. Plovoucí tlačítko plus vytvoří kopii měřeného tvaru.
+{{ui:shape.ruler}} vložíte z knihovny tvarů. Je to pouze měřicí pomůcka: neexportuje se a nelze ji slučovat ani odečítat. U těles dotýkajících se pravítka nebo zasahujících přes něj zobrazí rozměr přímo v pohledu. Číselný údaj lze upravit a těleso se podle něj změní. Plovoucí tlačítko plus vytvoří kopii měřeného tvaru. Natištěná stupnice je v milimetrech; po přepnutí jednotky na palce (přepínač vpravo dole) je v palcích, s čárkou na každou šestnáctinu palce a očíslovanými celými palci.
 
 ## Úhelník
 
@@ -59,6 +59,8 @@ Poznámka zachytí informace, které geometrie nevyjadřuje: „Šroub je o 0,3 
 - Poznámka umístěná **na těleso** se pohybuje spolu s ním.
 - Poznámka **vedle tělesa** zůstává na pracovní rovině, {{ui:note.free}}.
 - {{ui:note.detach}} odpojí poznámku od tělesa.
+- {{ui:editor.tool.group}} vezme připojenou poznámku do skupiny; {{ui:editor.tool.ungroup}} ji předá viditelné části pod ní, i vnořené skupině. Dokud je skupina otevřená přes {{ui:group.edit}}, její poznámky se pohybují s částí pod nimi a tlačítkem {{ui:group.done}} se vrátí ke skupině; zrušení je vrátí do původního stavu.
+- Když je její těleso smazáno nebo pod ní už není žádné viditelné těleso, poznámka zůstane, kde byla, na pracovní rovině.
 - Tažením ji přesunete, kliknutím otevřete k úpravě.
 - [[Enter]] potvrdí text, [[Esc]] vrátí podobu před zahájením úpravy. [[Shift]]+[[Enter]] vloží nový řádek.
 

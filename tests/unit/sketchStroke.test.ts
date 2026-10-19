@@ -1,6 +1,7 @@
 import manifoldModule, { type ManifoldToplevel } from "manifold-3d";
 import { beforeAll, describe, expect, it } from "vitest";
-import { normalizeSketchStroke, strokedSketchProfile } from "@/lib/sketchStroke";
+import { orderedCadSketchPaths } from "@/lib/sketchCadProfile";
+import { normalizeSketchStroke, sampledPath, strokedSketchProfile } from "@/lib/sketchStroke";
 import type { SketchProfile, SketchStroke } from "@/types/layerling";
 
 let runtime: ManifoldToplevel;
@@ -102,5 +103,67 @@ describe("a stroke for a revolve (#347)", () => {
 
   it("leaves nothing when the whole line lies right of the axis", () => {
     expect(strokedSketchProfile(runtime, polyline([[5, 0], [15, 0]], false, { width: 2 }), { clipToRevolveSide: true })).toBeNull();
+  });
+});
+
+/** A closed loop of `count` cubic curves round a circle of `radius` mm, as a traced drawing has them. */
+function curvedLoop(count: number, radius: number): SketchProfile {
+  const step = (2 * Math.PI) / count;
+  const handle = (4 / 3) * Math.tan(step / 4) * radius;
+  const points = Array.from({ length: count }, (_, index) => {
+    const angle = index * step;
+    return {
+      id: `c${index}`,
+      x: radius * Math.cos(angle),
+      z: radius * Math.sin(angle),
+      handleOut: { x: radius * Math.cos(angle) - handle * Math.sin(angle), z: radius * Math.sin(angle) + handle * Math.cos(angle) },
+      handleIn: { x: radius * Math.cos(angle) + handle * Math.sin(angle), z: radius * Math.sin(angle) - handle * Math.cos(angle) },
+    };
+  });
+  const segments = points.map((point, index) => ({ id: `cs${index}`, startId: point.id, endId: points[(index + 1) % count].id, kind: "bezier" as const }));
+  return { points, segments };
+}
+
+describe("curves cut into straight pieces (#461)", () => {
+  const loop = (profile: SketchProfile) => sampledPath(orderedCadSketchPaths(profile).find((path) => path.closed)!);
+
+  it("cuts a long curve finely and a short one coarsely", () => {
+    // 4 curves round 50 mm: a quarter is about 78 mm long and gets the most pieces; 600 of them are 0.5 mm long.
+    expect(loop(curvedLoop(4, 50)).length).toBeGreaterThanOrEqual(4 * 28);
+    expect(loop(curvedLoop(600, 50)).length).toBeLessThanOrEqual(600 * 5);
+  });
+
+  it("keeps every piece within 0.01 mm of the curve", () => {
+    for (const [count, radius] of [[8, 20], [12, 30], [60, 40]] as const) {
+      const profile = curvedLoop(count, radius);
+      const polygon = loop(profile);
+      const distanceToPolygon = (x: number, z: number) => Math.min(...polygon.map((a, index) => {
+        const b = polygon[(index + 1) % polygon.length];
+        const length2 = (b.x - a.x) ** 2 + (b.z - a.z) ** 2;
+        const along = length2 === 0 ? 0 : Math.max(0, Math.min(1, ((x - a.x) * (b.x - a.x) + (z - a.z) * (b.z - a.z)) / length2));
+        return Math.hypot(x - (a.x + along * (b.x - a.x)), z - (a.z + along * (b.z - a.z)));
+      }));
+      let worst = 0;
+      profile.segments.forEach((segment, index) => {
+        const from = profile.points[index];
+        const to = profile.points[(index + 1) % count];
+        for (let step = 0; step <= 40; step += 1) {
+          const t = step / 40;
+          const u = 1 - t;
+          worst = Math.max(worst, distanceToPolygon(
+            u ** 3 * from.x + 3 * u ** 2 * t * from.handleOut!.x + 3 * u * t ** 2 * to.handleIn!.x + t ** 3 * to.x,
+            u ** 3 * from.z + 3 * u ** 2 * t * from.handleOut!.z + 3 * u * t ** 2 * to.handleIn!.z + t ** 3 * to.z,
+          ));
+        }
+        expect(segment.kind).toBe("bezier");
+      });
+      expect(worst).toBeLessThan(0.0101);
+    }
+  });
+
+  it("makes far fewer edges for a traced drawing than the fixed 32 per curve did", () => {
+    const stroked = strokedSketchProfile(runtime, { ...curvedLoop(568, 58), stroke: { width: 1, align: "inside", join: "round", cap: "round" } });
+    expect(stroked).not.toBeNull();
+    expect(stroked!.points.length).toBeLessThan((568 * 32) / 2);
   });
 });

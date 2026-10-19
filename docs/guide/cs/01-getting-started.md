@@ -25,6 +25,66 @@ Všechny projekty se později zobrazují na úvodní stránce s náhledem. Uchov
 - **Vlevo** najdete ovládání pohledu a nad ním orientační krychli. Jejich použití popisuje kapitola [Pohled a pracovní rovina](chapter:view-and-workplane).
 - **Úplně nahoře** přepínáte mezi {{ui:editor.modeGeometry}} a {{ui:editor.modeSketch}}, přejmenováváte projekt a volíte jazyk a barevný motiv.
 
+## Tlačítka kolem pracovní plochy
+
+Najeďte myší na tlačítko a uvidíte jeho název. Pokud si nejste jistí, co tlačítko dělá, klikněte v oblasti {{ui:editor.group.help}} na {{ui:interactiveHelp.title}} ([[Shift]]+[[F1]]) a pak na tlačítko. Tady jsou ta, na která se ptá nejvíc lidí.
+
+### Vložit
+
+{{ui:editor.tool.paste}} ([[Ctrl]]+[[V]]) přidá do projektu to, co jste zkopírovali pomocí {{ui:editor.tool.copy}}. {{ui:common.duplicate}} kopíruje a vkládá v jednom kroku.
+
+### Smazat
+
+{{ui:common.delete}} ([[Delete]]) odstraní vybrané tvary. {{ui:editor.tool.undo}} je vrátí.
+
+### Rozdělit sloučení
+
+{{ui:editor.tool.ungroup}} ([[Ctrl]]+[[Shift]]+[[G]]) rozloží vybranou skupinu zpět na tvary, z nichž vznikla.
+
+### Nastavení pracovní plochy
+
+{{ui:editor.workspaceSettings}} otevře nastavení pracovní plochy: jednotky, velikost desky, tiskárnu, mřížku, barvy, světlo a další. Víc v kapitole [Pohled a pracovní rovina](chapter:view-and-workplane).
+
+### Barevný motiv
+
+{{ui:common.theme}} úplně nahoře určuje vzhled layerlingu: podle systému, světlý, tmavý nebo grafitový.
+
+### Přejmenovat projekt
+
+{{ui:editor.renameProject}}: tužka vedle názvu úplně nahoře. Napište nový název a stiskněte [[Enter]].
+
+### Název projektu
+
+Název projektu ({{ui:confirm.projectName}}) je úplně nahoře. Klikněte na něj, pište a [[Enter]] název potvrdí.
+
+### Možnosti viditelnosti
+
+{{ui:editor.visibilityOptions}}, šipka vedle ikony oka, obsahuje, co můžete zobrazit nebo skrýt: seznam objektů, vše skryté, poznámky a převisy tisku. Víc v kapitole [Výběr a uspořádání](chapter:select-and-arrange).
+
+### Skrýt vybrané
+
+{{ui:editor.tool.hideSelected}} ([[Ctrl]]+[[H]]) skryje vybrané tvary. Zůstanou v projektu i v seznamu objektů; {{ui:editor.visibilityOptions}} je znovu zobrazí.
+
+### Hledat příkazy
+
+{{ui:palette.open}}: napište, co hledáte, nástroj, tvar nebo nastavení, a klikněte na výsledek.
+
+### Skrýt ovládání pohledu
+
+{{ui:camera.hide}} sbalí ovládání kamery vlevo a dá pracovní ploše víc místa; {{ui:camera.show}} ho vrátí.
+
+### Krok přichytávání
+
+{{ui:inspector.snapGrid}} dole ve vlastnostech je krok, ke kterému se přichytává přesouvání a změna velikosti. Vedle něj malý přepínač **mm | in** mění jednotku. Víc v kapitole [Pohled a pracovní rovina](chapter:view-and-workplane).
+
+### Jednotka: milimetry nebo palce
+
+Přepínač **mm | in** vedle {{ui:inspector.snapGrid}} mění jednotku, mřížku desky a krok přichytávání pro tento projekt.
+
+### Zápatí
+
+Dole v okně: {{ui:dashboard.sponsor}} vede na stránku, kde můžete projekt podpořit; {{ui:dashboard.userGuide}} otevře tuto příručku; {{ui:dashboard.forum}} vede na místo pro otázky, nápady a hlášení chyb (diskuse na GitHubu, v němčině fórum drucktipps3d); {{ui:editor.bugReport}} vytvoří ZIP pro hlášení chyby; {{ui:dashboard.projectOnGitHub}} vede na projekt na GitHubu a číslo verze otevře poznámky k vydání. Odkazy na provozovatele a ochranu osobních údajů patří tomu, kdo provozuje kopii layerlingu, kterou používáte.
+
 ## První díl
 
 Jako příklad vytvoříme kvádr s otvorem.

@@ -40,3 +40,36 @@ describe("which side of a body a mark on its edge belongs to (#419)", () => {
     expect(flipped.convertSigns({ x: 1, z: 1 })).toEqual({ x: -1, z: -1 });
   });
 });
+
+describe("a body laid on its side: the vertical mark (#480)", () => {
+  // The frame of a body turned by `degrees` about the X axis: its own depth then runs up, its height along the plate.
+  const aboutX = (degrees: number) => {
+    const quaternion = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), THREE.MathUtils.degToRad(degrees));
+    return {
+      xAxis: new THREE.Vector3(1, 0, 0).applyQuaternion(quaternion),
+      yAxis: new THREE.Vector3(0, 1, 0).applyQuaternion(quaternion),
+      zAxis: new THREE.Vector3(0, 0, 1).applyQuaternion(quaternion),
+    };
+  };
+  const workplane = aboutX(0);
+
+  it("keeps height for the vertical mark of an upright body", () => {
+    expect(ownSideForMark(workplane, aboutX(0), "height")?.axis).toBe("height");
+    expect(ownSideForMark(workplane, aboutX(180), "height")?.axis).toBe("height");
+  });
+
+  it("gives the vertical mark of a body laid on its side to its depth, and the mark along the plate to its height", () => {
+    expect(ownSideForMark(workplane, aboutX(90), "height")?.axis).toBe("depth");
+    expect(ownSideForMark(workplane, aboutX(90), "depth")?.axis).toBe("height");
+    expect(ownSideForMark(workplane, aboutX(270), "height")?.axis).toBe("depth");
+    expect(ownSideForMark(workplane, aboutX(90), "width")?.axis).toBe("width");
+  });
+
+  it("gives no side for a body tilted by some other angle", () => {
+    expect(ownSideForMark(workplane, aboutX(45), "height")).toBeNull();
+  });
+
+  it("does not guess a height without the body's own up axis", () => {
+    expect(ownSideForMark(workplane, { xAxis: workplane.xAxis, zAxis: workplane.zAxis }, "height")).toBeNull();
+  });
+});

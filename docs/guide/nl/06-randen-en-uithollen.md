@@ -10,7 +10,7 @@ Scherpe randen zien er op een geprint onderdeel zelden goed uit, en sterk zijn z
 1. Selecteer het lichaam (of de groep).
 2. Klik in het lint op {{ui:editor.tool.fillet}} of {{ui:editor.tool.chamfer}}, druk op [[B]] voor de afronding of [[Shift+B]] voor de afschuining, of klik met de rechtermuisknop op het lichaam en kies het in het menu.
 3. De randen van het lichaam lichten op. Klik op de randen die bewerkt moeten worden. Nog een klik haalt een rand er weer uit. Met [[Shift]] voeg je één rand toe of haal je hem weg.
-4. Stel de maat in en bevestig met {{ui:edge.apply}} of [[Enter]].
+4. Stel de maat in en bevestig met {{ui:edge.apply}} of [[Enter]]. Daarna blijft het venster met dezelfde maat open op het nieuwe lichaam, zodat meteen de volgende afronding of afschuining kan volgen; {{ui:edge.done}}, [[Esc]] of het kruisje sluit het. Met [[Shift]] of [[Ctrl]] voegt een klik op {{ui:edge.topEdges}}, {{ui:edge.bottomEdges}}, {{ui:edge.verticalEdges}} of {{ui:edge.horizontalEdges}} die randen toe aan de gekozen randen in plaats van ze te vervangen.
 
 ![Het gereedschap "Randen afronden": alle scherpe randen zijn geselecteerd, het beeld toont het voorbeeld met een straal van 4 mm.](shot:fillet-preview)
 
@@ -24,6 +24,8 @@ In het paneel vind je:
 - **{{ui:edge.radius}}** voor de afronding. Voor de afschuining stel je {{ui:edge.distance}} of {{ui:edge.angle}} in.
 - {{ui:edge.sharpThreshold}} bepaalt welke randen überhaupt als scherp gelden. Een waarde van 25° behandelt alleen duidelijke knikken als rand en laat vloeiende overgangen met rust.
 - {{ui:edge.topEdges}} kiest alleen de randen langs de bovenkant van het lichaam. Dat is de snelle manier voor een koekjesvorm: bouw de omtrek in een schets als lijn, en schuin dan de bovenranden af. {{ui:edge.angle}} bepaalt hoe steil de afschuining is; die kan niet verder reiken dan de wand dik is.
+- {{ui:edge.bottomEdges}} kiest alleen de randen helemaal onderaan het lichaam, het tegenstuk van {{ui:edge.topEdges}}. Zo rond je snel alleen de voet van een onderdeel af of geef je die een afschuining.
+- {{ui:edge.chamfillet}}, bovenaan het afschuinvenster naast {{ui:editor.tool.chamfer}} gekozen, maakt de printbare voet van een onderdeel: een afschuining bij de plaat die tangentieel overgaat in een afronding naar de wand, zodat de eerste lagen geen steun nodig hebben en de rand toch zacht eindigt. {{ui:edge.distance}} is de hoogte die de voet inneemt, {{ui:edge.angle}} (15° tot 75°) de steilte van de afschuining bij de plaat. De randen kies je met {{ui:edge.bottomEdges}}.
 - {{ui:edge.onlyVisibleEdges}} verbergt de randen die vanuit jouw kijkrichting achter het lichaam liggen. Standaard schijnt elke rand door het lichaam heen, wat bij een druk onderdeel verwarrend wordt; met de schakelaar aan zie je, en klik je, alleen de randen die naar je toe wijzen. Draai het beeld om bij de andere te komen. Een rand die rood getekend is (zie hieronder) is altijd zichtbaar.
 - {{ui:edge.tangentChains}}: een klik kiest dan ook randen die vloeiend in elkaar overlopen, bijvoorbeeld alle randen rond een vlak met afgeronde hoeken. De schakelaar bepaalt alleen wat een klik kiest: de CAD-kernel zet een afschuining of afronding altijd door langs zulke vloeiend doorlopende randen. Het paneel meldt langs hoeveel randen extra dat gebeurt.
 - {{ui:edge.keepSize}} houdt de afschuining of afronding even groot, ook als je het lichaam later schaalt.
@@ -43,7 +45,7 @@ Een bewerkt lichaam kun je altijd opnieuw bewerken. Selecteer het weer en open h
 
 Naast een afschuining, een afronding of een uitholling staat ook {{ui:edge.editAction}}. Dat draait de bewerking op dezelfde manier terug, maar opent het gereedschap meteen opnieuw met dezelfde randen en de oude waarde. Je past de waarde aan en past hem opnieuw toe: een afronding van 3 mm wordt er een van 5 mm zonder dat je de randen nog eens hoeft aan te klikken. Liggen er nieuwere bewerkingen bovenop, dan gaan die ook hier mee. Dit geldt voor randbewerkingen die je vanaf nu maakt; oudere bieden alleen terugdraaien aan, net als losse onderdelen van een groep.
 
-Bij een groep, bijvoorbeeld een cilinder met een gat, hoort de bewerkte rand bij het afgewerkte lichaam, niet bij een van zijn onderdelen. De groep wordt dus één lichaam, en {{ui:editor.tool.ungroup}} is niet meer beschikbaar. Draai de bewerking terug zoals hierboven beschreven en de groep komt terug met al zijn onderdelen. Het makkelijkst is om randen als laatste te bewerken. Dat geldt ook voor schroefdraad: het randgereedschap neemt schroefdraad als exact lichaam, dus bij een blok met een draadgat erin worden de randen afgerond met de schroefdraad erin. De randen van schroefdraad uitrekenen duurt langer dan bij een gewone vorm: een paar seconden voor een M6 en ongeveer een halve minuut voor een G1/2-pijpdraad.
+Bij een groep, bijvoorbeeld een cilinder met een gat, hoort de bewerkte rand bij het afgewerkte lichaam, niet bij een van zijn onderdelen. De groep wordt dus één lichaam. {{ui:editor.tool.ungroup}} werkt toch: het draait eerst de randbewerkingen terug en heft dan de groep op, in één stap die [[Ctrl]]+[[Z]] ongedaan maakt. Draai de bewerking terug zoals hierboven beschreven en de groep komt terug met al zijn onderdelen. Het makkelijkst is om randen als laatste te bewerken. Dat geldt ook voor schroefdraad: het randgereedschap neemt schroefdraad als exact lichaam, dus bij een blok met een draadgat erin worden de randen afgerond met de schroefdraad erin. De randen van schroefdraad uitrekenen duurt langer dan bij een gewone vorm: een paar seconden voor een M6 en ongeveer een halve minuut voor een G1/2-pijpdraad.
 
 > **Goed om te weten:** layerling werkt voor afrondingen en afschuiningen met echte CAD-geometrie, niet alleen met een driehoeksmesh. Daarom is een afgeronde rand in de STEP-export nog steeds een afgeronde rand.
 
@@ -78,3 +80,17 @@ Een lichaam met een kamer, een blok met een gat dat niet helemaal doorloopt, gem
 Verander je later de maat van een uitgehold lichaam, dan holt layerling het meteen opnieuw uit op de nieuwe maat. De wand blijft zo dik als je hebt gekozen, ook bij ronde lichamen. Een cilinder die je de ene kant verder uittrekt dan de andere wordt een ellips.
 
 > **Tip:** Met een spuitmond van 0,4 mm is 1,2 tot 2 mm wand een goed begin: dun genoeg om materiaal te besparen, dik genoeg voor een stevig onderdeel.
+
+## Vlakken verwijderen
+
+Een afronding die in de weg zit, een gat op de verkeerde plek, een nok die je niet meer nodig hebt: {{ui:editor.tool.deleteFace}} haalt ze weer van het lichaam af, zonder dat je het opnieuw hoeft op te bouwen.
+
+1. Selecteer het lichaam en klik op {{ui:editor.tool.deleteFace}}, of klik met de rechtermuisknop op het lichaam en kies het in het menu.
+2. Klik op elk vlak van wat weg moet: de vlakken van een afgeronde rand, de wand van een gat, de zijkant en de bovenkant van een nok. Een gekozen vlak licht op; nog een klik haalt het er weer uit. Het venster telt de vlakken.
+3. Klik op {{ui:deleteFace.apply}} of druk op [[Delete]]. [[Esc]] sluit het gereedschap zonder iets te veranderen.
+
+De vlakken eromheen groeien tot de opening dicht is. Een blok met afgeronde bovenranden krijgt zijn scherpe randen terug, een gat is dicht, een nok is weg. Het lichaam blijft exact: je kunt het weer afronden en afschuinen, en de STEP-export houdt zijn echte vlakken. [[Ctrl]]+[[Z]] draait het verwijderen in één stap terug. Het staat ook onder {{ui:edge.featureHistory}} bij de afrondingen en afschuiningen, waar {{ui:edge.revertAction}} het terugdraait; {{ui:edge.editAction}} is er niet voor. Bij een groep wordt het resultaat één lichaam, zoals bij een randbewerking.
+
+Kies alle vlakken van wat weg moet, en alleen die. Als de vlakken eromheen de opening niet kunnen sluiten, zegt layerling dat en verandert er niets: een hoofdzijde van een blok heeft bijvoorbeeld geen buurvlak dat zijn plaats kan innemen. Verwijder je alleen de bodem van een kamer, dan wordt het een gat dat er helemaal doorheen gaat, omdat de wanden van de kamer doorlopen tot de andere kant.
+
+{{ui:editor.tool.deleteFace}} heeft exacte vlakken nodig: het werkt op onderdelen die als STEP zijn geïmporteerd en op de vormen van layerling. Wat layerling als mesh bewaart, heeft ze niet: een geïmporteerde STL, OBJ of 3MF, een gesplitst, om een cilinder gewikkeld of vereenvoudigd lichaam, of een heel gedetailleerde vorm zoals een lange tekst. Importeer een onderdeel als STEP als dat kan. Bij een gedetailleerd geïmporteerd onderdeel kunnen enkele vlakken te veel zijn voor de CAD-kernel: na 45 seconden wordt het verwijderen gestopt en verandert er niets. Een lichaam dat na een randbewerking met behouden randgrootte van grootte is veranderd, heeft op de nieuwe grootte geen exacte vlakken tot de grootteverandering is teruggedraaid.

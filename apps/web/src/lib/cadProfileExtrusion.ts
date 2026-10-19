@@ -1,11 +1,11 @@
 import * as THREE from "three";
 import { taperedSlotOutline } from "@/lib/slotGeometry";
 import type { WorkplaneShape } from "@/types/layerling";
-import type { CadModifierProfileLoop, CadModifierProfilePart, CadModifierProfileSegment, CadModifierHelicalGearPart, CadModifierSpringPart, CadModifierSweepPiece, CadModifierThreadPart } from "@/lib/cadModifierTypes";
+import type { CadModifierProfileLoop, CadModifierProfilePart, CadModifierProfileSegment, CadModifierGridfinityPart, CadModifierHelicalGearPart, CadModifierSpringPart, CadModifierSweepPiece, CadModifierThreadPart } from "@/lib/cadModifierTypes";
 import { profileArcPoint, profileLoopBounds, validateCadProfile } from "@/lib/cadProfileSolid";
 import { cadTransformFromMatrix } from "@/lib/cadBakeMetadata";
 import { CAD_MODIFIER_EXACT_SEGMENT_LIMIT } from "@/lib/cadModifierRuntime";
-import { meshYawDegrees, mirrorSign, shapeDepth, shapeHasShapeDeform, shapeTaperDimensions, shapeWidth } from "@/lib/workplaneShapes";
+import { deformsAboutOrigin, meshYawDegrees, mirrorSign, shapeDepth, shapeHasShapeDeform, shapeTaperDimensions, shapeWidth } from "@/lib/workplaneShapes";
 import { regularPolygonFootprintScale } from "@/lib/regularPolygonFootprint";
 import { roundSideCount } from "@/lib/roundSideCount";
 import { drawnRound, ROUND_FROM_BENT_TUBE_QUALITY, ROUND_FROM_HALF_SPHERE_STEPS, ROUND_FROM_ROOF_SIDES, ROUND_FROM_SIDES, ROUND_FROM_SPHERE_STEPS } from "@/lib/roundness";
@@ -27,6 +27,7 @@ import { textFillComponents, textFillPieceGeometry, textHasFill } from "@/lib/te
 import { loadedManifoldRuntime } from "@/lib/manifoldHandle";
 import { threadBuildPlan, WHITWORTH_PROFILE_CONSTANTS } from "@/lib/threadGeometry";
 import { springBuildPlan, springRingSectionShare } from "@/lib/springGeometry";
+import { gridfinityHasPieces, gridfinityPlan } from "@/lib/gridfinityGeometry";
 import { knurlCorners, knurlSettings, roundKnurlWave } from "@/lib/knurlGeometry";
 import { BEVEL_GEAR_TOP_SCALE, gearHelixTwist, gearOutlineCorners, internalGearMeasures, internalGearOutline, involuteFlankPoint, involuteGearMeasures, involuteOutlineStretch, involuteToothCentre, normalizeGearCenterHoleSize, normalizeGearProfile, normalizeGearToothSize, normalizeGearType, rackMeasures, rackOutlinePoints, rackToothArcs, roundGearMeasures, roundInternalMeasures, roundToothArcs, type GearOutlineOptions, type InternalGearOptions, type InvoluteGearMeasures, type RackOptions, type RoundWave } from "@/lib/gearGeometry";
 
@@ -1199,8 +1200,9 @@ function deformedLoftProfile(shape: WorkplaneShape, width: number, depth: number
   // The display mesh narrows towards the middle of its outline's extent, not
   // towards the origin; a star or a heart is not centred on it.
   const bounds = loops.map(profileLoopBounds);
-  const centerX = (Math.min(...bounds.map((b) => b[0])) + Math.max(...bounds.map((b) => b[2]))) / 2;
-  const centerZ = (Math.min(...bounds.map((b) => b[1])) + Math.max(...bounds.map((b) => b[3]))) / 2;
+  const aboutOrigin = deformsAboutOrigin(shape.kind);
+  const centerX = aboutOrigin ? 0 : (Math.min(...bounds.map((b) => b[0])) + Math.max(...bounds.map((b) => b[2]))) / 2;
+  const centerZ = aboutOrigin ? 0 : (Math.min(...bounds.map((b) => b[1])) + Math.max(...bounds.map((b) => b[3]))) / 2;
   const section = (loop: CadModifierProfileLoop, sx: number, sz: number, shiftX: number, shiftZ: number) =>
     mapLoop(loop, sx, centerX * (1 - sx) + shiftX, sz, centerZ * (1 - sz) + shiftZ);
   const part: CadModifierProfilePart = {
@@ -1361,6 +1363,58 @@ export function cadModifierSpringForShape(shape: WorkplaneShape): CadModifierSpr
     // The mesh is drawn round at the larger of width and depth and stretched
     // to the shape's footprint; the body takes the same stretch.
     transform: profileTransformForShape(shape, new THREE.Matrix4().makeScale(plan.scaleX, 1, plan.scaleZ)),
+  };
+}
+
+/**
+ * A Gridfinity bin or baseplate as the exact body its display mesh draws, or
+ * null: the size and settings go to `gridfinitySolid.ts`, which builds the
+ * body from the same `gridfinityPlan` as the mesh.
+ */
+export function cadModifierGridfinityForShape(shape: WorkplaneShape): CadModifierGridfinityPart | null {
+  if (shape.kind !== "gridfinity") return null;
+  if (shape.importedMesh || shape.groupedShapes?.length || shape.cadBrep || shape.imagePlate || shapeHasShapeDeform(shape)) return null;
+  const width = shapeWidth(shape);
+  const depth = shapeDepth(shape);
+  if (![width, depth, shape.height].every((value) => Number.isFinite(value) && value > 0)) return null;
+  const plan = gridfinityPlan({ width, depth, height: shape.height, gridfinityType: shape.gridfinityType, gridfinityLip: shape.gridfinityLip, gridfinityMagnets: shape.gridfinityMagnets, gridfinityHalfGrid: shape.gridfinityHalfGrid });
+  // Label shelves and finger scoops are in the display mesh only once Manifold has loaded; until then the body would not match it (#455).
+  if (!loadedManifoldRuntime() && gridfinityHasPieces({ ...shape, width, depth })) return null;
+  return {
+    width: plan.size.width,
+    depth: plan.size.depth,
+    height: plan.size.height,
+    gridfinityType: plan.type,
+    gridfinityLip: plan.lip,
+    gridfinityMagnets: plan.magnets,
+    gridfinityHalfGrid: plan.halfGrid,
+    gridfinityLabelBack: shape.gridfinityLabelBack,
+    gridfinityLabelFront: shape.gridfinityLabelFront,
+    gridfinityLabelLeft: shape.gridfinityLabelLeft,
+    gridfinityLabelRight: shape.gridfinityLabelRight,
+    gridfinityLabelBackWidth: shape.gridfinityLabelBackWidth,
+    gridfinityLabelBackLength: shape.gridfinityLabelBackLength,
+    gridfinityLabelBackOffset: shape.gridfinityLabelBackOffset,
+    gridfinityLabelFrontWidth: shape.gridfinityLabelFrontWidth,
+    gridfinityLabelFrontLength: shape.gridfinityLabelFrontLength,
+    gridfinityLabelFrontOffset: shape.gridfinityLabelFrontOffset,
+    gridfinityLabelLeftWidth: shape.gridfinityLabelLeftWidth,
+    gridfinityLabelLeftLength: shape.gridfinityLabelLeftLength,
+    gridfinityLabelLeftOffset: shape.gridfinityLabelLeftOffset,
+    gridfinityLabelRightWidth: shape.gridfinityLabelRightWidth,
+    gridfinityLabelRightLength: shape.gridfinityLabelRightLength,
+    gridfinityLabelRightOffset: shape.gridfinityLabelRightOffset,
+    gridfinityLabelCorner: shape.gridfinityLabelCorner,
+    gridfinityLabelCornerSize: shape.gridfinityLabelCornerSize,
+    gridfinityScoopBack: shape.gridfinityScoopBack,
+    gridfinityScoopFront: shape.gridfinityScoopFront,
+    gridfinityScoopLeft: shape.gridfinityScoopLeft,
+    gridfinityScoopRight: shape.gridfinityScoopRight,
+    gridfinityScoopRadius: shape.gridfinityScoopRadius,
+    gridfinityFloorHeight: shape.gridfinityFloorHeight,
+    // Mesh and body are built at the size of the grid units, which canonicalizeShape
+    // keeps the shape's box at; a box that differs anyway stretches the body to it.
+    transform: profileTransformForShape(shape, new THREE.Matrix4().makeScale(width / plan.size.width, shape.height / plan.size.height, depth / plan.size.depth)),
   };
 }
 

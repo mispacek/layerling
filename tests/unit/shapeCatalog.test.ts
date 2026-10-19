@@ -61,6 +61,11 @@ describe("shape catalog", () => {
     expect(kinds.indexOf("text")).toBe(kinds.indexOf("teardrop") + 1);
   });
 
+  it("puts Gridfinity right after the spring", () => {
+    const kinds = toolbarShapeAssets.map((asset) => asset.kind);
+    expect(kinds.indexOf("gridfinity")).toBe(kinds.indexOf("spring") + 1);
+  });
+
   it("exposes knurl, hinge and dovetail between gear and the decorative shapes in the toolbar catalog", () => {
     const kinds = toolbarShapeAssets.map((asset) => asset.kind);
 

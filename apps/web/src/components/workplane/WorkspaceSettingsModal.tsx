@@ -10,6 +10,8 @@ import { HexColorInput, HexColorPicker } from "react-colorful";
 import { APP_THEME_OPTIONS, type AppThemePreference } from "@/lib/appTheme";
 import { setToolbarSize, TOOLBAR_SIZE_OPTIONS, type ToolbarSize } from "@/lib/toolbarSize";
 import { useToolbarSize } from "@/lib/useToolbarSize";
+import { useViewCubePosition } from "@/lib/useViewCubePosition";
+import { setViewCubePosition, VIEW_CUBE_POSITION_OPTIONS, type ViewCubePosition } from "@/lib/viewCubePosition";
 import { gearCenterHoleLimits, gearToothPitch, gearTypeHasHelix } from "@/lib/gearGeometry";
 import { automaticSideCount } from "@/lib/roundSideCount";
 import { torusTessellation } from "@/lib/torusTessellation";
@@ -70,7 +72,7 @@ import { numberLocale, t, type MessageKey } from "@/lib/i18n";
 import { useLanguage } from "@/lib/useLanguage";
 import { measurementOptionLabel, normalizeScaleForUnits, parseMeasurementInput, scaleOptionsForUnits, WORKSPACE_UNIT_OPTIONS } from "@/lib/measurementUnits";
 import { shapeAssetDefaultDimensions, shapeAssetLabel, shapeAssetSpecialDefaults, toolbarShapeAssets } from "@/lib/shapeCatalog";
-import { BOOLEAN_TRIANGLE_LIMIT_PRESETS, BOOLEAN_TRIANGLE_LIMIT_STEP, DEFAULT_WORKPLANE_WORKSPACE, ZOOM_SPEED_SLIDER_MAX, MAX_BOOLEAN_TRIANGLE_LIMIT, MAX_CUSTOM_SHAPE_DIMENSION, MAX_HIGH_RESOLUTION_SIDES, MAX_HIGH_RESOLUTION_STEPS, MIN_BOOLEAN_TRIANGLE_LIMIT, MIN_CUSTOM_SHAPE_DIMENSION, booleanTriangleLimitPreset, gridBlockForUnits, snapGridForUnits, type BooleanTriangleLimitPreset, DEFAULT_SNAP_GRID, MAX_CUSTOM_SNAP_GRID, MAX_CUSTOM_SNAP_GRID_NAME, MAX_CUSTOM_SNAP_GRIDS, MIN_CUSTOM_SNAP_GRID, customSnapGridDivisors, customSnapGridLabel, customSnapGridSize, parseCustomSnapGrid, snapGridOptions } from "@/lib/workplaneSettings";
+import { BOOLEAN_TRIANGLE_LIMIT_PRESETS, BOOLEAN_TRIANGLE_LIMIT_STEP, DEFAULT_WORKPLANE_WORKSPACE, ZOOM_SPEED_SLIDER_MAX, MAX_BOOLEAN_TRIANGLE_LIMIT, MAX_CUSTOM_SHAPE_DIMENSION, MAX_HIGH_RESOLUTION_SIDES, MAX_HIGH_RESOLUTION_STEPS, MIN_BOOLEAN_TRIANGLE_LIMIT, MIN_CUSTOM_SHAPE_DIMENSION, booleanTriangleLimitPreset, workspaceForUnits, snapGridForUnits, type BooleanTriangleLimitPreset, DEFAULT_SNAP_GRID, MAX_CUSTOM_SNAP_GRID, MAX_CUSTOM_SNAP_GRID_NAME, MAX_CUSTOM_SNAP_GRIDS, MIN_CUSTOM_SNAP_GRID, customSnapGridDivisors, customSnapGridLabel, customSnapGridSize, parseCustomSnapGrid, resetGridInSavedDefault, snapGridOptions, standardGridSettings } from "@/lib/workplaneSettings";
 import { DEFAULT_SKETCH_BACKGROUND, DEFAULT_SKETCH_GRID_COLOR, DEFAULT_SKETCH_PLATE_COLOR, IMPERIAL_GRID_BLOCK_PRESETS, inchGridPresetMm, workplaneGridPalette } from "@/lib/workplaneGrid";
 import type { BentTubeProfile, CustomSnapGrid, GearProfile, GearType, GridSize, ShapeCustomization, ShapeKind, ThreadHand, ThreadHead, ThreadProfile, ThreadRole, WorkplaneWorkspaceSettings } from "@/types/layerling";
 import { DEFAULT_LOFT } from "@/lib/loftGeometry";
@@ -113,6 +115,13 @@ const TOOLBAR_SIZE_LABEL_KEYS: Record<ToolbarSize, MessageKey> = {
   large: "workspace.toolbarSizeLarge",
 };
 
+const VIEW_CUBE_POSITION_LABEL_KEYS: Record<ViewCubePosition, MessageKey> = {
+  "top-left": "workspace.viewCubePositionTopLeft",
+  "top-right": "workspace.viewCubePositionTopRight",
+  "bottom-left": "workspace.viewCubePositionBottomLeft",
+  "bottom-right": "workspace.viewCubePositionBottomRight",
+};
+
 function gridBlockPresetLabel(preset: string) {
   return preset === "Custom" ? t("workspace.custom") : preset;
 }
@@ -123,7 +132,7 @@ const BOOLEAN_LIMIT_PRESET_LABEL_KEYS: Record<BooleanTriangleLimitPreset, Messag
   fast: "workspace.booleanTriangleLimitFast",
 };
 const HISTORY_CUSTOM_DEFAULT = 250;
-const TEXT_FONT_OPTIONS = ["Multilanguage", "Sans", "Serif", "Script", "Monospace", "Rounded", "Stencil"];
+const TEXT_FONT_OPTIONS = ["Multilanguage", "Sans", "Serif", "Script", "Monospace", "Rounded", "Stencil", "Japanese"];
 const GEAR_TYPE_OPTIONS: Array<{ value: GearType; label: MessageKey }> = [
   { value: "spur", label: "gear.spur" },
   { value: "helical", label: "gear.helical" },
@@ -170,7 +179,7 @@ type ShapeSpecialNumberKey = "steps" | "sides" | "bevel" | "segments" | "topRadi
   | "loftBottomWidth" | "loftBottomDepth" | "loftTopWidth" | "loftTopDepth" | "loftWall";
 type ShapeSpecialField =
   | { type: "number"; key: ShapeSpecialNumberKey; label: string; defaultValue: number; min: number; max: number; step?: number; unit?: string }
-  | { type: "select"; key: "font" | "gearType" | "gearProfile" | "threadRole" | "threadHead" | "threadHand" | "threadProfile" | "springHand" | "bentTubeProfile" | "bentTubeInnerProfile" | "knurlPattern" | "loftBottomOutline" | "loftTopOutline"; label: string; defaultValue: string; options: Array<{ value: string; label: string }> }
+  | { type: "select"; key: "font" | "gearType" | "gearProfile" | "threadRole" | "threadHead" | "threadHand" | "threadProfile" | "springHand" | "bentTubeProfile" | "bentTubeInnerProfile" | "knurlPattern" | "gridfinityType" | "loftBottomOutline" | "loftTopOutline"; label: string; defaultValue: string; options: Array<{ value: string; label: string }> }
   | { type: "text"; key: "text"; label: string; defaultValue: string; maxLength: number };
 
 function clamp(value: number, min: number, max: number) {
@@ -346,6 +355,12 @@ function specialFieldsForShape(
       { type: "number", key: "knurlChamfer", label: t("prop.knurlChamfer"), defaultValue: defaults.knurlChamfer ?? 0.5, min: 0, max: Math.max(0.05, Math.min(dimensions.width / 4, dimensions.height / 2 - 0.05)), step: 0.05, unit: "mm" },
     ];
   }
+  if (kind === "gridfinity") {
+    // The lip and the magnet holes are switches, which this list has no field for; saving a bin as the default from its panel keeps them.
+    return [
+      { type: "select", key: "gridfinityType", label: t("prop.gridfinityType"), defaultValue: defaults.gridfinityType ?? "bin", options: [{ value: "bin", label: t("gridfinity.bin") }, { value: "baseplate", label: t("gridfinity.baseplate") }] },
+    ];
+  }
   if (kind === "hinge") {
     return [
       { type: "number", key: "hingeKnuckles", label: t("prop.hingeKnuckles"), defaultValue: defaults.hingeKnuckles ?? 5, min: 3, max: 15, step: 2 },
@@ -447,6 +462,7 @@ export function WorkspaceSettingsModal({
   useLanguage();
   const [activeSection, setActiveSection] = useState<WorkspaceSettingsSection>("appearance");
   const toolbarSize = useToolbarSize();
+  const viewCubePosition = useViewCubePosition();
   const [selectedShapeKind, setSelectedShapeKind] = useState<ShapeKind>(toolbarShapeAssets[0].kind);
   const [dimensionDrafts, setDimensionDrafts] = useState(() => ({
     width: workspace.width.toFixed(workspace.accuracy),
@@ -602,6 +618,13 @@ export function WorkspaceSettingsModal({
     }
     patchWorkspace({ sizePreset, width: preset.width, depth: preset.depth, printer: "" });
   };
+  // Back to the grid the app starts with, here and in the default saved with "Make default" (#503).
+  const resetGrid = () => {
+    const standard = standardGridSettings(workspace.units);
+    patchWorkspace(standard);
+    setGridBlockSizeDraft(standard.gridBlockSize.toFixed(workspace.accuracy));
+    resetGridInSavedDefault();
+  };
   const setGridBlockPreset = (gridBlockPreset: string) => {
     patchWorkspace({ gridBlockPreset, gridBlockSize: gridBlockSizeForPreset(gridBlockPreset, workspace.gridBlockSize) });
   };
@@ -729,6 +752,19 @@ export function WorkspaceSettingsModal({
                       ))}
                     </select>
                   </label>
+                  <label className="workspace-select view-cube-position-setting">
+                    <span>{t("workspace.viewCubePosition")}</span>
+                    <select
+                      value={viewCubePosition}
+                      onChange={(event) => setViewCubePosition(event.currentTarget.value as ViewCubePosition)}
+                    >
+                      {VIEW_CUBE_POSITION_OPTIONS.map((position) => (
+                        <option key={position} value={position}>
+                          {t(VIEW_CUBE_POSITION_LABEL_KEYS[position])}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
                   <ColorSettingControl
                     label={t("workspace.backgroundColor")}
                     color={backgroundColor}
@@ -825,6 +861,12 @@ export function WorkspaceSettingsModal({
                     label={t("workspace.selectBeforeMoving")}
                     checked={workspace.selectBeforeMove}
                     onChange={(selectBeforeMove) => patchWorkspace({ selectBeforeMove })}
+                  />
+                  <WorkspaceToggle
+                    label={t("workspace.frameByDirection")}
+                    description={t("workspace.frameByDirectionHint")}
+                    checked={workspace.frameByDirection}
+                    onChange={(frameByDirection) => patchWorkspace({ frameByDirection })}
                   />
                   <WorkspaceToggle
                     label={t("workspace.doubleClickOpensSketch")}
@@ -1039,7 +1081,7 @@ export function WorkspaceSettingsModal({
                     options={WORKSPACE_UNIT_OPTIONS}
                     optionLabel={measurementOptionLabel}
                     onChange={(units) => {
-                      patchWorkspace({ units, ...gridBlockForUnits(units, workspace.gridBlockPreset, workspace.gridBlockSize) });
+                      patchWorkspace(workspaceForUnits(workspace, units));
                       const nextSnap = snapGridForUnits(units, snap);
                       if (nextSnap !== snap) onSnapChange(nextSnap);
                     }}
@@ -1222,6 +1264,13 @@ export function WorkspaceSettingsModal({
                       </label>
                     </div>
                   ) : null}
+                  <div className="workspace-reset-row">
+                    <span>{t("workspace.resetGridHint")}</span>
+                    <button type="button" onClick={resetGrid}>
+                      <RotateCcw size={14} />
+                      <span>{t("workspace.resetGrid")}</span>
+                    </button>
+                  </div>
                 </>
               ) : null}
 

@@ -5,7 +5,8 @@ import { importedShapesFromObj } from "@/lib/objImport";
 import { attachProjectAsset, projectAssetFromBytes, sourceFormatForFileName } from "@/lib/projectAssets";
 import { importedShapeFromStl } from "@/lib/stlImport";
 import { readKeepSvgPage } from "@/lib/importPreferences";
-import { importedShapeFromSvgWithReport } from "@/lib/svgImport";
+import { scaleSvgText } from "@/lib/svgScale";
+import { importedShapeFromSvgWithReport, prepareSvgImport } from "@/lib/svgImport";
 import { importedShapesFrom3mf } from "@/lib/threemfImport";
 import { sketchProfileFromSvg } from "@/lib/svgSketch";
 import { importedPictureSvg, isPictureFile, svgEmbeddedPicture } from "@/lib/pictureIcon";
@@ -77,6 +78,8 @@ export async function importModelFiles(
     svgAsSketch?: (mesh: WorkplaneShape, profile: SketchProfile) => Promise<WorkplaneShape | null>;
     /** An SVG keeps its place on its drawing page, so files of one page line up (#258). Left out: the setting in the import window. */
     svgKeepPagePosition?: boolean;
+    /** An SVG or a picture comes in at this width in mm, scaled from its own size (#448). Null or left out: its own size. */
+    svgWidth?: number | null;
   } = {},
 ): Promise<ModelImportResult | null> {
   const prepared = await prepareImportFiles(selected);
@@ -153,7 +156,21 @@ export async function importModelFiles(
         // The mesh lies mirrored top to bottom - turned up out of the drawing - and older designs
         // rebuild it so from their file. A new import mirrors it back to read right from above (#197).
         // A traced picture has no page of its own to keep.
-        const svg = importedShapeFromSvgWithReport(file.name, text, { keepPagePosition: !traced && (options.svgKeepPagePosition ?? readKeepSvgPage()) });
+        await prepareSvgImport();
+        const keepPagePosition = !traced && (options.svgKeepPagePosition ?? readKeepSvgPage());
+        let svg = importedShapeFromSvgWithReport(file.name, text, { keepPagePosition });
+        // A width typed in the import window scales the drawing before the sketch of its outlines is read,
+        // so the body and its sketch agree; the file stored with the design is the scaled one too.
+        const wishedWidth = options.svgWidth;
+        if (wishedWidth && wishedWidth > 0 && svg.shape.width > 1e-6) {
+          const scaled = scaleSvgText(text, wishedWidth / svg.shape.width);
+          if (scaled !== text) {
+            text = scaled;
+            bytes = new TextEncoder().encode(text);
+            assetType = "image/svg+xml";
+            svg = importedShapeFromSvgWithReport(file.name, text, { keepPagePosition });
+          }
+        }
         shape = { ...svg.shape, mirrorZ: true };
         if (svg.pageKept === false) result.notes.push(t("status.importSvgNoPage", { name: file.name }));
         // A shape that does not build into a solid is left out; say so instead of leaving a gap unexplained (#258).

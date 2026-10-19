@@ -1,1 +1,46 @@
-[]
+[
+  {
+    "title": {
+      "de": "Keine Offline-Versprechen, wo es nicht geht",
+      "en": "No offline promise where it cannot work"
+    },
+    "body": {
+      "de": "Die Karte \"layerling als App installieren\" und die Kachel \"Ohne Internet\" auf der Startseite erscheinen nur noch, wo layerling sich wirklich für den Offline-Betrieb ablegen kann. Im Docker-Image, das als Node-Server läuft, und unter einer Adresse mit http fallen sie weg.",
+      "en": "The card \"Install layerling as an app\" and the \"Works offline\" tile on the start page now appear only where layerling can really keep itself for offline use. In the Docker image, which runs as a Node server, and at a plain-http address they are gone."
+    }
+  },
+  {
+    "title": {
+      "en": "The view cube can sit in any corner",
+      "de": "Der Ansichtswürfel kann in jeder Ecke stehen",
+      "ar": "يمكن وضع مكعب الاتجاه في أي زاوية",
+      "cs": "Orientační krychle může být v kterémkoli rohu",
+      "da": "Orienteringskuben kan stå i ethvert hjørne",
+      "fr": "Le cube d'orientation peut se placer dans n'importe quel coin",
+      "it": "Il cubo di orientamento può stare in qualsiasi angolo",
+      "hu": "A nézetkocka bármelyik sarokba kerülhet",
+      "nl": "De richtingskubus kan in elke hoek staan",
+      "pl": "Kostka orientacji może stać w dowolnym rogu",
+      "sl": "Kocka za usmerjanje je lahko v katerem koli kotu",
+      "tr": "Yön küpü herhangi bir köşede durabilir",
+      "ru": "Куб ориентации можно поставить в любой угол",
+      "ja": "ビュー方向キューブを好きな隅に置けるように"
+    },
+    "body": {
+      "en": "Settings > Appearance > View cube position puts the view cube in the top left, top right, bottom left or bottom right of the workplane. In any corner but the top left, the camera controls move up into its place.",
+      "de": "Einstellungen > Darstellung > Position des Ansichtswürfels stellt den Würfel oben links, oben rechts, unten links oder unten rechts auf die Arbeitsfläche. In jeder Ecke außer oben links rückt die Kamerasteuerung an seinen Platz nach oben.",
+      "ar": "الإعدادات > المظهر > موضع مكعب الاتجاه يضع المكعب في أعلى اليسار أو أعلى اليمين أو أسفل اليسار أو أسفل اليمين من سطح العمل. في أي زاوية غير أعلى اليسار تصعد عناصر التحكم بالكاميرا إلى مكانه.",
+      "cs": "Nastavení > Vzhled > Umístění orientační krychle ji přesune vlevo nahoru, vpravo nahoru, vlevo dolů nebo vpravo dolů na pracovní ploše. V každém rohu kromě levého horního se ovládání pohledu posune nahoru na její místo.",
+      "da": "Indstillinger > Udseende > Placering af orienteringskuben sætter kuben øverst til venstre, øverst til højre, nederst til venstre eller nederst til højre på arbejdsfladen. I alle hjørner undtagen øverst til venstre rykker kamerakontrollerne op på dens plads.",
+      "fr": "Paramètres > Apparence > Position du cube d'orientation place le cube en haut à gauche, en haut à droite, en bas à gauche ou en bas à droite de l'espace de travail. Dans tout autre coin qu'en haut à gauche, les commandes de la caméra remontent à sa place.",
+      "it": "Impostazioni > Aspetto > Posizione del cubo di orientamento mette il cubo in alto a sinistra, in alto a destra, in basso a sinistra o in basso a destra dell'area di lavoro. In ogni angolo tranne quello in alto a sinistra, i controlli della camera salgono al suo posto.",
+      "hu": "Beállítások > Megjelenés > A nézetkocka helye a kockát a munkaterület bal felső, jobb felső, bal alsó vagy jobb alsó sarkába teszi. A bal felső sarkon kívül minden sarokban a kameravezérlők feljebb kerülnek a helyére.",
+      "nl": "Instellingen > Weergave > Positie van de richtingskubus zet de kubus linksboven, rechtsboven, linksonder of rechtsonder op het werkvlak. In elke hoek behalve linksboven schuift de camerabediening omhoog naar zijn plek.",
+      "pl": "Ustawienia > Wygląd > Położenie kostki orientacji przenosi kostkę do lewego górnego, prawego górnego, lewego dolnego albo prawego dolnego rogu obszaru roboczego. W każdym rogu poza lewym górnym sterowanie kamerą przesuwa się w górę na jej miejsce.",
+      "sl": "Nastavitve > Videz > Položaj kocke za usmerjanje postavi kocko zgoraj levo, zgoraj desno, spodaj levo ali spodaj desno na delovni površini. V vsakem kotu razen zgoraj levo se upravljanje kamere pomakne navzgor na njeno mesto.",
+      "tr": "Ayarlar > Görünüm > Yön küpünün konumu küpü çalışma alanının sol üst, sağ üst, sol alt veya sağ alt köşesine koyar. Sol üst dışındaki her köşede kamera denetimleri onun yerine yukarı çıkar.",
+      "ru": "Настройки > Внешний вид > Положение куба ориентации ставит куб вверху слева, вверху справа, внизу слева или внизу справа рабочей области. В любом углу, кроме верхнего левого, панель камеры поднимается на его место.",
+      "ja": "設定 > 外観 > ビュー方向キューブの位置で、キューブを作業領域の左上・右上・左下・右下に置けます。左上以外では、カメラ操作がキューブのあった場所まで上がります。"
+    }
+  }
+]

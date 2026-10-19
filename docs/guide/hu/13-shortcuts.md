@@ -5,7 +5,7 @@ summary: Minden billentyű egy pillantással, közvetlenül a programból véve,
 
 A billentyűparancsok addig működnek, amíg a munkasík van fókuszban. Amíg egy mezőbe gépelsz, nem lépnek közbe. Macen ahol itt [[Ctrl]] szerepel, ott a [[Cmd]] érvényes.
 
-A szerkesztőben a {{ui:editor.group.help}} területen lévő {{ui:editor.keyboardShortcuts}} ugyanezt a listát nyitja meg ablakként.
+A szerkesztőben a {{ui:editor.group.help}} területen lévő {{ui:editor.keyboardShortcuts}} ugyanezt a listát nyitja meg ablakként. Az ablak nyomtató gombja ({{ui:shortcuts.print}}) csak a listát nyomtatja ki, fehér alapon feketével és nagy betűkkel; a böngésző nyomtatási párbeszédablaka PDF-ként is felkínálja a mentést.
 
 ![A billentyűparancsok ablak a szerkesztőben.](shot:shortcuts)
 

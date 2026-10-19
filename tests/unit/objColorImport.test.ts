@@ -107,8 +107,12 @@ describe("OBJ import with colours (Discussion #79)", () => {
     expect(shape.color).toBe("#2f9e44");
     expect(shape.height).toBeCloseTo(4, 6);
     expect(shape.importedMesh?.sourceFormat).toBe("json");
-    // Was eine .lyl aus einer mitgespeicherten Quelle nachbaut, bleibt wie es war.
-    expect(importedShapeFromObj("teil.obj", obj, true).height).toBeCloseTo(20, 6);
+    // Was eine .lyl aus einer mitgespeicherten Quelle nachbaut, bleibt wie es war: eine OBJ aus der
+    // Zeit, als layerling noch Y-oben schrieb (Kopfzeile "Y-up"), wird mit der alten Lesart gelesen.
+    const oldYUp = obj
+      .replace("# Z-up", "# Y-up")
+      .replace(/^v (\S+) (\S+) (\S+)(.*)$/gm, (_line, x: string, y: string, z: string, rest: string) => `v ${x} ${Number(z)} ${-Number(y)}${rest}`);
+    expect(importedShapeFromObj("teil.obj", oldYUp, true).height).toBeCloseTo(20, 6);
   });
 
   it("leaves an OBJ without colours as it was", () => {

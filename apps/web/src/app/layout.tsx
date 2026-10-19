@@ -1,6 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import "./technic.css";
+import "./historyView.css";
+import "./myShapes.css";
+import "./viewCube.css";
+import { DiagnoseStrip } from "@/components/DiagnoseStrip";
 import { NewVersionNotice } from "@/components/NewVersionNotice";
 import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistration";
 import { DOM_MUTATION_GUARD_SCRIPT } from "@/lib/domMutationGuard";
@@ -8,6 +12,7 @@ import { LANGUAGES } from "@/lib/languages";
 import { TOOLBAR_SIZE_BOOT_SCRIPT } from "@/lib/toolbarSize";
 import { DEFAULT_LANGUAGE } from "@/lib/i18n";
 import { GRAPHITE_STYLESHEET_HREF, GRAPHITE_STYLESHEET_ID } from "@/lib/appTheme";
+import { VIEW_CUBE_POSITION_BOOT_SCRIPT } from "@/lib/viewCubePosition";
 
 const NAME = "layerling";
 const TITLE = "layerling – bezplatné 3D modelování pro 3D tisk v prohlížeči";
@@ -44,6 +49,9 @@ export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   applicationName: NAME,
+  // layerling speaks its languages itself. A browser's translator reads the page as English before the chosen
+  // language is in, and makes "Hell" into "Hölle" or an English menu into German (forum).
+  other: { google: "notranslate" },
   manifest: "/manifest.webmanifest",
   icons: {
     // Das SVG ist das eigentliche Symbol; die .ico steht daneben fuer alles,
@@ -89,18 +97,20 @@ export default function RootLayout({
 }>) {
   return (
     // Translate tools add classes such as translated-ltr to <html>; that must not end in a hydration error (#191).
-    <html lang={DEFAULT_LANGUAGE} data-theme="dark" data-palette="graphite" style={{ colorScheme: "dark" }} suppressHydrationWarning>
+    <html lang={DEFAULT_LANGUAGE} translate="no" data-theme="dark" data-palette="graphite" style={{ colorScheme: "dark" }} suppressHydrationWarning>
       <head>
         <link id={GRAPHITE_STYLESHEET_ID} rel="stylesheet" href={GRAPHITE_STYLESHEET_HREF} />
         {/* Before any of React's scripts: a page rearranged by Translate must not crash it (#186). */}
         <script dangerouslySetInnerHTML={{ __html: DOM_MUTATION_GUARD_SCRIPT }} />
         <script dangerouslySetInnerHTML={{ __html: TOOLBAR_SIZE_BOOT_SCRIPT }} />
+        <script dangerouslySetInnerHTML={{ __html: VIEW_CUBE_POSITION_BOOT_SCRIPT }} />
       </head>
       <body suppressHydrationWarning>
         <script dangerouslySetInnerHTML={{ __html: INSTALL_PROMPT_SCRIPT }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(STRUCTURED_DATA) }} />
         {children}
         <ServiceWorkerRegistration />
+        <DiagnoseStrip />
         <NewVersionNotice />
       </body>
     </html>

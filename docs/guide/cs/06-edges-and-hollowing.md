@@ -10,7 +10,7 @@ Ostré hrany na výtisku často nevypadají dobře a nejsou ani příliš odoln�
 1. Vyberte těleso nebo sloučený celek.
 2. Zvolte {{ui:editor.tool.fillet}} nebo {{ui:editor.tool.chamfer}} v pásu nástrojů. Zaoblení otevřete také klávesou [[B]], zkosení pomocí [[Shift+B]]. Obě volby jsou i v nabídce pravého tlačítka na tělese.
 3. Hrany se zvýrazní. Kliknutím je přidáváte do výběru nebo z něj odebíráte. Se [[Shift]] změníte výběr jediné hrany.
-4. Nastavte velikost a potvrďte pomocí {{ui:edge.apply}} nebo [[Enter]].
+4. Nastavte velikost a potvrďte pomocí {{ui:edge.apply}} nebo [[Enter]]. Potom zůstane okno otevřené na novém tělese se stejnou velikostí, takže může hned následovat další zaoblení nebo zkosení; zavře ho {{ui:edge.done}}, [[Esc]] nebo křížek. S [[Shift]] nebo [[Ctrl]] kliknutí na {{ui:edge.topEdges}}, {{ui:edge.bottomEdges}}, {{ui:edge.verticalEdges}} nebo {{ui:edge.horizontalEdges}} tyto hrany přidá k vybraným místo jejich nahrazení.
 
 ![Nástroj pro zaoblení hran: vybrané všechny ostré hrany a náhled poloměru 4 mm.](shot:fillet-preview)
 
@@ -24,6 +24,8 @@ Panel nabízí:
 - **{{ui:edge.radius}}** určuje poloměr zaoblení. U zkosení zadáváte {{ui:edge.distance}} nebo {{ui:edge.angle}}.
 - {{ui:edge.sharpThreshold}} rozhoduje, které hrany se považují za ostré. Hodnota 25° zachytí zřetelné zlomy a vynechá téměř rovinné přechody.
 - {{ui:edge.topEdges}} vybere pouze hrany na horním obvodu tělesa. Hodí se pro vykrajovátko: vytvořte obrys náčrtem jako rozšířenou čáru a pak zkoste jeho horní hrany. {{ui:edge.angle}} určuje sklon zkosení; to nesmí zasahovat dále než do tloušťky stěny.
+- {{ui:edge.bottomEdges}} vybere pouze hrany úplně dole na tělese, protějšek tlačítka {{ui:edge.topEdges}}. Je to rychlý způsob, jak zaoblit nebo zkosit jen patu součásti.
+- {{ui:edge.chamfillet}}, zvolené nahoře v okně zkosení vedle {{ui:editor.tool.chamfer}}, vytvoří tisknutelnou patu dílu: zkosení u podložky, které tečně přechází v zaoblení ke stěně, takže první vrstvy nepotřebují podpěry a hrana přesto končí měkce. {{ui:edge.distance}} je výška, kterou pata zabírá, {{ui:edge.angle}} (15° až 75°) strmost zkosení u podložky. Hrany vyberete tlačítkem {{ui:edge.bottomEdges}}.
 - {{ui:edge.onlyVisibleEdges}} skryje hrany za tělesem. Ve výchozím stavu prosvítají všechny, což může být u složitého dílu nepřehledné. Po zapnutí vybíráte pouze hrany obrácené k vám; pro ostatní otočte pohled. Chybová červená hrana se zobrazuje vždy.
 - {{ui:edge.tangentChains}} přidává po kliknutí i plynule navazující hrany, například celý obvod plochy se zaoblenými rohy. Volba ovlivňuje jen výběr kliknutím. CAD jádro vždy pokračuje v úpravě podél tečně navazujících hran. Panel uvádí, kolik dalších hran se tím upraví.
 - {{ui:edge.keepSize}} zachová velikost zkosení či zaoblení i při pozdější změně velikosti tělesa.
@@ -43,7 +45,7 @@ Upravené těleso lze upravovat znovu. Vyberte je a otevřete zaoblení, zkosen�
 
 Vedle úpravy je i {{ui:edge.editAction}}. Původní úpravu vrátí stejným způsobem, ale rovnou otevře její nástroj s původním výběrem hran a hodnotou. Zaoblení 3 mm tak změníte na 5 mm bez opakovaného výběru. I zde se zruší navazující úpravy. Možnost platí pro nově vytvořené úpravy; u starších a u jednotlivých částí sloučeného celku lze úpravu pouze vrátit.
 
-Na sloučeném celku, například válci s otvorem, patří upravovaná hrana výslednému tělesu, nikoli některé jeho části. Celek se proto změní na jediné těleso a {{ui:editor.tool.ungroup}} přestane být dostupné. Vrácením úpravy se obnoví i původní části. Nejjednodušší je upravovat hrany až nakonec. Platí to i pro závity: nástroj pracuje s jejich přesnou geometrií, takže lze zaoblit kvádr se závitovým otvorem a závit zachovat. Příprava hran závitu trvá déle než u jednoduchého tvaru, u M6 několik sekund, u trubkového G1/2 přibližně půl minuty.
+Na sloučeném celku, například válci s otvorem, patří upravovaná hrana výslednému tělesu, nikoli některé jeho části. Celek se proto změní na jediné těleso. {{ui:editor.tool.ungroup}} přesto funguje: nejdřív vrátí úpravy hran a pak skupinu rozpustí, jedním krokem, který [[Ctrl]]+[[Z]] vrátí zpět. Vrácením úpravy se obnoví i původní části. Nejjednodušší je upravovat hrany až nakonec. Platí to i pro závity: nástroj pracuje s jejich přesnou geometrií, takže lze zaoblit kvádr se závitovým otvorem a závit zachovat. Příprava hran závitu trvá déle než u jednoduchého tvaru, u M6 několik sekund, u trubkového G1/2 přibližně půl minuty.
 
 > **Dobré vědět:** Layerling při zkosení a zaoblení používá skutečnou CAD geometrii. Zaoblená hrana proto zůstává oblou plochou i při exportu STEP.
 
@@ -78,3 +80,17 @@ Vytvořit dutinu lze i v tělese s kapsou, tedy kvádru se slepým otvorem vznik
 Při pozdější změně velikosti se dutina ihned přepočítá. Zadaná tloušťka stěn zůstává zachovaná i u oblých těles. Válec protažený v jednom směru více než v druhém se změní na elipsu.
 
 > **Tip:** Pro trysku 0,4 mm je vhodným výchozím rozsahem stěna 1,2 až 2 mm: šetří materiál a přitom poskytuje dostatečně pevný díl.
+
+## Mazání ploch
+
+Zaoblení, které překáží, otvor na špatném místě, výstupek, který už nepotřebujete: {{ui:editor.tool.deleteFace}} je z tělesa zase odstraní, aniž byste ho museli stavět znovu.
+
+1. Vyberte těleso a zvolte {{ui:editor.tool.deleteFace}} v pásu nástrojů nebo nabídce pravého tlačítka.
+2. Klikněte na každou plochu toho, co má zmizet: plochy zaoblené hrany, stěnu otvoru, bok a vršek výstupku. Vybraná plocha se zvýrazní; dalším kliknutím ji z výběru odeberete. Panel plochy počítá.
+3. Klikněte na {{ui:deleteFace.apply}} nebo stiskněte [[Delete]]. [[Esc]] nástroj zavře, aniž by se cokoli změnilo.
+
+Okolní plochy se rozšíří, až se mezera uzavře. Kvádr se zaoblenými horními hranami dostane zpět ostré hrany, otvor se zaplní, výstupek zmizí. Těleso zůstane přesné: lze ho znovu zaoblit a zkosit a export do STEP zachová jeho skutečné plochy. [[Ctrl]]+[[Z]] smazání vrátí jedním krokem. Smazání je také v části {{ui:edge.featureHistory}} stejně jako zaoblení a zkosení, kde ho {{ui:edge.revertAction}} vrátí; {{ui:edge.editAction}} pro něj není. Sloučený celek se přitom změní na jediné těleso, stejně jako při úpravě hran.
+
+Vyberte všechny plochy toho, co má zmizet, a jen ty. Pokud okolní plochy mezeru uzavřít nedokážou, layerling to oznámí a nic se nezmění: například hlavní strana kvádru nemá sousední plochu, která by zaujala její místo. Smažete-li jen dno kapsy, vznikne průchozí otvor, protože stěny kapsy pokračují až na druhou stranu.
+
+{{ui:editor.tool.deleteFace}} potřebuje přesné plochy: funguje u dílů importovaných jako STEP a u tvarů layerlingu. Co layerling vede jako síť, je nemá: importovaný STL, OBJ nebo 3MF, rozdělené, kolem válce obtočené nebo zjednodušené těleso či velmi podrobný tvar, například dlouhý text. Pokud můžete, importujte díl jako STEP. U podrobného importovaného dílu mohou být některé plochy pro CAD jádro příliš náročné: po 45 sekundách se mazání zastaví a nic se nezmění. Těleso, jehož velikost se změnila po úpravě hran se zachovanou velikostí hran, nemá v nové velikosti přesné plochy, dokud se změna velikosti nevrátí.

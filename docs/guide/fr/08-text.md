@@ -11,6 +11,7 @@ Choisissez {{ui:shape.text}} dans la bibliothèque de formes et placez-le. Dans 
 - **{{ui:nameTag.letterSize}} :** Quelle est la taille des lettres, vues d'en haut ; {{ui:prop.height}} définit leur épaisseur.
 - **{{ui:prop.height}} :** Dans quelle mesure le lettrage se détache de la surface.
 - **{{ui:prop.bevel}} :** Arrondit les bords des lettres pour qu'ils paraissent plus doux. Avec {{ui:prop.segments}}, vous décidez du nombre d'étapes.
+- **{{ui:nameTag.letterEdge}} :** arrondit ou chanfreine le bord supérieur des lettres, comme sur un porte-nom : {{ui:nameTag.edge.none}}, {{ui:nameTag.edge.round}} ou {{ui:nameTag.edge.chamfer}}, avec la {{ui:nameTag.letterEdgeSize}} (0,4 mm au départ, au plus aussi haute que le texte). Elle va plus loin que {{ui:prop.bevel}}, mais seulement jusqu'à la largeur des traits : là où un trait est plus fin que le double de la taille, le bord se termine par un sommet plus étroit. Le dessous reste plat, on peut donc coller les lettres une à une ensuite. Tant qu'un bord est choisi, il remplace {{ui:prop.bevel}}.
 - **Taille :** Vous définissez la longueur et la largeur de la ligne comme pour n'importe quelle forme. Faites glisser les poignées ou saisissez les dimensions.
 - **{{ui:prop.textStretch}} :** Désactivé au départ : les lettres gardent leurs proportions et restent au milieu du cadre, donc un cadre étiré plus large ou plus profond que le mot n'en a besoin reste plus grand que les lettres. Activez-le et les lettres sont étirées dans les deux directions pour remplir tout le cadre : une majuscule peut être rendue plus basse ou plus étroite, comme dans Tinkercad. Il s'applique au texte droit ; le texte courbe a sa propre taille de lettre.
 
@@ -105,7 +106,7 @@ Chaque changement apparaît en même temps. L'étiquette est un paquet : elle s
 
 Tapez les noms dans {{ui:textLayers.names}}, un par ligne, jusqu'à cent. Le bouton ci-dessous indique le nombre de balises à créer, par exemple "Créer 12 balises de nom". Chaque étiquette a les mêmes calques, la même taille de lettre et le même trou pour le porte-clés et est un objet à part entière ; ils sont disposés en rangées inférieures à la première, espacées de 5 mm. Un texte brut contient également la liste de noms, plus bas dans ses paramètres.
 
-## Balises d'icône
+## Badges d'icône
 
 Une balise icône est la même balise avec une icône SVG au lieu de lettres : un cœur, un nuage, le logo d'un club. L'icône en haut, en dessous le même contour un peu plus large dans une seconde couleur, en bas une plaque sans trous.
 
@@ -123,6 +124,27 @@ La carte {{ui:iconTag.title}} en haut des paramètres contient :
 Le fichier SVG nécessite des contours fermés ; un dessin composé uniquement de lignes ouvertes ne peut pas former une balise. Un corps d'esquisse dont le remplissage est une ligne le conserve : la surface de cette ligne devient l'icône.
 
 **Une image (PNG ou JPG)** est vectorisée en contour, et l'aperçu affiche ce contour. Sous {{ui:iconTag.part}}, vous choisissez si c'est la partie {{ui:iconTag.part.dark}} ou {{ui:iconTag.part.light}} qui devient l'icône ; au départ, il s'agit de la partie qui n'est pas l'arrière-plan. Les pixels transparents ne font jamais partie de l'icône. Un fichier SVG ne contenant qu'une seule image (comme lorsqu'Inkscape enregistre un bitmap importé) est vectorisé de la même manière. Le contour suit les pixels, de sorte qu'une petite image aura des bords crénelés : les images de quelques centaines de pixels ou plus donnent les meilleurs résultats. {{ui:iconTag.replace}} prend la partie d'une image qui ne constitue pas son arrière-plan.
+
+## Codes QR
+
+Un code QR transforme un texte ou une adresse web en un motif que lit l'appareil photo d'un téléphone : un lien vers votre boutique sur une enseigne, le nom du Wi-Fi sur un sous-verre, un numéro de téléphone sur un porte-clés.
+
+Choisissez {{ui:shape.qrCode}} dans la bibliothèque de formes. Une fenêtre s'ouvre ; le curseur est déjà dans le champ de texte :
+
+- **{{ui:qrCode.text}} :** ce que dit le code. Entrée crée le code, Maj+Entrée commence une nouvelle ligne. Sous le champ, vous voyez la place utilisée ; les lettres accentuées et autres caractères spéciaux prennent deux octets. Quand le texte est trop long, le champ le dit.
+- **{{ui:qrCode.errorCorrection}} :** L, M, Q ou H. Un niveau plus élevé reste lisible quand une partie du code est sale ou rayée (L environ 7 %, M 15 %, Q 25 %, H 30 %), mais demande plus de modules pour le même texte, chaque module devient donc plus petit. M est choisi au départ.
+- **{{ui:qrCode.style}} :** {{ui:qrCode.style.code}} construit le code seul, haut de 4 mm. {{ui:qrCode.style.raised}} le pose à 1 mm de haut sur une plaque blanche de 3 mm, en lot de deux couleurs, pour qu'une impression multicolore imprime le code foncé et la plaque claire. {{ui:qrCode.style.engraved}} grave le code à 1 mm de profondeur dans la plaque.
+- **{{ui:qrCode.sizeBy}} :** saisissez la {{ui:qrCode.sizeBy.width}} du code entier (40 mm au départ) ou la taille d'un module ; l'autre valeur s'affiche dessous. Les modules de moins de 0,8 mm reçoivent un avertissement. C'est une règle empirique pour une buse de 0,4 mm, pas une garantie : imprimante, matériau, couleurs et téléphone jouent tous un rôle.
+- **{{ui:qrCode.quietZone}} :** les lecteurs ont besoin d'une marge vide de quatre modules autour du code. Sur une plaque, la marge fait partie de la plaque ; ne la désactivez que si la plaque repose sur une surface claire plus grande. Le code seul n'a pas de marge à lui : laissez la place libre autour.
+- **Hauteurs :** la hauteur du code, ou sur une plaque la hauteur du code ou la profondeur de gravure, et l'épaisseur de la plaque.
+
+L'aperçu montre le code tel qu'il sera construit. {{ui:qrCode.ok}} le place au milieu du plateau.
+
+Le code est un corps comme un autre : déplacez-le, tournez-le, redimensionnez-le (gardez la largeur et la profondeur égales, sinon le code est déformé), groupez-le, ou faites-en un trou et groupez-le dans une pièce à vous pour l'y graver. Le redimensionner redimensionne tout le code ; chaque module reste carré.
+
+La carte {{ui:qrCode.title}} en haut de ses réglages contient le texte. Modifiez-le et cliquez sur {{ui:qrCode.regenerate}} : le code est reconstruit là où il est et aussi large qu'il l'est maintenant. Correction d'erreur, zone de silence et construction restent telles qu'elles ont été choisies ; pour d'autres choix, créez un nouveau code depuis la bibliothèque.
+
+Scannez le code avec votre téléphone avant de l'imprimer, puis encore une fois après. Le foncé sur clair se lit le mieux ; un code clair sur une plaque foncée n'est pas lu par tous les téléphones.
 
 ## Texte sur un arc de cercle
 

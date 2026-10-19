@@ -7,7 +7,7 @@ summary: Hol vannak a terveid, hogyan készíts róluk biztonsági mentést, mil
 
 A layerling mindent a számítógépeden lévő böngészőben ment. Nincs fiók, és semmi sem töltődik fel. Minden változtatás magától mentődik. A kezdőlapon lévő előnézeti kép azt a nézetet mutatja, amely utoljára előtted volt, amikor a {{ui:editor.homeDashboard}} gombbal visszamentél. Ha napokkal később ugyanabban a böngészőben nyitod meg a layerlinget, minden ott van.
 
-Ha egy üres tervből mész vissza a kezdőlapra, a layerling megkérdezi, megtartsa-e. Az {{ui:confirm.yes}} vagy az [[Enter]] megtartja, a {{ui:confirm.no}} eltávolítja, így nem gyűlnek fel az üres tervek. A szerveren lévő közös mappában lévő terveknél nem kérdez.
+Ha egy üres tervből mész vissza a kezdőlapra, a layerling megkérdezi, megtartsa-e. Az {{ui:confirm.yes}} vagy az [[Enter]] megtartja, a {{ui:confirm.no}} eltávolítja, így nem gyűlnek fel az üres tervek. A szerveren lévő közös mappában lévő tervnél a {{ui:confirm.no}} a szerverről törli a fájlt, mindenki számára, aki a szervert használja.
 
 Ennek van egy hátulütője: aki törli a böngésző tárolóját, vagy másik számítógépre vált, elveszíti a terveket. **A fontos munkáidról ezért készíts biztonsági mentést egy fájlba.**
 

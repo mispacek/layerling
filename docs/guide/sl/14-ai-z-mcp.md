@@ -72,10 +72,13 @@ Umetna inteligenca dela z istimi funkcijami kot ti, teče po isti poti kot tvoje
 | `layerling_list_edges` | našteje prave robove CAD objekta |
 | `layerling_apply_edge_treatment` | posname ali zaobli izbrane robove |
 | `layerling_hollow_object` | izdolbe telo z enakomerno steno |
+| `layerling_list_faces` | našteje ploskve natančnega telesa |
+| `layerling_delete_faces` | izbriše ploskve in zapre vrzel |
 | `layerling_array_objects` | pomnoži v vrsti ali na krogu |
 | `layerling_bundle_objects` | poveže objekte v sveženj kot Ctrl+B: premikajo se skupaj, obdržijo barvo in vrsto ter gredo posamezno v izvoz |
 | `layerling_layer_text` | iz besedila naredi sklad plasti za večbarvni tisk (črke, širši robovi, plošča brez lukenj) ali sklad zgradi znova, z luknjo za obesek za ključe, vogali za vsako plast in zaobljenim ali poševno odrezanim robom črk; s seznamom imen en napis na ime |
 | `layerling_layer_icon` | iz simbola SVG (besedilo datoteke ali iztisnjeno telo skice) naredi simbolno oznako v plasteh za večbarvni tisk – simbol, širši robovi, plošča brez lukenj – ali jo zgradi znova z novo širino ali plastmi; s številom napolni ploščo s kopijami |
+| `layerling_create_qr_code` | iz besedila ali spletnega naslova naredi kodo QR kot {{ui:shape.qrCode}} v knjižnici oblik – samo kodo, dvignjeno na plošči ali vgravirano, s popravkom napak, širino, višino, tihim območjem in po želji kot luknjo; opozori, ko je modul manjši od 0,8 mm |
 | `layerling_measure_section` | meri na ravnini prereza med dvema točkama, ki se zaskočita na obris – debeline sten, reže, prileganja |
 | `layerling_show_overhangs` | vklopi ali izklopi šrafuro previsov, nastavi kot in za vsako telo navede ploskev, ki bi potrebovala podpore |
 | `layerling_estimate_print` | oceni prostornino, težo in filament za izbor ali celoten načrt: za polno telo in kot grobo oceno s stenami in polnilom kot v oknu za izvoz |
@@ -93,8 +96,10 @@ Umetna inteligenca dela z istimi funkcijami kot ti, teče po isti poti kot tvoje
 | `layerling_set_section_view` | prereže pogled vzdolž ravnine, da se vidi notranjost (samo pogled, nič se ne razreže) |
 | `layerling_clear_history` | za vedno izbriše vse korake razveljavitve, kot gumb »Izbriši zgodovino« v pogledu zgodovine; potrebuje `confirm: true` |
 | `layerling_set_history_view` | pogleda nazaj na prejšnje stanje projekta, kot pogled zgodovine (pravi načrt ostane nedotaknjen; orodja, ki spreminjajo, počakajo, da se zapre) |
+| `layerling_restore_from_history` | vrne objekte (tudi dele v skupinah) iz prejšnjega stanja v načrt kot kopije, kot »Vrni v načrt« v pogledu zgodovine - en korak, ki ga razveljavitev vzame nazaj |
 | `layerling_export_drawing` | naredi delavniško risbo izvoza »2D«: trije pogledi v merilu 1:1 na listu ISO s skupnimi merami in tabelo okroglih izvrtin, kot besedilo SVG ali PDF |
 | `layerling_export_mesh` | zapiše datoteko izvoznega okna kot STL, 3MF ali OBJ iz istih teles; na pot v tem računalniku ali kot base64 |
+| `layerling_save_project` | shrani celoten urejevalni načrt kot datoteko .lyl na pot v računalniku, na katerem teče strežnik MCP, brez pogovornega okna; obstoječa datoteka se zamenja le z `overwrite`, piše se prek začasne datoteke, cilj Ctrl+S v urejevalniku pa ostane, kakršen je bil |
 | `layerling_export_section_svg` | izda obrise na ravnini prereza kot SVG v merilu 1:1, iz istih teles kot izvoz |
 | `layerling_set_workplane` | položi delovno ravnino na stran telesa, jo ponastavi na osnovno ploščo ali jo skrije in prikaže |
 | `layerling_capture_image` | posname sliko pogleda, od spredaj, zgoraj, s strani, poševno z vogala in več |

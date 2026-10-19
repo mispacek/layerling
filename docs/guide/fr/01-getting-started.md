@@ -25,6 +25,66 @@ Tous vos designs apparaissent ensuite sur la page d'accueil avec une image d'ape
 - **À gauche** se trouvent les commandes de caméra surmontées du cube de vue. Elles permettent de se déplacer dans la scène, voir plus en détail dans [Vue et plan de travail](chapter:view-and-workplane).
 - **Tout en haut**, vous basculez entre {{ui:editor.modeGeometry}} et {{ui:editor.modeSketch}}, renommez le design et choisissez la langue et le thème visuel.
 
+## Les boutons autour de la zone de travail
+
+Passez la souris sur un bouton pour voir son nom. Si vous ne savez pas ce que fait un bouton, cliquez dans la zone {{ui:editor.group.help}} sur {{ui:interactiveHelp.title}} ([[Shift]]+[[F1]]) puis sur le bouton. Voici ceux dont on parle le plus.
+
+### Coller
+
+{{ui:editor.tool.paste}} ([[Ctrl]]+[[V]]) ajoute à la conception ce que vous avez copié avec {{ui:editor.tool.copy}}. {{ui:common.duplicate}} copie et colle en une étape.
+
+### Supprimer
+
+{{ui:common.delete}} ([[Delete]]) retire les formes sélectionnées. {{ui:editor.tool.undo}} les ramène.
+
+### Dissocier
+
+{{ui:editor.tool.ungroup}} ([[Ctrl]]+[[Shift]]+[[G]]) défait le groupe sélectionné en les formes dont il était fait.
+
+### Paramètres de l'espace de travail
+
+{{ui:editor.workspaceSettings}} ouvre les réglages de la zone de travail : unité, taille du plateau, imprimante, grille, couleurs, lumière et plus. Plus de détails dans [Vue et plan de travail](chapter:view-and-workplane).
+
+### Thème
+
+{{ui:common.theme}} tout en haut choisit l'apparence de layerling : comme votre système, clair, sombre ou graphite.
+
+### Renommer la conception
+
+{{ui:editor.renameProject}} : le crayon à côté du nom tout en haut. Tapez le nouveau nom et appuyez sur [[Enter]].
+
+### Nom du modèle
+
+Le nom de la conception ({{ui:confirm.projectName}}) se trouve tout en haut. Cliquez dessus, tapez, et [[Enter]] garde le nom.
+
+### Options de visibilité
+
+{{ui:editor.visibilityOptions}}, la flèche à côté de l'œil, contient ce que vous pouvez afficher ou masquer : la liste des objets, tout ce que vous avez masqué, les notes et les surplombs de l'impression. Plus de détails dans [Sélectionner et disposer](chapter:select-and-arrange).
+
+### Masquer la sélection
+
+{{ui:editor.tool.hideSelected}} ([[Ctrl]]+[[H]]) masque les formes sélectionnées. Elles restent dans la conception et dans la liste des objets ; {{ui:editor.visibilityOptions}} les affiche de nouveau.
+
+### Commandes de recherche
+
+{{ui:palette.open}} : tapez ce que vous cherchez, un outil, une forme ou un réglage, et cliquez sur le résultat.
+
+### Masquer les commandes de la caméra
+
+{{ui:camera.hide}} replie les commandes de la caméra à gauche et laisse plus de place à la zone de travail ; {{ui:camera.show}} les ramène.
+
+### Grille d'accrochage
+
+{{ui:inspector.snapGrid}}, en bas des propriétés, est le pas sur lequel le déplacement et le redimensionnement s'accrochent. À côté, le petit commutateur **mm | in** change l'unité. Plus de détails dans [Vue et plan de travail](chapter:view-and-workplane).
+
+### Unité : millimètres ou pouces
+
+Le commutateur **mm | in** à côté de {{ui:inspector.snapGrid}} change l'unité, la grille du plateau et le pas d'accrochage, pour cette conception.
+
+### Le pied de page
+
+En bas de la fenêtre : {{ui:dashboard.sponsor}} mène à la page où vous pouvez soutenir le projet ; {{ui:dashboard.userGuide}} ouvre ce guide ; {{ui:dashboard.forum}} mène à l'endroit des questions, des idées et des rapports de bogue (les discussions sur GitHub, en allemand le forum de drucktipps3d) ; {{ui:editor.bugReport}} crée un ZIP pour un rapport de bogue ; {{ui:dashboard.projectOnGitHub}} mène au projet sur GitHub, et le numéro de version ouvre les notes de version. Les liens vers les mentions légales et la politique de confidentialité appartiennent à celui qui exploite la copie de layerling que vous utilisez.
+
 ## Votre première pièce
 
 À titre d'exemple, nous allons créer un cube percé d'un trou.

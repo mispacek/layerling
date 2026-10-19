@@ -40,6 +40,20 @@ describe("guide markdown", () => {
     expect(english).toContain("“Group”");
   });
 
+  it("fills the {count} of a counting sentence from the number after the bar", async () => {
+    expect(renderInline("{{ui:workspace.gridMajorSteps|10}}", await contextFor("en"))).toContain("“10 grid steps”");
+    expect(renderInline("{{ui:workspace.gridMajorSteps|10}}", await contextFor("de"))).toContain("„10 Rasterschritte“");
+  });
+
+  it("never writes a {count} placeholder into a built guide page", async () => {
+    for (const language of LANGUAGES) {
+      for (const chapter of await readChapters(language)) {
+        const html = renderInline(chapter.body.replace(/^#.*$/gm, ""), await contextFor(language));
+        expect(html, `${language}/${chapter.file}`).not.toContain("{count}");
+      }
+    }
+  });
+
   it("takes the program's numbers from roundness.ts, written as the language writes them", async () => {
     const { EXACT_ROUND_TOLERANCE, MIN_AUTOMATIC_SIDES } = await import("@/lib/roundness");
     expect(renderInline("{{value:EXACT_ROUND_TOLERANCE}} mm, {{value:MIN_AUTOMATIC_SIDES}}", await contextFor("de"))).toBe(`${String(EXACT_ROUND_TOLERANCE).replace(".", ",")} mm, ${MIN_AUTOMATIC_SIDES}`);
@@ -93,6 +107,7 @@ describe("guide markdown", () => {
 
   it("spells a heading in Cyrillic out, so it has an id of its own", () => {
     expect(slugify("Резьба и механика")).toBe("rezba-i-mekhanika");
+    expect(slugify("Własne czcionki")).toBe("wlasne-czcionki");
     expect(slugify("Как отменить обработку кромки")).toBe("kak-otmenit-obrabotku-kromki");
   });
 
@@ -255,7 +270,7 @@ describe("guide content", () => {
       for (const [name, section] of Object.entries(GUIDE_SECTIONS)) {
         const file = readdirSync(directory).find((entry) => entry.endsWith(`-${GUIDE_CHAPTERS[section.chapter][language]}.md`));
         expect(file, `${language}: ${name}`).toBeTruthy();
-        const ids = readFileSync(join(directory, file!), "utf8").split(/\r?\n/).filter((line) => line.startsWith("## ")).map((line) => slugify(line.slice(3).trim()));
+        const ids = readFileSync(join(directory, file!), "utf8").split(/\r?\n/).filter((line) => /^#{2,3} /.test(line)).map((line) => slugify(line.replace(/^#{2,3} /, "").trim()));
         expect(ids, `${language}: ${name}`).toContain(section[language]);
       }
     }
@@ -271,7 +286,7 @@ describe("guide content", () => {
     expect(guideSectionForShape({ kind: "mesh", sketchProfile: {}, sketchOperation: "revolve" })).toBe("sketchToBody");
     expect(guideSectionForShape({ kind: "mesh", importedMesh: { sourceFormat: "stl" } })).toBe("importing");
     expect(guideHref("de", guideChapterForShape({ kind: "mesh", sketchProfile: {} }), guideSectionForShape({ kind: "mesh", sketchProfile: {} }))).toBe("/anleitung/skizzen.html#fuellung-und-silhouette");
-    for (const kind of ["thread", "gear", "spring", "bentTube", "hinge", "knurl", "dovetail", "teardrop", "counterbore", "countersink", "doubleCountersink", "ruler"] as const) {
+    for (const kind of ["thread", "gear", "spring", "bentTube", "gridfinity", "hinge", "knurl", "dovetail", "teardrop", "counterbore", "countersink", "doubleCountersink", "ruler"] as const) {
       const section = guideSectionForShape({ kind });
       expect(section && GUIDE_SECTIONS[section].chapter, kind).toBe(guideChapterForShape({ kind }));
     }

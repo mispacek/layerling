@@ -7,9 +7,20 @@ summary: Kje ležijo tvoji načrti, kako jih varnostno shraniš, katere oblike l
 
 layerling vse shranjuje v brskalniku na tvojem računalniku. Računa ni in nič se ne nalaga na splet. Vsaka sprememba se shrani sama. Sličica predogleda na začetni strani kaže pogled, ki si ga imel nazadnje pred seboj, ko si se z {{ui:editor.homeDashboard}} vrnil nazaj. Če layerling po nekaj dneh spet odpreš v istem brskalniku, je vse tam.
 
-Če se iz načrta, v katerem ni nič, vrneš na začetno stran, layerling vpraša, ali naj ostane. {{ui:confirm.yes}} ali [[Enter]] ga obdrži, {{ui:confirm.no}} ga odstrani, da se ne kopičijo prazni načrti. Načrti v skupni mapi na strežniku so izvzeti.
+Če se iz načrta, v katerem ni nič, vrneš na začetno stran, layerling vpraša, ali naj ostane. {{ui:confirm.yes}} ali [[Enter]] ga obdrži, {{ui:confirm.no}} ga odstrani, da se ne kopičijo prazni načrti. Pri načrtu v skupni mapi na strežniku {{ui:confirm.no}} izbriše datoteko s strežnika, za vse, ki ga uporabljajo.
 
 To ima svojo slabo stran: kdor izbriše pomnilnik brskalnika ali preide na drug računalnik, izgubi načrte. **Zato pomembna dela shrani v datoteko.**
+
+## Mape za tvoje projekte
+
+Pri desetinah projektov en seznam ni dovolj. Na začetni strani {{ui:shared.newFolder}} ustvari mapo za projekte tega brskalnika; klik na mapo jo odpre. Mape lahko vsebujejo mape.
+
+- **V mapo:** povleci projekt na mapo ali v meniju projekta izberi {{ui:shared.moveTo}}, ki ponudi vse mape. Nov projekt in datoteka, ki jo odpreš ali uvoziš, gre v mapo, ki je takrat odprta.
+- **Spet ven:** prva ploščica v mapi, `..`, in vrstica pod {{ui:dashboard.projects}} vodita nazaj; nanju lahko povlečeš tudi projekt. Mapa, ki jo povlečeš na drugo mapo, gre vanjo.
+- **Preimenovanje in brisanje** sta v meniju mape. Brisanje mape ne izbriše nobenega projekta: njena vsebina se pomakne za raven višje.
+- **Iskanje** pregleda vse mape; najden projekt pokaže svojo mapo, klik nanjo pa jo odpre.
+
+{{ui:dashboard.backupAll}} ohrani mape: projekti so v datoteki varnostne kopije v svojih mapah, obnovitev pa jih vrne tja. Mape tega brskalnika so ločene od map na strežniku.
 
 ## Varnostno kopiranje in deljenje
 

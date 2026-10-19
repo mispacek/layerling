@@ -110,6 +110,7 @@ export {
   ToolbarFilletIcon,
   ToolbarHistoryIcon,
   ToolbarHollowIcon,
+  ToolbarDeleteFaceIcon,
   ToolbarSimplifyIcon,
   ToolbarBundleIcon,
   ToolbarGroupIcon,

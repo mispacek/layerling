@@ -23,6 +23,7 @@ export const GUIDE_CHAPTERS = {
   files: { de: "dateien-und-speichern", en: "files-and-saving", nl: "bestanden-en-opslaan", ru: "files-and-saving", cs: "files-and-saving", sl: "datoteke-in-shranjevanje", hu: "files-and-saving" },
   shortcuts: { de: "tastenkuerzel", en: "shortcuts", nl: "sneltoetsen", ru: "shortcuts", cs: "shortcuts", sl: "bliznjice", hu: "shortcuts" },
   ai: { de: "ki-mit-mcp", en: "ai-with-mcp", nl: "ai-met-mcp", ru: "ai-with-mcp", cs: "ai-with-mcp", sl: "ai-z-mcp", hu: "ai-with-mcp" },
+  tablet: { de: "tablet-und-touch", en: "tablet-and-touch", nl: "tablet-en-touch", ru: "tablet-and-touch", cs: "tablet-and-touch", sl: "tablica-in-dotik", hu: "tablet-and-touch" },
   offline: { de: "offline-und-installieren", en: "offline-and-install", nl: "offline-en-installeren", ru: "offline-and-install", cs: "offline-and-install", sl: "offline-in-namestitev", hu: "offline-and-install" },
 } as const satisfies Record<string, { en: string } & Partial<Record<Language, string>>>;
 
@@ -35,12 +36,15 @@ export type GuideChapter = keyof typeof GUIDE_CHAPTERS;
  */
 export const GUIDE_SECTIONS = {
   sectionView: { chapter: "view", de: "ins-innere-schauen-die-schnittansicht", en: "looking-inside-the-section-view", nl: "naar-binnen-kijken-de-doorsnede", ru: "zaglyanut-vnutr-vid-v-razreze", cs: "pohled-dovnitr-rez", sl: "pogled-v-notranjost-prerezni-pogled", hu: "belelatni-a-metszeti-nezet" },
+  viewCube: { chapter: "view", de: "der-ansichtswuerfel", en: "the-view-cube", nl: "de-weergavekubus", ru: "kub-orientatsii", cs: "orientacni-krychle", sl: "orientacijska-kocka", hu: "a-nezetkocka" },
+  cameraBar: { chapter: "view", de: "die-kameraleiste", en: "the-camera-bar", nl: "de-camerabalk", ru: "panel-kamery", cs: "lista-pohledu", sl: "vrstica-kamere", hu: "a-kamerasav" },
   gridAndSnapping: { chapter: "view", de: "gitter-und-raster", en: "grid-and-snapping", nl: "raster-en-vastklikken", ru: "setka-i-privyazka", cs: "mrizka-a-prichytavani", sl: "mreza-in-pripenjanje", hu: "racs-es-illesztes" },
   shapeSettings: { chapter: "shapes", de: "die-einstellungen-der-form", en: "the-shape-s-settings", nl: "de-instellingen-van-de-vorm", ru: "nastroyki-figury", cs: "nastaveni-tvaru", sl: "nastavitve-oblike", hu: "az-alakzat-beallitasai" },
   wrapCylinder: { chapter: "shapes", de: "um-einen-zylinder-wickeln", en: "wrapping-around-a-cylinder", nl: "om-een-cilinder-wikkelen", ru: "oborachivanie-vokrug-tsilindra", cs: "obtoceni-kolem-valce", sl: "ovijanje-okoli-valja", hu: "hengerre-tekeres" },
   textFill: { chapter: "text", de: "kontur-silhouette-und-breiter", en: "outline-silhouette-and-wider", nl: "contour-silhouet-en-breder", ru: "kontur-siluet-i-shire", cs: "obrys-silueta-a-rozsireni", sl: "kontura-silhueta-in-sirse", hu: "koervonal-sziluett-es-szelesebb" },
   textLayers: { chapter: "text", de: "schichten-und-namensschilder", en: "layers-and-name-tags", nl: "lagen-en-naambordjes", ru: "sloi-i-birki-s-imenem", cs: "vrstvy-a-jmenovky", sl: "plasti-in-napisi-z-imenom", hu: "retegek-es-nevcimkek" },
   iconTag: { chapter: "text", de: "symbolschilder", en: "icon-tags", nl: "icoonbordjes", ru: "birki-so-znachkom", cs: "stitky-se-symbolem", sl: "simbolne-oznake", hu: "ikoncimkek" },
+  qrCode: { chapter: "text", de: "qr-codes", en: "qr-codes", nl: "qr-codes", fr: "codes-qr", ru: "qr-kody", cs: "qr-kody", sl: "kode-qr", hu: "qr-kodok" },
   myShapes: { chapter: "shapes", de: "eigene-formen", en: "custom-shapes", nl: "eigen-vormen", ru: "sobstvennye-figury", cs: "vlastni-tvary", sl: "oblike-po-meri", hu: "sajat-alakzatok" },
   objectList: { chapter: "select", de: "die-objektliste", en: "the-object-list", nl: "de-objectlijst", ru: "spisok-obektov", cs: "seznam-objektu", sl: "seznam-objektov", hu: "az-objektumlista" },
   pattern: { chapter: "select", de: "muster-reihe-und-kreis", en: "patterns-row-and-circle", nl: "patronen-rij-en-cirkel", ru: "massivy-ryad-i-krug", cs: "opakovani-v-rade-a-po-kruznici", sl: "polja-vrsta-in-krog", hu: "ismetles-sor-es-koer" },
@@ -55,11 +59,13 @@ export const GUIDE_SECTIONS = {
   splitting: { chapter: "solids", de: "teilen", en: "splitting", nl: "splitsen", ru: "razdelenie", cs: "rozdeleni", sl: "rezanje", hu: "kettevagas" },
   edgeTreatment: { chapter: "edges", de: "kanten-fasen-und-verrunden", en: "chamfering-and-filleting-edges", nl: "randen-afschuinen-en-afronden", ru: "faska-i-skruglenie-kromok", cs: "zkoseni-a-zaobleni-hran", sl: "posnetje-in-zaokrozitev-robov", hu: "elek-letoerese-es-lekerekitese" },
   hollowing: { chapter: "edges", de: "koerper-aushoehlen", en: "hollowing-bodies", nl: "lichamen-uithollen", ru: "sozdanie-obolochki", cs: "vytvareni-dutin", sl: "izdolbljenje-teles", hu: "testek-kiueregelese" },
+  deleteFace: { chapter: "edges", de: "flaechen-loeschen", en: "deleting-faces", nl: "vlakken-verwijderen", fr: "supprimer-des-faces", ru: "udalenie-graney", cs: "mazani-ploch", sl: "brisanje-ploskev" },
   threads: { chapter: "threads", de: "gewinde", en: "threads", nl: "schroefdraad", ru: "rezba", cs: "zavity", sl: "navoj", hu: "menetek" },
   gears: { chapter: "threads", de: "zahnraeder", en: "gears", nl: "tandwielen", ru: "shesterni", cs: "ozubena-kola", sl: "zobniki", hu: "fogaskerekek" },
   springs: { chapter: "threads", de: "federn", en: "springs", nl: "veren", ru: "pruzhiny", cs: "pruziny", sl: "vzmeti", hu: "rugok" },
   bentTubes: { chapter: "threads", de: "gebogene-rohre", en: "bent-tubes", nl: "gebogen-buizen", ru: "izognutye-truby", cs: "ohnute-trubky", sl: "ukrivljene-cevi", hu: "hajlitott-csoevek" },
   loft: { chapter: "threads", de: "uebergang", en: "loft", nl: "loft", ru: "perekhod", cs: "propojeni-profilu", sl: "prehod", hu: "atmenet" },
+  gridfinity: { chapter: "threads", de: "gridfinity", en: "gridfinity", nl: "gridfinity", ru: "gridfinity", cs: "gridfinity", sl: "gridfinity", hu: "gridfinity" },
   hinge: { chapter: "threads", de: "scharnier", en: "hinge", nl: "scharnier", ru: "petlya", cs: "pant", sl: "tecaj", hu: "zsaner" },
   knurl: { chapter: "threads", de: "raendelung", en: "knurling", nl: "kartel", ru: "nakatka", cs: "ryhovane-uchopy", sl: "narebricenje", hu: "recezes" },
   dovetail: { chapter: "threads", de: "schwalbenschwanz", en: "dovetail", nl: "zwaluwstaart", ru: "lastochkin-khvost", cs: "rybinovy-spoj", sl: "lastovicji-rep", hu: "fecskefark" },
@@ -67,6 +73,7 @@ export const GUIDE_SECTIONS = {
   screwHoles: { chapter: "threads", de: "stufen-und-senkbohrung", en: "counterbore-and-countersink", nl: "verzinkboring-en-verzinking", ru: "tsekovka-i-zenkovka", cs: "valcove-a-kuzelove-zahloubeni", sl: "stopnicasta-in-udirna-izvrtina", hu: "hengeres-es-kupos-suellyesztes" },
   ruler: { chapter: "measuring", de: "das-lineal", en: "the-ruler", nl: "de-liniaal", ru: "lineyka", cs: "pravitko", sl: "ravnilo", hu: "a-vonalzo" },
   printer: { chapter: "printing", de: "den-drucker-waehlen", en: "choosing-your-printer", nl: "je-printer-kiezen", ru: "vybor-printera", cs: "vyber-tiskarny", sl: "izbira-tiskalnika", hu: "a-nyomtatod-kivalasztasa" },
+  designFolders: { chapter: "files", de: "ordner-fuer-deine-entwuerfe", en: "folders-for-your-designs", nl: "mappen-voor-je-ontwerpen", fr: "des-dossiers-pour-vos-dessins", ru: "papki-dlya-proektov", cs: "slozky-pro-projekty", sl: "mape-za-tvoje-projekte" },
   backingUp: { chapter: "files", de: "sichern-und-weitergeben", en: "backing-up-and-passing-on", nl: "back-up-maken-en-doorgeven", ru: "rezervnye-kopii-i-peredacha", cs: "zalohovani-a-predavani", sl: "varnostno-kopiranje-in-deljenje", hu: "biztonsagi-mentes-es-tovabbadas" },
   exporting: { chapter: "files", de: "exportieren", en: "exporting", nl: "exporteren", ru: "eksport", cs: "export", sl: "izvoz", hu: "exportalas" },
   importing: { chapter: "files", de: "importieren", en: "importing", nl: "importeren", ru: "import", cs: "import", sl: "uvoz", hu: "importalas" },
@@ -86,8 +93,10 @@ export const GUIDE_SECTIONS = {
   layFlat: { chapter: "select", de: "auf-eine-flaeche-legen", en: "laying-flat-on-a-face", nl: "plat-op-een-vlak-leggen", ru: "ukladka-na-gran", cs: "polozeni-na-plochu", sl: "polaganje-na-ploskev", hu: "lapra-fektetes" },
   referencePoints: { chapter: "measuring", de: "bezugspunkte", en: "reference-points", nl: "referentiepunten", ru: "opornye-tochki", cs: "referencni-body", sl: "referencne-tocke", hu: "referenciapontok" },
   addingText: { chapter: "text", de: "text-hinzufuegen", en: "adding-text", nl: "tekst-toevoegen", ru: "dobavlenie-teksta", cs: "vlozeni-textu", sl: "dodajanje-besedila", hu: "szoeveg-hozzaadasa" },
+  sketchMirror: { chapter: "sketches", de: "spiegeln", en: "mirroring", nl: "spiegelen", fr: "symetrie", ru: "zerkalnoe-otrazhenie", cs: "zrcadleni", sl: "zrcaljenje", hu: "tuekroezes", pl: "odbicie-lustrzane", da: "spejling" },
   sketchCurve: { chapter: "sketches", de: "eine-gerade-seite-kruemmen", en: "curving-a-straight-side", nl: "een-rechte-zijde-buigen", ru: "izgib-pryamoy-storony", cs: "prohnuti-prime-strany", sl: "ukrivljanje-ravne-stranice", hu: "egyenes-oldal-goerbitese" },
   commandSearch: { chapter: "shortcuts", de: "befehlssuche", en: "command-search", nl: "opdrachten-zoeken", ru: "poisk-komand", cs: "vyhledavani-prikazu", sl: "iskanje-ukazov", hu: "parancskereso" },
+  interactiveHelp: { chapter: "shortcuts", de: "interaktive-hilfe", en: "interactive-help", nl: "interactieve-hulp", fr: "aide-interactive", ru: "interaktivnaya-spravka", cs: "interaktivni-napoveda", sl: "interaktivna-pomoc" },
   whatsNew: { chapter: "start", de: "neu-seit-deinem-letzten-besuch", en: "new-since-your-last-visit", nl: "nieuw-sinds-je-laatste-bezoek", ru: "novoe-s-vashego-poslednego-vizita", cs: "novinky-od-posledni-navstevy", sl: "novo-od-tvojega-zadnjega-obiska", hu: "ujdonsagok-a-legutobbi-latogatasod-ota" },
 } as const satisfies Record<string, { chapter: GuideChapter; en: string } & Partial<Record<Language, string>>>;
 
@@ -119,6 +128,7 @@ type GuideShape = {
   importedMesh?: { sourceFormat?: string };
   layeredText?: boolean;
   layeredIcon?: boolean;
+  qrCode?: unknown;
 };
 
 export function guideSectionForShape(shape: GuideShape): GuideSection | undefined {
@@ -126,6 +136,8 @@ export function guideSectionForShape(shape: GuideShape): GuideSection | undefine
   if (shape.layeredText && shape.groupedShapes?.length) return "textLayers";
   // An icon tag is a bundle too; its card is explained next to the name tag.
   if (shape.layeredIcon && shape.groupedShapes?.length) return "iconTag";
+  // A QR code (#553), alone or on its plate, is explained with the texts and tags.
+  if (shape.qrCode) return "qrCode";
   if (shape.groupedShapes?.length) {
     if (shape.groupOperation === "bundle") return "bundling";
     if (shape.groupOperation === "intersection") return "intersection";
@@ -154,6 +166,8 @@ export function guideSectionForShape(shape: GuideShape): GuideSection | undefine
     case "honeycomb":
       // No longer a shape of its own: the hole pattern tool took its place (#223).
       return "holePattern";
+    case "gridfinity":
+      return "gridfinity";
     case "hinge":
       return "hinge";
     case "knurl":
@@ -187,6 +201,7 @@ export function guideChapterForShape(shape: GuideShape): GuideChapter {
     case "gear":
     case "bentTube":
     case "loft":
+    case "gridfinity":
     case "hinge":
     case "knurl":
     case "dovetail":

@@ -31,6 +31,7 @@ export type ShapeKind =
   | "loft"
   | "thread"
   | "spring"
+  | "gridfinity"
   | "ring"
   | "wedge"
   | "polygon"
@@ -90,6 +91,8 @@ export type MeasurementAccuracy = 1 | 2 | 3;
 export type HistoryRetentionLimit = "unlimited" | number;
 
 export type ShapeCustomization = {
+  /** The colour a new shape of this kind starts with ("#rrggbb"); the app's own colour of the kind when absent. */
+  color?: string;
   width?: number;
   depth?: number;
   height?: number;
@@ -164,6 +167,64 @@ export type ShapeCustomization = {
   hingeLeafThickness?: number;
   /** Hinge: gap in mm between the moving parts - around the pin, between knuckles and before the leaves. */
   hingeClearance?: number;
+  /** Hinge: no printed pin; the bore runs through every knuckle for a pin of one's own (filament, wire). */
+  hingePinless?: boolean;
+  /** Gridfinity: a bin or the baseplate it stands in; the size counts grid units of 42 mm (height units of 7 mm). */
+  gridfinityType?: GridfinityType;
+  /** Gridfinity bin: the stacking lip on top of the wall; missing means on. */
+  gridfinityLip?: boolean;
+  /** Gridfinity bin: holes for 6 x 2 mm magnets under each foot. */
+  gridfinityMagnets?: boolean;
+  /** Gridfinity bin: the size counts cells of 21 mm, each with a foot, four to a baseplate's socket; missing means the 42 mm grid. */
+  gridfinityHalfGrid?: boolean;
+  /** Gridfinity bin: a label shelf along the back wall. */
+  gridfinityLabelBack?: boolean;
+  /** Gridfinity bin: a label shelf along the front wall. */
+  gridfinityLabelFront?: boolean;
+  /** Gridfinity bin: a label shelf along the left wall. */
+  gridfinityLabelLeft?: boolean;
+  /** Gridfinity bin: a label shelf along the right wall. */
+  gridfinityLabelRight?: boolean;
+  /** Gridfinity bin: how far the back wall's label shelf reaches out from it, in mm. */
+  gridfinityLabelBackWidth?: number;
+  /** Gridfinity bin: the back wall's label shelf length in mm; missing or 0 runs it from wall to wall. */
+  gridfinityLabelBackLength?: number;
+  /** Gridfinity bin: the back wall's label shelf of a set length moved along the wall from the middle, in mm, towards +x. */
+  gridfinityLabelBackOffset?: number;
+  /** Gridfinity bin: how far the front wall's label shelf reaches out from it, in mm. */
+  gridfinityLabelFrontWidth?: number;
+  /** Gridfinity bin: the front wall's label shelf length in mm; missing or 0 runs it from wall to wall. */
+  gridfinityLabelFrontLength?: number;
+  /** Gridfinity bin: the front wall's label shelf of a set length moved along the wall from the middle, in mm, towards +x. */
+  gridfinityLabelFrontOffset?: number;
+  /** Gridfinity bin: how far the left wall's label shelf reaches out from it, in mm. */
+  gridfinityLabelLeftWidth?: number;
+  /** Gridfinity bin: the left wall's label shelf length in mm; missing or 0 runs it from wall to wall. */
+  gridfinityLabelLeftLength?: number;
+  /** Gridfinity bin: the left wall's label shelf of a set length moved along the wall from the middle, in mm, towards +z (the front). */
+  gridfinityLabelLeftOffset?: number;
+  /** Gridfinity bin: how far the right wall's label shelf reaches out from it, in mm. */
+  gridfinityLabelRightWidth?: number;
+  /** Gridfinity bin: the right wall's label shelf length in mm; missing or 0 runs it from wall to wall. */
+  gridfinityLabelRightLength?: number;
+  /** Gridfinity bin: the right wall's label shelf of a set length moved along the wall from the middle, in mm, towards +z (the front). */
+  gridfinityLabelRightOffset?: number;
+  /** Gridfinity bin: where a label shelf meets a wall or another shelf, the corner rounded or chamfered. */
+  gridfinityLabelCorner?: GridfinityLabelCorner;
+  /** Gridfinity bin: the size of that rounding or chamfer in mm; 0 leaves the corner sharp. */
+  gridfinityLabelCornerSize?: number;
+  /** Gridfinity bin: a finger scoop along the back wall, the floor rising along a quarter circle into it. */
+  gridfinityScoopBack?: boolean;
+  /** Gridfinity bin: a finger scoop along the front wall. */
+  gridfinityScoopFront?: boolean;
+  /** Gridfinity bin: a finger scoop along the left wall. */
+  gridfinityScoopLeft?: boolean;
+  /** Gridfinity bin: a finger scoop along the right wall. */
+  gridfinityScoopRight?: boolean;
+  /** Gridfinity bin: the finger scoops' radius in mm; missing is half the height from the floor up to the lip's support, or to the top without the lip. */
+  gridfinityScoopRadius?: number;
+  /** Gridfinity bin: the floor's height inside in mm, measured from the underside; missing is 5.95, and at the highest the bin is solid up to the lip's support, or to the top without the lip. */
+  gridfinityFloorHeight?: number;
   /** Knurling: grooves straight along the axis, or crossed into diamonds. */
   knurlPattern?: "straight" | "diamond" | "round";
   /** Knurling: number of grooves around the grip. */
@@ -243,6 +304,8 @@ export type WorkplaneWorkspaceSettings = {
   gridBlockPreset: string;
   /** Follow the selected snap step; absent in older projects means enabled. */
   gridFollowSnap?: boolean;
+  /** The grid preset of the unit system left by the last switch between mm and in, so switching back finds it again (#442). */
+  gridBlockOtherUnits?: string;
   gridColor: string;
   /** Every how many grid steps a darker line is drawn on a millimetre grid: 5 or 10 (#143). */
   gridMajorInterval: number;
@@ -291,6 +354,8 @@ export type WorkplaneWorkspaceSettings = {
   showGrid: boolean;
   clickToPlaceShapes: boolean;
   selectBeforeMove: boolean;
+  /** The selection frame takes only what it encloses when dragged to the right, what it touches when dragged to the left (#430). */
+  frameByDirection: boolean;
   /** A double click on a sketch body opens its sketch; on a group or bundle, opens it for editing (#150). */
   doubleClickOpensSketch: boolean;
   doubleClickOpensGroup: boolean;
@@ -407,6 +472,11 @@ export type SketchOperation = "extrude" | "revolve" | "sweep";
 export type GearType = "spur" | "helical" | "herringbone" | "bevel" | "internal" | "rack";
 export type GearProfile = "involute" | "round" | "simple";
 
+/** A Gridfinity bin, or the baseplate bins stand in. */
+export type GridfinityType = "bin" | "baseplate";
+/** How a label shelf's corners are finished where it meets a wall or another shelf. */
+export type GridfinityLabelCorner = "round" | "chamfer";
+
 /** Was aus dem Gewinde wird: Stange, Schraube, Mutter oder das Loch dafuer. */
 export type ThreadRole = "rod" | "screw" | "nut" | "bore";
 export type ThreadHead = "cylinder" | "countersunk" | "hex";
@@ -442,8 +512,8 @@ export type ShellOpenings = "none" | "top" | "bottom" | "top-bottom" | ShellSide
 export type ShellEdges = "round" | "sharp";
 
 export type EdgeTreatmentFeature = {
-  /** "shell" hollows the body: `amount` is then the wall thickness. */
-  kind: "fillet" | "chamfer" | "shell";
+  /** "shell" hollows the body: `amount` is then the wall thickness. "deleteFace" deletes faces and closes the gap (#451). */
+  kind: "fillet" | "chamfer" | "chamfillet" | "shell" | "deleteFace";
   amount: number;
   edgeCount: number;
   /** The edges picked, as the tool numbered them on the body before this treatment: "Edit" picks them again (#227). */
@@ -452,6 +522,9 @@ export type EdgeTreatmentFeature = {
   openings?: ShellOpenings;
   /** Only for "shell"; missing means "round". */
   shellEdges?: ShellEdges;
+  /** Only for "deleteFace": the faces deleted, as the tool numbered them on the body before. */
+  faceIds?: number[];
+  faceCount?: number;
 };
 
 export type EdgeTreatmentHistoryEntry = {
@@ -634,6 +707,64 @@ export type WorkplaneShape = {
   hingeLeafThickness?: number;
   /** Hinge: gap in mm between the moving parts - around the pin, between knuckles and before the leaves. */
   hingeClearance?: number;
+  /** Hinge: no printed pin; the bore runs through every knuckle for a pin of one's own (filament, wire). */
+  hingePinless?: boolean;
+  /** Gridfinity: a bin or the baseplate it stands in; the size counts grid units of 42 mm (height units of 7 mm). */
+  gridfinityType?: GridfinityType;
+  /** Gridfinity bin: the stacking lip on top of the wall; missing means on. */
+  gridfinityLip?: boolean;
+  /** Gridfinity bin: holes for 6 x 2 mm magnets under each foot. */
+  gridfinityMagnets?: boolean;
+  /** Gridfinity bin: the size counts cells of 21 mm, each with a foot, four to a baseplate's socket; missing means the 42 mm grid. */
+  gridfinityHalfGrid?: boolean;
+  /** Gridfinity bin: a label shelf along the back wall. */
+  gridfinityLabelBack?: boolean;
+  /** Gridfinity bin: a label shelf along the front wall. */
+  gridfinityLabelFront?: boolean;
+  /** Gridfinity bin: a label shelf along the left wall. */
+  gridfinityLabelLeft?: boolean;
+  /** Gridfinity bin: a label shelf along the right wall. */
+  gridfinityLabelRight?: boolean;
+  /** Gridfinity bin: how far the back wall's label shelf reaches out from it, in mm. */
+  gridfinityLabelBackWidth?: number;
+  /** Gridfinity bin: the back wall's label shelf length in mm; missing or 0 runs it from wall to wall. */
+  gridfinityLabelBackLength?: number;
+  /** Gridfinity bin: the back wall's label shelf of a set length moved along the wall from the middle, in mm, towards +x. */
+  gridfinityLabelBackOffset?: number;
+  /** Gridfinity bin: how far the front wall's label shelf reaches out from it, in mm. */
+  gridfinityLabelFrontWidth?: number;
+  /** Gridfinity bin: the front wall's label shelf length in mm; missing or 0 runs it from wall to wall. */
+  gridfinityLabelFrontLength?: number;
+  /** Gridfinity bin: the front wall's label shelf of a set length moved along the wall from the middle, in mm, towards +x. */
+  gridfinityLabelFrontOffset?: number;
+  /** Gridfinity bin: how far the left wall's label shelf reaches out from it, in mm. */
+  gridfinityLabelLeftWidth?: number;
+  /** Gridfinity bin: the left wall's label shelf length in mm; missing or 0 runs it from wall to wall. */
+  gridfinityLabelLeftLength?: number;
+  /** Gridfinity bin: the left wall's label shelf of a set length moved along the wall from the middle, in mm, towards +z (the front). */
+  gridfinityLabelLeftOffset?: number;
+  /** Gridfinity bin: how far the right wall's label shelf reaches out from it, in mm. */
+  gridfinityLabelRightWidth?: number;
+  /** Gridfinity bin: the right wall's label shelf length in mm; missing or 0 runs it from wall to wall. */
+  gridfinityLabelRightLength?: number;
+  /** Gridfinity bin: the right wall's label shelf of a set length moved along the wall from the middle, in mm, towards +z (the front). */
+  gridfinityLabelRightOffset?: number;
+  /** Gridfinity bin: where a label shelf meets a wall or another shelf, the corner rounded or chamfered. */
+  gridfinityLabelCorner?: GridfinityLabelCorner;
+  /** Gridfinity bin: the size of that rounding or chamfer in mm; 0 leaves the corner sharp. */
+  gridfinityLabelCornerSize?: number;
+  /** Gridfinity bin: a finger scoop along the back wall, the floor rising along a quarter circle into it. */
+  gridfinityScoopBack?: boolean;
+  /** Gridfinity bin: a finger scoop along the front wall. */
+  gridfinityScoopFront?: boolean;
+  /** Gridfinity bin: a finger scoop along the left wall. */
+  gridfinityScoopLeft?: boolean;
+  /** Gridfinity bin: a finger scoop along the right wall. */
+  gridfinityScoopRight?: boolean;
+  /** Gridfinity bin: the finger scoops' radius in mm; missing is half the height from the floor up to the lip's support, or to the top without the lip. */
+  gridfinityScoopRadius?: number;
+  /** Gridfinity bin: the floor's height inside in mm, measured from the underside; missing is 5.95, and at the highest the bin is solid up to the lip's support, or to the top without the lip. */
+  gridfinityFloorHeight?: number;
   /** Knurling: grooves straight along the axis, or crossed into diamonds. */
   knurlPattern?: "straight" | "diamond" | "round";
   /** Knurling: number of grooves around the grip. */
@@ -737,6 +868,11 @@ export type WorkplaneShape = {
    * edits the icon's width and the layers together and builds the stack again.
    */
   layeredIcon?: boolean;
+  /**
+   * A QR code (#553): the text and the choices it was made with, so the properties panel can make
+   * it again. On the code body itself, or on the plate group or bundle that holds it.
+   */
+  qrCode?: QrCodeSettings;
   /**
    * Set on a body made by wrapping around a cylinder (#106): its box is
    * centred on the cylinder's axis, and aligning, snapping and centring use
@@ -855,4 +991,20 @@ export type WorkplaneNote = {
    * a note, and travels with the design exactly like one (history, file, server).
    */
   kind?: "point";
+};
+
+export type QrErrorCorrection = "L" | "M" | "Q" | "H";
+/** What is built: the code alone, a plate with the code raised on it, or a plate with the code engraved. */
+export type QrStyle = "code" | "raised" | "engraved";
+/** What a QR body keeps so it can be made again from the inspector (#553). */
+export type QrCodeSettings = {
+  text: string;
+  errorCorrection: QrErrorCorrection;
+  /** Four modules of empty margin round the code - on a plate, the plate's rim. */
+  quietZone: boolean;
+  style: QrStyle;
+  /** The code's height (raised, or alone) or the engraving's depth, in mm. */
+  codeHeight: number;
+  /** The plate's thickness, in mm, for a plate. */
+  plateThickness: number;
 };

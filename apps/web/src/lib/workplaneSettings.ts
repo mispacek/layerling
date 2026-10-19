@@ -3,6 +3,7 @@ import type { CustomSnapGrid, CustomSnapGridSize, GridSize, HistoryRetentionLimi
 import { normalizeScaleForUnits } from "@/lib/measurementUnits";
 import { DEFAULT_IMPERIAL_GRID_BLOCK_PRESET, DEFAULT_METRIC_GRID_BLOCK_PRESET, DEFAULT_EDGE_LINE_COLOR, DEFAULT_LIGHT_AZIMUTH, DEFAULT_LIGHT_ELEVATION, DEFAULT_SKETCH_BACKGROUND, DEFAULT_SKETCH_GRID_COLOR, DEFAULT_SKETCH_PLATE_COLOR, DEFAULT_WORKPLANE_BACKGROUND, DEFAULT_WORKPLANE_GRID_COLOR, DEFAULT_WORKPLANE_SURFACE_COLOR, inchGridPresetMm } from "@/lib/workplaneGrid";
 import { isThreadProfile } from "@/lib/threadProfiles";
+import { normalizeHexColor } from "@/lib/coloredImport";
 
 export const DEFAULT_SNAP_GRID: GridSize = "1.0 mm";
 export const BRICK_SNAP_STEP = 8;
@@ -69,6 +70,7 @@ export const DEFAULT_WORKPLANE_WORKSPACE: WorkplaneWorkspaceSettings = {
   showGrid: true,
   clickToPlaceShapes: true,
   selectBeforeMove: false,
+  frameByDirection: false,
   doubleClickOpensSketch: true,
   doubleClickOpensGroup: true,
   objectSnap: true,
@@ -214,6 +216,26 @@ export function gridBlockForUnits(units: string, preset: string, size: number): 
   return { gridBlockPreset: preset, gridBlockSize: size };
 }
 
+/**
+ * The workspace in another unit system, as the unit field of the settings makes it: the plate's grid follows
+ * (an inch preset with Imperial, a millimetre one otherwise) and the scale is one the system has (#422). The
+ * snap step follows through `snapGridForUnits`. The grid of the system left behind is remembered, so switching
+ * to inches and back brings "1 mm" back and not the usual 5 mm (#442).
+ */
+export function workspaceForUnits<T extends Pick<WorkplaneWorkspaceSettings, "units" | "gridBlockPreset" | "gridBlockSize" | "scale"> & { gridBlockOtherUnits?: string }>(workspace: T, units: string): T {
+  if (units === workspace.units) return workspace;
+  const remembered = workspace.gridBlockOtherUnits;
+  const arrivingInInches = units === "Imperial";
+  const rememberedFits = remembered !== undefined && remembered !== "Custom" && (inchGridPresetMm(remembered) !== null) === arrivingInInches;
+  const grid = rememberedFits
+    ? { gridBlockPreset: remembered, gridBlockSize: inchGridPresetMm(remembered) ?? Number.parseFloat(remembered) }
+    : gridBlockForUnits(units, workspace.gridBlockPreset, workspace.gridBlockSize);
+  // A custom size goes with the user to the other system as it is, so only a preset is worth remembering.
+  const left = workspace.gridBlockPreset !== "Custom" ? workspace.gridBlockPreset : remembered;
+  const next = { ...workspace, units, ...grid, gridBlockOtherUnits: left };
+  return { ...next, scale: normalizeScaleForUnits(next.units, next.scale) };
+}
+
 /** Keeps the current snap step when the unit system offers it, else the usual default (1.0 mm or 1/8 in). */
 export function snapGridForUnits(units: string, snap: GridSize): GridSize {
   // A measure of the user's own is millimetres whatever the plate is ruled in.
@@ -223,7 +245,7 @@ export function snapGridForUnits(units: string, snap: GridSize): GridSize {
 }
 const customizableShapeKinds: ShapeKind[] = [
   "box", "roundedBox", "cylinder", "slot", "ellipse", "sphere", "sketch", "scribble", "cone", "pyramid", "roof", "text", "roundRoof",
-  "halfSphere", "torus", "tube", "bentTube", "star", "heart", "crescent", "gear", "honeycomb", "hinge", "knurl", "dovetail", "counterbore", "countersink", "doubleCountersink", "teardrop", "loft", "thread", "spring", "ring", "wedge", "polygon", "icosahedron", "ruler", "mesh",
+  "halfSphere", "torus", "tube", "bentTube", "star", "heart", "crescent", "gear", "honeycomb", "hinge", "knurl", "dovetail", "counterbore", "countersink", "doubleCountersink", "teardrop", "loft", "thread", "spring", "gridfinity", "ring", "wedge", "polygon", "icosahedron", "ruler", "mesh",
 ];
 
 function numberOrDefault(value: unknown, fallback: number) {
@@ -288,6 +310,7 @@ export function normalizeShapeCustomizations(value: unknown, fallback: ShapeCust
       depth: optionalShapeDimension(source.depth, fallbackEntry?.depth),
       height: optionalShapeDimension(source.height, fallbackEntry?.height),
       maxDimension: optionalShapeDimension(source.maxDimension, fallbackEntry?.maxDimension),
+      color: normalizeHexColor(typeof source.color === "string" ? source.color : undefined) ?? fallbackEntry?.color,
     };
     if (kind === "sphere" || kind === "halfSphere" || kind === "torus") {
       entry.steps = optionalShapeNumber(source.steps, fallbackEntry?.steps, 6, MAX_HIGH_RESOLUTION_STEPS, true);
@@ -344,6 +367,37 @@ export function normalizeShapeCustomizations(value: unknown, fallback: ShapeCust
       entry.hingePinDiameter = optionalShapeNumber(source.hingePinDiameter, fallbackEntry?.hingePinDiameter, 0.2, MAX_CUSTOM_SHAPE_DIMENSION);
       entry.hingeLeafThickness = optionalShapeNumber(source.hingeLeafThickness, fallbackEntry?.hingeLeafThickness, 0.1, MAX_CUSTOM_SHAPE_DIMENSION);
       entry.hingeClearance = optionalShapeNumber(source.hingeClearance, fallbackEntry?.hingeClearance, 0.1, 1);
+      entry.hingePinless = typeof source.hingePinless === "boolean" ? source.hingePinless : fallbackEntry?.hingePinless;
+    }
+    if (kind === "gridfinity") {
+      entry.gridfinityType = source.gridfinityType === "bin" || source.gridfinityType === "baseplate" ? source.gridfinityType : fallbackEntry?.gridfinityType;
+      entry.gridfinityLip = typeof source.gridfinityLip === "boolean" ? source.gridfinityLip : fallbackEntry?.gridfinityLip;
+      entry.gridfinityMagnets = typeof source.gridfinityMagnets === "boolean" ? source.gridfinityMagnets : fallbackEntry?.gridfinityMagnets;
+      entry.gridfinityHalfGrid = typeof source.gridfinityHalfGrid === "boolean" ? source.gridfinityHalfGrid : fallbackEntry?.gridfinityHalfGrid;
+      entry.gridfinityLabelBack = typeof source.gridfinityLabelBack === "boolean" ? source.gridfinityLabelBack : fallbackEntry?.gridfinityLabelBack;
+      entry.gridfinityLabelFront = typeof source.gridfinityLabelFront === "boolean" ? source.gridfinityLabelFront : fallbackEntry?.gridfinityLabelFront;
+      entry.gridfinityLabelLeft = typeof source.gridfinityLabelLeft === "boolean" ? source.gridfinityLabelLeft : fallbackEntry?.gridfinityLabelLeft;
+      entry.gridfinityLabelRight = typeof source.gridfinityLabelRight === "boolean" ? source.gridfinityLabelRight : fallbackEntry?.gridfinityLabelRight;
+      entry.gridfinityLabelBackWidth = optionalShapeNumber(source.gridfinityLabelBackWidth, fallbackEntry?.gridfinityLabelBackWidth, 0, MAX_CUSTOM_SHAPE_DIMENSION);
+      entry.gridfinityLabelBackLength = optionalShapeNumber(source.gridfinityLabelBackLength, fallbackEntry?.gridfinityLabelBackLength, 0, MAX_CUSTOM_SHAPE_DIMENSION);
+      entry.gridfinityLabelBackOffset = optionalShapeNumber(source.gridfinityLabelBackOffset, fallbackEntry?.gridfinityLabelBackOffset, -MAX_CUSTOM_SHAPE_DIMENSION, MAX_CUSTOM_SHAPE_DIMENSION);
+      entry.gridfinityLabelFrontWidth = optionalShapeNumber(source.gridfinityLabelFrontWidth, fallbackEntry?.gridfinityLabelFrontWidth, 0, MAX_CUSTOM_SHAPE_DIMENSION);
+      entry.gridfinityLabelFrontLength = optionalShapeNumber(source.gridfinityLabelFrontLength, fallbackEntry?.gridfinityLabelFrontLength, 0, MAX_CUSTOM_SHAPE_DIMENSION);
+      entry.gridfinityLabelFrontOffset = optionalShapeNumber(source.gridfinityLabelFrontOffset, fallbackEntry?.gridfinityLabelFrontOffset, -MAX_CUSTOM_SHAPE_DIMENSION, MAX_CUSTOM_SHAPE_DIMENSION);
+      entry.gridfinityLabelLeftWidth = optionalShapeNumber(source.gridfinityLabelLeftWidth, fallbackEntry?.gridfinityLabelLeftWidth, 0, MAX_CUSTOM_SHAPE_DIMENSION);
+      entry.gridfinityLabelLeftLength = optionalShapeNumber(source.gridfinityLabelLeftLength, fallbackEntry?.gridfinityLabelLeftLength, 0, MAX_CUSTOM_SHAPE_DIMENSION);
+      entry.gridfinityLabelLeftOffset = optionalShapeNumber(source.gridfinityLabelLeftOffset, fallbackEntry?.gridfinityLabelLeftOffset, -MAX_CUSTOM_SHAPE_DIMENSION, MAX_CUSTOM_SHAPE_DIMENSION);
+      entry.gridfinityLabelRightWidth = optionalShapeNumber(source.gridfinityLabelRightWidth, fallbackEntry?.gridfinityLabelRightWidth, 0, MAX_CUSTOM_SHAPE_DIMENSION);
+      entry.gridfinityLabelRightLength = optionalShapeNumber(source.gridfinityLabelRightLength, fallbackEntry?.gridfinityLabelRightLength, 0, MAX_CUSTOM_SHAPE_DIMENSION);
+      entry.gridfinityLabelRightOffset = optionalShapeNumber(source.gridfinityLabelRightOffset, fallbackEntry?.gridfinityLabelRightOffset, -MAX_CUSTOM_SHAPE_DIMENSION, MAX_CUSTOM_SHAPE_DIMENSION);
+      entry.gridfinityLabelCorner = source.gridfinityLabelCorner === "round" || source.gridfinityLabelCorner === "chamfer" ? source.gridfinityLabelCorner : fallbackEntry?.gridfinityLabelCorner;
+      entry.gridfinityLabelCornerSize = optionalShapeNumber(source.gridfinityLabelCornerSize, fallbackEntry?.gridfinityLabelCornerSize, 0, MAX_CUSTOM_SHAPE_DIMENSION);
+      entry.gridfinityScoopBack = typeof source.gridfinityScoopBack === "boolean" ? source.gridfinityScoopBack : fallbackEntry?.gridfinityScoopBack;
+      entry.gridfinityScoopFront = typeof source.gridfinityScoopFront === "boolean" ? source.gridfinityScoopFront : fallbackEntry?.gridfinityScoopFront;
+      entry.gridfinityScoopLeft = typeof source.gridfinityScoopLeft === "boolean" ? source.gridfinityScoopLeft : fallbackEntry?.gridfinityScoopLeft;
+      entry.gridfinityScoopRight = typeof source.gridfinityScoopRight === "boolean" ? source.gridfinityScoopRight : fallbackEntry?.gridfinityScoopRight;
+      entry.gridfinityScoopRadius = optionalShapeNumber(source.gridfinityScoopRadius, fallbackEntry?.gridfinityScoopRadius, 0, MAX_CUSTOM_SHAPE_DIMENSION);
+      entry.gridfinityFloorHeight = optionalShapeNumber(source.gridfinityFloorHeight, fallbackEntry?.gridfinityFloorHeight, 0, MAX_CUSTOM_SHAPE_DIMENSION);
     }
     if (kind === "knurl") {
       entry.knurlPattern = source.knurlPattern === "straight" || source.knurlPattern === "diamond" || source.knurlPattern === "round" ? source.knurlPattern : fallbackEntry?.knurlPattern;
@@ -506,6 +560,9 @@ export function positionReach(workspace: Pick<WorkplaneWorkspaceSettings, "width
   return Math.max(220, Math.max(workspace.width, workspace.depth) * 1.5, printerHeight ?? 0);
 }
 
+/** The longest a ruler gets: what its Length slider reaches, and how far its handles pull it (#500). */
+export const RULER_MAX_LENGTH = 500;
+
 /**
  * How far a handle may pull a body (#181). The fixed ceilings (220 mm across, 180 mm high) date
  * from the fixed 200 mm plate; a larger plate or printer lets the handles go as far as it reaches,
@@ -523,6 +580,8 @@ export function handleDimensionLimit(
   const custom = workspace.shapeCustomizations[kind]?.maxDimension;
   const current = Number.isFinite(currentSize) ? currentSize : 0;
   if (custom !== undefined) return Math.max(custom, current);
+  // A ruler only measures and is never printed, so the plate is no limit for it: the handles go as far as its slider (#500).
+  if (kind === "ruler" && axis === "across") return Math.max(RULER_MAX_LENGTH, workspace.width, workspace.depth, current);
   const plate = axis === "across"
     ? Math.max(workspace.width, workspace.depth)
     : printerHeight ?? Math.max(workspace.width, workspace.depth);
@@ -597,6 +656,7 @@ export function normalizeWorkspaceSettings(value: unknown, fallback: WorkplaneWo
       stringOrDefault(candidate.gridBlockPreset, fallback.gridBlockPreset),
       numberOrDefault(candidate.gridBlockSize, fallback.gridBlockSize),
     ),
+    gridBlockOtherUnits: typeof candidate.gridBlockOtherUnits === "string" && candidate.gridBlockOtherUnits.trim() ? candidate.gridBlockOtherUnits : fallback.gridBlockOtherUnits,
     gridColor: migratedLegacyColor(colorOrDefault(candidate.gridColor, fallback.gridColor), LEGACY_GRID_COLOR, fallback.gridColor),
     gridFollowSnap: booleanOrDefault(candidate.gridFollowSnap, fallback.gridFollowSnap !== false),
     gridMajorInterval: candidate.gridMajorInterval === 10 ? 10 : candidate.gridMajorInterval === 5 ? 5 : fallback.gridMajorInterval,
@@ -628,6 +688,7 @@ export function normalizeWorkspaceSettings(value: unknown, fallback: WorkplaneWo
     // with 1.18.8 click placement is on for everyone unless switched off again.
     clickToPlaceShapes: booleanOrDefault(candidate.clickToPlaceShapes, fallback.clickToPlaceShapes),
     selectBeforeMove: booleanOrDefault(candidate.selectBeforeMove, fallback.selectBeforeMove),
+    frameByDirection: booleanOrDefault(candidate.frameByDirection, fallback.frameByDirection),
     doubleClickOpensSketch: booleanOrDefault(candidate.doubleClickOpensSketch, fallback.doubleClickOpensSketch),
     doubleClickOpensGroup: booleanOrDefault(candidate.doubleClickOpensGroup, fallback.doubleClickOpensGroup),
     objectSnap: booleanOrDefault(candidate.objectSnap, fallback.objectSnap),
@@ -679,6 +740,35 @@ function browserStorage(): Storage | null {
   }
 }
 
+/**
+ * The grid as the app starts it - visibility, colours, spacing and line weight - for "Reset grid" on the
+ * Workplane page (#503: a grid colour that matched the plate hid every line, and a new design started from
+ * the same saved default). Inch grids go back to their own standard spacing; the size of the plate and the
+ * printer are not touched.
+ */
+export function standardGridSettings(units: string) {
+  const inches = units === "Imperial";
+  return {
+    showGrid: DEFAULT_WORKPLANE_WORKSPACE.showGrid,
+    gridColor: DEFAULT_WORKPLANE_WORKSPACE.gridColor,
+    gridMajorColor: DEFAULT_WORKPLANE_WORKSPACE.gridMajorColor,
+    gridMajorInterval: DEFAULT_WORKPLANE_WORKSPACE.gridMajorInterval,
+    gridLinesGrow: DEFAULT_WORKPLANE_WORKSPACE.gridLinesGrow,
+    gridBlockPreset: inches ? DEFAULT_IMPERIAL_GRID_BLOCK_PRESET : DEFAULT_METRIC_GRID_BLOCK_PRESET,
+    gridBlockSize: inches ? (inchGridPresetMm(DEFAULT_IMPERIAL_GRID_BLOCK_PRESET) ?? DEFAULT_WORKPLANE_WORKSPACE.gridBlockSize) : DEFAULT_WORKPLANE_WORKSPACE.gridBlockSize,
+  };
+}
+
+/**
+ * Puts the grid of the default saved with "Make default" back to the standard, leaving everything else of it
+ * as it is, so that new designs start with a visible grid too. False when there is no saved default.
+ */
+export function resetGridInSavedDefault(storage: Storage | null = browserStorage()) {
+  const saved = readWorkspaceDefault(storage);
+  if (!saved || !storage) return false;
+  return saveWorkspaceDefault({ ...saved.workspace, ...standardGridSettings(saved.workspace.units) }, saved.snap, storage);
+}
+
 export function readWorkspaceDefault(storage: Storage | null = browserStorage()) {
   if (!storage) {
     return null;
@@ -698,6 +788,24 @@ export function readWorkspaceDefault(storage: Storage | null = browserStorage())
   } catch {
     return null;
   }
+}
+
+/**
+ * "Save as default" on a shape (#483): the values of its kind also go into the browser's default workspace, so a new
+ * design starts with them, not only the design that is open. Only that kind's entry changes, whatever else the
+ * default holds; with no entry (Reset defaults) the kind goes back to what the app starts it with.
+ */
+export function saveShapeDefaultsForNewDesigns(
+  kind: ShapeKind,
+  entry: ShapeCustomization | null,
+  storage: Storage | null = browserStorage(),
+) {
+  const stored = readWorkspaceDefault(storage);
+  const base = stored?.workspace ?? normalizeWorkspaceSettings(undefined);
+  const shapeCustomizations = { ...base.shapeCustomizations };
+  if (entry) shapeCustomizations[kind] = entry;
+  else delete shapeCustomizations[kind];
+  return saveWorkspaceDefault({ ...base, shapeCustomizations }, stored?.snap ?? DEFAULT_SNAP_GRID, storage);
 }
 
 export function saveWorkspaceDefault(

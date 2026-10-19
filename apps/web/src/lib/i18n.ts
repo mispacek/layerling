@@ -88,7 +88,11 @@ const LOADERS: Partial<Record<Language, CatalogueLoader>> = {
   // Russian is a separate chunk as well: the fork adds it, the author has no Russian.
   ru: () => import("@/lib/messages.ru").then((module) => module.MESSAGES_RU),
   sl: () => import("@/lib/messages.sl").then((module) => module.MESSAGES_SL),
+  tr: () => import("@/lib/messages.tr").then((module) => module.MESSAGES_TR),
   hu: () => import("@/lib/messages.hu").then((module) => module.MESSAGES_HU),
+  it: () => import("@/lib/messages.it").then((module) => module.MESSAGES_IT),
+  ar: () => import("@/lib/messages.ar").then((module) => module.MESSAGES_AR),
+  ja: () => import("@/lib/messages.ja").then((module) => module.MESSAGES_JA),
 };
 
 const catalogues = createCatalogueStore({ en: MESSAGES_EN, de: MESSAGES_DE, cs: MESSAGES_CS }, LOADERS);

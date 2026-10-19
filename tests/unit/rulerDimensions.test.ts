@@ -11,6 +11,7 @@ import {
   cornerRulerDimensionMatches,
   cornerRulerDimensionMatchesFromCorner,
   cornerRulerTicks,
+  rulerTicks,
   pointAlongRuler,
   rulerDimensionMatch,
   type CornerRulerPose,
@@ -361,5 +362,34 @@ describe("framing square: one mode for each number", () => {
     expect(toggledCornerRulerMode("endpoint")).toEqual({ mode: "midpoint" });
     expect(toggledCornerRulerMode("midpoint")).toEqual({ mode: "endpoint" });
     expect(toggledCornerRulerMode("endpoint", { z: "midpoint" })).toEqual({ mode: "endpoint" });
+  });
+});
+
+describe("the printed scale of a ruler (#500)", () => {
+  it("has a line every millimetre, longer at five and ten, and numbers the tens", () => {
+    const ticks = rulerTicks(150);
+    expect(ticks).toHaveLength(151);
+    expect(ticks[0]).toEqual({ offset: 0, height: 0.62, label: "0" });
+    expect(ticks[1].height).toBe(0.26);
+    expect(ticks[5].height).toBe(0.42);
+    expect(ticks[10]).toEqual({ offset: 10, height: 0.62, label: "10" });
+    expect(ticks.filter((tick) => tick.label !== undefined)).toHaveLength(16);
+  });
+
+  it("has a line every sixteenth of an inch for a ruler in inches, with the whole inches numbered", () => {
+    const ticks = rulerTicks(101.6, true);
+    // 4 inches = 64 sixteenths, with both ends.
+    expect(ticks).toHaveLength(65);
+    expect(ticks[16].offset).toBeCloseTo(25.4, 9);
+    expect(ticks.filter((tick) => tick.label !== undefined).map((tick) => tick.label)).toEqual(["0", "1", "2", "3", "4"]);
+    expect([ticks[1], ticks[2], ticks[4], ticks[8], ticks[16]].map((tick) => tick.height)).toEqual([0.26, 0.34, 0.42, 0.5, 0.62]);
+  });
+
+  it("stops at the end of the ruler and has no scale without a length", () => {
+    const ticks = rulerTicks(30, true);
+    expect(ticks.at(-1)!.offset).toBeLessThanOrEqual(30);
+    expect(ticks).toHaveLength(Math.floor((30 / 25.4) * 16) + 1);
+    expect(rulerTicks(0)).toEqual([]);
+    expect(rulerTicks(Number.NaN, true)).toEqual([]);
   });
 });

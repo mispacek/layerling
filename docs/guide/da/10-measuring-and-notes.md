@@ -22,7 +22,7 @@ Målebåndet sidder for neden i kamerabjælken ved venstre kant ({{ui:camera.tap
 
 ## Linealen
 
-Du henter {{ui:shape.ruler}} fra formbiblioteket. Den er rent et måleværktøj: den optræder i ingen eksport og kan hverken grupperes eller skæres. For hver form der rører eller overlapper linealen viser den udstrækningen som et flydende tal lige i visningen. Du kan ændre det tal der, og formen følger med. Det flydende plus-symbol laver en kopi af den målte form.
+Du henter {{ui:shape.ruler}} fra formbiblioteket. Den er rent et måleværktøj: den optræder i ingen eksport og kan hverken grupperes eller skæres. For hver form der rører eller overlapper linealen viser den udstrækningen som et flydende tal lige i visningen. Du kan ændre det tal der, og formen følger med. Det flydende plus-symbol laver en kopi af den målte form. Dens påtrykte skala er i millimeter; skifter du enheden til tommer (kontakten nederst til højre), er den i tommer, med en streg for hver sekstendedel tomme og de hele tommer nummereret.
 
 ## Vinkelmåleren
 
@@ -59,6 +59,8 @@ En note registrerer hvad geometrien ikke siger: "Denne skrue er 0,3 mm for stram
 - Hvis du placerer noten **på en form**, følger den med den.
 - Hvis du placerer den **ved siden af**, bliver den på arbejdsplanet ({{ui:note.free}}).
 - {{ui:note.detach}} frigør en vedhæftet note fra formen.
+- {{ui:editor.tool.group}} tager en vedhæftet note med ind i gruppen; {{ui:editor.tool.ungroup}} giver den videre til den synlige del under den, også en gruppe indeni. Mens en gruppe er åben med {{ui:group.edit}}, følger dens noter med den del, de sidder på, og går tilbage til gruppen med {{ui:group.done}}; annullering sætter dem tilbage, som de var.
+- Hvis dens form slettes, eller der ikke længere er en synlig form under den, bliver noten stående, hvor den var, på arbejdsplanet.
 - Trækning flytter noten, et klik åbner den til redigering.
 - Mens du skriver, bevarer [[Enter]] teksten og [[Esc]] sætter den tilbage til hvordan den var før du begyndte; [[Shift]]+[[Enter]] starter en ny linje.
 

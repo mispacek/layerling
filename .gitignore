@@ -27,6 +27,9 @@ apps/web/public/instrukcja/
 apps/web/public/guide-fr/
 apps/web/public/ru/
 apps/web/public/navodila/
+apps/web/public/guide-ja/
+# The sitemap is written by the same build on every dev and build run, so it is not kept in Git (#498).
+apps/web/public/sitemap.xml
 
 # Environment files
 .env
@@ -77,3 +80,13 @@ apps/web/public/prirucka/
 apps/web/public/utmutato/
 # Built Danish user guide.
 apps/web/public/vejledning/
+# Built Italian user guide.
+apps/web/public/it/
+# Built Arabic user guide.
+apps/web/public/dalil/
+
+# Built Turkish user guide.
+apps/web/public/kilavuz/
+
+# The Japanese typeface, cut from Zen Maru Gothic by scripts/build-japanese-typeface.mjs
+apps/web/public/fonts/japanese/

@@ -13,6 +13,18 @@ export const WHEEL_NOTCH_DELTA = 100;
 /** A step this long after the one before it stands alone: a notch, not a stream of a trackpad. */
 export const WHEEL_ALONE_GAP_MS = 80;
 
+/**
+ * The wheel step that zooms as far as a pinch on a trackpad did (#439 forum): Safari on a Mac sends no wheel steps
+ * for a pinch, only a gesture with a scale, so the scale it grew by since the last event is turned into the step
+ * OrbitControls would have read, which scales the distance by 0.95 ^ (zoom speed * step / 100). Spreading
+ * (a ratio above 1) comes closer, so its step is negative.
+ */
+export function pinchWheelDelta(ratio: number, zoomSpeed: number): number | null {
+  if (!Number.isFinite(ratio) || ratio <= 0 || !Number.isFinite(zoomSpeed) || zoomSpeed <= 0) return null;
+  const step = (100 * Math.log(ratio)) / (zoomSpeed * -Math.log(0.95));
+  return Math.abs(step) < 1e-3 ? null : -step;
+}
+
 export function wheelZoomDelta(event: { deltaY: number; deltaMode: number; ctrlKey: boolean }, msSinceLastWheel: number): number {
   if (event.ctrlKey || event.deltaMode !== 0) return event.deltaY;
   const size = Math.abs(event.deltaY);

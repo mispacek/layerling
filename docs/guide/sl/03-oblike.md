@@ -11,6 +11,8 @@ V orodni vrstici klikni {{ui:editor.addShape}}. Odpre se knjižnica oblik.
 
 ![Knjižnica oblik. Vsaka sličica je narisana iz prave geometrije oblike.](shot:shape-menu)
 
+Knjižnica se zapre po vsaki izbrani obliki. Z naslovno vrstico jo premakneš tja, kjer ne zakriva mesta, na katero ciljaš, na primer nad ploščo Lastnosti; dvoklik na naslovno vrstico jo vrne pod njen gumb, kje si jo pustil, pa si zapomni brskalnik. Žebljiček v naslovni vrstici drži knjižnico odprto, medtem ko postavljaš več oblik zapored. Z robovi in vogali spreminjaš njeno velikost, tako široko in visoko, kot dovoli tvoj zaslon; tudi to si brskalnik zapomni, dvoklik na rob pa jo povrne. Ko knjižnico zožiš, opusti imena in pokaže samo slike; ime se prikaže, ko pokažeš na obliko.
+
 Izberi obliko. Zdaj visi na kazalcu miške in pristane tja, kamor klikneš. Če pri tem zapelješ čez telo, se položi na ploskev pod kazalcem, tudi na poševno, kot pri Cruiseu v Tinkercadu; nad prazno ploščo pristane na delovni ravnini. Če pritisneš [[Esc]], se odlaganje prekine. Orodje, ki čaka na klik, na primer merilni trak, kotomer, opomba, {{ui:camera.placeWorkplane}}, {{ui:editor.tool.layFlat}} ali robna orodja, se ob izbiri oblike izklopi, da klik odloži obliko. Obratno vklop enega teh orodij obliko spet odloži. Kdor želi obliko raje kar na sredino plošče, lahko odlaganje s klikom izklopi v nastavitvah (področje {{ui:workspace.appearance}}, stikalo {{ui:workspace.cruise}}).
 
 Kaj ponuja knjižnica:
@@ -19,7 +21,7 @@ Kaj ponuja knjižnica:
 - **Cevi:** {{ui:shape.tube}} in {{ui:shape.bentTube}} iz do dvanajst ravnih kosov z ovinki vmes, poleg tega {{ui:shape.loft}} od enega obrisa do drugega, na primer od oglatega do okroglega.
 - **Okrasne oblike:** {{ui:shape.star}}, {{ui:shape.heart}} in {{ui:shape.crescent}}.
 - **Napisi:** {{ui:shape.text}}, tudi na krožnem loku. Več v poglavju [Besedilo](chapter:besedilo).
-- **Mehanika:** {{ui:shape.thread}} (navojna palica, vijak, matica in navojna luknja), {{ui:shape.spring}}, {{ui:shape.gear}} in {{ui:shape.knurl}} za ročaje. Več v poglavju [Navoji in mehanika](chapter:navoji-in-mehanika).
+- **Mehanika:** {{ui:shape.thread}} (navojna palica, vijak, matica in navojna luknja), {{ui:shape.spring}}, posode in podstavki {{ui:shape.gridfinity}}, {{ui:shape.gear}} in {{ui:shape.knurl}} za ročaje. Več v poglavju [Navoji in mehanika](chapter:navoji-in-mehanika).
 - **Za konstrukcije:** tiskljivi {{ui:shape.hinge}}, {{ui:shape.dovetail}}, {{ui:shape.teardrop}} za vodoravne luknje, {{ui:shape.counterbore}} in {{ui:shape.countersink}} za glave vijakov ter {{ui:shape.ruler}}, ki je samo merilno orodje in se v nobenem izvozu ne pojavi.
 
 Trikotnik dobiš na dva načina: {{ui:shape.polygon}} s tremi stranicami je enakokraki trikotnik, »streha« iz Tinkercada, {{ui:shape.wedge}} pa pravokotni. Oba sta prava trikotna prizma. Za trikotno luknjo oblike kopiraš, kopijo narediš manjšo, jo označiš kot luknjo in jo poravnaš z {{ui:editor.tool.centerOnWorkplane}} ali {{ui:editor.tool.align}}. Oboje dela z obdajajočo škatlo oblike, torej najmanjšim kvadrom, ki jo obdaja; razpolovljen kvadrat zato še vedno velja kot cel kvadrat. Z iskanjem ukazov ([[Ctrl]]+[[K]]) najdeš obe obliki tudi pod »trikotnik« ali »streha«.
@@ -34,7 +36,7 @@ Nastavitve so zasidrane ob desnem robu. Če kaj zakrivajo, jih povlečeš stran 
 
 ![Nastavitve valja: telo ali luknja, premer in višina kot številka in kot drsnik.](shot:editor-overview)
 
-- **{{ui:inspector.solid}} ali {{ui:inspector.hole}}:** Telo ostane, luknja odvzame material. Klik na {{ui:inspector.solid}} odpre barve; lastne barve, ki jih tam zmešaš, so potem pripravljene pod {{ui:inspector.recentColors}}, zadnjih osem. Več v poglavju [Telesa in luknje](chapter:telesa-in-luknje).
+- **{{ui:inspector.solid}} ali {{ui:inspector.hole}}:** Telo ostane, luknja odvzame material. Klik na {{ui:inspector.solid}} odpre barve; lastne barve, ki jih tam zmešaš, so potem pripravljene pod {{ui:inspector.recentColors}}, zadnjih osem. Več v poglavju [Telesa in luknje](chapter:telesa-in-luknje). Bucika v vrsti {{ui:inspector.keptColors}} obdrži izbrano barvo za vedno: stoji v svoji vrsti, novejše barve je nikoli ne izrinejo, in z isto buciko jo spet izpustite; v tem brskalniku se ohrani do 21 barv.
 - **{{ui:inspector.transparent}}:** Tako vidiš skozi telo, na primer da prepoznaš obliko za njim.
 - **{{ui:inspector.multicolor}}:** Samo pri skupini; [[Shift]]+[[M]] ga preklopi. Ko je vklopljeno, vsak del skupine pokaže svojo barvo, tudi v skupini, ki je z luknjami izračunana v eno telo (stene, ki jih luknja pusti, prevzamejo barvo telesa, v katero je bila izrezana). Če za skupino izbereš barvo, to izklopi stikalo in pobarva celotno skupino. Sveženj vedno obdrži barve svojih delov. Pri izvozu 3MF vsak del obdrži svojo barvo, tako da rezalnik dele dodeli različnim filamentom; OBJ nosi barve v točkah, na meji dveh barv torej malo manj natančno.
 - **{{ui:inspector.properties}}:** Mere in vse, kar spada k tej obliki. Pri valju na primer premer, višina in število stranic. Pri zobniku zobje, pri vzmeti ovoji. Vrednost, ki si jo premaknil stran od privzete, dobi ob imenu majhno puščico: klik vrne natanko to vrednost, ne glede na to, kaj si medtem še naredil, drugače kot Razveljavi. Enako stori dvoklik na drsnik, tu in pri drsnikih v delovnih nastavitvah. Drsnik za dolžino se, ko ga vlečeš z miško, pripne na korak mreže, zato višina izide v celih milimetrih (ne pri izklopljeni mreži in ne pri kratkih drsnikih); vpisana vrednost in smerni tipki na drsniku ostaneta natančni. {{ui:inspector.saveDefaults}} spodaj naredi trenutne vrednosti začetne vrednosti te vrste oblike (isto kot {{ui:workspace.shapeDefaults}} v nastavitvah), {{ui:inspector.resetDefaults}} pa se vrne na vrednosti programa.
@@ -45,9 +47,11 @@ Nastavitve so zasidrane ob desnem robu. Če kaj zakrivajo, jih povlečeš stran 
 
 ![Skupina iz oranžnega bloka, modrega čepa in luknje, izračunana v eno telo. Z Večbarvno ostane čep moder, blok oranžen, stene luknje pa prevzamejo barvo bloka.](shot:group-multicolor)
 
-Zožanje in zasuk imajo skoraj vse oblike. Samo zobnik, navoj, vzmet, narebričenje, tečaj, piramida, ukrivljena cev, kaplja, udirki in ravnilo ju nimajo: te oblike imajo svoje fiksne mere ali, kot piramida, že svojo zgornjo stran.
+Zožanje in zasuk imajo skoraj vse oblike. Samo zobnik, navoj, vzmet, Gridfinity, narebričenje, tečaj, piramida, ukrivljena cev, kaplja, udirki in ravnilo ju nimajo: te oblike imajo svoje fiksne mere ali, kot piramida, že svojo zgornjo stran.
 
 ![Stožec, pri katerem sta bila spremenjena polmer zgoraj in višina: majhna puščica ob vsaki vrednosti jo vrne nazaj, spodnja gumba pa shranita ali ponastavita privzete vrednosti oblike.](shot:property-reset)
+
+{{ui:inspector.saveDefaults}} si zapomni, kar ste spremenili na tej obliki, kot začetek vsake nove oblike te vrste: mere, nastavitve oblike in njeno barvo. Valj pobarvajte zeleno in pritisnite gumb, vsak valj, ki ga dodate potem, bo zelen; druge vrste obdržijo svoje barve. {{ui:inspector.resetDefaults}} vrne vrsto na to, s čimer jo začne program. Katere vrste imajo lastne privzete vrednosti, je označeno v nastavitvah pod {{ui:workspace.shapeDefaults}}. Z njimi se začne tudi nov načrt, ki ga začneš na začetni strani; vrednosti si zapomni ta brskalnik.
 
 Zožan ali nagnjen kvader, valj, elipsa, večkotnik, cev ali obroč obdrži svojo natančno obliko, prav tako kapsula, zvezda, srce, polmesec, lastovičji rep in zaobljen kvader brez zaobljenega zgornjega in spodnjega roba: posnetja in zaokrožitve gredo nanje kot na nespremenjeno obliko, izvoz STEP pa jih zapiše. To velja tudi za zasukano obliko: njen presek se natančno vrti z njo, stranice pa se enakomerno vijejo od spodaj navzgor.
 
@@ -87,12 +91,12 @@ Poleg nastavitev so na sami obliki ročice:
 - **Vogali in robovi** povlečejo obliko večjo ali manjšo. Če pri vlečenju vogala držiš [[Shift]], rasteta širina, globina in višina skupaj in razmerja se ohranijo; z [[Alt]] oblika raste od sredine namesto od nasprotnega vogala. Brez tipkovnice ali če nočeš držati tipke, zgoraj v lastnostih vklopiš {{ui:inspector.keepProportions}}: potem vogali vedno ohranijo razmerja, in če vpišeš širino, globino ali višino, se drugi dve spremenita za isti faktor. Nastavitev se zapomni.
 - **Puščica zgoraj** spremeni višino, ročica **na sredini** obliko dvigne ali spusti.
 - **Zakrivljene puščice** jo vrtijo.
-- Na **številkah** ob obliki vidiš mere. Klik nanje odpre polje, v katero vpišeš želeno številko. Z [[Enter]] oblika raste od roba, ki je nasproten številki, kot pri vlečenju; z [[Alt]]+[[Enter]] raste okoli svoje sredine, zato oblika, ki je bila poravnana z drugo, ostane poravnana. To velja za širino in dolžino; višina vedno raste navzgor od spodnje ploskve. Polja v lastnostih na desni ohranijo sredino brez tipke.
+- Na **številkah** ob obliki vidiš mere. Klik nanje odpre polje, v katero vpišeš želeno številko. Z [[Enter]] oblika raste od roba, ki je nasproten številki, kot pri vlečenju; z [[Alt]]+[[Enter]] raste okoli svoje sredine, zato oblika, ki je bila poravnana z drugo, ostane poravnana. To velja za širino in dolžino; višina vedno raste navzgor od spodnje ploskve. Polja v lastnostih na desni ohranijo sredino brez tipke. [[Tab]] obdrži številko in odpre naslednje polje (širina, globina, višina); [[Shift]]+[[Tab]] gre nazaj. V polju lastnosti, na katero si kliknil, vrednost spreminja tudi kolesce miške: eno enoto na stopnjo, desetkrat toliko s [[Shift]], desetino s [[Ctrl]] in stotino s [[Alt]]. Polje, na katero nisi kliknil, prepusti kolesce plošči, ki se pomika.
 - **Klik na vogal** (brez vlečenja) odpre širino in globino skupaj. Vpiši prvo številko, s [[Tab]] preskoči na drugo in obe sprejmi z [[Enter]]. [[Esc]] prekine.
 
 Če si obliko zavrtel za prave kote, na primer z {{ui:editor.tool.layFlat}} položil na stran, se polja v lastnostih imenujejo po smeri, v katero mera zdaj teče: {{ui:prop.height}} je tisto, kar gre navzgor, {{ui:prop.width}} teče vzdolž X in {{ui:prop.length}} vzdolž Y. Če pri ležeči obliki vpišeš višino, se torej spremeni navpična mera, spodnja stran pa ostane na plošči. Če oblika stoji poševno pod drugim kotom, polja kažejo njene lastne mere, opomba pod njimi pa to pove.
 
-Brez miške gre s tipkovnico: smerne tipke premaknejo izbor za en korak mreže (0,01 mm, ko je mreža izklopljena), s [[Shift]] za pet, ali za deset, če v nastavitvah pod {{ui:workspace.appearance}} nastaviš {{ui:workspace.gridMajorEvery}} na 10 {{ui:workspace.gridMajorSteps}}: tako daleč kot do naslednje temnejše črte, kot v Tinkercadu. Ravnajo se po pogledu: [[→]] premakne tja, kjer je na zaslonu desno, [[↑]] stran od gledalca, tudi če si ploščo zavrtel. Če obliko premakneš iz slike, se pogled premakne z njo. [[Ctrl]]+[[↑]] in [[Ctrl]]+[[↓]] jo dvigneta in spustita. [[R]] zavrti za 45°, [[Shift]]+[[R]] za 22,5°. [[D]] odloži izbor na delovno ravnino.
+Brez miške gre s tipkovnico: smerne tipke premaknejo izbor za en korak mreže (0,01 mm, ko je mreža izklopljena), s [[Shift]] za pet, ali za deset, če v nastavitvah pod {{ui:workspace.appearance}} nastaviš {{ui:workspace.gridMajorEvery}} na {{ui:workspace.gridMajorSteps|10}}: tako daleč kot do naslednje temnejše črte, kot v Tinkercadu. Ravnajo se po pogledu: [[→]] premakne tja, kjer je na zaslonu desno, [[↑]] stran od gledalca, tudi če si ploščo zavrtel. Če obliko premakneš iz slike, se pogled premakne z njo. [[Ctrl]]+[[↑]] in [[Ctrl]]+[[↓]] jo dvigneta in spustita. [[R]] zavrti za 45°, [[Shift]]+[[R]] za 22,5°. [[D]] odloži izbor na delovno ravnino.
 
 Ročice povlečejo obliko do velikosti tvoje plošče, najmanj 220 mm v širino in globino. Večje gre s številko v lastnostih; tako povečana oblika se ob naslednjem prijemu ne skrči nazaj. Lastno zgornjo mejo za vsako obliko nastaviš v nastavitvah pod {{ui:workspace.shapeDefaults}} z {{ui:workspace.customLimit}}.
 
@@ -110,11 +114,17 @@ Držalo, ročaj ali osnovna plošča, ki jo potrebuješ znova in znova, pride me
 
 1. Označi eno ali več teles, tudi luknje, skupine ali uvožen model.
 2. Odpri seznam oblik in klikni {{ui:myShapes.saveSelection}}. Vpiši ime in potrdi z {{ui:common.save}}.
-3. V vsakem načrtu klik na ploščico vstavi obliko kot vsako drugo. Ploščico lahko tudi povlečeš na delovno površino, potem pristane tam, kjer jo spustiš.
+3. V vsakem načrtu klik na ploščico vstavi obliko kot vsako drugo. Ploščico lahko tudi povlečeš na delovno površino, potem pristane tam, kjer jo spustiš. Oblika nato visi na kazalcu kot vsaka druga: sledi mu, tudi čez ploskve drugih teles, klik jo odloži, [[Esc]] jo umakne.
 
 Več teles pride ven skupaj, tako kot so stala drugo glede na drugo, in ostanejo posamezno izbirna. Svinčnik na ploščici jo preimenuje, koš jo odstrani po vprašanju. Kar je že v načrtih, ostane pri tem ohranjeno.
 
 {{ui:myShapes.title}} so v tem brskalniku, ločeno od načrtov, in so ob naslednjem zagonu takoj spet tam. {{ui:dashboard.backupAll}} na začetni strani jih shrani skupaj z načrti, ob odpiranju varnostne kopije se vrnejo oboje. Samo oblike shraniš z {{ui:myShapes.backup}} (puščica navzdol) kot datoteko ZIP in jih z {{ui:myShapes.load}} (puščica navzgor) prineseš v drug brskalnik. {{ui:myShapes.load}} sprejme tudi posamezne načrte `.lyl`, vsak potem postane oblika. Kar je že tam, se ne ustvari dvakrat.
+
+### Mape
+
+Veliko oblik po meri je laže razvrstiti v mape. {{ui:myShapes.newFolder}} (mapa s plusom poleg {{ui:myShapes.saveSelection}}) vpraša za ime in ustvari mapo na vrhu; mapa s plusom pri mapi, {{ui:myShapes.newSubfolder}}, ustvari mapo v njej. Mape segajo tri ravni globoko: mapa na tretji ravni sprejme oblike, ne pa novih map. Mape stojijo nad oblikami, ki niso v nobeni mapi, urejene po imenu, in se odpirajo in zapirajo s puščico; število pri mapi šteje oblike v njej in v mapah pod njo. Pri shranjevanju izberi mapo na seznamu poleg imena; z {{ui:myShapes.noFolder}} oblika ostane na vrhu.
+
+Mapa s puščico na ploščici premakne obliko v drugo mapo ali z {{ui:myShapes.noFolder}} spet ven. Svinčnik pri mapi jo preimenuje, koš jo po vprašanju izbriše skupaj z mapami in oblikami v njej. Same mape ni mogoče premakniti: ustvari novo tam, kamor sodi, in vanjo premakni oblike. Varnostna kopija ohrani mape, in ob nalaganju se oblike vrnejo na isto mesto. Na strežniku so mape mape v `Custom shapes`.
 
 ### Oblike po meri na strežniku
 

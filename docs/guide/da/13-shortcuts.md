@@ -5,7 +5,7 @@ summary: Alle taster på ét sted, taget direkte fra programmet så listen altid
 
 Genvejene virker så længe arbejdsplanet har fokus. Mens du skriver i et felt holder de sig væk. På en Mac, brug [[Cmd]] hvor [[Ctrl]] er angivet her.
 
-I editoren åbner {{ui:editor.keyboardShortcuts}} i området {{ui:editor.group.help}} den samme liste som et vindue.
+I editoren åbner {{ui:editor.keyboardShortcuts}} i området {{ui:editor.group.help}} den samme liste som et vindue. Printerknappen i vinduet ({{ui:shortcuts.print}}) udskriver selve listen, sort på hvidt og med stor skrift; browserens udskrivningsdialog tilbyder også at gemme den som PDF.
 
 ![Tastaturgenvejsvinduet i editoren.](shot:shortcuts)
 

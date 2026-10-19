@@ -1,6 +1,6 @@
-import type { ShellEdges, ShellOpenings } from "@/types/layerling";
+import type { GridfinityLabelCorner, GridfinityType, ShellEdges, ShellOpenings } from "@/types/layerling";
 
-export type CadModifierKind = "chamfer" | "fillet" | "shell";
+export type CadModifierKind = "chamfer" | "chamfillet" | "fillet" | "shell" | "deleteFace";
 
 export type CadModifierEdge = {
   id: number;
@@ -265,6 +265,48 @@ export type CadModifierHelicalGearPart = {
   expected?: { bounds: number[]; volume: number };
 };
 
+/**
+ * A Gridfinity bin or baseplate, as the exact body its display mesh draws:
+ * the size and settings it is built from (`gridfinityPlan`), in the shape's
+ * own frame (y up, the bottom at y = 0, centred on x and z); `transform`
+ * places it.
+ */
+export type CadModifierGridfinityPart = {
+  width: number;
+  depth: number;
+  height: number;
+  gridfinityType: GridfinityType;
+  gridfinityLip: boolean;
+  gridfinityMagnets: boolean;
+  gridfinityHalfGrid?: boolean;
+  gridfinityLabelBack?: boolean;
+  gridfinityLabelFront?: boolean;
+  gridfinityLabelLeft?: boolean;
+  gridfinityLabelRight?: boolean;
+  gridfinityLabelBackWidth?: number;
+  gridfinityLabelBackLength?: number;
+  gridfinityLabelBackOffset?: number;
+  gridfinityLabelFrontWidth?: number;
+  gridfinityLabelFrontLength?: number;
+  gridfinityLabelFrontOffset?: number;
+  gridfinityLabelLeftWidth?: number;
+  gridfinityLabelLeftLength?: number;
+  gridfinityLabelLeftOffset?: number;
+  gridfinityLabelRightWidth?: number;
+  gridfinityLabelRightLength?: number;
+  gridfinityLabelRightOffset?: number;
+  gridfinityLabelCorner?: GridfinityLabelCorner;
+  gridfinityLabelCornerSize?: number;
+  gridfinityScoopBack?: boolean;
+  gridfinityScoopFront?: boolean;
+  gridfinityScoopLeft?: boolean;
+  gridfinityScoopRight?: boolean;
+  gridfinityScoopRadius?: number;
+  gridfinityFloorHeight?: number;
+  transform?: number[];
+  expected?: { bounds: number[]; volume: number };
+};
+
 export type CadModifierMeshPart = {
   positions?: Float32Array;
   indices?: Uint32Array;
@@ -284,6 +326,8 @@ export type CadModifierMeshPart = {
   spring?: CadModifierSpringPart;
   /** A helical gear's exact body; positions/indices (if any) are only the fallback if it cannot be built. */
   helicalGear?: CadModifierHelicalGearPart;
+  /** A Gridfinity bin or baseplate's exact body; positions/indices (if any) are only the fallback if it cannot be built. */
+  gridfinity?: CadModifierGridfinityPart;
   primitive?: CadModifierPrimitivePart;
   /** When set, positions/indices (if any) are only the fallback if the exact body fails. */
   profile?: CadModifierProfilePart;
@@ -302,8 +346,27 @@ export type CadModifierComponentMesh = {
 
 export type CadModifierDeflection = { linear: number; angular: number };
 
+/** One face of a prepared body, for Delete face (#451) and the MCP's face list. */
+export type CadFaceInfo = {
+  /** The face's place in the body's face list (getSubShapes order). */
+  id: number;
+  /** OCCT's surface kind: plane, cylinder, cone, sphere, torus, bspline, ... */
+  kind: string;
+  area: number;
+  center: { x: number; y: number; z: number };
+  /** Out of the body, for flat faces only. */
+  normal?: { x: number; y: number; z: number };
+};
+
+/** The prepared body's faces: each face's description and, for picking, the tessellation with the face of every triangle. */
+export type CadModifierFaces = {
+  list: Array<CadFaceInfo & { owner: number }>;
+  mesh?: { positions: Float32Array; indices: Uint32Array; triangleFaces: Int32Array };
+};
+
 export type CadModifierWorkerRequest =
-  | { type: "prepare"; requestId: number; parts: CadModifierMeshPart[]; sharpAngle: number; suppressTreatmentDetailEdges?: boolean }
+  // faces: also send the body's faces (Delete face); faceMesh: with their tessellation, for picking.
+  | { type: "prepare"; requestId: number; parts: CadModifierMeshPart[]; sharpAngle: number; suppressTreatmentDetailEdges?: boolean; faces?: boolean; faceMesh?: boolean }
   | {
       type: "preview";
       requestId: number;
@@ -315,6 +378,8 @@ export type CadModifierWorkerRequest =
       // Only for "shell": which faces stay open; `amount` is the wall thickness.
       shellOpenings?: ShellOpenings;
       shellEdges?: ShellEdges;
+      // Only for "deleteFace": the faces to delete, as the prepare numbered them.
+      faceIds?: number[];
       // The finest deflection the shape's edge-treatment history has needed
       // so far, if any - a floor beneath this operation's own deflection.
       minDeflection?: CadModifierDeflection;
@@ -326,7 +391,7 @@ export type CadModifierWorkerRequest =
   | { type: "dispose"; requestId: number };
 
 export type CadModifierWorkerResponse =
-  | { type: "ready"; requestId: number; edges: CadModifierEdge[]; selectableEdgeIds: number[]; sourceType: string }
+  | { type: "ready"; requestId: number; edges: CadModifierEdge[]; selectableEdgeIds: number[]; sourceType: string; faces?: CadModifierFaces }
   | {
       type: "preview";
       requestId: number;

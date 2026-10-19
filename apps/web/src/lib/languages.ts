@@ -10,7 +10,13 @@
  *
  * To add a language, see docs/TRANSLATING.md.
  */
-export const LANGUAGES = ["en", "de", "cs", "nl", "fr", "pl", "ru", "sl", "hu", "da"] as const;
+/*
+ * The order of the language menu. English comes first, as the language everything falls back to;
+ * then the languages written in the Latin alphabet, sorted by the name each one gives itself
+ * (Čeština, Dansk, Deutsch, Français, ...); then the others, by the name in their own script.
+ * A new language goes in at its place, not at the end.
+ */
+export const LANGUAGES = ["en", "cs", "da", "de", "fr", "it", "hu", "nl", "pl", "sl", "tr", "ru", "ar", "ja"] as const;
 export type Language = (typeof LANGUAGES)[number];
 export const DEFAULT_LANGUAGE: Language = "cs";
 
@@ -318,6 +324,45 @@ export const LANGUAGE_INFO: Readonly<Record<Language, LanguageInfo>> = {
       printButton: "Drukuj",
     },
   },
+  tr: {
+    name: "Türkçe",
+    htmlLang: "tr",
+    numberLocale: "tr-TR",
+    // Turkish uses the plain double quotation marks.
+    quotes: ["“", "”"],
+    guideDir: "kilavuz",
+    communityUrl: GITHUB_DISCUSSIONS,
+    readme: "README.md",
+    quickstartAnchor: "windows-quickstart",
+    legal: { imprint: "Künye", privacy: "Gizlilik" },
+    // Turkish keyboards label the keys in English; only the mouse actions get Turkish names.
+    keyNames: { Click: "Tık", RightClick: "Sağ tık", Drag: "Sürükle" },
+    asciiUmlauts: false,
+    complete: false,
+    guide: {
+      site: "layerling kılavuzu",
+      home: "Kılavuz",
+      openEditor: "Editörü aç",
+      backToEditor: "Editöre dön",
+      editorElsewhere: "Editör zaten başka bir sekmede açık – oraya geçmen yeterli.",
+      chapters: "Bölümler",
+      onThisPage: "Bu sayfada",
+      previous: "Önceki bölüm",
+      next: "Sonraki bölüm",
+      overviewLead: "layerling'in yapabildiği her şey, adım adım. Resimler çalışan programdan alınır ve her sürümle yenilenir.",
+      sourceNote: "Bu kılavuz programla birlikte büyür. Bir şey eksik veya yanlışsa bunu şurada söyle:",
+      forum: "forum",
+      notTranslated: "Bu bölüm henüz Türkçeye çevrilmedi. Aşağıda İngilizce metin var.",
+      languageMenu: "Dil",
+      search: "Kılavuzda ara",
+      searchNothing: "Sonuç yok.",
+      printAll: "Yazdırmak için tüm kılavuz",
+      printAllTitle: "Tüm kılavuz tek sayfada",
+      printAllLead: "Tüm bölümler art arda, yazdırmak veya PDF olarak kaydetmek için: Ctrl+P'ye bas ve yazdırma ayarlarında „Üst bilgi ve alt bilgi” seçeneğini kapat. Sadece bir kısmını yazdırmak istiyorsan orada sayfa numaralarını seç.",
+      printContents: "İçindekiler",
+      printButton: "Yazdır",
+    },
+  },
   ru: {
     name: "Русский",
     htmlLang: "ru",
@@ -473,6 +518,136 @@ export const LANGUAGE_INFO: Readonly<Record<Language, LanguageInfo>> = {
       printAllLead: "Hvert kapitel efter hinanden, til udskrivning eller til at gemme som PDF: tryk Ctrl+P og slå \"Sidehoveder og sidefødder\" fra i udskriftsindstillingerne. For kun at udskrive en del, vælg sidetallene der.",
       printContents: "Indhold",
       printButton: "Udskriv",
+    },
+  },
+  // Italiano: interfaccia e guida utente in corso di traduzione. Non viene contrassegnata
+  // come completa intenzionalmente. Le frasi aggiunte successivamente rimangono in inglese
+  // finché non vengono tradotte in un aggiornamento successivo, così una nuova versione
+  // del programma non deve attendere il completamento della traduzione. Il README rimane
+  // in inglese, quindi readme e quickstartAnchor puntano a quelli inglesi.
+  it: {
+    name: "Italiano",
+    htmlLang: "it",
+    numberLocale: "it-IT",
+    quotes: ["«", "»"],
+    guideDir: "it",
+    communityUrl: GITHUB_DISCUSSIONS,
+    readme: "README.md",
+    quickstartAnchor: "windows-quickstart",
+    legal: { imprint: "Note legali", privacy: "Informativa sulla privacy" },
+    keyNames: {
+      Ctrl: "Ctrl",
+      Shift: "Maiusc",
+      Delete: "Canc",
+      Backspace: "Backspace",
+      Home: "Home",
+      Click: "Clic",
+      RightClick: "Clic destro",
+      Drag: "Trascina",
+    },
+    asciiUmlauts: false,
+    complete: false,
+    guide: {
+      site: "Guida utente di layerling",
+      home: "Guida utente",
+      openEditor: "Apri l'editor",
+      backToEditor: "Torna all'editor",
+      editorElsewhere: "L'editor è già aperto in un'altra scheda: passa semplicemente a quella.",
+      chapters: "Capitoli",
+      onThisPage: "In questa pagina",
+      previous: "Capitolo precedente",
+      next: "Capitolo successivo",
+      overviewLead: "Tutto quello che layerling può fare, passo dopo passo. Le immagini sono tratte dal programma in esecuzione e vengono aggiornate a ogni versione.",
+      sourceNote: "Questa guida cresce insieme al programma. Se manca qualcosa o trovi un errore, segnalalo nelle",
+      forum: "discussioni",
+      notTranslated: "Questo capitolo non è ancora tradotto in italiano. Segue il testo inglese.",
+      languageMenu: "Lingua",
+      search: "Cerca nella guida",
+      searchNothing: "Nessun risultato.",
+      printAll: "Guida completa da stampare",
+      printAllTitle: "La guida completa in una sola pagina",
+      printAllLead: "Tutti i capitoli in sequenza, da stampare o salvare come PDF: premi Ctrl+P e disattiva le intestazioni e i piè di pagina nelle impostazioni di stampa. Per stampare solo una parte, seleziona i numeri delle pagine.",
+      printContents: "Indice",
+      printButton: "Stampa",
+    },
+  }, 
+  // Arabic (Modern Standard Arabic): in progress, not complete. The interface is not mirrored for
+  // right-to-left yet; the sentences come first, the layout is a separate change.
+  ar: {
+    name: "العربية",
+    htmlLang: "ar",
+    // ar-AE: Western digits (1, 2, 3) and a decimal point, the way measurements are typed in a CAD program.
+    numberLocale: "ar-AE",
+    quotes: ["«", "»"],
+    guideDir: "dalil",
+    communityUrl: GITHUB_DISCUSSIONS,
+    readme: "README.md",
+    quickstartAnchor: "windows-quickstart",
+    legal: { imprint: "بيانات الناشر", privacy: "سياسة الخصوصية" },
+    keyNames: { Click: "نقرة", RightClick: "نقرة بالزر الأيمن", Drag: "سحب" },
+    asciiUmlauts: false,
+    complete: false,
+    guide: {
+      site: "دليل استخدام layerling",
+      home: "دليل الاستخدام",
+      openEditor: "افتح المحرّر",
+      backToEditor: "العودة إلى المحرّر",
+      editorElsewhere: "المحرّر مفتوح بالفعل في علامة تبويب أخرى، فانتقل إليها.",
+      chapters: "الفصول",
+      onThisPage: "في هذه الصفحة",
+      previous: "الفصل السابق",
+      next: "الفصل التالي",
+      overviewLead: "كل ما يستطيع layerling فعله، خطوة بخطوة. الصور مأخوذة من البرنامج أثناء تشغيله وتُحدَّث مع كل إصدار.",
+      sourceNote: "ينمو هذا الدليل مع البرنامج. إذا كان هناك شيء ناقص أو خاطئ، فأخبرنا في",
+      forum: "النقاشات",
+      notTranslated: "لم يُترجَم هذا الفصل إلى لغتك بعد، ويليه النص الإنجليزي.",
+      languageMenu: "اللغة",
+      search: "ابحث في الدليل",
+      searchNothing: "لم يُعثر على شيء.",
+      printAll: "الدليل كاملًا للطباعة",
+      printAllTitle: "الدليل كاملًا في صفحة واحدة",
+      printAllLead: "جميع الفصول متتالية، للطباعة أو للحفظ بصيغة PDF: اضغط Ctrl+P وألغِ خيار \"الرؤوس والتذييلات\" في إعدادات الطباعة. لطباعة جزء فقط، اختر أرقام صفحاته هناك.",
+      printContents: "المحتويات",
+      printButton: "طباعة",
+    },
+  },
+  // Japanese: written for upper primary school children and their teachers, with Tinkercad's
+  // Japanese terms where Tinkercad has one. The guide is not translated yet.
+  ja: {
+    name: "日本語",
+    htmlLang: "ja",
+    numberLocale: "ja-JP",
+    quotes: ["「", "」"],
+    guideDir: "guide-ja",
+    communityUrl: GITHUB_DISCUSSIONS,
+    readme: "README.md",
+    quickstartAnchor: "windows-quickstart",
+    legal: { imprint: "運営者情報", privacy: "プライバシーポリシー" },
+    keyNames: { Click: "クリック", RightClick: "右クリック", Drag: "ドラッグ" },
+    asciiUmlauts: false,
+    complete: false,
+    guide: {
+      site: "layerling ユーザーガイド",
+      home: "ユーザーガイド",
+      openEditor: "エディターを開く",
+      backToEditor: "エディターに戻る",
+      editorElsewhere: "エディターはもう別のタブで開いています。そのタブに切り替えてください。",
+      chapters: "章",
+      onThisPage: "このページの内容",
+      previous: "前の章",
+      next: "次の章",
+      overviewLead: "layerling でできることを、じゅんばんに説明します。画像は動いているプログラムからとったもので、新しいバージョンが出るたびにとり直しています。",
+      sourceNote: "このガイドはプログラムといっしょに育っていきます。足りないところやまちがいがあったら、ここで教えてください:",
+      forum: "ディスカッション",
+      notTranslated: "この章はまだ日本語になっていません。このあとは英語で書かれています。",
+      languageMenu: "言語",
+      search: "ガイドを検索",
+      searchNothing: "見つかりませんでした。",
+      printAll: "ガイドをまとめて印刷",
+      printAllTitle: "ガイドの全部を1ページに",
+      printAllLead: "すべての章を順番にならべています。印刷するか、PDFとして保存できます。Ctrl+Pを押して、印刷の設定で「ヘッダーとフッター」をオフにしてください。一部だけ印刷したいときは、そこでページの番号を選んでください。",
+      printContents: "目次",
+      printButton: "印刷",
     },
   },
 };

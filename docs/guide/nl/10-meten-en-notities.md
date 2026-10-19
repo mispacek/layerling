@@ -22,7 +22,7 @@ Het meetlint zit aan de onderkant van de camerabalk aan de linkerrand ({{ui:came
 
 ## De liniaal
 
-De {{ui:shape.ruler}} haal je uit de vormenbibliotheek. Het is puur een meetinstrument: hij komt in geen enkele export terecht en kan niet gegroepeerd of geknipt worden. Voor elk lichaam dat de liniaal raakt of overlapt, toont hij de afmeting als zwevend getal direct in de weergave. Je kunt dat getal daar meteen aanpassen, en het lichaam volgt. Het zwevende plusteken maakt een kopie van de gemeten vorm.
+De {{ui:shape.ruler}} haal je uit de vormenbibliotheek. Het is puur een meetinstrument: hij komt in geen enkele export terecht en kan niet gegroepeerd of geknipt worden. Voor elk lichaam dat de liniaal raakt of overlapt, toont hij de afmeting als zwevend getal direct in de weergave. Je kunt dat getal daar meteen aanpassen, en het lichaam volgt. Het zwevende plusteken maakt een kopie van de gemeten vorm. De opgedrukte schaal is in millimeters; zet je de eenheid om op inches (de schakelaar rechtsonder), dan is hij in inches, met een streepje per zestiende inch en genummerde hele inches.
 
 ## De winkelhaak
 
@@ -59,6 +59,8 @@ Een notitie legt vast wat de geometrie niet zegt: "Deze schroef zit 0,3 mm te kr
 - Plaats je de notitie **op een lichaam**, dan reist ze mee.
 - Plaats je haar **ernaast**, dan blijft ze op het werkvlak ({{ui:note.free}}).
 - {{ui:note.detach}} maakt een vastgemaakte notitie los van het lichaam.
+- {{ui:editor.tool.group}} neemt een vastgemaakte notitie mee in de groep; {{ui:editor.tool.ungroup}} geeft haar door aan het zichtbare onderdeel eronder, ook aan een groep daarbinnen. Zolang een groep met {{ui:group.edit}} open is, bewegen de notities van die groep mee met het onderdeel eronder en gaan ze met {{ui:group.done}} terug naar de groep; annuleren zet ze terug zoals ze waren.
+- Wordt haar lichaam verwijderd, of ligt er geen zichtbaar lichaam meer onder, dan blijft de notitie staan waar ze stond, op het werkvlak.
 - Slepen verplaatst de notitie, een klik opent haar om te bewerken.
 - Terwijl je schrijft, bewaart [[Enter]] de tekst en zet [[Esc]] hem terug zoals hij was voordat je begon; [[Shift]]+[[Enter]] begint een nieuwe regel.
 

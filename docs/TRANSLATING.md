@@ -10,11 +10,11 @@ A language is three things:
 1. **An entry** in `apps/web/src/lib/languages.ts`: its name, how it writes numbers, its quotation marks, where its
    community meets, and the words of the guide pages.
 2. **The sentences of the interface**, in `apps/web/src/lib/messages.<code>.ts` (about 2,300 of them).
-3. **The user guide**, in `docs/guide/<code>/` (16 chapters).
+3. **The user guide**, in `docs/guide/<code>/` (17 chapters).
 
 ## Adding a language
 
-1. **Register it.** In `languages.ts` add the code to `LANGUAGES` and an entry to `LANGUAGE_INFO`. Copy the English
+1. **Register it.** In `languages.ts` add the code to `LANGUAGES` - at its place in the menu order described above the list: English first, then the Latin-script languages by their own names, then the others - and an entry to `LANGUAGE_INFO`. Copy the English
    one and change it. Leave `complete: false` for now. Name chapters like the English files (`readme: "README.md"` is
    right until the language has its own README).
 2. **The sentences.** Copy `messages.en.ts` to `messages.<code>.ts`, change the export to `MESSAGES_<CODE>` and its

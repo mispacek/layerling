@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, Download, FilePlus2, LoaderCircle, Trash2, X } from "lucide-react";
+import { ArchiveRestore, ChevronLeft, ChevronRight, CornerLeftUp, Download, FilePlus2, FolderOpen, LoaderCircle, Trash2, X } from "lucide-react";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { GuideHelpLink } from "@/components/GuideHelpLink";
 import { t } from "@/lib/i18n";
@@ -57,6 +57,12 @@ export function HistoryViewOverlay({
   objectCount,
   creating,
   canCreateProject,
+  pickedCount,
+  onBringBack,
+  openGroups,
+  canOpenGroup,
+  onOpenGroup,
+  onBackOut,
   onIndexChange,
   onExport,
   onCreateProject,
@@ -72,6 +78,18 @@ export function HistoryViewOverlay({
   objectCount: number;
   creating: boolean;
   canCreateProject: boolean;
+  /** How many objects of the shown state are picked to bring back. */
+  pickedCount: number;
+  /** Adds copies of the picked objects to the design, as they were in this state. */
+  onBringBack: () => void;
+  /** The names of the groups opened to look inside, outermost first. */
+  openGroups: string[];
+  /** Whether exactly one group is picked, which Open group opens. */
+  canOpenGroup: boolean;
+  /** Lays out the parts of the picked group to pick from; nothing changes. */
+  onOpenGroup: () => void;
+  /** Closes the innermost open group again. */
+  onBackOut: () => void;
   onIndexChange: (index: number) => void;
   onExport: () => void;
   onCreateProject: () => void;
@@ -111,6 +129,11 @@ export function HistoryViewOverlay({
           event.preventDefault();
           event.stopPropagation();
           onClose();
+        } else if (event.key.toLowerCase() === "e" && !event.ctrlKey && !event.metaKey && !event.altKey && canOpenGroup) {
+          // E opens the selected group, as in the design.
+          event.preventDefault();
+          event.stopPropagation();
+          onOpenGroup();
         }
       }}
     >
@@ -156,6 +179,17 @@ export function HistoryViewOverlay({
         </span>
       </div>
 
+      {openGroups.length ? (
+        <div className="history-view-inside" data-testid="history-view-inside">
+          <FolderOpen size={16} aria-hidden="true" />
+          <span>{t("historyView.inside", { path: openGroups.join(" › ") })}</span>
+          <button type="button" className="secondary" title={t("historyView.backOutHint")} onClick={onBackOut}>
+            <CornerLeftUp size={16} aria-hidden="true" />
+            {t("historyView.backOut")}
+          </button>
+        </div>
+      ) : null}
+
       {confirmingDelete ? (
         <div className="history-view-confirm" role="alertdialog" aria-labelledby="history-delete-title" aria-describedby="history-delete-body">
           <strong id="history-delete-title">{t("historyView.deleteTitle")}</strong>
@@ -176,6 +210,14 @@ export function HistoryViewOverlay({
         <button type="button" className="delete-history" disabled={confirmingDelete || count <= 1} title={count <= 1 ? t("historyView.deleteNothing") : t("historyView.deleteHint")} onClick={() => setConfirmingDelete(true)}>
           <Trash2 size={16} aria-hidden="true" />
           {t("historyView.delete")}
+        </button>
+        <button type="button" className="secondary" disabled={!canOpenGroup} title={canOpenGroup ? t("historyView.openGroupHint") : t("historyView.openGroupNothing")} data-testid="history-view-open-group" onClick={onOpenGroup}>
+          <FolderOpen size={16} aria-hidden="true" />
+          {t("historyView.openGroup")} (E)
+        </button>
+        <button type="button" className="secondary" disabled={pickedCount === 0} title={pickedCount === 0 ? t("historyView.bringBackNothing") : t("historyView.bringBackHint")} data-testid="history-view-bring-back" onClick={onBringBack}>
+          <ArchiveRestore size={16} aria-hidden="true" />
+          {pickedCount > 1 ? t("historyView.bringBackMany", { count: pickedCount }) : t("historyView.bringBack")}
         </button>
         <button type="button" className="secondary" onClick={onExport}>
           <Download size={16} aria-hidden="true" />

@@ -317,6 +317,11 @@ export type DimensionMark = {
   e2y2: number;
   labelX: number;
   labelY: number;
+  /**
+   * Only the number, without rails: the second place of the height value, right at the height handle, shown
+   * while the handle is hovered or pulled (#488). It is left out where marks stand on their own.
+   */
+  labelOnly?: boolean;
 };
 
 export type TransformOverlayState = {
@@ -409,6 +414,8 @@ export type TransformOverlayProps = {
   onCancelCornerEdit: () => void;
   onEditingDimensionChange: (value: string) => void;
   onCommitDimensionEdit: (aroundCenter?: boolean) => void;
+  /** Tab in a dimension box: keep the value and open the next one (Shift: the one before) (#300). */
+  onTabDimensionEdit: (backwards: boolean) => void;
   onCancelDimensionEdit: () => void;
   onBeginRotationEdit: (handleKey: string, x: number, y: number) => void;
   onEditingRotationChange: (value: string) => void;

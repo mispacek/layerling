@@ -1,16 +1,17 @@
 ---
 title: Text and curved lettering
-summary: Raised or engraved lettering in seven typefaces or one of your own, and if you like along a circular arc, such as on a coin, a lid or a ring.
+summary: Raised or engraved lettering in eight typefaces or one of your own, and if you like along a circular arc, such as on a coin, a lid or a ring.
 ---
 
 ## Adding text
 
 Choose {{ui:shape.text}} in the shape library and place it. In the {{ui:prop.text}} field on the right, type what it should say. The settings below:
 
-- **{{ui:prop.font}}:** Seven typefaces are available: Multilanguage, Sans, Serif, Script, Monospace, Rounded and Stencil (letters made of straight lines). New text starts in Sans. Accented letters such as ä, ö, ü, é and the € sign are in every typeface. Fonts of your own come on top, see [Your own fonts](#your-own-fonts) below.
+- **{{ui:prop.font}}:** Eight typefaces are available: Multilanguage, Sans, Serif, Script, Monospace, Rounded, Stencil (letters made of straight lines) and Japanese (Zen Maru Gothic). New text starts in Sans. Accented letters such as ä, ö, ü, é and the € sign are in every typeface, and so are kana, the common kanji and many of the rare ones in names such as 澤, 槇 and 檜: a Japanese name works in every typeface and on a name tag. The Japanese letters are fetched the first time a text needs them (the rare kanji in a second file, only when a text has one), so such a text shows question marks for a moment. They are kept on the computer afterwards, so Japanese also works offline from then on. Fonts of your own come on top, see [Your own fonts](#your-own-fonts) below.
 - **{{ui:nameTag.letterSize}}:** How big the letters are, seen from above; {{ui:prop.height}} sets how thick they are.
 - **{{ui:prop.height}}:** How far the lettering stands out from the surface.
 - **{{ui:prop.bevel}}:** Rounds the letter edges so they look softer. With {{ui:prop.segments}} you decide in how many steps.
+- **{{ui:nameTag.letterEdge}}:** rounds or chamfers the top edge of the letters, as on a name tag: {{ui:nameTag.edge.none}}, {{ui:nameTag.edge.round}} or {{ui:nameTag.edge.chamfer}}, with the {{ui:nameTag.letterEdgeSize}} (0.4 mm to start with, at most as high as the text). It goes further than the {{ui:prop.bevel}}, but only as far as the strokes are wide: where a stroke is thinner than twice the size, the edge ends in a narrower top. The underside stays flat, so single letters can be glued on afterwards. While an edge is chosen it takes the place of {{ui:prop.bevel}}.
 - **Size:** You set the length and width of the line as with any shape. Drag the handles or type the dimensions.
 - **{{ui:prop.textStretch}}:** Off at first: the letters keep their proportions and sit in the middle of the frame, so a frame pulled wider or deeper than the word needs stays larger than the letters. Switch it on and the letters are stretched to fill the whole frame in both directions: a capital can be made lower or narrower, as in Tinkercad. It is for straight text; curved text has its own letter size.
 
@@ -20,7 +21,7 @@ The edges of text can be chamfered or filleted too, straight or curved, see [Bre
 
 ## Your own fonts
 
-Besides the seven built-in fonts you can use any font of your own: a font file from your computer or, in Chrome and Edge, a font installed on your computer. Choose {{ui:font.manage}} at the bottom of {{ui:prop.font}}. The {{ui:font.title}} window opens.
+Besides the eight built-in fonts you can use any font of your own: a font file from your computer or, in Chrome and Edge, a font installed on your computer. Choose {{ui:font.manage}} at the bottom of {{ui:prop.font}}. The {{ui:font.title}} window opens.
 
 - **{{ui:font.addFile}}** takes a TrueType file (`.ttf`), an OpenType file (`.otf`) or a WOFF file (`.woff`). You can also simply drag the file into the window.
 - **On Windows** the installed fonts live in the Fonts folder (`C:\Windows\Fonts`). The browser's file dialog hides it. Open it in Explorer instead and drag the font into the {{ui:font.title}} window. Fonts installed for you alone live in `%LOCALAPPDATA%\Microsoft\Windows\Fonts`, which the file dialog shows too. On a Mac fonts live in `/Library/Fonts` and `~/Library/Fonts`.
@@ -123,6 +124,27 @@ The card {{ui:iconTag.title}} at the top of the settings holds:
 The SVG needs closed outlines; a drawing of open lines only cannot become a tag. A sketch body whose fill is a line keeps it: the area of that line is the icon.
 
 **A picture (PNG or JPG)** is traced into an outline, and the preview shows the outline. Under {{ui:iconTag.part}} you choose whether the {{ui:iconTag.part.dark}} or the {{ui:iconTag.part.light}} becomes the icon; at first it is the part that is not the background. Transparent pixels never belong to the icon. An SVG that holds nothing but one picture, as Inkscape saves an imported bitmap, is traced the same way. The outline follows the pixels, so a small picture gives a rough edge: pictures of a few hundred pixels or more work best. {{ui:iconTag.replace}} takes the part of a picture that is not its background.
+
+## QR codes
+
+A QR code turns a text or a web address into a pattern a phone camera reads: a link to your shop on a sign, the Wi-Fi name on a coaster, a phone number on a key tag.
+
+Choose {{ui:shape.qrCode}} in the shape library. A window opens; the cursor is already in the text field:
+
+- **{{ui:qrCode.text}}:** what the code says. Enter makes the code, Shift+Enter starts a new line. Below the field you see how much of the room is used; umlauts and other special letters take two bytes. When the text is too long, the field says so.
+- **{{ui:qrCode.errorCorrection}}:** L, M, Q or H. A higher level can still be read when part of the code is dirty or scratched (L about 7 %, M 15 %, Q 25 %, H 30 %), but needs more modules for the same text, so each module gets smaller. M is chosen at first.
+- **{{ui:qrCode.style}}:** {{ui:qrCode.style.code}} makes the code alone, 4 mm high. {{ui:qrCode.style.raised}} puts it 1 mm high on a white plate 3 mm thick, as a bundle of two colours, so a multicolour print prints the code dark and the plate light. {{ui:qrCode.style.engraved}} cuts the code 1 mm deep into the plate.
+- **{{ui:qrCode.sizeBy}}:** type the {{ui:qrCode.sizeBy.width}} of the whole code (40 mm at first) or the size of one module; the other number is shown below. Modules under 0.8 mm get a warning. That is a rule of thumb for a 0.4 mm nozzle, not a guarantee: printer, material, colours and the phone all play a part.
+- **{{ui:qrCode.quietZone}}:** scanners need an empty rim four modules wide round the code. On a plate the rim is part of the plate; switch it off only if the plate sits on a larger light surface. The code alone has no rim of its own: leave the room free round it.
+- **Heights:** the height of the code, or on a plate the code height or engraving depth, and the plate thickness.
+
+The preview shows the code as it will be built. {{ui:qrCode.ok}} puts it in the middle of the plate.
+
+The code is a body like any other: move it, turn it, scale it (keep width and depth the same, or the code is stretched), group it, or make it a hole and group it into a part of your own to engrave it there. Scaling it scales the whole code; each module stays square.
+
+The card {{ui:qrCode.title}} at the top of its settings holds the text. Change it and click {{ui:qrCode.regenerate}}: the code is built again where it stands and as wide as it is now. Error correction, quiet zone and build stay as they were chosen; for other choices make a new code from the library.
+
+Scan the code with your phone before you print it, and once more after printing. Dark on light reads best; a light code on a dark plate is not read by every phone.
 
 ## Text on a circular arc
 

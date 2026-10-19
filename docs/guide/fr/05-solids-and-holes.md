@@ -80,6 +80,6 @@ Les moitiés sont des maillages simples : les paramètres tels que les côtés 
 
 ## Séparation des pièces
 
-Si une forme est constituée de plusieurs éléments distincts, comme un texte composé de lettres simples, {{ui:inspector.separateParts}} la divise en formes indépendantes.
+Si une forme est constituée de plusieurs éléments distincts, comme un texte composé de lettres simples, {{ui:inspector.separateParts}} la divise en formes indépendantes. L'entrée se trouve aussi dans le menu du clic droit sur la forme.
 
 > **Conseil :** Construisez toujours des trous un peu plus longs que la partie à travers laquelle ils doivent passer. Si le trou se termine exactement au ras du visage, il reste parfois une peau très fine. Un millimètre de dépassement garantit.

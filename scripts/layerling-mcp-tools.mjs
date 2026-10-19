@@ -19,7 +19,7 @@ export const editorTargetSchema = {
  */
 export const creatableShapeKinds = [
   "box", "roundedBox", "cube", "cylinder", "slot", "ellipse", "polygon", "sphere", "cone", "pyramid", "wedge",
-  "roundRoof", "halfSphere", "torus", "loft", "tube", "bentTube", "star", "heart", "crescent", "text", "thread", "spring", "gear",
+  "roundRoof", "halfSphere", "torus", "loft", "tube", "bentTube", "star", "heart", "crescent", "text", "thread", "spring", "gridfinity", "gear",
   "hinge", "knurl", "dovetail", "counterbore", "countersink", "doubleCountersink", "teardrop", "ruler", "sketch",
 ];
 
@@ -67,13 +67,13 @@ export const shapeSettingSchema = {
   baseRadius: { type: "number", description: "Cone only: radius at the base." },
   topWidth: { type: "number", description: "Pyramid only: width of the flat top. 0 runs to a point." },
   topDepth: { type: "number", description: "Pyramid only: depth of the flat top. 0 runs to a point." },
-  taperTopWidth: { type: "number", description: "Taper, on every shape except gear, thread, spring, knurl, hinge, pyramid, bentTube, teardrop, counterbore, countersink and ruler: width of the top face. Setting one value of a face pins the other." },
-  taperTopDepth: { type: "number", description: "Taper, on every shape except gear, thread, spring, knurl, hinge, pyramid, bentTube, teardrop, counterbore, countersink and ruler: depth of the top face." },
-  taperBottomWidth: { type: "number", description: "Taper, on every shape except gear, thread, spring, knurl, hinge, pyramid, bentTube, teardrop, counterbore, countersink and ruler: width of the bottom face." },
-  taperBottomDepth: { type: "number", description: "Taper, on every shape except gear, thread, spring, knurl, hinge, pyramid, bentTube, teardrop, counterbore, countersink and ruler: depth of the bottom face." },
-  extrudeTwist: { type: "number", description: "On every shape except gear, thread, spring, knurl, hinge, pyramid, bentTube, teardrop, counterbore, countersink and ruler: rotates the top face relative to the base, in degrees, for a twisted extrusion." },
-  extrudeTopOffsetX: { type: "number", description: "On every shape except gear, thread, spring, knurl, hinge, pyramid, bentTube, teardrop, counterbore, countersink and ruler: shifts the top face along the shape's own X axis, in mm, for a leaning extrusion." },
-  extrudeTopOffsetZ: { type: "number", description: "On every shape except gear, thread, spring, knurl, hinge, pyramid, bentTube, teardrop, counterbore, countersink and ruler: shifts the top face along the shape's own Z axis, in mm, for a leaning extrusion." },
+  taperTopWidth: { type: "number", description: "Taper, on every shape except gear, thread, spring, gridfinity, knurl, hinge, pyramid, bentTube, teardrop, counterbore, countersink and ruler: width of the top face. Setting one value of a face pins the other." },
+  taperTopDepth: { type: "number", description: "Taper, on every shape except gear, thread, spring, gridfinity, knurl, hinge, pyramid, bentTube, teardrop, counterbore, countersink and ruler: depth of the top face." },
+  taperBottomWidth: { type: "number", description: "Taper, on every shape except gear, thread, spring, gridfinity, knurl, hinge, pyramid, bentTube, teardrop, counterbore, countersink and ruler: width of the bottom face." },
+  taperBottomDepth: { type: "number", description: "Taper, on every shape except gear, thread, spring, gridfinity, knurl, hinge, pyramid, bentTube, teardrop, counterbore, countersink and ruler: depth of the bottom face." },
+  extrudeTwist: { type: "number", description: "On every shape except gear, thread, spring, gridfinity, knurl, hinge, pyramid, bentTube, teardrop, counterbore, countersink and ruler: rotates the top face relative to the base, in degrees, for a twisted extrusion." },
+  extrudeTopOffsetX: { type: "number", description: "On every shape except gear, thread, spring, gridfinity, knurl, hinge, pyramid, bentTube, teardrop, counterbore, countersink and ruler: shifts the top face along the shape's own X axis, in mm, for a leaning extrusion." },
+  extrudeTopOffsetZ: { type: "number", description: "On every shape except gear, thread, spring, gridfinity, knurl, hinge, pyramid, bentTube, teardrop, counterbore, countersink and ruler: shifts the top face along the shape's own Z axis, in mm, for a leaning extrusion." },
   teeth: { type: "number", description: "Gear only." },
   gearProfile: { type: "string", enum: ["involute", "round", "simple"], description: "Gear only: involute teeth that mesh (new gears), round teeth made of arcs (like Tinkercad's Useful gear: forgiving on small printed gears, a smooth grip on knobs), or the plain straight teeth older designs have. An involute gear's width and depth are its outside diameter, module x (teeth + 2): for module 1.5 and 20 teeth give width and depth 33. Round teeth stand lower, so a round gear's outside diameter is module x (teeth + 1.2): module 1.5 and 20 teeth give 31.8. Two gears with the same module and tooth shape mesh at a centre distance of module x (teeth1 + teeth2) / 2; gearBacklash applies to both, gearPressureAngle only to involute teeth." },
   gearPressureAngle: { type: "number", description: "Involute gear only: pressure angle in degrees, 14.5 to 30 (default 20)." },
@@ -124,6 +124,35 @@ export const shapeSettingSchema = {
   hingePinDiameter: { type: "number", description: "Hinge only: diameter of the pin in mm (default 3); the other part's bore is wider by the clearance." },
   hingeLeafThickness: { type: "number", description: "Hinge only: thickness of the two leaves in mm (default 2), at most the knuckle radius less the bore radius so a leaf stays below the bore." },
   hingeClearance: { type: "number", description: "Hinge only: gap in mm between the moving parts (0.1 to 1, default 0.4) - around the pin, between the knuckles and in front of the leaves. Go up for a printer that tends to fuse, down for a tighter hinge." },
+  hingePinless: { type: "boolean", description: "Hinge only: leave the printed pin out. The bore (pin diameter plus the clearance) then runs through every knuckle, the ends included, for a pin of your own such as a piece of filament or wire (default false)." },
+  gridfinityType: { type: "string", enum: ["bin", "baseplate"], description: "Gridfinity only: a bin, or the baseplate bins stand in, to the published Gridfinity measures so they fit parts printed from other designs. The size is whole grid units of 42 mm: a bin is 42 x units - 0.5 across and deep (41.5, 83.5, 125.5 ... up to 6 units, 251.5), 7 mm per height unit, up to 20 units, plus 4.4 for the stacking lip (a 3-unit bin is 25.4 tall); a baseplate is 42 x units across and deep and 5 tall. Any width, depth or height is rounded to the nearest whole units. When a baseplate becomes a bin, give its height too, or it gets one height unit. With gridfinityHalfGrid a bin's units are cells of 21 mm instead." },
+  gridfinityLip: { type: "boolean", description: "Gridfinity bin only: the stacking lip on top of the wall that the next bin's feet sit in (default true). Switching it keeps the height units and adds or takes off the 4.4 mm." },
+  gridfinityMagnets: { type: "boolean", description: "Gridfinity bin only: holes for 6 x 2 mm magnets under each foot, 6.5 mm wide and 2.4 deep, 13 mm from the middle of the unit both ways (default false); on the half-size grid one hole under each foot, see gridfinityHalfGrid. A baseplate has none." },
+  gridfinityHalfGrid: { type: "boolean", description: "Gridfinity bin only: a half-size grid (default false). The width and depth then count cells of 21 mm: a bin is 21 x units - 0.5 (20.5, 41.5, 62.5 ... up to 12 units, 251.5), with a foot under every cell, the same steps and corners, four to a socket of an ordinary baseplate. Switching it on keeps the outline; switching it off rounds an odd count up to whole units of 42 mm. With magnets each foot gets one hole, 2.5 mm both ways from its middle towards the corner of its cell on the 42 mm grid, counted from the bin's left back corner (-x, -z). A baseplate ignores it." },
+  gridfinityLabelBack: { type: "boolean", description: "Gridfinity bin only, 3 height units or more and a floor low enough (see gridfinityFloorHeight): a label shelf along the inside of the back wall (default false). The shelf is flat on top, with a 1.2 mm strip down at the front and an underside rising at 36 degrees from the wall; its top is 0.85 mm below 7 mm per height unit (20.15 mm for 3 units), so the feet of a bin stacked on the lip stay 0.5 mm clear. Shelves on several walls join at the corners; each wall has its own width, length and offset (gridfinityLabelBackWidth, gridfinityLabelBackLength, gridfinityLabelBackOffset and the same for Front, Left and Right), and the corner settings apply to all of them." },
+  gridfinityLabelFront: { type: "boolean", description: "Gridfinity bin only: a label shelf along the front wall (default false); see gridfinityLabelBack." },
+  gridfinityLabelLeft: { type: "boolean", description: "Gridfinity bin only: a label shelf along the left wall (default false); see gridfinityLabelBack." },
+  gridfinityLabelRight: { type: "boolean", description: "Gridfinity bin only: a label shelf along the right wall (default false); see gridfinityLabelBack." },
+  gridfinityLabelBackWidth: { type: "number", description: "Gridfinity bin only: how far the back wall's label shelf reaches out from it in mm (default 14, at least 4). The underside ends above the floor (at most about 17 in a bin of 3 height units, less with a raised floor), and across the bin the shelves and their corner pieces leave at least 2 mm open." },
+  gridfinityLabelBackLength: { type: "number", description: "Gridfinity bin only: the back wall's label shelf length in mm; 0 (the default), or a length that leaves at most 1 mm at both ends (1.8 mm with the stacking lip), runs it from wall to wall, into the round corners. At least 10; an end that comes that close to a wall, or stops on that wall's shelf, runs into it." },
+  gridfinityLabelBackOffset: { type: "number", description: "Gridfinity bin only: moves the back wall's label shelf of a set length along the wall, in mm from the middle (default 0); positive is to the right (+x). It stays on its wall." },
+  gridfinityLabelFrontWidth: { type: "number", description: "Gridfinity bin only: as gridfinityLabelBackWidth, for the front wall's label shelf." },
+  gridfinityLabelFrontLength: { type: "number", description: "Gridfinity bin only: as gridfinityLabelBackLength, for the front wall's label shelf." },
+  gridfinityLabelFrontOffset: { type: "number", description: "Gridfinity bin only: moves the front wall's label shelf of a set length along the wall, in mm from the middle (default 0); positive is to the right (+x). It stays on its wall." },
+  gridfinityLabelLeftWidth: { type: "number", description: "Gridfinity bin only: as gridfinityLabelBackWidth, for the left wall's label shelf." },
+  gridfinityLabelLeftLength: { type: "number", description: "Gridfinity bin only: as gridfinityLabelBackLength, for the left wall's label shelf." },
+  gridfinityLabelLeftOffset: { type: "number", description: "Gridfinity bin only: moves the left wall's label shelf of a set length along the wall, in mm from the middle (default 0); positive is towards the front (+z). It stays on its wall." },
+  gridfinityLabelRightWidth: { type: "number", description: "Gridfinity bin only: as gridfinityLabelBackWidth, for the right wall's label shelf." },
+  gridfinityLabelRightLength: { type: "number", description: "Gridfinity bin only: as gridfinityLabelBackLength, for the right wall's label shelf." },
+  gridfinityLabelRightOffset: { type: "number", description: "Gridfinity bin only: moves the right wall's label shelf of a set length along the wall, in mm from the middle (default 0); positive is towards the front (+z). It stays on its wall." },
+  gridfinityLabelCorner: { type: "string", enum: ["round", "chamfer"], description: "Gridfinity bin only: where a label shelf meets a wall or another shelf, the corner rounded (default) or chamfered. With round, a shelf of a set length also has the front corners of its free ends rounded by the same size (at most half its width and half its length); with chamfer they stay square." },
+  gridfinityLabelCornerSize: { type: "number", description: "Gridfinity bin only: the size of that rounding or chamfer in mm, 0 to 10 (default 2); 0 leaves the corners sharp." },
+  gridfinityScoopBack: { type: "boolean", description: "Gridfinity bin only, 2 height units or more and a floor low enough (see gridfinityFloorHeight): a finger scoop along the inside of the back wall (default false). The floor rises along a quarter circle into the wall, from wall to wall, so small parts can be pushed out; scoops on neighbouring walls meet in their corner, gridfinityScoopRadius applies to all of them, and a bin with a scoop has every inner floor edge rounded by 2.8 mm." },
+  gridfinityScoopFront: { type: "boolean", description: "Gridfinity bin only: a finger scoop along the front wall (default false); see gridfinityScoopBack." },
+  gridfinityScoopLeft: { type: "boolean", description: "Gridfinity bin only: a finger scoop along the left wall (default false); see gridfinityScoopBack." },
+  gridfinityScoopRight: { type: "boolean", description: "Gridfinity bin only: a finger scoop along the right wall (default false); see gridfinityScoopBack." },
+  gridfinityScoopRadius: { type: "number", description: "Gridfinity bin only: the finger scoops' radius in mm, at least 3.5. Unset, it is half the height from the floor (5.95 mm up unless gridfinityFloorHeight raises it) to where the stacking lip's support leaves the wall, 1.65 mm under 7 mm per height unit, or to the top of a bin without the lip: 6.7 for a bin of 3 height units with the lip, 7.525 without. It stays at least 0.5 mm less than that height, and across the bin it leaves at least 2 mm of floor, between two scoops facing each other or between a scoop and the wall opposite it." },
+  gridfinityFloorHeight: { type: "number", description: "Gridfinity bin only: the floor's height inside in mm, measured from the underside of the bin (default 5.95, the 1.2 mm floor on the feet). Raised, the bin is solid up to it, a blank to cut shapes into: at most where the stacking lip's support leaves the wall, 1.65 mm under 7 mm per height unit (19.35 for 3 units), so a stacked bin's feet stay 1.3 mm clear, or the top of a bin without the lip, a solid block. Not in a bin of 1 height unit with the lip. Finger scoops start on it and label shelves can reach less far out above it; both are left out once it leaves them no room." },
   dovetailNeckWidth: { type: "number", description: "Dovetail only: width of the narrow neck in mm; the shape's width is the wide end, its depth the length of the tail. Must be narrower than the width." },
   screwHoleShaft: { type: "number", description: "Counterbore, countersink and doubleCountersink: diameter of the shaft below the head (on the doubleCountersink, between the two cones) in mm. The shape's width is the head diameter, its height the whole length; the head end of a counterbore and a countersink is on top." },
   screwHoleHeadDepth: { type: "number", description: "Counterbore only: depth of the cylindrical head pocket in mm." },
@@ -232,7 +261,7 @@ export const tools = [
   },
   {
     name: "layerling_create_shape",
-    description: "Create any of Layerling's shapes: boxes, cylinders, slots, polygons, spheres, cones, pyramids, wedges, roofs, tori, tubes, stars, hearts, crescents, print-in-place hinges, knurled grips, raised text, threads (rod, screw, nut, tapped hole), springs, gears, or a simple extruded sketch. Width, depth and height default to what the editor uses for that shape; everything a shape has beyond its size is optional and falls back to the same defaults as a shape placed by hand. With a workplane set on a face (layerling_set_workplane), the shape stands on that face and x and z count on it (0, 0 is where the workplane sits) - unless elevation or a rotation is given, which mean the base plate.",
+    description: "Create any of Layerling's shapes: boxes, cylinders, slots, polygons, spheres, cones, pyramids, wedges, roofs, tori, tubes, stars, hearts, crescents, print-in-place hinges, Gridfinity bins and baseplates, knurled grips, raised text, threads (rod, screw, nut, tapped hole), springs, gears, or a simple extruded sketch. Width, depth and height default to what the editor uses for that shape; everything a shape has beyond its size is optional and falls back to the same defaults as a shape placed by hand. With a workplane set on a face (layerling_set_workplane), the shape stands on that face and x and z count on it (0, 0 is where the workplane sits) - unless elevation or a rotation is given, which mean the base plate.",
     inputSchema: {
       ...editorTargetSchema,
       required: ["kind"],
@@ -280,6 +309,7 @@ export const tools = [
         text: { type: "string", description: "The file content as text. Give text or base64, not both." },
         base64: { type: "string", description: "The file content as base64, for binary files." },
         mtl: { type: "string", description: "The .mtl material file of an OBJ, as text, for its colours." },
+        svgWidth: { type: "number", description: "SVG and pictures (PNG, JPG): bring the drawing in at this width in millimetres, scaled from its own size, as the width field of the import window does. Left out, it comes in at its own size." },
         keepPagePosition: { type: "boolean", description: "SVG only: keep the drawing's place on its page (its viewBox) instead of centring it on itself, so that several files exported from one page - the layers of one document - line up when imported one after the other. Default false; a drawing that states no page is centred anyway." },
       },
     },
@@ -649,7 +679,7 @@ export const tools = [
   },
   {
     name: "layerling_save_custom_shape",
-    description: "Keep bodies as a custom shape, as the shape library's \"Save selection\" does, to insert them into any design later. Several bodies become one shape and come back together. The shape is kept centred, standing on the plate. Where the shared server store is on, it goes to the server's \"Custom shapes\" folder unless location says \"browser\"; otherwise it stays in this browser. Returns the new shape's id, name and location.",
+    description: "Keep bodies as a custom shape, as the shape library's \"Save selection\" does, to insert them into any design later. Several bodies become one shape and come back together. The shape is kept centred, standing on the plate. Where the shared server store is on, it goes to the server's \"Custom shapes\" folder unless location says \"browser\"; otherwise it stays in this browser. Returns the new shape's id, name, location and folder.",
     inputSchema: {
       ...editorTargetSchema,
       properties: {
@@ -657,12 +687,13 @@ export const tools = [
         ids: { type: "array", items: { type: "string" }, description: "The bodies to keep; defaults to the selection." },
         name: { type: "string", description: "Name shown in the library; defaults to the body's name. On the server it is also the file name, so it must not be taken yet." },
         location: { type: "string", enum: ["server", "browser"], description: "Where to keep it. Default: the server when there is one, else the browser." },
+        folder: { type: "string", description: "Folder path to put it in, on that side (browser or server), with / between levels, e.g. \"Brackets/M3\"; at most three levels. Missing folders on the way are made. Default: no folder, the top of the list." },
       },
     },
   },
   {
     name: "layerling_list_custom_shapes",
-    description: "List the custom shapes: those on the server (ids start with \"server:\") and those in this browser, with name, location and size. serverAvailable says whether this installation has the shared store.",
+    description: "List the custom shapes: those on the server (ids start with \"server:\") and those in this browser, with name, location, folder path (\"Brackets/M3\", null for none) and size, plus the folder paths on each side (folders go three levels deep). serverAvailable says whether this installation has the shared store.",
     inputSchema: editorTargetSchema,
   },
   {
@@ -721,6 +752,31 @@ export const tools = [
     },
   },
   {
+    name: "layerling_list_faces",
+    description: "List the faces of one object's exact body, for layerling_delete_faces: each with its id, its kind (plane, cylinder, cone, sphere, torus, bspline, ...), its area in square millimetres, its middle and, for a flat face, its outward normal, in world coordinates (y up). Only for exact bodies, STEP imports and layerling's shapes; whatever layerling keeps as a mesh (an imported STL, OBJ or 3MF, a split, wrapped or simplified body, a very detailed shape such as a long text) has no exact faces.",
+    inputSchema: {
+      ...editorTargetSchema,
+      required: ["id"],
+      properties: {
+        ...editorTargetSchema.properties,
+        id: { type: "string" },
+      },
+    },
+  },
+  {
+    name: "layerling_delete_faces",
+    description: "Delete faces of an exact body, as the editor's Delete face tool does: the faces around them grow until they close the gap, so a fillet, a hole, a boss or a step is gone and the body stays exact (fillet, chamfer and STEP export still work on it). Give every face of the feature, with ids from layerling_list_faces - the four faces of a box's rounded top edges, the wall of a hole, the side and top of a boss. When the faces around them cannot close the gap, nothing changes and the answer says so. Deleting only the floor of a pocket makes it a hole straight through. One undo step; undone like an edge treatment.",
+    inputSchema: {
+      ...editorTargetSchema,
+      required: ["id", "faceIds"],
+      properties: {
+        ...editorTargetSchema.properties,
+        id: { type: "string" },
+        faceIds: { type: "array", items: { type: "integer" }, description: "Face ids from layerling_list_faces." },
+      },
+    },
+  },
+  {
     name: "layerling_hollow_object",
     description: "Hollow a solid into walls of equal thickness, like a box, cup or case. The walls grow inward, so the outside keeps its size. `openings` chooses which flat sides stay open, measured against the world's axes: a list of any of top, bottom, front (+z), back (-z), left (-x) and right (+x) - for example [\"front\"] for a drawer slot - or one of the names top (default), bottom, top-bottom, or none for a sealed cavity. A side asked for in a list must have a flat face at the very edge of the body on that side. `edges` sets how the inner walls meet where the body has a step or opening: round (default, radius = wall thickness) or sharp. Can be undone like an edge treatment. Resizing the body later hollows it again at the new size a moment afterwards, so the walls keep their thickness.",
     inputSchema: {
@@ -767,18 +823,18 @@ export const tools = [
   },
   {
     name: "layerling_apply_edge_treatment",
-    description: "Apply chamfer or fillet to specific edge ids returned by layerling_list_edges, to \"all\" sharp edges, or to the \"top\" edges (every edge along the body's highest level, such as the rim of a cookie cutter), as the editor's Top edges button picks them.",
+    description: "Apply chamfer, chamfillet or fillet to specific edge ids returned by layerling_list_edges, to \"all\" sharp edges, to the \"top\" edges (every edge along the body's highest level, such as the rim of a cookie cutter), to the \"bottom\" edges (every edge along its lowest level, such as the foot of a part), or to the \"vertical\" edges (every edge that stands straight up, such as the corners of a box), as the editor's Top edges, Bottom edges and Vertical edges buttons pick them. A chamfillet is the printable foot: a chamfer at the plate (chamferAngle 15 to 75, default 45) that blends tangentially into a fillet toward the wall, so the foot needs no support and ends soft; amount is the height it takes up, and it is mostly used with \"bottom\".",
     inputSchema: {
       ...editorTargetSchema,
       required: ["id", "kind", "edgeIds", "amount"],
       properties: {
         ...editorTargetSchema.properties,
         id: { type: "string" },
-        kind: { type: "string", enum: ["chamfer", "fillet"] },
+        kind: { type: "string", enum: ["chamfer", "chamfillet", "fillet"] },
         edgeIds: {
           anyOf: [
             { type: "array", items: { type: "number" } },
-            { type: "string", enum: ["all", "top"] },
+            { type: "string", enum: ["all", "top", "bottom", "vertical"] },
           ],
         },
         allEdges: { type: "boolean" },
@@ -904,6 +960,26 @@ export const tools = [
     },
   },
   {
+    name: "layerling_create_qr_code",
+    description: "A QR code as a body to print, like the editor's QR code (the shape library): `text` (a text or a web address, written as UTF-8) becomes the code's modules, merged into one outline without gaps between modules, and stands on the middle of the plate. `errorCorrection` L, M (default), Q or H: a higher level survives dirt and damage but needs more modules; the text must fit the level (L 2953, M 2331, Q 1663, H 1273 bytes). `width` is the whole code's width in mm (5 to 500, default 40), the quiet zone included on a plate. `style` \"code\" (default) builds the code alone as one sketch body, `height` mm high (default 4); \"raised\" a bundle of a white plate (`plateThickness`, default 3) and the dark code `height` mm on it (default 1) - two colours for a multicolour print; \"engraved\" the plate with the code cut `height` mm deep (default 1) as a group. `quietZone` (default true) gives a plate the four-module rim scanners need; the code alone has no rim of its own. `asHole` makes the result a hole, to group into another body and engrave the code there. The settings stay on the body (summary `qrCode`); layerling_update_object can move, turn and scale it like any body. A module under 0.8 mm is reported in `warning` - a rule of thumb for a 0.4 mm nozzle, not a guarantee. One undo step.",
+    inputSchema: {
+      ...editorTargetSchema,
+      properties: {
+        ...editorTargetSchema.properties,
+        text: { type: "string", description: "The text or web address the code holds." },
+        errorCorrection: { type: "string", enum: ["L", "M", "Q", "H"], description: "Error correction level (default M)." },
+        width: { type: "number", minimum: 5, maximum: 500, description: "The code's width in mm (default 40)." },
+        height: { type: "number", minimum: 0.2, maximum: 50, description: "The code's height, or on a plate its relief or engraving depth, in mm." },
+        quietZone: { type: "boolean", description: "A rim of four empty modules round the code on a plate (default true)." },
+        asHole: { type: "boolean", description: "Make the result a hole (default false)." },
+        style: { type: "string", enum: ["code", "raised", "engraved"], description: "The code alone (default), raised on a plate, or engraved into a plate." },
+        plateThickness: { type: "number", minimum: 0.2, maximum: 50, description: "The plate's thickness in mm for raised and engraved (default 3)." },
+        name: { type: "string", description: "The object's name (default \"QR code\")." },
+      },
+      required: ["text"],
+    },
+  },
+  {
     name: "layerling_measure_section",
     description: "Measure on a cut through the design, like \"Measure\" in the editor's section view: wall thickness, a gap, a clearance. Both points snap to the outline of the cut (within snapRadius mm, default 1): first to the nearest wall, then the second one preferably square to its wall as seen from the first - give it a point near the opposite wall and it returns the true thickness. Points are in the editor's coordinates (x, z, elevation); the one along the axis is set to the plane. axis and offset work like layerling_export_section_svg and default to the section view or the middle of the design. Round outlines (a hole, a cylinder) also snap: the centre of the circle; a second point near the spot across the centre from a first one on the circle lands exactly across, so the distance is the diameter; and with the centre as the first point the second lands on the circle, so the distance is the radius. Returns the snapped points with their snap kind (perpendicular, corner, outline, center, opposite or free), distance, circle (\"diameter\", \"radius\" or null) and deltaX, deltaZ, deltaElevation. The section view itself is left as it is.",
     inputSchema: {
@@ -1016,13 +1092,26 @@ export const tools = [
   },
   {
     name: "layerling_set_history_view",
-    description: "Look back at an earlier state of the project, like the editor's History view: the workplane shows that state while the real design stays untouched. Give `index` (0 is the oldest state, the last one is the current design) to open the view at that state or move it, `open: false` to close it, or no settings to read where it stands. While it is open, tools that change the design answer with an error - close it first; reading, `layerling_capture_image` (a picture of the shown state) and the section view still work. `layerling_read_scene` keeps describing the live design. Returns the state shown, how many there are and its bodies.",
+    description: "Look back at an earlier state of the project, like the editor's History view: the workplane shows that state while the real design stays untouched. Give `index` (0 is the oldest state, the last one is the current design) to open the view at that state or move it, `open: false` to close it, or no settings to read where it stands. While it is open, tools that change the design answer with an error - close it first; reading, `layerling_capture_image` (a picture of the shown state) and the section view still work. `layerling_read_scene` keeps describing the live design. Returns the state shown, how many there are and its bodies; a group lists its `parts` at every depth, whose ids `layerling_restore_from_history` takes.",
     inputSchema: {
       ...editorTargetSchema,
       properties: {
         ...editorTargetSchema.properties,
         open: { type: "boolean", description: "false closes the view; true (or an index) opens it." },
         index: { type: "number", description: "The state to show, 0 = oldest. Clamped to the existing states." },
+      },
+    },
+  },
+  {
+    name: "layerling_restore_from_history",
+    description: "Bring objects back from an earlier state of the history into the current design, as the History view's \"Bring into design\" button does: each comes in as a copy with new ids, exactly as it was in that state and at the spot it had there, and the copies end up selected. Each copy is named after the time of that state, such as \"Box (12:32)\" (the date too for a state of an earlier day), so it is easy to tell from the current version. A part inside a group can be brought back on its own - give its id from the `parts` that `layerling_set_history_view` lists for a group; it comes out where opening the group would put it, and the group itself stays untouched. It is one step: Undo takes it back. Closes the History view if it is open. Notes and reference points attached to the objects are not brought along. Returns the new objects.",
+    inputSchema: {
+      ...editorTargetSchema,
+      required: ["index", "ids"],
+      properties: {
+        ...editorTargetSchema.properties,
+        index: { type: "number", description: "The state to bring the objects back from, 0 = oldest, as layerling_set_history_view numbers them." },
+        ids: { type: "array", items: { type: "string" }, description: "Ids of objects in that state, at any depth inside groups." },
       },
     },
   },
@@ -1073,6 +1162,20 @@ export const tools = [
         ids: { type: "array", items: { type: "string" }, description: "Objects to export. Defaults to the whole design." },
         path: { type: "string", description: "Where to write the file, e.g. C:/print/part.stl. Directories are made as needed. Omit it to get the file as base64." },
       },
+    },
+  },
+  {
+    name: "layerling_save_project",
+    description: "Save the whole editable design as a .lyl file, as the export window's Layerling project (.lyl) does: shapes, groups, sketches, CAD and imported assets, settings, notes and the undo history as chosen. The file is written at path on the computer where this MCP server runs, without any dialog. An existing file is only replaced with overwrite true; the file is written through a temporary one, so a failure leaves no half file. It does not change the file that Ctrl+S in the editor saves to. The answer gives the full path, the size in bytes and how many objects and history steps the file holds. In the History view it saves the state shown.",
+    inputSchema: {
+      ...editorTargetSchema,
+      properties: {
+        ...editorTargetSchema.properties,
+        path: { type: "string", description: "Where to write the file, e.g. C:/Projects/drawer/drawer-r01.lyl. A missing .lyl ending is added. Directories are made as needed." },
+        overwrite: { type: "boolean", description: "Replace a file that is already there. Defaults to false: the call fails and leaves the file alone." },
+        history: { description: "How much undo history goes into the file: a number of steps (0 for none) or \"all\". Defaults to the limit set under Workspace settings.", anyOf: [{ type: "number" }, { type: "string", enum: ["all"] }] },
+      },
+      required: ["path"],
     },
   },
   {

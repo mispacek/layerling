@@ -22,7 +22,7 @@ Mit [[Esc]] verlässt du den Messmodus.
 
 ## Das Lineal
 
-Aus der Formenbibliothek holst du das {{ui:shape.ruler}}. Es ist ein reines Messwerkzeug: Es erscheint in keinem Export und lässt sich weder gruppieren noch verschneiden. Für jeden Körper, der das Lineal berührt oder überlappt, zeigt es die Ausdehnung als schwebende Zahl direkt in der Ansicht. Diese Zahl kannst du direkt dort ändern, und der Körper passt sich an. Über das schwebende Plus-Symbol legst du eine Kopie der gemessenen Form an.
+Aus der Formenbibliothek holst du das {{ui:shape.ruler}}. Es ist ein reines Messwerkzeug: Es erscheint in keinem Export und lässt sich weder gruppieren noch verschneiden. Für jeden Körper, der das Lineal berührt oder überlappt, zeigt es die Ausdehnung als schwebende Zahl direkt in der Ansicht. Diese Zahl kannst du direkt dort ändern, und der Körper passt sich an. Über das schwebende Plus-Symbol legst du eine Kopie der gemessenen Form an. Seine aufgedruckte Skala ist in Millimetern; stellst du die Einheit auf Zoll um (der Schalter unten rechts), ist sie in Zoll, mit einem Strich je Sechzehntelzoll und nummerierten ganzen Zoll.
 
 ## Das Winkellineal
 
@@ -61,6 +61,8 @@ Eine Notiz hält fest, was die Geometrie nicht sagt: „Hier ist eine Schraube 0
 - Setzt du die Notiz **auf einen Körper**, wandert sie mit ihm.
 - Setzt du sie **daneben**, bleibt sie auf der Arbeitsebene ({{ui:note.free}}).
 - {{ui:note.detach}} löst eine angeheftete Notiz vom Körper.
+- {{ui:editor.tool.group}} nimmt eine angeheftete Notiz mit in die Gruppe; {{ui:editor.tool.ungroup}} gibt sie an das sichtbare Teil darunter weiter, auch an eine Gruppe darin. Solange eine Gruppe mit {{ui:group.edit}} offen ist, wandern ihre Notizen mit dem Teil darunter und kehren mit {{ui:group.done}} zur Gruppe zurück; Abbrechen stellt sie wieder her, wie sie waren.
+- Wird ihr Körper gelöscht oder liegt kein sichtbarer Körper mehr darunter, bleibt die Notiz stehen, wo sie war, auf der Arbeitsebene.
 - Ziehen verschiebt die Notiz, ein Klick öffnet sie zum Bearbeiten.
 - Beim Schreiben übernimmt [[Enter]] den Text, und [[Esc]] stellt ihn wieder her, wie er vorher war; [[Umschalt]]+[[Enter]] beginnt eine neue Zeile.
 

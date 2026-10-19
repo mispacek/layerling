@@ -1,16 +1,17 @@
 ---
 title: Text und gebogene Schrift
-summary: Beschriftungen erhaben oder vertieft, mit sieben Schriftarten oder einer eigenen – und auf Wunsch entlang eines Kreisbogens, etwa auf einer Münze, einem Deckel oder einem Ring.
+summary: Beschriftungen erhaben oder vertieft, mit acht Schriftarten oder einer eigenen – und auf Wunsch entlang eines Kreisbogens, etwa auf einer Münze, einem Deckel oder einem Ring.
 ---
 
 ## Text hinzufügen
 
 Wähle in der Formenbibliothek {{ui:shape.text}} und setze ihn ab. Im Feld {{ui:prop.text}} rechts tippst du, was da stehen soll. Die Einstellungen darunter:
 
-- **{{ui:prop.font}}:** Sieben Schriftarten stehen bereit: Multilanguage, Sans, Serif, Script, Monospace, Rounded und Stencil (Buchstaben aus geraden Linien). Neuer Text beginnt in Sans. Umlaute, ß und € gibt es in jeder Schrift. Eigene Schriften kommen dazu, siehe [Eigene Schriften](#eigene-schriften) weiter unten.
+- **{{ui:prop.font}}:** Acht Schriftarten stehen bereit: Multilanguage, Sans, Serif, Script, Monospace, Rounded, Stencil (Buchstaben aus geraden Linien) und Japanese (Zen Maru Gothic). Neuer Text beginnt in Sans. Umlaute, ß und € gibt es in jeder Schrift, ebenso Kana, die gebräuchlichen Kanji und viele seltene aus Namen wie 澤, 槇 und 檜: ein japanischer Name geht in jeder Schrift und auf einem Namensschild. Die japanischen Zeichen werden geholt, sobald ein Text sie zum ersten Mal braucht (die seltenen Kanji in einer zweiten Datei, nur wenn ein Text eines hat), darum zeigt so ein Text einen Moment lang Fragezeichen. Danach bleiben sie auf dem Computer, sodass Japanisch von da an auch ohne Internet geht. Eigene Schriften kommen dazu, siehe [Eigene Schriften](#eigene-schriften) weiter unten.
 - **{{ui:nameTag.letterSize}}:** Wie groß die Buchstaben sind, von oben gesehen; {{ui:prop.height}} bestimmt, wie dick sie sind.
 - **{{ui:prop.height}}:** Wie hoch die Schrift aus der Fläche ragt.
 - **{{ui:prop.bevel}}:** Rundet die Buchstabenkanten ab, damit sie weicher wirken. Mit {{ui:prop.segments}} bestimmst du, in wie vielen Stufen.
+- **{{ui:nameTag.letterEdge}}:** rundet die obere Kante der Buchstaben ab oder setzt eine Fase an, wie bei einem Namensschild: {{ui:nameTag.edge.none}}, {{ui:nameTag.edge.round}} oder {{ui:nameTag.edge.chamfer}}, mit der {{ui:nameTag.letterEdgeSize}} (zu Beginn 0,4 mm, höchstens so hoch wie der Text). Sie geht weiter als die {{ui:prop.bevel}}, aber nur so weit, wie die Striche breit sind: wo ein Strich dünner ist als die doppelte Größe, endet die Kante in einer schmaleren Oberseite. Die Unterseite bleibt flach, einzelne Buchstaben lassen sich also nachher aufkleben. Solange eine Kante gewählt ist, ersetzt sie die {{ui:prop.bevel}}.
 - **Größe:** Länge und Breite der Zeile stellst du wie bei jeder Form ein. Zieh an den Griffen oder tippe die Maße ein.
 - **{{ui:prop.textStretch}}:** Zuerst aus: Die Buchstaben behalten ihre Proportionen und sitzen in der Mitte des Rahmens, ein Rahmen, der breiter oder tiefer gezogen ist, als das Wort braucht, bleibt also größer als die Buchstaben. Schaltest du es ein, werden die Buchstaben in beide Richtungen auf den ganzen Rahmen gestreckt: Ein Großbuchstabe lässt sich niedriger oder schmaler machen, wie in Tinkercad. Es gilt für gerade Schrift; gebogene Schrift hat ihre eigene Buchstabengröße.
 
@@ -20,7 +21,7 @@ Auch die Kanten einer Schrift lassen sich fasen oder verrunden, gerade oder gebo
 
 ## Eigene Schriften
 
-Neben den sieben mitgelieferten Schriften kannst du jede eigene Schrift nehmen: eine Schriftdatei von deinem Rechner oder, in Chrome und Edge, eine Schrift, die auf deinem Computer installiert ist. Wähle dazu unter {{ui:prop.font}} ganz unten {{ui:font.manage}}. Es öffnet sich das Fenster {{ui:font.title}}.
+Neben den acht mitgelieferten Schriften kannst du jede eigene Schrift nehmen: eine Schriftdatei von deinem Rechner oder, in Chrome und Edge, eine Schrift, die auf deinem Computer installiert ist. Wähle dazu unter {{ui:prop.font}} ganz unten {{ui:font.manage}}. Es öffnet sich das Fenster {{ui:font.title}}.
 
 - **{{ui:font.addFile}}** nimmt eine TrueType-Datei (`.ttf`), eine OpenType-Datei (`.otf`) oder eine WOFF-Datei (`.woff`). Du kannst die Datei auch einfach in das Fenster ziehen.
 - **Unter Windows** liegen die installierten Schriften im Ordner „Schriftarten“ (`C:\Windows\Fonts`). Den blendet der Dateidialog des Browsers aus. Öffne ihn stattdessen im Explorer und zieh die gewünschte Schrift in das Fenster {{ui:font.title}}. Schriften, die nur für dich installiert sind, liegen in `%LOCALAPPDATA%\Microsoft\Windows\Fonts`; diesen Ordner zeigt auch der Dateidialog. Am Mac liegen Schriften in `/Library/Fonts` und `~/Library/Fonts`.
@@ -123,6 +124,27 @@ Die Karte {{ui:iconTag.title}} oben in den Einstellungen enthält:
 Die SVG braucht geschlossene Umrisse; eine Zeichnung nur aus offenen Linien wird kein Schild. Ein Skizzenkörper, dessen Füllung eine Linie ist, behält sie: Die Fläche dieser Linie ist das Symbol.
 
 **Ein Bild (PNG oder JPG)** wird zu einem Umriss nachgezeichnet, und die Vorschau zeigt den Umriss. Unter {{ui:iconTag.part}} wählst du, ob der {{ui:iconTag.part.dark}} oder der {{ui:iconTag.part.light}} das Symbol wird; zuerst ist es der Teil, der nicht der Hintergrund ist. Durchsichtige Pixel gehören nie zum Symbol. Eine SVG, die nur ein einziges Bild enthält, wie Inkscape eine importierte Bitmap speichert, wird genauso nachgezeichnet. Der Umriss folgt den Pixeln, ein kleines Bild gibt also einen rauen Rand: Bilder ab einigen hundert Pixeln eignen sich am besten. {{ui:iconTag.replace}} nimmt von einem Bild den Teil, der nicht sein Hintergrund ist.
+
+## QR-Codes
+
+Ein QR-Code macht aus einem Text oder einer Webadresse ein Muster, das eine Handykamera liest: ein Link zu deinem Shop auf einem Schild, der WLAN-Name auf einem Untersetzer, eine Telefonnummer am Schlüsselanhänger.
+
+Wähle in der Formenbibliothek {{ui:shape.qrCode}}. Ein Fenster öffnet sich; der Cursor steht schon im Textfeld:
+
+- **{{ui:qrCode.text}}:** was der Code sagt. Eingabe erzeugt den Code, Umschalt+Eingabe beginnt eine neue Zeile. Unter dem Feld siehst du, wie viel vom Platz belegt ist; Umlaute und andere Sonderzeichen brauchen zwei Byte. Ist der Text zu lang, sagt das Feld es dir.
+- **{{ui:qrCode.errorCorrection}}:** L, M, Q oder H. Eine höhere Stufe wird noch gelesen, wenn ein Teil des Codes verschmutzt oder zerkratzt ist (L etwa 7 %, M 15 %, Q 25 %, H 30 %), braucht für denselben Text aber mehr Module, jedes Modul wird also kleiner. Zuerst ist M gewählt.
+- **{{ui:qrCode.style}}:** {{ui:qrCode.style.code}} baut den Code allein, 4 mm hoch. {{ui:qrCode.style.raised}} setzt ihn 1 mm hoch auf eine weiße Platte von 3 mm, als Bündel aus zwei Farben, sodass ein Mehrfarbdruck den Code dunkel und die Platte hell druckt. {{ui:qrCode.style.engraved}} schneidet den Code 1 mm tief in die Platte.
+- **{{ui:qrCode.sizeBy}}:** Tippe die {{ui:qrCode.sizeBy.width}} des ganzen Codes ein (zuerst 40 mm) oder die Größe eines Moduls; die andere Zahl steht darunter. Module unter 0,8 mm bekommen eine Warnung. Das ist eine Faustregel für eine 0,4-mm-Düse, keine Garantie: Drucker, Material, Farben und das Handy spielen alle mit.
+- **{{ui:qrCode.quietZone}}:** Scanner brauchen um den Code einen leeren Rand von vier Modulen. Auf einer Platte gehört der Rand zur Platte; schalte ihn nur ab, wenn die Platte auf einer größeren hellen Fläche sitzt. Der Code allein hat keinen eigenen Rand: Lass den Platz rundherum frei.
+- **Höhen:** die Höhe des Codes, auf einer Platte die Codehöhe oder Gravurtiefe, und die Plattendicke.
+
+Die Vorschau zeigt den Code, wie er gebaut wird. {{ui:qrCode.ok}} stellt ihn in die Mitte der Platte.
+
+Der Code ist ein Körper wie jeder andere: Verschiebe ihn, drehe ihn, skaliere ihn (Breite und Tiefe gleich lassen, sonst wird der Code verzerrt), gruppiere ihn, oder mach ihn zur Aussparung und gruppiere ihn in ein eigenes Teil, um ihn dort einzugravieren. Skalieren skaliert den ganzen Code; jedes Modul bleibt quadratisch.
+
+Die Karte {{ui:qrCode.title}} oben in seinen Einstellungen enthält den Text. Ändere ihn und klicke auf {{ui:qrCode.regenerate}}: Der Code wird dort neu gebaut, wo er steht, und so breit, wie er gerade ist. Fehlerkorrektur, Ruhezone und Bauart bleiben, wie sie gewählt wurden; für andere Einstellungen erzeuge einen neuen Code aus der Bibliothek.
+
+Scanne den Code vor dem Druck mit deinem Handy, und nach dem Druck noch einmal. Dunkel auf hell liest sich am besten; einen hellen Code auf dunkler Platte liest nicht jedes Handy.
 
 ## Text auf dem Kreisbogen
 

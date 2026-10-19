@@ -29,7 +29,7 @@ project.lyl
 - `states`: explicit root node IDs and editable object graphs for the active scene and undo/redo states
 - `history`: ordered state references, selection per state, the time each state was recorded (`recordedAt`, ISO 8601, optional - older packages carry none), and current undo/redo index
 - `sketches`: sketch/extrusion indexes
-- `features`: supported group, subtraction, intersection, mirror, sketch-extrusion, sketch-revolve, sketch-sweep, fillet, and chamfer operations used by the active project
+- `features`: supported group, subtraction, intersection, mirror, sketch-extrusion, sketch-revolve, sketch-sweep, fillet, chamfer, and delete-face operations used by the active project
 - `groups`: explicit parent/member references and operation type
 - `workplanes`: base and selected offset workplanes
 - `exactCad`: objects with exact B-Rep or imported STEP sources

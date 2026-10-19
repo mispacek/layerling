@@ -25,6 +25,66 @@ Alle dine designs vises senere på startsiden med et forhåndsbillede. De gemmes
 - **Til venstre** er kamerakontrollerne med visningskuben over dem. De flytter dig rundt i scenen, mere i [Visning og arbejdsplan](chapter:view-and-workplane).
 - **Øverst oppe** skifter du mellem {{ui:editor.modeGeometry}} og {{ui:editor.modeSketch}}, omdøber designet og vælger sprog og farveskema.
 
+## Knapperne rundt om arbejdsområdet
+
+Hold musen over en knap for at se dens navn. Er du i tvivl om, hvad en knap gør, så klik i området {{ui:editor.group.help}} på {{ui:interactiveHelp.title}} ([[Shift]]+[[F1]]) og derefter på knappen. Her står dem, der spørges mest om.
+
+### Indsæt
+
+{{ui:editor.tool.paste}} ([[Ctrl]]+[[V]]) sætter det ind i designet, du kopierede med {{ui:editor.tool.copy}}. {{ui:common.duplicate}} kopierer og sætter ind i ét trin.
+
+### Slet
+
+{{ui:common.delete}} ([[Delete]]) fjerner de valgte former. {{ui:editor.tool.undo}} henter dem tilbage.
+
+### Opdel gruppe
+
+{{ui:editor.tool.ungroup}} ([[Ctrl]]+[[Shift]]+[[G]]) skiller den valgte gruppe igen ad i de former, den blev lavet af.
+
+### Arbejdsområdeindstillinger
+
+{{ui:editor.workspaceSettings}} åbner indstillingerne for arbejdsområdet: enhed, pladens størrelse, printer, gitter, farver, lys og mere. Mere i [Visning og arbejdsplan](chapter:view-and-workplane).
+
+### Farveskema
+
+{{ui:common.theme}} helt øverst bestemmer, hvordan layerling ser ud: som dit system, lyst, mørkt eller grafit.
+
+### Omdøb design
+
+{{ui:editor.renameProject}}: blyanten ved siden af navnet helt øverst. Skriv det nye navn og tryk [[Enter]].
+
+### Designnavn
+
+Designets navn ({{ui:confirm.projectName}}) står helt øverst. Klik på det, skriv, og [[Enter]] beholder navnet.
+
+### Visningsmuligheder
+
+{{ui:editor.visibilityOptions}}, pilen ved siden af øjet, rummer det, du kan vise eller skjule: listen over objekter, alt du har skjult, noterne og udhænget i printet. Mere i [Vælg og arranger](chapter:select-and-arrange).
+
+### Skjul valgte
+
+{{ui:editor.tool.hideSelected}} ([[Ctrl]]+[[H]]) skjuler de valgte former. De bliver i designet og i objektlisten; {{ui:editor.visibilityOptions}} viser dem igen.
+
+### Søg efter kommandoer
+
+{{ui:palette.open}}: skriv, hvad du leder efter, et værktøj, en form eller en indstilling, og klik på resultatet.
+
+### Skjul kamerakontroller
+
+{{ui:camera.hide}} folder kamerastyringen til venstre væk og giver arbejdsområdet mere plads; {{ui:camera.show}} henter den tilbage.
+
+### Snap til gitter
+
+{{ui:inspector.snapGrid}} nederst i egenskaberne er det trin, flytning og størrelsesændring fanger på. Ved siden af ændrer den lille kontakt **mm | in** enheden. Mere i [Visning og arbejdsplan](chapter:view-and-workplane).
+
+### Enhed: millimeter eller tommer
+
+Kontakten **mm | in** ved siden af {{ui:inspector.snapGrid}} ændrer enheden, pladens gitter og fangtrinnet for dette design.
+
+### Sidefoden
+
+Nederst i vinduet: {{ui:dashboard.sponsor}} fører til siden, hvor du kan støtte projektet; {{ui:dashboard.userGuide}} åbner denne vejledning; {{ui:dashboard.forum}} fører til stedet for spørgsmål, idéer og fejlrapporter (diskussionerne på GitHub, på tysk forummet hos drucktipps3d); {{ui:editor.bugReport}} laver en ZIP til en fejlrapport; {{ui:dashboard.projectOnGitHub}} fører til projektet på GitHub, og versionsnummeret åbner udgivelsesnoterne. Linkene til impressum og privatlivspolitik hører til den, der driver den kopi af layerling, du bruger.
+
 ## Din første del
 
 Som eksempel bygger vi en kasse med et hul.

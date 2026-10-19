@@ -1,6 +1,8 @@
 import * as THREE from "three";
 import { SVGLoader } from "three/examples/jsm/loaders/SVGLoader.js";
 import { createLocalId } from "@/lib/localIds";
+import { loadedManifoldRuntime, manifoldLoaderKnown, onManifoldReady, requestManifoldRuntime } from "@/lib/manifoldHandle";
+import type { ManifoldToplevel } from "manifold-3d";
 import type { WorkplaneShape } from "@/types/layerling";
 
 export const MAX_SVG_BYTES = 2 * 1024 * 1024;
@@ -573,6 +575,25 @@ export function validateClosedSolidTriangleSoup(positions: readonly number[], la
   return analysis;
 }
 
+/**
+ * The check of a body the kernel made: closed, watertight and with volume, as for any import, but a sliver
+ * of no area is allowed - where two outlines meet at a single point the kernel's body has one, and it is
+ * harmless (#420).
+ */
+function validateKernelSolid(positions: readonly number[]) {
+  const analysis = analyzeTriangleSoup(positions);
+  if (analysis.triangleCount > MAX_SVG_TRIANGLES) {
+    throw new Error(`SVG is too complex (${analysis.triangleCount} triangles; maximum ${MAX_SVG_TRIANGLES})`);
+  }
+  if (analysis.boundaryEdges > 0 || analysis.nonManifoldEdges > 0) {
+    throw new Error("SVG is not a watertight manifold");
+  }
+  if (analysis.width <= 0 || analysis.height <= 0 || analysis.depth <= 0 || analysis.surfaceArea <= 0 || analysis.volume <= analysis.volumeTolerance) {
+    throw new Error("SVG does not enclose a non-zero volume");
+  }
+  return analysis;
+}
+
 /** The paths that make the body: visibly filled ones, and the closed parts of visibly stroked ones. */
 export function svgProfilePaths(paths: readonly THREE.ShapePath[]) {
   return paths.map(extrusionProfileFromPath).filter((path): path is THREE.ShapePath => Boolean(path));
@@ -588,6 +609,76 @@ export function parseSvgForImport(source: string) {
     throw new Error("SVG is not valid XML");
   }
   return parsed;
+}
+
+/**
+ * Waits for the exact kernel before an SVG is built (#420): the build below then lets the kernel make the
+ * bodies, which stay clean solids where outlines touch or overlap. Without a kernel (a test, a page that
+ * has none) it returns at once, and the plain build is used.
+ */
+export async function prepareSvgImport(timeoutMs = 10_000) {
+  if (loadedManifoldRuntime() || !manifoldLoaderKnown()) return;
+  await new Promise<void>((resolve) => {
+    const stop = onManifoldReady(() => {
+      stop();
+      resolve();
+    });
+    globalThis.setTimeout(() => {
+      stop();
+      resolve();
+    }, timeoutMs);
+    requestManifoldRuntime();
+  });
+}
+
+/**
+ * The shapes as one body, made by the kernel: every outline with its holes becomes a face (even-odd, as a
+ * drawing is filled), is extruded, and all of them are joined. Outlines that touch or lie over each other come
+ * out as one clean solid, where the caps built from each outline alone can overlap or turn the wrong way and
+ * leave a body that no cut can use (#420). Null when the kernel cannot make it; the plain build then goes on.
+ */
+function extrudeShapesWithKernel(runtime: ManifoldToplevel, shapes: readonly THREE.Shape[]): { positions: number[]; skippedShapes: number } | null {
+  const made: Array<{ delete(): void }> = [];
+  try {
+    const solids: ReturnType<typeof runtime.Manifold.extrude>[] = [];
+    let skippedShapes = 0;
+    for (const shape of shapes) {
+      const points = shape.extractPoints(SVG_CURVE_SEGMENTS);
+      const rings = [points.shape, ...points.holes]
+        .map((ring) => ring.map((point) => [point.x, point.y] as [number, number]))
+        .filter((ring) => ring.length >= 3);
+      if (!rings.length) {
+        skippedShapes += 1;
+        continue;
+      }
+      const section = new runtime.CrossSection(rings, "EvenOdd");
+      made.push(section);
+      if (section.isEmpty()) {
+        skippedShapes += 1;
+        continue;
+      }
+      const solid = runtime.Manifold.extrude(section, SVG_EXTRUSION_DEPTH);
+      made.push(solid);
+      solids.push(solid);
+    }
+    if (!solids.length) return null;
+    const merged = solids.length === 1 ? solids[0] : runtime.Manifold.union(solids);
+    made.push(merged);
+    if (merged.status() !== "NoError" || merged.numTri() < 1) return null;
+    const mesh = merged.getMesh();
+    const stride = mesh.numProp;
+    const positions: number[] = [];
+    // The same turn as the plain build (extrude along z, then rotate about x by -90 degrees): (x, y, z) -> (x, z, -y).
+    for (let index = 0; index < mesh.triVerts.length; index += 1) {
+      const base = mesh.triVerts[index] * stride;
+      positions.push(mesh.vertProperties[base], mesh.vertProperties[base + 2], -mesh.vertProperties[base + 1]);
+    }
+    return { positions, skippedShapes };
+  } catch {
+    return null;
+  } finally {
+    new Set(made).forEach((item) => item.delete());
+  }
 }
 
 export function buildSvgExtrusionFromPaths(paths: readonly THREE.ShapePath[]) {
@@ -606,7 +697,23 @@ export function buildSvgExtrusionFromPaths(paths: readonly THREE.ShapePath[]) {
   // Shapes that do not build into a solid are left out; the import says how many (#258).
   let skippedShapes = 0;
 
-  for (const shape of shapes) {
+  const runtime = loadedManifoldRuntime();
+  const kernelBuild = runtime ? extrudeShapesWithKernel(runtime, shapes) : null;
+  let kernelAnalysis: TriangleSoupAnalysis | null = null;
+  if (kernelBuild) {
+    try {
+      kernelAnalysis = validateKernelSolid(kernelBuild.positions);
+    } catch {
+      kernelAnalysis = null;
+    }
+  }
+  if (kernelBuild && kernelAnalysis) {
+    for (let index = 0; index < kernelBuild.positions.length; index += 1) rawPositions.push(kernelBuild.positions[index]);
+    acceptedAnalyses.push(kernelAnalysis);
+    skippedShapes = kernelBuild.skippedShapes;
+  }
+
+  for (const shape of kernelAnalysis ? [] : shapes) {
     const rawGeometry = new THREE.ExtrudeGeometry(shape, {
       depth: SVG_EXTRUSION_DEPTH,
       bevelEnabled: false,

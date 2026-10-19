@@ -22,7 +22,7 @@ The tape measure sits at the lower end of the camera bar on the left edge ({{ui:
 
 ## The ruler
 
-You fetch the {{ui:shape.ruler}} from the shape library. It is purely a measuring tool: it appears in no export and can neither be grouped nor cut. For every body that touches or overlaps the ruler, it shows the extent as a floating number right in the view. You can change that number right there, and the body follows. The floating plus symbol creates a copy of the measured shape.
+You fetch the {{ui:shape.ruler}} from the shape library. It is purely a measuring tool: it appears in no export and can neither be grouped nor cut. For every body that touches or overlaps the ruler, it shows the extent as a floating number right in the view. You can change that number right there, and the body follows. The floating plus symbol creates a copy of the measured shape. Its printed scale is in millimetres; once the unit is switched to inches (the switch at the bottom right), it is in inches, with a line every sixteenth of an inch and the whole inches numbered.
 
 ## The framing square
 
@@ -61,6 +61,8 @@ A note records what the geometry does not say: "This screw is 0.3 mm too tight",
 - If you place the note **on a body**, it travels with it.
 - If you place it **beside**, it stays on the workplane ({{ui:note.free}}).
 - {{ui:note.detach}} releases an attached note from the body.
+- {{ui:editor.tool.group}} takes an attached note into the group; {{ui:editor.tool.ungroup}} hands it to the visible part under it, a group inside included. While a group is open with {{ui:group.edit}}, its notes move with the part under them and go back to the group with {{ui:group.done}}; cancelling puts them back as they were.
+- If its body is deleted, or no visible body is under it any more, the note stays where it stood, on the workplane.
 - Dragging moves the note, a click opens it for editing.
 - While you write, [[Enter]] keeps the text and [[Esc]] puts it back to how it was before you started; [[Shift]]+[[Enter]] starts a new line.
 

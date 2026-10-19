@@ -80,6 +80,6 @@ Die Hälften sind einfache Netze: Einstellungen wie die Seitenzahl eines Zylinde
 
 ## Teile trennen
 
-Besteht eine Form aus mehreren voneinander getrennten Stücken, etwa ein Text aus einzelnen Buchstaben, kannst du sie mit {{ui:inspector.separateParts}} in eigenständige Formen zerlegen.
+Besteht eine Form aus mehreren voneinander getrennten Stücken, etwa ein Text aus einzelnen Buchstaben, kannst du sie mit {{ui:inspector.separateParts}} in eigenständige Formen zerlegen. Den Eintrag gibt es auch im Menü, das sich mit einem Rechtsklick auf die Form öffnet.
 
 > **Tipp:** Baue Löcher immer etwas länger als das Teil, das sie durchdringen sollen. Schließt die Aussparung genau mit der Fläche ab, bleibt manchmal eine hauchdünne Haut stehen. Ein Millimeter Überstand schafft Sicherheit.

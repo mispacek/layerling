@@ -10,7 +10,7 @@ Skarpe kanter ser sjældent godt ud på en printet del, og de er heller ikke spe
 1. Vælg formen (eller gruppen).
 2. Klik på {{ui:editor.tool.fillet}} eller {{ui:editor.tool.chamfer}} i båndet, tryk [[B]] for rund eller [[Shift+B]] for fas, eller højreklik formen og vælg det fra menuen.
 3. Formens kanter lyser op. Klik dem der skal berøres. Endnu et klik tager en kant ud igen. Med [[Shift]] tilføjer eller fjerner du en enkelt kant.
-4. Sæt størrelsen og bekræft med {{ui:edge.apply}} eller [[Enter]].
+4. Sæt størrelsen og bekræft med {{ui:edge.apply}} eller [[Enter]]. Bagefter forbliver vinduet åbent på det nye legeme med samme størrelse, så den næste afrunding eller affasning kan følge med det samme; {{ui:edge.done}}, [[Esc]] eller krydset lukker det. Med [[Skift]] eller [[Ctrl]] føjer et klik på {{ui:edge.topEdges}}, {{ui:edge.bottomEdges}}, {{ui:edge.verticalEdges}} eller {{ui:edge.horizontalEdges}} disse kanter til de valgte i stedet for at erstatte dem.
 
 !["Rund kanter"-værktøjet: alle skarpe kanter er valgt, billedet viser forhåndsvisningen med 4 mm radius.](shot:fillet-preview)
 
@@ -24,6 +24,8 @@ I panelet finder du:
 - **{{ui:edge.radius}}** for runding. For fas sætter du {{ui:edge.distance}} eller {{ui:edge.angle}}.
 - {{ui:edge.sharpThreshold}} bestemmer hvilke kanter der overhovedet tæller som skarpe. En værdi på 25° behandler kun klare knæk som kanter og lader flade overgange være.
 - {{ui:edge.topEdges}} vælger kun kanterne langs den allerøverste top af formen. Det er den hurtige vej til en småkageudstikker: byg omridset i en skitse som en streg, fas så topkanterne. {{ui:edge.angle}} sætter hvor stejl faser er; den kan ikke nå længere end væggen er tyk.
+- {{ui:edge.bottomEdges}} vælger kun kanterne langs den allernederste bund af formen, modstykket til {{ui:edge.topEdges}}. Det er den hurtige vej til kun at afrunde eller affase foden på en del.
+- {{ui:edge.chamfillet}}, valgt øverst i affasningsvinduet ved siden af {{ui:editor.tool.chamfer}}, laver den printbare fod på en del: en affasning ved pladen, der går tangentielt over i en afrunding mod væggen, så de første lag ikke behøver støtte, og kanten alligevel ender blødt. {{ui:edge.distance}} er den højde, foden fylder, {{ui:edge.angle}} (15° til 75°) hvor stejl affasningen er ved pladen. Kanterne vælger du med {{ui:edge.bottomEdges}}.
 - {{ui:edge.onlyVisibleEdges}} skjuler kanterne der ligger bag formen fra hvor du kigger. Som standard vises hver kant igennem formen, hvilket bliver forvirrende på en travl del; med kontakten til ser du, og kan klikke, kun de kanter der vender mod dig. Drej visningen for at nå de andre. En kant tegnet i rødt (se nedenfor) vises altid.
 - {{ui:edge.tangentChains}}: et klik vælger så også kanter der glat flyder ind i hinanden, for eksempel alle kanter rundt om en flade med rundede hjørner. Kontakten bestemmer kun hvad et klik vælger: CAD-kernen fører altid en fas eller rund med videre langs sådanne glat fortsættende kanter. Panelet fortæller dig langs hvor mange flere kanter det sker.
 - {{ui:edge.keepSize}} bevarer fasen eller runding som den er, selvom du skalerer formen senere.
@@ -43,7 +45,7 @@ En behandlet form kan altid behandles igen. Vælg den igen og åbn værktøjet -
 
 Ved siden af en fas, en rund eller en udhuling er der også {{ui:edge.editAction}}. Den tager behandlingen tilbage på samme måde, men åbner værktøjet igen med det samme med de samme kanter og den gamle værdi. Du ændrer værdien og anvender igen: en 3 mm rund bliver til 5 mm uden at klikke kanterne igen. Hvis nyere behandlinger ligger ovenpå, følger de med her også. Det gælder for kantbehandlinger du laver fra nu af; ældre tilbyder kun at tage tilbage, og det samme gør enkelte dele af en gruppe.
 
-På en gruppe, for eksempel en cylinder med et hul, hører den behandlede kant til den færdige form, ikke til en af dens dele. Så bliver gruppen til én form, og {{ui:editor.tool.ungroup}} er ikke længere tilgængelig. Tag behandlingen tilbage som beskrevet ovenfor og gruppen vender tilbage med alle sine dele. Den nemmeste måde er at behandle kanter til sidst. Det gælder også gevind: kantværktøjet tager et gevind som dets eksakte form, så en blok med et gevindhul får sine kanter rundet med gevindet på plads. At beregne et gevinds kanter tager længere end for en almindelig form, et par sekunder for en M6 og omkring et halvt minut for et G1/2-rørgevind.
+På en gruppe, for eksempel en cylinder med et hul, hører den behandlede kant til den færdige form, ikke til en af dens dele. Så bliver gruppen til én form. {{ui:editor.tool.ungroup}} virker alligevel: Det tager først kantbehandlingerne tilbage og opløser derefter gruppen, i ét trin som [[Ctrl]]+[[Z]] fortryder. Tag behandlingen tilbage som beskrevet ovenfor og gruppen vender tilbage med alle sine dele. Den nemmeste måde er at behandle kanter til sidst. Det gælder også gevind: kantværktøjet tager et gevind som dets eksakte form, så en blok med et gevindhul får sine kanter rundet med gevindet på plads. At beregne et gevinds kanter tager længere end for en almindelig form, et par sekunder for en M6 og omkring et halvt minut for et G1/2-rørgevind.
 
 > **Godt at vide:** layerling arbejder med rigtig CAD-geometri til runding og fas, ikke kun et trekantnet. Det er derfor en rundet kant stadig er en rundet kant i STEP-eksporten.
 

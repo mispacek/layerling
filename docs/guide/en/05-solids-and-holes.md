@@ -80,6 +80,6 @@ The halves are plain meshes: settings such as a cylinder's sides or a text's let
 
 ## Separating parts
 
-If a shape consists of several separate pieces, such as text made of single letters, {{ui:inspector.separateParts}} splits it into independent shapes.
+If a shape consists of several separate pieces, such as text made of single letters, {{ui:inspector.separateParts}} splits it into independent shapes. The entry is also in the menu you get with a right click on the shape.
 
 > **Tip:** Always build holes a little longer than the part they are to pass through. If the hole ends exactly flush with the face, a wafer-thin skin sometimes remains. One millimetre of overshoot makes sure.

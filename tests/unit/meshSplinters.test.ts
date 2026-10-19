@@ -70,16 +70,29 @@ describe("loose splinters of an export (#352)", () => {
     expect(result.mesh.vertices.length).toBe(64 + 8 + 4);
   });
 
-  it("takes out a tiny closed piece of many triangles but keeps a thin ring and a large open sheet", () => {
+  it("takes out a tiny closed piece of many triangles and a flat sheet of no volume but keeps a thin ring", () => {
     const speck = prism(12, 0.3, 0.3);
     const ring = prism(24, 8, 0.3);
-    // An open sheet: the top of the prism alone, with a volume of about nothing.
+    // An open flat sheet: the top of a prism alone, with no volume.
     const sheet: Part = { vertices: prism(24, 8, 0).vertices.slice(0, 24).map(([x, , z]) => [x + 40, 0, z] as Vec), faces: [] };
     for (let k = 1; k < 23; k += 1) sheet.faces.push([0, k + 1, k]);
     const mesh = join("tiny and thin", [plate, { vertices: speck.vertices.map(([x, y, z]) => [x + 30, y, z] as Vec), faces: speck.faces }, { vertices: ring.vertices.map(([x, y, z]) => [x + 20, y, z] as Vec), faces: ring.faces }, sheet]);
     const result = removeLooseSplinters(mesh);
+    expect(result.removed).toBe(2);
+    expect(result.mesh.faces.length).toBe(mesh.faces.length - speck.faces.length - sheet.faces.length);
+  });
+
+  it("takes out a flat sheet of no volume however large, but keeps a small cube", () => {
+    // Two faces on each other: a closed shell of nothing, 12 mm long.
+    const sheet: Part = {
+      vertices: [[50, 0, 0], [62, 0, 0], [62, 0, 4], [50, 0, 4]],
+      faces: [[0, 1, 2], [0, 2, 3], [0, 2, 1], [0, 3, 2]],
+    };
+    const cube = box([70, 0, 0], [73, 3, 3]);
+    const mesh = join("sheet", [plate, sheet, cube]);
+    const result = removeLooseSplinters(mesh);
     expect(result.removed).toBe(1);
-    expect(result.mesh.faces.length).toBe(mesh.faces.length - speck.faces.length);
+    expect(result.mesh.faces.length).toBe(mesh.faces.length - sheet.faces.length);
   });
 
   it("always keeps the piece with the most triangles", () => {

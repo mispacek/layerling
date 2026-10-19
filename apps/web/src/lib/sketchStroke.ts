@@ -17,7 +17,11 @@ export const DEFAULT_SKETCH_STROKE: SketchStroke = { width: 2, align: "center", 
 export const MIN_SKETCH_STROKE_WIDTH = 0.05;
 export const MAX_SKETCH_STROKE_WIDTH = 500;
 
+/** The most pieces a curve is cut into, and the fewest; a short or flat curve needs few (#461). */
 const CURVE_SAMPLES = 32;
+const MIN_CURVE_SAMPLES = 4;
+/** How far, in mm, the straight pieces may stray from the curve. */
+const CURVE_TOLERANCE = 0.01;
 const MITER_LIMIT = 4;
 
 type Vec = { x: number; z: number };
@@ -35,6 +39,18 @@ export function normalizeSketchStroke(value: unknown): SketchStroke | undefined 
   };
 }
 
+/**
+ * How many straight pieces a cubic curve is cut into so none strays more than CURVE_TOLERANCE: the
+ * error of n pieces is at most (1/8) * |B''| / n^2, with |B''| at most 6 times the larger second
+ * difference of the control points. A traced drawing has hundreds of short curves; cutting each
+ * into 32 made tens of thousands of edges that the kernel could not build in time (#461).
+ */
+function curveSampleCount(a: Vec, b: Vec, c: Vec, d: Vec): number {
+  const second = Math.max(Math.hypot(a.x - 2 * b.x + c.x, a.z - 2 * b.z + c.z), Math.hypot(b.x - 2 * c.x + d.x, b.z - 2 * c.z + d.z));
+  const pieces = Math.ceil(Math.sqrt((0.75 * second) / CURVE_TOLERANCE));
+  return Math.max(MIN_CURVE_SAMPLES, Math.min(CURVE_SAMPLES, pieces));
+}
+
 /** A path as points, curves broken into short straight pieces; a closed path does not repeat its start. */
 export function sampledPath(path: OrderedCadSketchPath): Vec[] {
   const samples: Vec[] = [];
@@ -47,8 +63,9 @@ export function sampledPath(path: OrderedCadSketchPath): Vec[] {
       samples.push({ x: to.x, z: to.z });
       return;
     }
-    for (let index = 1; index <= CURVE_SAMPLES; index += 1) {
-      const t = index / CURVE_SAMPLES;
+    const pieces = curveSampleCount(from, first, second, to);
+    for (let index = 1; index <= pieces; index += 1) {
+      const t = index / pieces;
       const u = 1 - t;
       samples.push({
         x: u ** 3 * from.x + 3 * u ** 2 * t * first.x + 3 * u * t ** 2 * second.x + t ** 3 * to.x,

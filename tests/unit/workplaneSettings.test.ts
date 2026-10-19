@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { WorkplaneWorkspaceSettings } from "@/types/layerling";
 import { formatMeasurementNumber, lengthDisplayUnit, millimetersToDisplay, normalizeScaleForUnits, parseMeasurementInput, resolveMeasurementInput, scaleOptionsForUnits } from "@/lib/measurementUnits";
-import { booleanTriangleLimitPreset, canBeginShapeDrag, customSnapGridDivisors, customSnapGridLabel, normalizeCustomSnapGrids, DEFAULT_ORBIT_ZOOM_SPEED, DEFAULT_SNAP_GRID, DEFAULT_WORKPLANE_WORKSPACE, keyboardNudgeStep, normalizeShapeCustomizations, snapGridForUnits, snapGridOptions, snapGridStep, normalizeSnapGrid, normalizeWorkspaceSettings, orbitControlsZoomSpeed, shapeDimensionLimit, workplaneSettingsFingerprint, ZOOM_SPEED_SLIDER_MAX, workspaceHydrationSyncDecision, zoomDistanceScale } from "@/lib/workplaneSettings";
+import { booleanTriangleLimitPreset, canBeginShapeDrag, customSnapGridDivisors, customSnapGridLabel, normalizeCustomSnapGrids, DEFAULT_ORBIT_ZOOM_SPEED, DEFAULT_SNAP_GRID, DEFAULT_WORKPLANE_WORKSPACE, keyboardNudgeStep, normalizeShapeCustomizations, snapGridForUnits, snapGridOptions, snapGridStep, normalizeSnapGrid, normalizeWorkspaceSettings, orbitControlsZoomSpeed, shapeDimensionLimit, workplaneSettingsFingerprint, ZOOM_SPEED_SLIDER_MAX, workspaceHydrationSyncDecision, zoomDistanceScale, standardGridSettings, resetGridInSavedDefault, readWorkspaceDefault, saveWorkspaceDefault } from "@/lib/workplaneSettings";
 import { toolbarShapeAssets } from "@/lib/shapeCatalog";
 
 describe("workplane settings helpers", () => {
@@ -307,5 +307,54 @@ describe("a custom snap grid offered whole only (#329)", () => {
       { name: "B", size: 5 },
       { name: "C", size: 2 },
     ]);
+  });
+});
+
+describe("reset grid (#503)", () => {
+  function fakeStorage(initial: Record<string, string> = {}) {
+    const data = new Map(Object.entries(initial));
+    return {
+      getItem: (key: string) => data.get(key) ?? null,
+      setItem: (key: string, value: string) => void data.set(key, value),
+      removeItem: (key: string) => void data.delete(key),
+      clear: () => data.clear(),
+      key: () => null,
+      get length() {
+        return data.size;
+      },
+    } as Storage;
+  }
+
+  it("brings back a visible grid in the colours the app starts with", () => {
+    const standard = standardGridSettings("Metric");
+    expect(standard.showGrid).toBe(true);
+    expect(standard.gridColor).toBe(DEFAULT_WORKPLANE_WORKSPACE.gridColor);
+    expect(standard.gridMajorColor).toBe("");
+    expect(standard.gridBlockPreset).toBe("5 mm");
+    expect(standard.gridBlockSize).toBe(5);
+  });
+
+  it("gives inch grids their own standard spacing", () => {
+    const standard = standardGridSettings("Imperial");
+    expect(standard.gridBlockPreset).toBe("1/4 in");
+    expect(standard.gridBlockSize).toBeCloseTo(6.35, 5);
+  });
+
+  it("resets only the grid of the default saved with Make default", () => {
+    const storage = fakeStorage();
+    saveWorkspaceDefault({ ...DEFAULT_WORKPLANE_WORKSPACE, width: 300, gridColor: "#ffffff", gridMajorColor: "#ffffff", showGrid: false, gridBlockSize: 80, gridBlockPreset: "Custom" }, "0.5 mm", storage);
+    expect(resetGridInSavedDefault(storage)).toBe(true);
+    const saved = readWorkspaceDefault(storage)!;
+    expect(saved.workspace.gridColor).toBe(DEFAULT_WORKPLANE_WORKSPACE.gridColor);
+    expect(saved.workspace.showGrid).toBe(true);
+    expect(saved.workspace.gridBlockSize).toBe(5);
+    expect(saved.workspace.width).toBe(300);
+    expect(saved.snap).toBe("0.5 mm");
+  });
+
+  it("does nothing when no default was ever saved", () => {
+    const storage = fakeStorage();
+    expect(resetGridInSavedDefault(storage)).toBe(false);
+    expect(readWorkspaceDefault(storage)).toBeNull();
   });
 });

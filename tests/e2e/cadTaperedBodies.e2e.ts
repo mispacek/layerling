@@ -20,7 +20,7 @@ import { createDovetailGeometry } from "@/lib/dovetailGeometry";
 import { createRoundedBoxGeometry } from "@/lib/roundedBoxGeometry";
 import { meshForTwist } from "@/lib/heightSlices";
 import { shellSolid } from "@/lib/cadShell";
-import { meshYawDegrees, mirrorSign, shapeExtrudeDeformAt, shapeHasExtrudeDeform, shapeHasTaper, shapeTaperDimensions, shapeTaperScaleAt } from "@/lib/workplaneShapes";
+import { deformsAboutOrigin, meshYawDegrees, mirrorSign, shapeExtrudeDeformAt, shapeHasExtrudeDeform, shapeHasTaper, shapeTaperDimensions, shapeTaperScaleAt } from "@/lib/workplaneShapes";
 
 /*
  * Tapered and leaning shapes as ruled lofts between their bottom and top
@@ -79,8 +79,9 @@ function worldMesh(source: WorkplaneShape) {
   const maxY = Math.max(...raw.map((v) => v[1]));
   const span = Math.max(1e-6, maxY - minY);
   // Taper and twist work towards the middle of the mesh's extent (a star is not centred on its origin).
-  const cx = (Math.min(...raw.map((v) => v[0])) + Math.max(...raw.map((v) => v[0]))) / 2;
-  const cz = (Math.min(...raw.map((v) => v[2])) + Math.max(...raw.map((v) => v[2]))) / 2;
+  // A star turns about its own middle instead (#476).
+  const cx = deformsAboutOrigin(source.kind) ? 0 : (Math.min(...raw.map((v) => v[0])) + Math.max(...raw.map((v) => v[0]))) / 2;
+  const cz = deformsAboutOrigin(source.kind) ? 0 : (Math.min(...raw.map((v) => v[2])) + Math.max(...raw.map((v) => v[2]))) / 2;
   const centerY = source.height / 2;
   const matrix = new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler(
     THREE.MathUtils.degToRad(source.rotationX ?? 0), THREE.MathUtils.degToRad(meshYawDegrees(source)), THREE.MathUtils.degToRad(source.rotationZ ?? 0), "XYZ"));

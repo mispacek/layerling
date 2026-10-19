@@ -1,6 +1,6 @@
 "use client";
 
-import { AlignCenterHorizontal, AlignCenterVertical, Check, ChevronUp, CornerDownRight, Crop, Crosshair, Home, Layers, Link, Link2Off, LockKeyhole, LockKeyholeOpen, Minus, Plus, Ruler, RulerDimensionLine, Slash, Spline, Split, Trash2, Waves, X } from "lucide-react";
+import { AlignCenterHorizontal, AlignCenterVertical, Check, ChevronUp, CornerDownRight, Crop, Crosshair, FlipHorizontal2, FlipVertical2, Home, Layers, Link, Link2Off, LockKeyhole, LockKeyholeOpen, Minus, Plus, Ruler, RulerDimensionLine, Slash, Spline, Split, Trash2, Waves, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type Dispatch, type SetStateAction, type FocusEvent as ReactFocusEvent, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent, type WheelEvent as ReactWheelEvent } from "react";
 import { SnapGridControl } from "@/components/workplane/ShapeInspector";
 import { SketchRevolvePreview } from "@/components/SketchRevolvePreview";
@@ -16,7 +16,7 @@ import { applyCornerAngle, sketchCornerAt, type CornerTurn, type SketchCorner } 
 import { isSegmentCurved } from "@/lib/sketchSegmentCurve";
 import { DEFAULT_SKETCH_BACKGROUND, DEFAULT_SKETCH_GRID_COLOR, DEFAULT_SKETCH_PLATE_COLOR, workplaneGridLayout } from "@/lib/workplaneGrid";
 import { closestPointOnSketchSegment, type SketchSegmentPlacement } from "@/lib/sketchPointRefinement";
-import { isSketchPanGesture, SKETCH_MANUAL_MAX_ZOOM, SKETCH_MAX_ZOOM, SKETCH_WHEEL_ZOOM_BOOST, SKETCH_MIN_ZOOM, sketchWheelZoomFactor, zoomSketchViewAt, type SketchView } from "@/lib/sketchPointerControls";
+import { isChainDrawingTool, isSketchPanGesture, rightClickEndsChain, SKETCH_MANUAL_MAX_ZOOM, SKETCH_MAX_ZOOM, SKETCH_WHEEL_ZOOM_BOOST, SKETCH_MIN_ZOOM, sketchPinchZoomFactor, sketchWheelZoomFactor, zoomSketchViewAt, type SketchView } from "@/lib/sketchPointerControls";
 import { pickTouchTarget, type TouchCandidate } from "@/lib/sketchTouch";
 import { isSketchPrimitive, type SketchPrimitive } from "@/lib/sketchPrimitives";
 import { mirrorSign, resizedImportedMeshPositions } from "@/lib/workplaneShapes";
@@ -63,8 +63,12 @@ type SketchWorkspaceProps = {
   onPlanePoint: (point: { x: number; z: number }, handles?: { handleIn: { x: number; z: number }; handleOut: { x: number; z: number } }) => void;
   onAddPrimitive: (primitive: SketchPrimitive, center: { x: number; z: number }) => void;
   onPointPress: (id: string) => void;
+  /** Ends the chain of points being drawn, keeping the tool: a right click on the plane or a double click on the last point (#520). */
+  onFinishLine?: () => void;
   onSelectSegment: (id: string) => void;
   onSelectMany: (pointIds: string[], segmentIds: string[], imageIds: string[]) => void;
+  /** A window dragged with the Erase tool: takes away the points and lines inside it (#519). */
+  onEraseMany?: (pointIds: string[], segmentIds: string[]) => void;
   /** Shift+click with Select: adds the point or line to the selection, or takes it out. */
   onToggleSelect: (entity: SketchSelectableEntity) => void;
   onSelectImage: (id: string) => void;
@@ -83,6 +87,8 @@ type SketchWorkspaceProps = {
   onCurveSegment?: (id: string) => void;
   /** Curve or straighten all the selected lines at once (#283). */
   onCurveSegments?: (ids: string[]) => void;
+  /** Copies the selection to the other side of the vertical or the horizontal axis through the middle of the plate, or of a straight line (#512). */
+  onMirror?: (across: "vertical" | "horizontal" | { segmentId: string }) => void;
   onStraightenSegments?: (ids: string[]) => void;
   onStraightenSegment?: (id: string) => void;
   /** Makes a line a construction line (#229), or a normal line again. */
@@ -521,8 +527,10 @@ export function SketchWorkspace({
   onPlanePoint,
   onAddPrimitive,
   onPointPress,
+  onFinishLine,
   onSelectSegment,
   onSelectMany,
+  onEraseMany,
   onToggleSelect,
   onSelectImage,
   onUpdateImage,
@@ -537,6 +545,7 @@ export function SketchWorkspace({
   onSetPointMode,
   onCurveSegment,
   onCurveSegments,
+  onMirror,
   onStraightenSegment,
   onStraightenSegments,
   onSetSegmentConstruction,
@@ -759,6 +768,34 @@ export function SketchWorkspace({
     onCornerDialogChange?.(dialog);
   }, [onCornerDialogChange]);
   const [cornerValue, setCornerValue] = useState("2");
+  // Mirror (#512): the bar with the choice of axis, and the step where a line is picked as the axis.
+  const [mirrorOpen, setMirrorOpen] = useState(false);
+  const [mirrorPicking, setMirrorPicking] = useState(false);
+  useEffect(() => {
+    if (selected) return;
+    setMirrorOpen(false);
+    setMirrorPicking(false);
+  }, [selected]);
+  useEffect(() => {
+    if (!mirrorOpen) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      if (mirrorPicking) setMirrorPicking(false);
+      else setMirrorOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [mirrorOpen, mirrorPicking]);
+  const closeMirror = () => {
+    setMirrorOpen(false);
+    setMirrorPicking(false);
+  };
+  const mirrorButton = onMirror ? (
+    <>
+      <span className="sketch-point-divider" />
+      <button type="button" title={t("sketch.mirrorHint")} onClick={() => setMirrorOpen(true)}><FlipHorizontal2 /><span>{t("sketch.mirror")}</span></button>
+    </>
+  ) : null;
 
   useEffect(() => {
     setCornerDialog(null);
@@ -1077,7 +1114,11 @@ export function SketchWorkspace({
     }
   };
 
+  // Where the right button went down: a right click that did not move ends the chain, one that did is a pan.
+  const rightPressRef = useRef<{ x: number; y: number } | null>(null);
+
   const handlePanPointerDownCapture = (event: ReactPointerEvent<SVGSVGElement>) => {
+    if (event.button === 2) rightPressRef.current = { x: event.clientX, y: event.clientY };
     if (isSketchPanGesture(event)) beginPan(event);
     else retargetTouchPress(event);
   };
@@ -1095,7 +1136,7 @@ export function SketchWorkspace({
       capturePointer(event.currentTarget, event.pointerId);
       const startPoint = event.shiftKey && activePoint ? constrainDrawing(activePoint, point) : point;
       setPointerAction({ kind: "bezier", pointerId: event.pointerId, origin: startPoint, current: startPoint });
-    } else if (tool === "select") {
+    } else if (tool === "select" || (tool === "erase" && onEraseMany)) {
       capturePointer(event.currentTarget, event.pointerId);
       setPointerAction({ kind: "marquee", pointerId: event.pointerId, origin: point, current: point, clientX: event.clientX, clientY: event.clientY });
     } else if (tool === "line" || tool === "smooth" || tool === "measure") {
@@ -1167,6 +1208,21 @@ export function SketchWorkspace({
     if (action.kind === "marquee") {
       // A click without dragging inside a closed shape selects the whole shape.
       const clicked = Math.hypot(event.clientX - action.clientX, event.clientY - action.clientY) < 4;
+      if (tool === "erase") {
+        // The Erase tool takes away what its window holds; a click on the empty plane does nothing.
+        setPointerAction(null);
+        if (clicked || !onEraseMany) return;
+        const eraseContains = (point: { x: number; z: number }) => point.x >= Math.min(action.origin.x, action.current.x) && point.x <= Math.max(action.origin.x, action.current.x) && point.z >= Math.min(action.origin.z, action.current.z) && point.z <= Math.max(action.origin.z, action.current.z);
+        onEraseMany(
+          profile.points.filter(eraseContains).map((point) => point.id),
+          profile.segments.filter((segment) => {
+            const start = pointById.get(segment.startId);
+            const end = pointById.get(segment.endId);
+            return Boolean(start && end && (eraseContains(start) || eraseContains(end) || eraseContains({ x: (start.x + end.x) / 2, z: (start.z + end.z) / 2 })));
+          }).map((segment) => segment.id),
+        );
+        return;
+      }
       const clickPoint = clicked ? unsnappedPointFromEvent(event) : null;
       const shape = clickPoint ? closedPathAt(clickPoint, paths) : null;
       if (shape) {
@@ -1239,6 +1295,37 @@ export function SketchWorkspace({
     setView((current) => zoomSketchViewAt(current, factor, offset, pixelsPerUnit, workspace));
   };
 
+  // Safari on a Mac sends no wheel steps for a pinch on the trackpad, only gestures with a scale, and zooms the whole
+  // page if they are not refused (#439 forum). Each change of the scale zooms the plate under the fingers.
+  useEffect(() => {
+    const wrap = wrapRef.current;
+    if (!wrap) return;
+    let gestureScale = 1;
+    const onGesture = (event: Event) => {
+      if (event.cancelable) event.preventDefault();
+      if (event.type === "gesturestart") {
+        gestureScale = 1;
+        return;
+      }
+      if (event.type !== "gesturechange") return;
+      const gesture = event as Event & { scale?: number; clientX?: number; clientY?: number };
+      if (typeof gesture.scale !== "number" || !(gesture.scale > 0)) return;
+      const ratio = gesture.scale / gestureScale;
+      gestureScale = gesture.scale;
+      const bounds = wrap.getBoundingClientRect();
+      const offset = {
+        x: (gesture.clientX ?? bounds.left + bounds.width / 2) - (bounds.left + bounds.width / 2),
+        y: (gesture.clientY ?? bounds.top + bounds.height / 2) - (bounds.top + bounds.height / 2),
+      };
+      const pixelsPerUnit = Math.min(bounds.width / workspace.width, bounds.height / workspace.depth);
+      const factor = sketchPinchZoomFactor(ratio, orbitControlsZoomSpeed(workspace.zoomSpeed), orbitControlsZoomSpeed(DEFAULT_WORKPLANE_WORKSPACE.zoomSpeed));
+      setView((current) => zoomSketchViewAt(current, factor, offset, pixelsPerUnit, workspace));
+    };
+    const names = ["gesturestart", "gesturechange", "gestureend"] as const;
+    names.forEach((name) => wrap.addEventListener(name, onGesture, { passive: false }));
+    return () => names.forEach((name) => wrap.removeEventListener(name, onGesture));
+  }, [workspace]);
+
   // Matches the 3D editor's buttons: a fixed step raised by the configured zoom speed.
   const zoomByButton = (distanceStep: number) => {
     const scaled = zoomDistanceScale(distanceStep, workspace.zoomSpeed);
@@ -1253,8 +1340,8 @@ export function SketchWorkspace({
   );
 
   // Like the 3D editor's Shift+F: frame the selection with a little room around it.
-  const focusSelection = useCallback(() => {
-    if (!focusBounds) return;
+  const focusSelection = useCallback((): boolean => {
+    if (!focusBounds) return false;
     const margin = 1.3;
     // A lone point or a tiny selection has next to no extent; a quarter of the
     // plate keeps it in context instead of diving straight to the maximum zoom.
@@ -1268,6 +1355,7 @@ export function SketchWorkspace({
         z: clamp((focusBounds.minZ + focusBounds.maxZ) / 2, -workspace.depth / 2, workspace.depth / 2),
       },
     });
+    return true;
   }, [focusBounds, workspace.depth, workspace.width]);
 
   useEffect(() => {
@@ -1316,7 +1404,11 @@ export function SketchWorkspace({
       if (event.key.toLowerCase() === "f" && event.shiftKey) {
         event.preventDefault();
         focusSelection();
-      } else if (event.key.toLowerCase() === "f" || event.key === "Home") {
+      } else if (event.key.toLowerCase() === "f") {
+        // As in the 3D view: F looks at the selection, and at the whole sketch when nothing is selected (#465).
+        event.preventDefault();
+        if (!focusSelection()) resetView();
+      } else if (event.key === "Home") {
         event.preventDefault();
         resetView();
       } else if (event.key === "+" || event.key === "=") {
@@ -1637,14 +1729,14 @@ export function SketchWorkspace({
     <main className="sketch-workspace-stage" style={sketchColorStyle}>
       <div className="sketch-mode-badge">{operation === "revolve" ? t("sketch.modeBadgeRevolve") : operation === "sweep" ? t("sketch.modeBadgeSweep") : t("sketch.modeBadge")}</div>
       {operation === "revolve" ? <SketchRevolvePreview positions={revolvePreviewPositions} /> : null}
-      <div className="camera-controls sketch-camera-controls" aria-label={t("sketch.viewControls")}>
-        <button aria-label={t("sketch.resetView")} aria-keyshortcuts="F" title={t("camera.shortcut", { label: t("sketch.resetView"), keys: "F" })} onClick={resetView}><Home size={28} /></button>
+      <div className="camera-controls sketch-camera-controls" aria-label={t("sketch.viewControls")} data-help-section="cameraBar">
+        <button aria-label={t("sketch.resetView")} aria-keyshortcuts="Home" title={t("camera.shortcut", { label: t("sketch.resetView"), keys: "Home" })} onClick={resetView}><Home size={28} /></button>
         <button
           aria-label={t("camera.focusSelection")}
-          aria-keyshortcuts="Shift+F"
-          title={t("camera.shortcut", { label: t("camera.focusSelection"), keys: "Shift+F" })}
+          aria-keyshortcuts="F Shift+F"
+          title={t("camera.shortcut", { label: t("camera.focusSelection"), keys: "F" })}
           disabled={!focusBounds}
-          onClick={focusSelection}
+          onClick={() => focusSelection()}
         >
           <Crosshair size={28} />
         </button>
@@ -1697,7 +1789,11 @@ export function SketchWorkspace({
             setRefinePreview(null);
           }}
           onWheel={handleWheel}
-          onContextMenu={(event) => event.preventDefault()}
+          onContextMenu={(event) => {
+            event.preventDefault();
+            if (onFinishLine && activePointId && isChainDrawingTool(tool) && rightClickEndsChain(rightPressRef.current, { x: event.clientX, y: event.clientY })) onFinishLine();
+            rightPressRef.current = null;
+          }}
           onDragOver={(event) => {
             if (!event.dataTransfer.types.includes("application/x-layerling-sketch-primitive")) return;
             event.preventDefault();
@@ -1863,6 +1959,10 @@ export function SketchWorkspace({
                   event.preventDefault();
                   event.stopPropagation();
                   if (event.button === 1) beginPan(event);
+                  else if (mirrorPicking && event.button === 0 && onMirror) {
+                    onMirror({ segmentId: segment.id });
+                    closeMirror();
+                  }
                   else if (tool === "erase") onDeleteSegment(segment.id);
                   else if (event.button === 0 && tool === "refine" && point) {
                     const start = pointById.get(segment.startId);
@@ -1990,7 +2090,8 @@ export function SketchWorkspace({
             const widthPill = dimensionPillSize(widthLabel, screenUnit, 18);
             const depthPill = dimensionPillSize(depthLabel, screenUnit, 18);
             return (
-              <g className="sketch-geometry-selection">
+              // While a line is picked as the mirror axis (#512) the frame lets the click through to the lines.
+              <g className="sketch-geometry-selection" pointerEvents={mirrorPicking ? "none" : undefined}>
                 <rect
                   data-sketch-entity="selection-box"
                   className="sketch-geometry-selection-box"
@@ -2189,7 +2290,7 @@ export function SketchWorkspace({
               </g>
             );
           })() : null}
-          {selectedPoint && tool === "select" ? (
+          {selectedPoint && tool === "select" && !mirrorOpen ? (
             <g className="sketch-curve-handles">
               {selectedPoint.handleIn ? <><line x1={selectedPoint.x} y1={selectedPoint.z} x2={selectedPoint.handleIn.x} y2={selectedPoint.handleIn.z} /><circle data-sketch-entity="handle" cx={selectedPoint.handleIn.x} cy={selectedPoint.handleIn.z} r={controlPointRadius} className={selectedHandle?.pointId === selectedPoint.id && selectedHandle.handle === "in" ? "sketch-handle-selected" : undefined} onPointerDown={(event) => pressHandle(event, selectedPoint.id, "in", selectedPoint.handleIn!)} /></> : null}
               {selectedPoint.handleOut ? <><line x1={selectedPoint.x} y1={selectedPoint.z} x2={selectedPoint.handleOut.x} y2={selectedPoint.handleOut.z} /><circle data-sketch-entity="handle" cx={selectedPoint.handleOut.x} cy={selectedPoint.handleOut.z} r={controlPointRadius} className={selectedHandle?.pointId === selectedPoint.id && selectedHandle.handle === "out" ? "sketch-handle-selected" : undefined} onPointerDown={(event) => pressHandle(event, selectedPoint.id, "out", selectedPoint.handleOut!)} /></> : null}
@@ -2204,6 +2305,10 @@ export function SketchWorkspace({
                 cx={point.x}
                 cy={point.z}
                 r={pointRadius}
+                onDoubleClick={() => {
+                  // A double click on the last point ends the chain (#520).
+                  if (onFinishLine && activePointId === point.id && isChainDrawingTool(tool)) onFinishLine();
+                }}
                 onPointerDown={(event) => {
                   event.preventDefault();
                   event.stopPropagation();
@@ -2569,12 +2674,13 @@ export function SketchWorkspace({
                   </button>
                 </>
               ) : null}
+              {mirrorButton}
               <GuideHelpLink section="sketchCurve" className="sketch-corner-help" iconSize={17} />
             </>
           )}
         </div>
       ) : null}
-      {(manyCorners || manyLines) && tool === "select" ? (
+      {(manyCorners || manyLines || (selected?.kind === "multiple" && onMirror)) && tool === "select" && !mirrorOpen ? (
         <div className="sketch-point-actions" aria-label={t("sketch.pointActions")}>
           {activeCornerDialog && manyCorners ? (
             cornerDialogContent
@@ -2613,12 +2719,13 @@ export function SketchWorkspace({
                   <button type="button" title={t("sketch.straightenLineHint")} disabled={!canStraightenLines} onClick={() => onStraightenSegments?.(selectedLines.map((segment) => segment.id))}><Minus /><span>{t("sketch.straightenLine")}</span></button>
                 </>
               ) : null}
+              {mirrorButton}
               <GuideHelpLink section={manyCorners ? "sketchCorners" : "sketchCurve"} className="sketch-corner-help" iconSize={17} />
             </>
           )}
         </div>
       ) : null}
-      {selectedSegment && tool === "select" && onCurveSegment && onStraightenSegment ? (
+      {selectedSegment && tool === "select" && onCurveSegment && onStraightenSegment && !mirrorOpen ? (
         <div className="sketch-point-actions" aria-label={t("sketch.segmentActions")}>
           <button type="button" title={t("sketch.curveLineHint")} disabled={selectedSegmentCurved} onClick={() => onCurveSegment(selectedSegment.id)}><Spline /><span>{t("sketch.curveLine")}</span></button>
           <button type="button" title={t("sketch.straightenLineHint")} disabled={!selectedSegmentCurved && (selectedSegment.kind ?? "line") === "line"} onClick={() => onStraightenSegment(selectedSegment.id)}><Minus /><span>{t("sketch.straightenLine")}</span></button>
@@ -2634,7 +2741,23 @@ export function SketchWorkspace({
               <span>{t(selectedSegment.construction ? "sketch.makeSolid" : "sketch.makeConstruction")}</span>
             </button>
           ) : null}
+          {mirrorButton}
           <GuideHelpLink section="sketchCurve" className="sketch-corner-help" iconSize={17} />
+        </div>
+      ) : null}
+      {mirrorOpen && selected && tool === "select" && onMirror ? (
+        <div className="sketch-point-actions" aria-label={t("sketch.mirror")}>
+          {mirrorPicking ? (
+            <span className="sketch-corner-label">{t("sketch.mirrorPickLine")}</span>
+          ) : (
+            <>
+              <button type="button" title={t("sketch.mirrorLeftRightHint")} onClick={() => { onMirror("vertical"); closeMirror(); }}><FlipHorizontal2 /><span>{t("sketch.mirrorLeftRight")}</span></button>
+              <button type="button" title={t("sketch.mirrorTopBottomHint")} onClick={() => { onMirror("horizontal"); closeMirror(); }}><FlipVertical2 /><span>{t("sketch.mirrorTopBottom")}</span></button>
+              <button type="button" title={t("sketch.mirrorAcrossLineHint")} onClick={() => setMirrorPicking(true)}><Slash /><span>{t("sketch.mirrorAcrossLine")}</span></button>
+            </>
+          )}
+          <button type="button" className="sketch-corner-cancel" title={t("common.cancel")} aria-label={t("common.cancel")} onClick={closeMirror}><X /></button>
+          <GuideHelpLink section="sketchMirror" className="sketch-corner-help" iconSize={17} />
         </div>
       ) : null}
       <div className="grid-settings">

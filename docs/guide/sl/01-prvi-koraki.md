@@ -25,6 +25,66 @@ Vsi tvoji načrti se pozneje pojavijo na začetni strani s sličico predogleda. 
 - **Levo** je upravljanje kamere z orientacijsko kocko nad njim. S tem se premikaš po prizoru, več o tem v poglavju [Pogled in delovna ravnina](chapter:pogled-in-delovna-ravnina).
 - **Čisto zgoraj** preklapljaš med {{ui:editor.modeGeometry}} in {{ui:editor.modeSketch}}, preimenuješ načrt ter nastaviš jezik in barvno shemo.
 
+## Gumbi okoli delovne površine
+
+Z miško se ustavite nad gumbom in videli boste njegovo ime. Če niste prepričani, kaj gumb naredi, kliknite v območju {{ui:editor.group.help}} na {{ui:interactiveHelp.title}} ([[Shift]]+[[F1]]) in nato na gumb. Tu so tisti, o katerih se najpogosteje sprašuje.
+
+### Prilepi
+
+{{ui:editor.tool.paste}} ([[Ctrl]]+[[V]]) doda v projekt to, kar ste kopirali z {{ui:editor.tool.copy}}. {{ui:common.duplicate}} kopira in prilepi v enem koraku.
+
+### Izbriši
+
+{{ui:common.delete}} ([[Delete]]) odstrani izbrane oblike. {{ui:editor.tool.undo}} jih vrne.
+
+### Razdruži
+
+{{ui:editor.tool.ungroup}} ([[Ctrl]]+[[Shift]]+[[G]]) izbrano skupino spet razstavi na oblike, iz katerih je nastala.
+
+### Nastavitve delovnega prostora
+
+{{ui:editor.workspaceSettings}} odpre nastavitve delovne površine: enota, velikost plošče, tiskalnik, mreža, barve, svetloba in drugo. Več v poglavju [Pogled in delovna ravnina](chapter:pogled-in-delovna-ravnina).
+
+### Tema
+
+{{ui:common.theme}} čisto na vrhu določa videz layerlinga: kot sistem, svetel, temen ali grafiten.
+
+### Preimenuj projekt
+
+{{ui:editor.renameProject}}: svinčnik ob imenu čisto na vrhu. Vpišite novo ime in pritisnite [[Enter]].
+
+### Ime projekta
+
+Ime projekta ({{ui:confirm.projectName}}) je čisto na vrhu. Kliknite nanj, vpišite in [[Enter]] ime obdrži.
+
+### Možnosti vidnosti
+
+{{ui:editor.visibilityOptions}}, puščica ob ikoni očesa, vsebuje, kar lahko prikažete ali skrijete: seznam objektov, vse skrito, opombe in previse tiska. Več v poglavju [Izbiranje in razporejanje](chapter:izbiranje-in-razporejanje).
+
+### Skrij izbrano
+
+{{ui:editor.tool.hideSelected}} ([[Ctrl]]+[[H]]) skrije izbrane oblike. Ostanejo v projektu in na seznamu objektov; {{ui:editor.visibilityOptions}} jih spet pokaže.
+
+### Išči ukaze
+
+{{ui:palette.open}}: vpišite, kar iščete, orodje, obliko ali nastavitev, in kliknite rezultat.
+
+### Skrij upravljanje kamere
+
+{{ui:camera.hide}} zloži upravljanje kamere na levi in da delovni površini več prostora; {{ui:camera.show}} ga vrne.
+
+### Mreža pripenjanja
+
+{{ui:inspector.snapGrid}} spodaj v lastnostih je korak, na katerega se pripenjata premikanje in spreminjanje velikosti. Ob njem majhno stikalo **mm | in** spremeni enoto. Več v poglavju [Pogled in delovna ravnina](chapter:pogled-in-delovna-ravnina).
+
+### Enota: milimetri ali palci
+
+Stikalo **mm | in** ob {{ui:inspector.snapGrid}} spremeni enoto, mrežo plošče in korak pripenjanja za ta projekt.
+
+### Noga okna
+
+Na dnu okna: {{ui:dashboard.sponsor}} vodi na stran, kjer lahko podprete projekt; {{ui:dashboard.userGuide}} odpre ta priročnik; {{ui:dashboard.forum}} vodi na mesto za vprašanja, zamisli in poročila o napakah (razprave na GitHubu, v nemščini forum drucktipps3d); {{ui:editor.bugReport}} naredi ZIP za poročilo o napaki; {{ui:dashboard.projectOnGitHub}} vodi do projekta na GitHubu, številka različice pa odpre opombe ob izdaji. Povezavi na podatke o ponudniku in na varstvo zasebnosti pripadata tistemu, ki upravlja kopijo layerlinga, ki jo uporabljate.
+
 ## Tvoj prvi del
 
 Za primer zgradimo kocko z izvrtino.

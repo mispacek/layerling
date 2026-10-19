@@ -7,7 +7,7 @@ summary: Hvor dine designs bor, hvordan du sikkerhedskopierer dem, hvilke format
 
 layerling gemmer alt i browseren på din computer. Der er ingen konto, og intet uploades. Hver ændring gemmer sig selv. Forhåndsbilledet på startsiden viser den visning du sidst havde foran dig da du gik tilbage med {{ui:editor.homeDashboard}}. Hvis du åbner layerling i den samme browser dage senere, er alt der.
 
-Hvis du går tilbage til startsiden fra et design der ikke har noget i sig, spørger layerling om det skal beholdes. {{ui:confirm.yes}} eller [[Enter]] beholder det, {{ui:confirm.no}} fjerner det, så tomme designs ikke hober sig op. Designs i en delt mappe på en server spørges der ikke om.
+Hvis du går tilbage til startsiden fra et design der ikke har noget i sig, spørger layerling om det skal beholdes. {{ui:confirm.yes}} eller [[Enter]] beholder det, {{ui:confirm.no}} fjerner det, så tomme designs ikke hober sig op. For et design i en delt mappe på en server sletter {{ui:confirm.no}} filen fra serveren, for alle der bruger den.
 
 Det har en ulempe: den der rydder browserens lager eller skifter til en anden computer mister designsene. **Så sikkerhedskopiér vigtigt arbejde i en fil.**
 

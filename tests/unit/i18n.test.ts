@@ -112,7 +112,7 @@ describe("language detection", () => {
     expect(languageFromTag("CS")).toBe("cs");
     expect(languageFromTag("fr-FR")).toBe("fr");
     expect(languageFromTag("ru-RU")).toBe("ru");
-    expect(languageFromTag("it-IT")).toBe(null);
+    expect(languageFromTag("es-ES")).toBe(null);
     expect(languageFromTag(undefined)).toBe(null);
   });
 
@@ -123,7 +123,9 @@ describe("language detection", () => {
     expect(isLanguage("fr")).toBe(true);
     expect(isLanguage("pl")).toBe(true);
     expect(isLanguage("ru")).toBe(true);
-    expect(isLanguage("it")).toBe(false);
+    expect(isLanguage("it")).toBe(true);
+    expect(isLanguage("ar")).toBe(true);
+    expect(isLanguage("es")).toBe(false);
     expect(isLanguage(null)).toBe(false);
   });
 
@@ -158,6 +160,9 @@ describe("language detection", () => {
     // The browser locale does not override the installation default.
     expect(withBrowser(["fr-FR", "es"])).toBe("cs");
     expect(withBrowser(["fr-FR", "de-DE"])).toBe("cs");
+    expect(withBrowser(["es-ES", "ko"])).toBe("cs");
+    expect(withBrowser(["ja-JP", "ja"])).toBe("cs");
+    expect(withBrowser(["en-US"], "ja")).toBe("ja");
     // A stored choice outranks the browser in both directions.
     expect(withBrowser(["de-DE"], "en")).toBe("en");
     expect(withBrowser(["en-US"], "de")).toBe("de");

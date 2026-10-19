@@ -8,6 +8,14 @@ import { unzipSync, zipSync } from "fflate";
  */
 
 export type BackupEntry = { name: string; bytes: Uint8Array };
+/** A design of a backup, with the folders it was in (#496); empty at the top level. */
+export type BackupDesign = BackupEntry & { folder: string[] };
+
+/**
+ * The designs that sit in a folder go into the ZIP under this folder, in their folders. A folder of
+ * one's own may be called anything, even "Custom shapes", and still not be taken for the shapes.
+ */
+export const DESIGN_FOLDERS_BACKUP_ROOT = "Folders";
 
 /**
  * The custom shapes of this browser travel in the same ZIP, in a folder of
@@ -40,16 +48,79 @@ export function backupEntryNames(projectNames: string[], fallback = "design") {
   });
 }
 
+/** One part of a path in the ZIP: a name made safe, as a design's name is. */
+function safeSegment(name: string, fallback: string) {
+  return name
+    .replace(/[\\/:*?"<>|\u0000-\u001f]/g, "-")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/^\.+/, "")
+    .slice(0, 120) || fallback;
+}
+
+/**
+ * Paths in the ZIP for designs that may sit in folders: a design at the top level is a file at the
+ * top as before, one in a folder lies under `Folders/` in the same folders. Never twice the same
+ * path, whatever the names.
+ */
+export function backupEntryPaths(designs: ReadonlyArray<{ name: string; folder: readonly string[] }>, fallback = "design", folderFallback = "folder") {
+  const used = new Set<string>();
+  return designs.map((design) => {
+    const directory = design.folder.length ? `${[DESIGN_FOLDERS_BACKUP_ROOT, ...design.folder.map((part) => safeSegment(part, folderFallback))].join("/")}/` : "";
+    const base = safeSegment(design.name, fallback);
+    let path = `${directory}${base}.lyl`;
+    for (let number = 2; used.has(path.toLowerCase()); number += 1) path = `${directory}${base} (${number}).lyl`;
+    used.add(path.toLowerCase());
+    return path;
+  });
+}
+
+/**
+ * A folder of one's own with no design anywhere inside it still goes into the ZIP, as an empty
+ * folder under `Folders/`, so a restore brings it back too.
+ */
+export function backupFolderPaths(folders: ReadonlyArray<readonly string[]>, folderFallback = "folder") {
+  return folders.map((folder) => `${[DESIGN_FOLDERS_BACKUP_ROOT, ...folder.map((part) => safeSegment(part, folderFallback))].join("/")}/`);
+}
+
+/** The empty folders a backup holds, as paths of names below `Folders/`. */
+export function unpackBackupFolders(bytes: Uint8Array): string[][] {
+  const found: string[][] = [];
+  try {
+    unzipSync(bytes, {
+      filter: (file) => {
+        if (file.name.endsWith("/") && file.name.startsWith(`${DESIGN_FOLDERS_BACKUP_ROOT}/`)) {
+          const parts = file.name.split("/").filter(Boolean).slice(1);
+          if (parts.length) found.push(parts);
+        }
+        return false;
+      },
+    });
+  } catch {
+    return [];
+  }
+  return found;
+}
+
 export function packBackup(entries: BackupEntry[], modified = new Date()): Uint8Array {
   const files: Record<string, [Uint8Array, { level: 0; mtime: Date }]> = {};
   for (const entry of entries) files[entry.name] = [entry.bytes, { level: 0, mtime: modified }];
   return zipSync(files);
 }
 
-/** The designs inside a backup, in the order they were packed. Other files, and the custom shapes, are left out. */
-export function unpackBackup(bytes: Uint8Array): BackupEntry[] {
+/**
+ * The designs inside a backup, in the order they were packed, each with the folders it was in.
+ * Other files, and the custom shapes, are left out. A design elsewhere in the ZIP than under
+ * `Folders/` - every backup made before there were folders - comes back at the top level.
+ */
+export function unpackBackup(bytes: Uint8Array): BackupDesign[] {
   const files = unzipSync(bytes, { filter: (file) => /\.(lyl|skf)$/i.test(file.name) && !inCustomShapesFolder(file.name) });
-  return Object.entries(files).map(([path, data]) => ({ name: path.split("/").pop() ?? path, bytes: data }));
+  return Object.entries(files).map(([path, data]) => {
+    const parts = path.split("/").filter(Boolean);
+    const name = parts.pop() ?? path;
+    const folder = parts[0] === DESIGN_FOLDERS_BACKUP_ROOT ? parts.slice(1) : [];
+    return { name, bytes: data, folder };
+  });
 }
 
 /** The custom shapes inside a backup: their packages by file name, and the list that names them. */

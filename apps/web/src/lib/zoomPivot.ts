@@ -41,3 +41,43 @@ export function pivotKeptAhead(
   if (!(ahead > distance + 1e-6)) return null;
   return camera.clone().addScaledVector(forward, ahead);
 }
+
+/**
+ * How far up and down the orbit pivot may go: at least the range it always had, and further to the
+ * top of the highest body and the foot of the lowest, so a body set high above the plate can be
+ * centred and zoomed into (#425). A body counts as tall as its largest side, as it may lie turned.
+ */
+export function pivotHeightRange(
+  bodies: Iterable<{ elevation: number; extent: number }>,
+  base: { minY: number; maxY: number },
+  reach?: { minY: number; maxY: number } | null,
+): { minY: number; maxY: number } {
+  let { minY, maxY } = base;
+  for (const body of bodies) {
+    minY = Math.min(minY, body.elevation);
+    maxY = Math.max(maxY, body.elevation + body.extent);
+  }
+  if (reach) {
+    minY = Math.min(minY, reach.minY);
+    maxY = Math.max(maxY, reach.maxY);
+  }
+  return { minY, maxY };
+}
+
+/**
+ * How far out to the sides and to the back the orbit pivot may go: at least the plate, and as far as
+ * the farthest body, so a design with parts parked beside the plate can be panned and turned about
+ * all of them, not only the ones the view was last centred on (#502). A body counts as wide as its
+ * largest side, as it may lie turned.
+ */
+export function pivotPlateReach(
+  bodies: Iterable<{ x: number; z: number; extent: number }>,
+  plate: { halfWidth: number; halfDepth: number },
+): { halfWidth: number; halfDepth: number } {
+  let { halfWidth, halfDepth } = plate;
+  for (const body of bodies) {
+    halfWidth = Math.max(halfWidth, Math.abs(body.x) + body.extent / 2);
+    halfDepth = Math.max(halfDepth, Math.abs(body.z) + body.extent / 2);
+  }
+  return { halfWidth, halfDepth };
+}
