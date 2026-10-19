@@ -1,7 +1,8 @@
 /// <reference lib="webworker" />
 
 import { OcctKernel, type ShapeHandle } from "occt-wasm";
-import { CAD_MODIFIER_RUNTIME_BASE, SKETCH_CAD_DEFLECTION } from "@/lib/cadModifierRuntime";
+import { CAD_MODIFIER_RUNTIME_BASE } from "@/lib/cadModifierRuntime";
+import { sketchCadDeflection } from "@/lib/sketchCadDeflection";
 import { cadSketchRegions } from "@/lib/sketchCadProfile";
 import { buildRevolvedSketchSolid } from "@/lib/cadSketchRevolve";
 import { buildStrokedSketchSolid } from "@/lib/cadSketchStroke";
@@ -78,12 +79,13 @@ self.onmessage = async (event: MessageEvent<SketchCadBuildRequest>) => {
       const sound = edgeCount > LARGE_SKETCH_EDGES ? cad.getVolume(result) > 1e-9 : cad.isValid(result);
       if (!sound) throw new Error("OpenCascade produced invalid sketch topology");
     }
-    const mesh = cad.tessellate(result, { linearDeflection: SKETCH_CAD_DEFLECTION.linear, angularDeflection: SKETCH_CAD_DEFLECTION.angular });
+    const deflection = sketchCadDeflection(request.profile);
+    const mesh = cad.tessellate(result, { linearDeflection: deflection.linear, angularDeflection: deflection.angular });
     const positions = new Float32Array(mesh.positions);
     const normals = new Float32Array(mesh.normals);
     const indices = new Uint32Array(mesh.indices);
     const brep = cad.toBREP(result);
-    post({ type: "built", requestId: request.requestId, positions, normals, indices, triangleCount: mesh.triangleCount, brep }, [positions.buffer, normals.buffer, indices.buffer]);
+    post({ type: "built", requestId: request.requestId, positions, normals, indices, triangleCount: mesh.triangleCount, brep, deflection }, [positions.buffer, normals.buffer, indices.buffer]);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error ?? "The CAD kernel could not build this sketch");
     post({ type: "error", requestId: request.requestId, message });

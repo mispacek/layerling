@@ -139,7 +139,7 @@ export async function cadShapeFromSketchProfile(profile: SketchProfile, height: 
     cadDisplayEdges: undefined,
     cadDisplayEdgesVersion: undefined,
   });
-  const shape = shapeFromCadMesh(source, response.positions, response.normals, response.indices, response.brep, SKETCH_CAD_DEFLECTION);
+  const shape = shapeFromCadMesh(source, response.positions, response.normals, response.indices, response.brep, response.deflection ?? SKETCH_CAD_DEFLECTION);
   if (!shape) throw new Error("OpenCascade returned an empty sketch solid");
   return { ...shape, sketchProfile: cloneSketchProfile(profile), sketchOperation: "extrude" as const };
 }
@@ -186,7 +186,7 @@ export async function cadShapeFromSketchSweep(profile: SketchProfile, existing?:
     cadDisplayEdges: undefined,
     cadDisplayEdgesVersion: undefined,
   });
-  const shape = shapeFromCadMesh(source, response.positions, response.normals, response.indices, response.brep, SKETCH_CAD_DEFLECTION);
+  const shape = shapeFromCadMesh(source, response.positions, response.normals, response.indices, response.brep, response.deflection ?? SKETCH_CAD_DEFLECTION);
   if (!shape) throw new Error(t("sketch.sweepFailed"));
   return { ...shape, sketchProfile: cloneSketchProfile(profile), sketchOperation: "sweep" as const };
 }
@@ -254,7 +254,7 @@ async function cadShapeFromSketchRevolve(
       locked: existing?.locked ?? false,
       hidden: existing?.hidden ?? false,
     } satisfies WorkplaneShape);
-    const shape = shapeFromCadMesh(source, response.positions, response.normals, response.indices, response.brep, SKETCH_CAD_DEFLECTION);
+    const shape = shapeFromCadMesh(source, response.positions, response.normals, response.indices, response.brep, response.deflection ?? SKETCH_CAD_DEFLECTION);
     if (!shape) return null;
     // Like the mesh revolve: the body stands at the origin (or where the edited one stood); the
     // exact body keeps its own frame, so it follows the move.

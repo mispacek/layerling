@@ -1,3 +1,4 @@
+import type { CadModifierDeflection } from "@/lib/cadModifierTypes";
 import type { SketchInset, SketchProfile, SketchStroke } from "@/types/layerling";
 
 export type SketchCadBuildRequest = {
@@ -30,5 +31,7 @@ export type SketchCadBuildResponse =
       indices: Uint32Array;
       triangleCount: number;
       brep: string;
+      /** How finely the body was cut, kept with it so that an edge treatment later does not cut it coarser (#573). */
+      deflection: CadModifierDeflection;
     }
   | { type: "error"; requestId: number; message: string };

@@ -42,5 +42,25 @@
       "ru": "Настройки > Внешний вид > Положение куба ориентации ставит куб вверху слева, вверху справа, внизу слева или внизу справа рабочей области. В любом углу, кроме верхнего левого, панель камеры поднимается на его место.",
       "ja": "設定 > 外観 > ビュー方向キューブの位置で、キューブを作業領域の左上・右上・左下・右下に置けます。左上以外では、カメラ操作がキューブのあった場所まで上がります。"
     }
+  },
+  {
+    "title": {
+      "de": "Nachgezeichnete SVGs bleiben klein genug zum Verbinden",
+      "en": "Traced SVGs stay small enough to join"
+    },
+    "body": {
+      "de": "Eine importierte SVG mit sehr vielen Kurven, etwa eine nachgezeichnete Zeichnung, wurde in über 350.000 Dreiecke zerlegt, sodass mehrere Kopien nicht mehr zu verbinden waren. Jetzt sind es etwa zehnmal weniger, und die Zeichnung sieht bei dieser Größe gleich aus. Von Hand gezeichnete Skizzen bleiben so fein wie vorher.",
+      "en": "An imported SVG with very many curves, such as a traced drawing, was cut into over 350,000 triangles, so several copies could no longer be joined. It is now about ten times fewer, and the drawing looks the same at that size. Sketches drawn by hand stay as fine as before."
+    }
+  },
+  {
+    "title": {
+      "de": "Dünne, kleine Buchstaben gehen im Export nicht mehr verloren",
+      "en": "Thin, small letters are no longer lost in the export"
+    },
+    "body": {
+      "de": "Ein kleiner, flacher Text verlor beim Export als STL, 3MF oder OBJ einzelne Buchstaben, bei dünnem Text die meisten: das Pünktchen des i, den Apostroph, kleine Buchstaben. Der Export hielt sie für Splitter, die ein Schnitt zurückgelassen hat. Das gilt jetzt nur noch für Körper, die ein Schnitt, ein Verschmelzen mehrerer Körper oder die Farbtrennung verändert hat.",
+      "en": "A small, flat text lost single letters in the export as STL, 3MF or OBJ, with a thin text most of them: the dot of the i, the apostrophe, small letters. The export took them for splinters that a cut had left behind. That now applies only to bodies that a cut, a merge of several bodies or the colour separation has changed."
+    }
   }
 ]
