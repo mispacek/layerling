@@ -1,4 +1,3 @@
-import { setLanguage } from "@/lib/i18n";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { WorkplaneShape } from "@/types/layerling";
 
@@ -56,6 +55,7 @@ const dispatched: string[] = [];
 
 async function load(build = "") {
   vi.resetModules();
+  (await import("@/lib/i18n")).setLanguage("en", false);
   vi.stubEnv("NEXT_PUBLIC_BUILD_ID", build);
   return import("@/lib/geometryWorker");
 }
@@ -185,6 +185,3 @@ describe("geometry worker on the page's side", () => {
     expect(busy).toEqual([false]);
   });
 });
-
-// These fixtures assert English labels; the application default remains Czech.
-beforeEach(() => { setLanguage("en", false); });
