@@ -90,6 +90,8 @@ Nakreslete polovinu průřezu **nalevo od zobrazené osy**. Vedle náčrtu uvid�
 
 Rotační těleso má přesnou geometrii stejně jako vysunuté. Podporuje zaoblení, zkosení a dutiny pro nádoby či vázy. Starší verze vytvářely síť; otevřením {{ui:inspector.editSketch}} a opětovným dokončením získáte přesné těleso. Profil přesahující přes osu zůstává sítí, protože jej nelze přesně sestavit.
 
+**Jedno souvislé vlákno: {{ui:prop.pitch}}.** Rotace udělá z obrysu uzavřené prstence. Vyberte rotační těleso a v panelu vlastností mu nastavte {{ui:prop.pitch}} větší než 0, tedy o kolik stoupne za jednu otáčku, a obrys se navine do šroubovice: jedno souvislé vlákno jako filament na cívce nebo pružina. Z {{ui:prop.sweep}} se pak stane {{ui:prop.turns}}, až 200; záporné číslo navíjí doleva. Závity bližší, než je výška obrysu, splynou v jedno těleso, takže funguje i plné jádro s jemnou roztečí. Šroubovice se staví jako síť, zaoblení, zkosení ani dutina na ni nefungují; při mnoha závitech držte {{ui:prop.sides}} nízko. Rozteč 0 dělá opět prstence.
+
 ## Protažení podél dráhy
 
 {{ui:sketch.sweep}} protáhne obrys podél dráhy: kabelový žlab, který zahýbá za roh, potrubí, kryt kolem řemene, prstenec kolem šestiúhelníku. Tlačítko je vedle {{ui:sketch.extrude}} a {{ui:sketch.revolve}} ve skupině {{ui:sketch.group.create}}.

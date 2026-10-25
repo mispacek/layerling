@@ -10,9 +10,14 @@ export type MarqueeMode = "touch" | "enclose";
 export type ScreenBox = { minX: number; maxX: number; minY: number; maxY: number };
 export type ScreenRect = { left: number; top: number; right: number; bottom: number };
 
-/** What a frame dragged from startX to currentX selects. */
-export function marqueeMode(frameByDirection: boolean, startX: number, currentX: number): MarqueeMode {
-  return frameByDirection && currentX >= startX ? "enclose" : "touch";
+/**
+ * What a frame dragged from startX to currentX selects. With `reverse` (Alt held, #572) it is the other
+ * way round for that drag, so that a body can be taken whole from the side the direction would not allow.
+ */
+export function marqueeMode(frameByDirection: boolean, startX: number, currentX: number, reverse = false): MarqueeMode {
+  const byDirection: MarqueeMode = frameByDirection && currentX >= startX ? "enclose" : "touch";
+  if (!reverse) return byDirection;
+  return byDirection === "enclose" ? "touch" : "enclose";
 }
 
 /** Whether a body's screen frame lies completely inside the selection frame. */

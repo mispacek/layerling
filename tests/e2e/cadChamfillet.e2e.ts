@@ -98,11 +98,11 @@ describe("chamfilleting a solid with the real OCCT kernel", () => {
     expect(kernel.isValid(result)).toBe(true);
     expect(kernel.isSolid(result)).toBe(true);
 
-    // A chamfilleted cylinder bottom has a conical base chamfer and a toroidal upper transition.
+    // A chamfilleted cylinder bottom has a conical base chamfer and a rounded upper transition (a torus or a spline).
     const faces = kernel.getSubShapes(result, "face");
     const surfaceTypes = faces.map((face) => kernel.surfaceType(face));
     expect(surfaceTypes).toContain("cone");
-    expect(surfaceTypes).toContain("torus");
+    expect(surfaceTypes.some((type) => type === "torus" || type === "bspline")).toBe(true);
     faces.forEach((face) => kernel.release(face));
 
     all.forEach((edge) => kernel.release(edge));
@@ -117,6 +117,33 @@ describe("chamfilleting a solid with the real OCCT kernel", () => {
 
     expect(kernel.isValid(result)).toBe(true);
     expect(kernel.isSolid(result)).toBe(true);
+
+    all.forEach((edge) => kernel.release(edge));
+    kernel.release(result);
+    kernel.release(solid);
+  });
+
+  it("chamfillets the foot of a cylinder at the bottom and leaves its top rim alone (#570)", () => {
+    const solid = yUp(kernel.makeCylinder(15, 30));
+    const { bottom, all } = bottomEdgesOf(solid);
+    expect(bottom).toHaveLength(1);
+    const result = chamfilletSolid(kernel, solid, bottom, 4, 45);
+
+    expect(kernel.isValid(result)).toBe(true);
+    expect(kernel.isSolid(result)).toBe(true);
+
+    // The chamfer sits on the plate and the blend above it; nothing is rounded at the top, where the wall still meets
+    // the lid at its full radius. The wall used to be taken for a new face, so the lid's rim was rounded as well.
+    const faces = kernel.getSubShapes(result, "face");
+    const parts = faces.map((face) => ({ type: kernel.surfaceType(face), box: kernel.getBoundingBox(face, false) }));
+    const lid = parts.find((part) => part.type === "plane" && part.box.ymin > 29.99);
+    expect(lid).toBeDefined();
+    expect((lid!.box.xmax - lid!.box.xmin) / 2).toBeCloseTo(15, 3);
+    const chamfer = parts.find((part) => part.type === "cone");
+    expect(chamfer).toBeDefined();
+    expect(chamfer!.box.ymax).toBeLessThan(2);
+    expect(parts.filter((part) => part.box.ymin > 25 && part.type !== "plane")).toHaveLength(0);
+    faces.forEach((face) => kernel.release(face));
 
     all.forEach((edge) => kernel.release(edge));
     kernel.release(result);

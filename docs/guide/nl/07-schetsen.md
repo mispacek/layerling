@@ -90,6 +90,8 @@ Bij draaien teken je de halve doorsnede **links van de as** die in de schets get
 
 Een gedraaid lichaam is een exact lichaam, net als een geëxtrudeerd: het neemt afschuiningen en afrondingen aan, en je kunt het uithollen, voor een beker of een vaas. Een lichaam dat met een oudere layerling gedraaid is, is een mesh; open {{ui:inspector.editSketch}} en voltooi het opnieuw om het exact te maken. Een profiel dat over de as heen reikt, kan niet exact gebouwd worden en wordt, zoals voorheen, een mesh.
 
+**Eén doorlopende streng: {{ui:prop.pitch}}.** Een rondgedraaide omtrek wordt gesloten ringen. Selecteer het gedraaide lichaam en geef het in het eigenschappenvenster een {{ui:prop.pitch}} boven 0, de hoogte die het per omwenteling stijgt, en de omtrek windt zich op als een schroeflijn: één doorlopende streng, zoals filament op een spoel of een spiraal. {{ui:prop.sweep}} wordt dan {{ui:prop.turns}}, tot 200; een negatief getal windt linksom. Windingen die dichter op elkaar liggen dan de omtrek hoog is, smelten samen tot één lichaam, dus ook een massieve kern met een fijne spoed werkt. Een schroeflijn wordt als mesh gebouwd, dus afronden, afschuinen en uithollen werken er niet op; houd {{ui:prop.sides}} laag bij veel windingen. Een spoed van 0 maakt er weer ringen van.
+
 ## Langs een pad trekken
 
 {{ui:sketch.sweep}} trekt een omtrek langs een pad: een kabelgoot die om de hoek gaat, een leiding, een beschermkap om een riem, een ring om een zeshoek. De knop staat naast {{ui:sketch.extrude}} en {{ui:sketch.revolve}} in de groep {{ui:sketch.group.create}}.

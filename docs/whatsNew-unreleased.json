@@ -1,6 +1,76 @@
 [
   {
     "title": {
+      "de": "Eine Drehung windet sich zu einem durchgehenden Strang",
+      "en": "A revolve can wind up as one continuous strand"
+    },
+    "body": {
+      "de": "Ein gedrehter Körper hat jetzt eine Steigung im Eigenschaften-Fenster. Über 0 windet sich der Umriss als Schraubenlinie statt zu Ringen, wie Filament auf einer Spule, und du stellst die Windungen ein.",
+      "en": "A revolved body now has a Pitch in the Properties panel. Above 0 the outline winds up as a helix instead of rings, like filament on a spool, and you set the number of turns."
+    }
+  },
+  {
+    "title": {
+      "de": "Alt dreht den Auswahlrahmen um",
+      "en": "Alt turns the selection frame around"
+    },
+    "body": {
+      "de": "Halte beim Ziehen eines Auswahlrahmens Alt: Der Rahmen arbeitet für dieses eine Ziehen andersherum. Mit der Einstellung \"Die Richtung des Rahmens entscheidet\" nimmt ein Rahmen nach rechts dann alles, was er berührt, und einer nach links nur das ganz Eingeschlossene. Ist die Einstellung aus, nimmt Alt nur das ganz Eingeschlossene.",
+      "en": "Hold Alt while you drag a selection frame: it works the other way round for that one drag. With the setting \"The direction of the frame decides\" on, a frame dragged to the right then takes everything it touches and one dragged to the left only what lies completely inside. With the setting off, Alt takes only what lies completely inside."
+    }
+  },
+  {
+    "title": {
+      "de": "Gravur um den Zylinder schneidet sauber durch",
+      "en": "An engraving around a cylinder cuts all the way through"
+    },
+    "body": {
+      "de": "Ein nach innen gewickeltes Logo, als Loch von einem Zylinder abgezogen, ließ an manchen Stellen eine hauchdünne Haut stehen. Der gewickelte Körper ragt jetzt 0,05 mm über die Wand hinaus, sodass das Loch sicher durchschneidet.",
+      "en": "A logo wrapped inward and cut out of a cylinder as a hole left a hair-thin skin standing in places. The wrapped body now reaches 0.05 mm beyond the wall, so the hole cuts all the way through."
+    }
+  },
+  {
+    "title": {
+      "de": "Mausrad in Größenfeldern stoppt am unteren Grenzwert",
+      "en": "The wheel in a size field stops at the lower limit"
+    },
+    "body": {
+      "de": "Das Mausrad in einem Größenfeld der Eigenschaften läuft nicht mehr unter den kleinsten Wert (0,01 mm) in negative Zahlen: Das Feld bleibt am Grenzwert stehen.",
+      "en": "The mouse wheel in a size field of the properties no longer runs below the smallest value (0.01 mm) into negative numbers: the field stops at the limit."
+    }
+  },
+  {
+    "title": {
+      "de": "Winzige Körper lassen sich auf dem Tablet wieder verschieben",
+      "en": "Tiny bodies can be moved on a tablet again"
+    },
+    "body": {
+      "de": "Ist ein ausgewählter Körper auf dem Bildschirm sehr klein, greift ein Finger nicht mehr aus Versehen einen Anfasser statt des Körpers: Die breiten Fangbereiche der Anfasser entfallen dann, und die Mitte bleibt zum Verschieben frei.",
+      "en": "When a selected body is very small on the screen, a finger no longer grabs a handle instead of the body: the handles' wide catch zones are dropped then, and the middle stays free for dragging."
+    }
+  },
+  {
+    "title": {
+      "de": "Schnittfläche eines durchsichtigen Körpers ist durchsichtig",
+      "en": "A see-through body has a see-through cut face"
+    },
+    "body": {
+      "de": "Schneidest du einen durchsichtigen Körper in der Schnittansicht, ist die gefüllte Schnittfläche jetzt ebenso durchsichtig wie der Körper, nicht mehr undurchsichtig.",
+      "en": "When you cut a see-through body in the section view, the filled cut face is now as see-through as the body, no longer solid."
+    }
+  },
+  {
+    "title": {
+      "de": "Formenfenster der Skizze: eigener Platz, eigene Größe",
+      "en": "The sketch's shape panel: its own place and size"
+    },
+    "body": {
+      "de": "Das Formenfenster der Skizze merkt sich Platz, Anheften und Größe jetzt für sich und teilt sie nicht mehr mit dem 3D-Editor. Es lässt sich an Rändern und Ecken auf die gewünschte Größe ziehen, wie das des 3D-Editors.",
+      "en": "The sketch's shape panel now remembers its place, its pin and its size on its own and no longer shares them with the 3D editor. Its edges and corners can be pulled to the size you want, like the 3D editor's panel."
+    }
+  },
+  {
+    "title": {
       "de": "Keine Offline-Versprechen, wo es nicht geht",
       "en": "No offline promise where it cannot work"
     },
@@ -61,6 +131,36 @@
     "body": {
       "de": "Ein kleiner, flacher Text verlor beim Export als STL, 3MF oder OBJ einzelne Buchstaben, bei dünnem Text die meisten: das Pünktchen des i, den Apostroph, kleine Buchstaben. Der Export hielt sie für Splitter, die ein Schnitt zurückgelassen hat. Das gilt jetzt nur noch für Körper, die ein Schnitt, ein Verschmelzen mehrerer Körper oder die Farbtrennung verändert hat.",
       "en": "A small, flat text lost single letters in the export as STL, 3MF or OBJ, with a thin text most of them: the dot of the i, the apostrophe, small letters. The export took them for splinters that a cut had left behind. That now applies only to bodies that a cut, a merge of several bodies or the colour separation has changed."
+    }
+  },
+  {
+    "title": {
+      "de": "Ein SVG mit sich berührenden Formen kommt vollständig an",
+      "en": "An SVG with touching shapes comes in whole"
+    },
+    "body": {
+      "de": "Bei einem gezeichneten oder nachgezeichneten Bild treffen sich zwei Formen oft in nur einem Punkt. Der Import hat dann einzelne Formen weggelassen, das Bild kam kleiner und lückenhaft an. Solche Formen werden jetzt zusammen aufgebaut, und das Bild bleibt vollständig.",
+      "en": "In a drawn or traced picture two shapes often meet in just one point. The import then left some shapes out, and the picture came in smaller and with gaps. Such shapes are now built together, and the picture stays whole."
+    }
+  },
+  {
+    "title": {
+      "de": "Chamfillet am Zylinder sitzt wieder am Fuß",
+      "en": "The chamfillet on a cylinder sits at the foot again"
+    },
+    "body": {
+      "de": "Ein Chamfillet an der unteren Kante eines Zylinders kam verkehrt herum heraus: unten die Verrundung, darüber die Fase, und auch der obere Rand wurde gerundet. Jetzt liegt unten die Fase auf der Platte, die in die Wand übergeht, und der obere Rand bleibt unberührt.",
+      "en": "A chamfillet on the bottom edge of a cylinder came out the wrong way round: the fillet at the foot, the chamfer above it, and the top rim rounded as well. Now the chamfer sits on the plate and blends into the wall, and the top rim stays untouched."
+    }
+  },
+  {
+    "title": {
+      "de": "Japanisch und Chinesisch ins Textfeld tippen",
+      "en": "Typing Japanese and Chinese into the Text field"
+    },
+    "body": {
+      "de": "Mit einer Eingabemethode (IME) ließ sich in das Textfeld eines Textes oder Namensschilds nichts Sinnvolles tippen: \"ishi\" wurde zu \"いｓｈい\" und ließ sich nicht in Kanji umwandeln. Das Feld behält jetzt, was getippt wird, und übernimmt ein Wort erst, wenn es fertig ist. Das gilt für Japanisch, Chinesisch und Koreanisch.",
+      "en": "With an input method (IME) nothing sensible could be typed into the Text field of a text or a name tag: \"ishi\" came out as \"いｓｈい\" and could not be converted to kanji. The field now keeps what is typed and takes a word over once it is done. This holds for Japanese, Chinese and Korean."
     }
   }
 ]

@@ -90,6 +90,8 @@ Pri vrtenju narišeš pol preseka **levo od osi**, ki je vrisana v skici. Poleg 
 
 Zavrteno telo je natančno telo kot izvlečeno: sprejme posnetja in zaokrožitve ter ga lahko izdolbeš, za kozarec ali vazo. Telo, ki je bilo zavrteno s starejšo različico programa layerling, je mreža; odpri {{ui:inspector.editSketch}} in ga znova zaključi, pa bo natančno. Obris, ki sega čez os, ni mogoče zgraditi natančno in postane kot doslej mreža.
 
+**En sam neprekinjen pramen: {{ui:prop.pitch}}.** Vrtenje iz obrisa naredi zaprte obroče. Izberi zavrteno telo in mu v podoknu lastnosti nastavi {{ui:prop.pitch}} večji od 0, višino, za katero se dvigne na en obrat, in obris se navije v vijačnico: en sam neprekinjen pramen kot filament na tuljavi ali vzmet. {{ui:prop.sweep}} takrat postane {{ui:prop.turns}}, do 200; negativno število navija levo. Ovoji, ki so bližje, kot je obris visok, se zlijejo v eno telo, zato deluje tudi polno jedro z drobnim korakom. Vijačnica se zgradi kot mreža, zato zaokrožitev, posnetje in izdolbenje na njej ne delujejo; pri veliko ovojih drži {{ui:prop.sides}} nizko. Korak 0 spet naredi obroče.
+
 ## Vleka vzdolž poti
 
 {{ui:sketch.sweep}} povleče obris vzdolž poti: kabelski kanal, ki zavije za vogal, cev, zaščita okoli jermena, obroč okoli šestkotnika. Gumb stoji ob {{ui:sketch.extrude}} in {{ui:sketch.revolve}} v skupini {{ui:sketch.group.create}}.

@@ -28,6 +28,12 @@ describe("the mouse wheel in a number field (#226)", () => {
     expect(wheelBaseStep(0.5, 500, 0.01, true)).toBe(1 / 16);
   });
 
+  it("steps a whole unit for the wall of a hollowed body of 40 mm, whose range runs to 19.6 (#536)", () => {
+    expect(wheelBaseStep(0.4, 19.6, 0.001)).toBe(1);
+    expect(wheelBaseStep(0.4, 8.4, 0.001)).toBe(1);
+    expect(wheelBaseStep(0.4, 7.6, 0.001)).toBe(0.1);
+  });
+
   it("never steps finer than the field's own step", () => {
     expect(wheelBaseStep(0, 1, 0.25)).toBe(0.25);
   });

@@ -7754,6 +7754,18 @@ html[data-theme="dark"]:where([data-palette="graphite"]) .interactive-help-windo
   outline: 2px solid #d07313;
 }
 
+:where(html[data-theme="dark"][data-palette="graphite"]) .history-view-step > svg {
+  color: #797979;
+}
+
+:where(html[data-theme="dark"][data-palette="graphite"]) .history-view-step-label {
+  color: #676767;
+}
+
+:where(html[data-theme="dark"][data-palette="graphite"]) .history-view-step.none .history-view-step-text {
+  color: #797979;
+}
+
 :where(html[data-theme="dark"][data-palette="graphite"]) .history-view-facts {
   color: #676767;
 }
@@ -7816,6 +7828,9 @@ html[data-theme="dark"]:where([data-palette="graphite"]) .history-view-bar {
 }
 
 html[data-theme="dark"]:where([data-palette="graphite"]) .history-view-heading span,
+html[data-theme="dark"]:where([data-palette="graphite"]) .history-view-step-label,
+html[data-theme="dark"]:where([data-palette="graphite"]) .history-view-step > svg,
+html[data-theme="dark"]:where([data-palette="graphite"]) .history-view-step.none .history-view-step-text,
 html[data-theme="dark"]:where([data-palette="graphite"]) .history-view-facts {
   color: #909090;
 }

@@ -475,6 +475,7 @@ export function canonicalizeShape(shape: WorkplaneShape): WorkplaneShape {
       sweepAngle: shape.sketchRevolve.sweepAngle,
       sides: shape.sketchRevolve.sides,
       quality: shape.sketchRevolve.quality,
+      ...(shape.sketchRevolve.pitch ? { pitch: shape.sketchRevolve.pitch } : {}),
     };
   }
   if (shape.edgeTreatmentHistory) {

@@ -3,6 +3,7 @@
 import { ArchiveRestore, ChevronLeft, ChevronRight, CornerLeftUp, Download, FilePlus2, FolderOpen, LoaderCircle, Trash2, X } from "lucide-react";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { GuideHelpLink } from "@/components/GuideHelpLink";
+import type { HistoryStepDescription } from "@/lib/historyStepDescription";
 import { t } from "@/lib/i18n";
 import { useLanguage } from "@/lib/useLanguage";
 import { useMovablePanel, type MovablePanelOptions } from "@/lib/useMovablePanel";
@@ -55,6 +56,8 @@ export function HistoryViewOverlay({
   liveIndex,
   recordedAt,
   objectCount,
+  lastStep,
+  nextStep,
   creating,
   canCreateProject,
   pickedCount,
@@ -76,6 +79,10 @@ export function HistoryViewOverlay({
   liveIndex: number;
   recordedAt?: number;
   objectCount: number;
+  /** What the left arrow would undo: the step that led to the state shown; null at the oldest state. */
+  lastStep: HistoryStepDescription | null;
+  /** What the right arrow would redo: the step after the state shown; null at the newest state. */
+  nextStep: HistoryStepDescription | null;
   creating: boolean;
   canCreateProject: boolean;
   /** How many objects of the shown state are picked to bring back. */
@@ -107,6 +114,8 @@ export function HistoryViewOverlay({
   const max = Math.max(0, count - 1);
   const position = max > 0 ? `${(index / max) * 100}%` : "100%";
   const time = formatHistoryStateTime(recordedAt, language);
+  const lastText = lastStep ? t(lastStep.key, lastStep.values) : t("historyView.lastStepNone");
+  const nextText = nextStep ? t(nextStep.key, nextStep.values) : t("historyView.nextStepNone");
   const distance = index - liveIndex;
   const relation = distance === 0
     ? t("historyView.atCurrent")
@@ -168,6 +177,19 @@ export function HistoryViewOverlay({
         <button type="button" aria-label={t("historyView.later")} title={t("historyView.later")} disabled={index >= max} onClick={() => onIndexChange(index + 1)}>
           <ChevronRight size={18} />
         </button>
+      </div>
+
+      <div className="history-view-steps" data-testid="history-view-steps">
+        <span className={`history-view-step last ${lastStep ? "" : "none"}`} title={lastText}>
+          <ChevronLeft size={14} aria-hidden="true" />
+          <span className="history-view-step-label">{t("historyView.lastStep")}:</span>
+          <span className="history-view-step-text" data-testid="history-view-last-step">{lastText}</span>
+        </span>
+        <span className={`history-view-step next ${nextStep ? "" : "none"}`} title={nextText}>
+          <span className="history-view-step-label">{t("historyView.nextStep")}:</span>
+          <span className="history-view-step-text" data-testid="history-view-next-step">{nextText}</span>
+          <ChevronRight size={14} aria-hidden="true" />
+        </span>
       </div>
 
       <div className="history-view-state">

@@ -5043,18 +5043,19 @@ html[data-toolbar-size="large"] .shape-menu-dropdown:not(.sketch-shape-menu-drop
 
 /* A library pulled to its own size (#505). The width and height come from the title bar's edges and corners; the
    stylesheet's columns give way to as many as fit, and the list scrolls inside the height that was chosen. */
-.shape-menu-dropdown.shape-menu-sized-width:not(.sketch-shape-menu-dropdown) .shape-menu-list {
+.shape-menu-dropdown.shape-menu-sized-width .shape-menu-list {
   /* A column needs 190 px, not 206: two columns then fit in the width of the Properties panel, so a pinned library takes
      no more of the screen than that panel does (#527). */
   grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
 }
 
-.shape-menu-dropdown.shape-menu-sized-height:not(.sketch-shape-menu-dropdown) .shape-menu-body {
+.shape-menu-dropdown.shape-menu-sized-height:not(.sketch-shape-menu-dropdown) .shape-menu-body,
+.shape-menu-dropdown.shape-menu-sized-height.sketch-shape-menu-dropdown > .shape-menu-list {
   max-height: calc(var(--shape-menu-height) - 46px);
 }
 
 /* Narrow: only the pictures stay, as in Tinkercad. The name is in each tile's tooltip. */
-.shape-menu-dropdown.shape-menu-icons-only:not(.sketch-shape-menu-dropdown) .shape-menu-list {
+.shape-menu-dropdown.shape-menu-icons-only .shape-menu-list {
   grid-template-columns: repeat(auto-fill, minmax(58px, 1fr));
   gap: 2px;
   padding: 6px;
@@ -9002,6 +9003,13 @@ html[data-theme="dark"] .inspector-bundle-note {
     position: absolute;
     inset: -15px;
     content: "";
+  }
+}
+
+/* A small body: the wide zones of its handles would cover all of it and every touch would grab one (#574). */
+@media (pointer: coarse) {
+  .transform-overlay.small-body .transform-handle::before {
+    inset: 0;
   }
 }
 

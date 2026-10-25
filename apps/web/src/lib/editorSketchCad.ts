@@ -215,7 +215,8 @@ async function cadShapeFromSketchRevolve(
   existing?: WorkplaneShape | null,
   drawn: SketchProfile = profile,
 ): Promise<WorkplaneShape | null> {
-  if (!revolveProfileFitsAxis(profile)) return null;
+  // A helix has no exact body yet; the mesh revolve winds it.
+  if (!revolveProfileFitsAxis(profile) || settings.pitch) return null;
   try {
     const worker = ensureSketchCadWorker();
     const requestId = ++sketchCadRequestId;

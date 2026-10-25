@@ -90,6 +90,8 @@ Beim Rotieren zeichnest du den halben Querschnitt **links von der Achse**, die i
 
 Ein gedrehter Körper ist ein exakter Körper wie ein ausgezogener: Er nimmt Fasen und Verrundungen an, und du kannst ihn aushöhlen, für einen Becher oder eine Vase. Ein Körper, der mit einer älteren layerling-Fassung gedreht wurde, ist ein Netz; öffne {{ui:inspector.editSketch}} und schließe ihn neu ab, dann ist er exakt. Ein Umriss, der über die Achse hinausreicht, lässt sich nicht exakt bauen und wird wie bisher ein Netz.
 
+**Ein durchgehender Strang: {{ui:prop.pitch}}.** Eine Drehung macht aus dem Umriss geschlossene Ringe. Wähle den gedrehten Körper aus und gib ihm im Eigenschaften-Fenster eine {{ui:prop.pitch}} über 0, die Höhe, um die er pro Umdrehung steigt, dann windet sich der Umriss als Schraubenlinie: ein durchgehender Strang wie Filament auf einer Spule oder eine Spirale. Aus {{ui:prop.sweep}} wird dann {{ui:prop.turns}}, bis 200; eine negative Zahl windet linksgängig. Windungen, die enger liegen, als der Umriss hoch ist, verschmelzen zu einem Körper, also geht auch ein voller Kern mit feiner Steigung. Eine Schraubenlinie wird als Netz gebaut, Verrunden, Fasen und Aushöhlen gehen darauf nicht; halte {{ui:prop.sides}} bei vielen Windungen niedrig. Eine Steigung von 0 macht wieder Ringe.
+
 ## Entlang eines Pfades ziehen
 
 {{ui:sketch.sweep}} zieht einen Umriss an einem Pfad entlang: ein Kabelkanal, der um die Ecke geht, eine Leitung, ein Schutz um einen Riemen, ein Ring um ein Sechseck. Der Knopf steht neben {{ui:sketch.extrude}} und {{ui:sketch.revolve}} in der Gruppe {{ui:sketch.group.create}}.

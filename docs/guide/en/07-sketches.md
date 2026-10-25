@@ -90,6 +90,8 @@ When revolving, you draw half the cross-section **to the left of the axis** show
 
 A revolved body is an exact body, like an extruded one: it takes chamfers and fillets, and you can hollow it, for a cup or a vase. A body revolved with an older layerling is a mesh; open {{ui:inspector.editSketch}} and finish it again to make it exact. A profile that reaches across the axis cannot be built exactly and becomes a mesh, as before.
 
+**One continuous strand: {{ui:prop.pitch}}.** A revolve turns its outline into closed rings. Select the revolved body and give it a {{ui:prop.pitch}} above 0 in the Properties panel, the distance it climbs per turn, and the outline winds up as a helix instead: one continuous strand, like filament on a spool or a coil. {{ui:prop.sweep}} then becomes {{ui:prop.turns}}, up to 200; a negative number winds left-handed. Turns closer than the outline is high melt into one body, so a solid core with a fine pitch works too. A helix is built as a mesh, so fillet, chamfer and hollow do not work on it; keep {{ui:prop.sides}} low on many turns. A pitch of 0 makes rings again.
+
 ## Sweeping along a path
 
 {{ui:sketch.sweep}} pulls an outline along a path: a cable channel that turns a corner, a conduit, a guard round a belt, a ring around a hexagon. It sits next to {{ui:sketch.extrude}} and {{ui:sketch.revolve}} in the {{ui:sketch.group.create}} group.

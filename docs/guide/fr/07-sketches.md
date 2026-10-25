@@ -90,6 +90,8 @@ Lors d'une révolution, vous dessinez la moitié de la section **à gauche de l'
 
 Un corps de révolution est un corps exact, comme un corps extrudé : il prend des chanfreins et des congés, et on peut le creuser, pour une tasse ou un vase. Un corps tourné avec une version plus ancienne de layerling est un maillage ; ouvrez {{ui:inspector.editSketch}} et terminez-le à nouveau pour le rendre exact. Un profil qui traverse l'axe ne peut pas être construit exactement et devient un maillage, comme auparavant.
 
+**Un seul brin continu : {{ui:prop.pitch}}.** Une révolution fait du contour des anneaux fermés. Sélectionnez le corps de révolution et donnez-lui dans le panneau des propriétés un {{ui:prop.pitch}} supérieur à 0, la hauteur dont il monte à chaque tour : le contour s'enroule alors en hélice, un seul brin continu comme le filament sur une bobine ou un ressort. {{ui:prop.sweep}} devient alors {{ui:prop.turns}}, jusqu'à 200 ; un nombre négatif enroule à gauche. Des tours plus rapprochés que la hauteur du contour fusionnent en un seul corps : un noyau plein avec un pas fin fonctionne aussi. Une hélice est construite en maillage : congé, chanfrein et creusage ne s'y appliquent pas ; gardez {{ui:prop.sides}} bas pour beaucoup de tours. Un pas de 0 refait des anneaux.
+
 ## Balayer le long d'un chemin
 
 {{ui:sketch.sweep}} tire un contour le long d'un chemin : un chemin de câbles qui tourne à l'angle, une conduite, une protection autour d'une courroie, un anneau autour d'un hexagone. Le bouton se trouve à côté de {{ui:sketch.extrude}} et {{ui:sketch.revolve}} dans le groupe {{ui:sketch.group.create}}.

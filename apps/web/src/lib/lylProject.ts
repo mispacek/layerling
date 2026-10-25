@@ -1316,6 +1316,7 @@ function validateShapeDefinition(definition: Record<string, unknown>, label: str
   if (definition.sketchRevolve !== undefined) {
     const settings = objectRecord(definition.sketchRevolve, `${label}.sketchRevolve`);
     ["startAngle", "sweepAngle", "sides", "quality"].forEach((field) => finiteNumber(settings[field], `${label}.sketchRevolve.${field}`));
+    if (settings.pitch !== undefined) finiteNumber(settings.pitch, `${label}.sketchRevolve.pitch`);
   }
   if (kind === "thread") {
     // Fehlende Werte sind erlaubt: der Geometriebauer setzt dann seine

@@ -86,25 +86,37 @@ type OriginalFaceSnapshot = {
   surfaceType: string;
 };
 
+/**
+ * Points that lie on `face` itself. The centre of mass of a curved face is no such point (that of a cylinder wall is on
+ * its axis, and projecting it back onto the wall picks any spot), so the midpoints of its edges serve instead (#570).
+ */
+function faceBoundaryPoints(cad: OcctKernel, face: ShapeHandle): Vec3[] {
+  const edges = cad.getSubShapes(face, "edge");
+  try {
+    const points = edges.slice(0, 6).map((edge) => edgeMidpoint(cad, edge));
+    return points.length ? points : [faceSamplePoint(cad, face)];
+  } finally {
+    releaseAll(cad, edges);
+  }
+}
+
 function isOriginalFace(cad: OcctKernel, face: ShapeHandle, originals: OriginalFaceSnapshot[], tolerance: number) {
   for (const orig of originals) {
     if (cad.isSame(face, orig.handle)) return true;
   }
   const surfaceType = cad.surfaceType(face);
-  const sample = faceSamplePoint(cad, face);
-  let normal: Vec3;
-  try {
-    normal = orientedFaceNormal(cad, face, sample);
-  } catch {
-    return false;
-  }
+  const samples = faceBoundaryPoints(cad, face);
   for (const orig of originals) {
     if (orig.surfaceType !== surfaceType) continue;
     try {
-      const projected = cad.projectPointOnFace(orig.handle, sample);
-      if (distance3(sample, projected) > tolerance) continue;
-      const origNormal = orientedFaceNormal(cad, orig.handle, projected);
-      if (dot(normal, origNormal) > 0.999) return true;
+      const matches = samples.every((sample) => {
+        const projected = cad.projectPointOnFace(orig.handle, sample);
+        if (distance3(sample, projected) > tolerance) return false;
+        const normal = orientedFaceNormal(cad, face, sample);
+        const origNormal = orientedFaceNormal(cad, orig.handle, projected);
+        return dot(normal, origNormal) > 0.999;
+      });
+      if (matches) return true;
     } catch {
       // Ignore faces whose projection fails.
     }

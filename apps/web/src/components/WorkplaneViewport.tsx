@@ -673,6 +673,8 @@ type MarqueeState = {
   currentY: number;
   additive: boolean;
   hasMoved: boolean;
+  /** Alt is held: the frame works the other way round for this moment (#572). */
+  reverse: boolean;
 };
 
 /** Eine gleichbleibende leere Liste, damit die Eigenschaft nicht jedes Bild neu wird. */
@@ -5225,7 +5227,8 @@ export function WorkplaneViewport({
       setMarqueeRect(null);
       return;
     }
-    setMarqueeTouching(workspaceRef.current.frameByDirection && marqueeMode(true, marquee.startX, marquee.currentX) === "touch");
+    // Dashed whenever the frame takes what it touches and the direction or Alt makes that a choice.
+    setMarqueeTouching((workspaceRef.current.frameByDirection || marquee.reverse) && marqueeMode(workspaceRef.current.frameByDirection, marquee.startX, marquee.currentX, marquee.reverse) === "touch");
     const left = Math.min(marquee.startX, marquee.currentX);
     const top = Math.min(marquee.startY, marquee.currentY);
     setMarqueeRect({
@@ -7204,6 +7207,7 @@ export function WorkplaneViewport({
           currentY: startY,
           additive,
           hasMoved: false,
+          reverse: event.altKey,
         };
         setMarqueeFromState(marqueeRef.current);
         state.controls.enabled = false;
@@ -7491,6 +7495,7 @@ export function WorkplaneViewport({
         const rect = state.renderer.domElement.getBoundingClientRect();
         marquee.currentX = event.clientX - rect.left;
         marquee.currentY = event.clientY - rect.top;
+        marquee.reverse = event.altKey;
         marquee.hasMoved = marquee.hasMoved || Math.hypot(marquee.currentX - marquee.startX, marquee.currentY - marquee.startY) > 5;
         setMarqueeFromState(marquee);
         return;
@@ -7808,7 +7813,8 @@ export function WorkplaneViewport({
             top: Math.min(marquee.startY, marquee.currentY),
             bottom: Math.max(marquee.startY, marquee.currentY),
           };
-          const selected = shapesInMarquee(rect, marqueeMode(workspaceRef.current.frameByDirection, marquee.startX, marquee.currentX) === "enclose");
+          marquee.reverse = event.altKey;
+          const selected = shapesInMarquee(rect, marqueeMode(workspaceRef.current.frameByDirection, marquee.startX, marquee.currentX, marquee.reverse) === "enclose");
           if (marquee.additive) {
             // Shift turns each body in the box around, as a Shift click does
             // for one: what was selected leaves the selection, the rest joins.
@@ -10795,6 +10801,10 @@ function buildSectionCaps(state: ThreeState, bodies: readonly SectionBody[], axi
     geometry.setIndex(cap.triangles);
     const material = new THREE.MeshBasicMaterial({
       color: new THREE.Color(body.color).multiplyScalar(0.78),
+      // A see-through body keeps a see-through cut face (#575), as dim as the body itself.
+      transparent: Boolean(body.seeThrough),
+      opacity: body.seeThrough ? TRANSPARENT_SOLID_OPACITY : 1,
+      depthWrite: !body.seeThrough,
       side: THREE.DoubleSide,
       polygonOffset: true,
       polygonOffsetFactor: -2,

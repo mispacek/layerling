@@ -90,6 +90,8 @@ Przy obracaniu rysujesz połowę przekroju **po lewej stronie osi** pokazanej w 
 
 Bryła obrotowa jest dokładną bryłą, tak jak wyciągnięta: przyjmuje fazki i zaokrąglenia i można ją wydrążyć, na kubek albo wazon. Bryła obrócona starszą wersją layerling jest siatką. Otwórz {{ui:inspector.editSketch}} i zakończ szkic ponownie, aby stała się dokładna. Profil, który sięga za oś, nie da się zbudować dokładnie i staje się siatką, jak dawniej.
 
+**Jedno ciągłe pasmo: {{ui:prop.pitch}}.** Obrót zamienia kontur w zamknięte pierścienie. Zaznacz bryłę obrotową i ustaw jej w panelu właściwości {{ui:prop.pitch}} większy od 0, czyli o ile wznosi się na jeden obrót, a kontur nawinie się w linię śrubową: jedno ciągłe pasmo, jak filament na szpuli albo sprężyna. {{ui:prop.sweep}} zmienia się wtedy w {{ui:prop.turns}}, do 200; liczba ujemna nawija w lewo. Zwoje leżące gęściej, niż wynosi wysokość konturu, zlewają się w jedną bryłę, więc pełny rdzeń z drobnym skokiem też działa. Linia śrubowa jest budowana jako siatka, więc zaokrąglenie, fazka i wydrążanie na niej nie działają; przy wielu zwojach trzymaj {{ui:prop.sides}} nisko. Skok 0 daje znowu pierścienie.
+
 ## Szkic po krzywych
 
 {{ui:sketch.sweep}} prowadzi kontur wzdłuż ścieżki: kanał kablowy, który skręca za róg, rurka, osłona wokół paska, pierścień wokół sześciokąta. Stoi obok przycisków {{ui:sketch.extrude}} i {{ui:sketch.revolve}} w grupie {{ui:sketch.group.create}}.

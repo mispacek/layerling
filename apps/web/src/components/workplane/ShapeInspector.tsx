@@ -210,7 +210,7 @@ import { MAX_HINGE_CLEARANCE, MAX_HINGE_KNUCKLES, MIN_HINGE_CLEARANCE, MIN_HINGE
 import { useLanguage } from "@/lib/useLanguage";
 import { useMovablePanel, type MovablePanelOptions } from "@/lib/useMovablePanel";
 import { isNonSolidShapeKind, resizedShapeSize, shapeDepth, shapeHasTaper, shapeOverallFootprintDimensions, shapeSupportsTaper, shapeTaperDimensions, shapeWidth } from "@/lib/workplaneShapes";
-import { normalizeSketchRevolveSettings } from "@/lib/sketchRevolve";
+import { MAX_SKETCH_REVOLVE_TURNS, normalizeSketchRevolveSettings } from "@/lib/sketchRevolve";
 import { roundSideCount } from "@/lib/roundSideCount";
 import { torusTessellation } from "@/lib/torusTessellation";
 import { normalizePyramidTop } from "@/lib/pyramidGeometry";
@@ -522,7 +522,12 @@ function getShapePropertiesWithAppLimits(shape: WorkplaneShape, onUpdate: ShapeI
     const updateRevolve = (patch: Partial<typeof settings>) => onUpdate({ sketchRevolve: normalizeSketchRevolveSettings({ ...settings, ...patch }) });
     return [
       { id: "startAngle", label: t("prop.startAngle"), value: settings.startAngle, min: 0, max: 359, step: 1, onChange: (startAngle) => updateRevolve({ startAngle }) },
-      { id: "sweep", label: t("prop.sweep"), value: settings.sweepAngle, min: -360, max: 360, step: 1, onChange: (sweepAngle) => updateRevolve({ sweepAngle }) },
+      // With a pitch the profile winds up as one strand; the sweep is then counted in turns
+      // (negative winds left-handed), and a pitch of 0 turns it back into rings.
+      ...(settings.pitch
+        ? [{ id: "turns", label: t("prop.turns"), value: settings.sweepAngle / 360, min: -MAX_SKETCH_REVOLVE_TURNS, max: MAX_SKETCH_REVOLVE_TURNS, step: 0.25, onChange: (turns: number) => updateRevolve({ sweepAngle: turns * 360 }) }]
+        : [{ id: "sweep", label: t("prop.sweep"), value: settings.sweepAngle, min: -360, max: 360, step: 1, onChange: (sweepAngle: number) => updateRevolve({ sweepAngle }) }]),
+      { id: "pitch", label: t("prop.pitch"), value: settings.pitch ?? 0, min: 0, max: 100, step: 0.05, onChange: (pitch: number) => updateRevolve({ pitch, sweepAngle: pitch > 0 ? settings.sweepAngle : Math.max(-360, Math.min(360, settings.sweepAngle)) }) },
       // An exact revolved body is round at any size; the side count only shapes the mesh of an older one.
       ...(shape.cadBrep ? [] : [{ id: "sides", label: t("prop.sides"), value: settings.sides, min: 3, max: MAX_HIGH_RESOLUTION_SIDES, step: 1, onChange: (sides: number) => updateRevolve({ sides }) }]),
       { id: "length", label: t("prop.length"), value: depth, min: MIN_SHAPE_SIZE, max: 160, onChange: setDepth },
@@ -4103,7 +4108,10 @@ function RangeProperty({
     const base = wheelBaseStep(controlMin, controlMax, controlStep, unit === "in");
     const parsed = parseMeasurementInput(draft);
     const current = Number.isFinite(parsed) ? parsed : controlValue;
-    const next = wheelNextValue(current, turn < 0 ? 1 : -1, base, { shift: event.shiftKey, ctrl: event.ctrlKey, alt: event.altKey });
+    const turned = wheelNextValue(current, turn < 0 ? 1 : -1, base, { shift: event.shiftKey, ctrl: event.ctrlKey, alt: event.altKey });
+    // The wheel stops at the field's lower limit, also for the figure shown: it went on below it, into negative sizes, which the body
+    // then kept at the limit and the field showed again as 0.01 only when it was left (#576, prmod3d).
+    const next = freePosition ? turned : Math.max(turned, controlMin);
     const nextModelValue = toModelValue(next);
     onChange(freePosition ? clamp(nextModelValue, -POSITION_TYPED_LIMIT, POSITION_TYPED_LIMIT) : allowsAboveSliderMax ? Math.max(min, nextModelValue) : clamp(nextModelValue, min, max));
     const shown = formatShown(freePosition || allowsAboveSliderMax ? next : clamp(next, controlMin, controlMax));
@@ -4211,20 +4219,52 @@ function RangeProperty({
   return hint ? <>{row}<p className="property-hint">{hint}</p></> : row;
 }
 
+/**
+ * A text of a shape. The field owns what is typed: `onChange` commits through the editor, for a
+ * name tag after an await, and a controlled field set back to the shape's older text meanwhile
+ * broke an IME in the middle of a word - "ishi" came out as "いｓい", unconvertible. So the
+ * field is uncontrolled: the shape's text is written into it only while it is not being edited,
+ * and a word being composed (Japanese, Chinese, Korean) is committed once, when it is done.
+ */
 function TextProperty({ label, value, disabled, onChange, onInteractionActiveChange }: Omit<TextPropertyConfig, "id"> & { id?: string } & { disabled?: boolean; onInteractionActiveChange?: (active: boolean) => void }) {
   const holdInteraction = useInteractionHold(onInteractionActiveChange);
+  const field = useRef<HTMLInputElement>(null);
+  const editing = useRef(false);
+  const composing = useRef(false);
+  useEffect(() => {
+    if (field.current && !editing.current && field.current.value !== value) field.current.value = value;
+  }, [value]);
   return (
     <label className="text-property">
       <span>{label}</span>
       <input
+        ref={field}
         type="text"
-        value={value}
+        defaultValue={value}
         disabled={disabled}
         maxLength={24}
         spellCheck={false}
-        onFocus={() => holdInteraction(true)}
-        onBlur={() => holdInteraction(false)}
-        onChange={(event) => onChange(event.currentTarget.value)}
+        onFocus={() => {
+          editing.current = true;
+          holdInteraction(true);
+        }}
+        onBlur={(event) => {
+          editing.current = false;
+          composing.current = false;
+          holdInteraction(false);
+          // What the shape kept of the text (trimmed, cut to length), now that the editing is over.
+          if (event.currentTarget.value !== value) event.currentTarget.value = value;
+        }}
+        onCompositionStart={() => {
+          composing.current = true;
+        }}
+        onCompositionEnd={(event) => {
+          composing.current = false;
+          onChange(event.currentTarget.value);
+        }}
+        onChange={(event) => {
+          if (!composing.current) onChange(event.currentTarget.value);
+        }}
       />
     </label>
   );

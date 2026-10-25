@@ -637,10 +637,12 @@ export async function prepareSvgImport(timeoutMs = 10_000) {
  * out as one clean solid, where the caps built from each outline alone can overlap or turn the wrong way and
  * leave a body that no cut can use (#420). Null when the kernel cannot make it; the plain build then goes on.
  */
+const SVG_TOUCH_CLOSING = 0.05;
+
 function extrudeShapesWithKernel(runtime: ManifoldToplevel, shapes: readonly THREE.Shape[]): { positions: number[]; skippedShapes: number } | null {
   const made: Array<{ delete(): void }> = [];
   try {
-    const solids: ReturnType<typeof runtime.Manifold.extrude>[] = [];
+    const sections: InstanceType<typeof runtime.CrossSection>[] = [];
     let skippedShapes = 0;
     for (const shape of shapes) {
       const points = shape.extractPoints(SVG_CURVE_SEGMENTS);
@@ -657,12 +659,20 @@ function extrudeShapesWithKernel(runtime: ManifoldToplevel, shapes: readonly THR
         skippedShapes += 1;
         continue;
       }
-      const solid = runtime.Manifold.extrude(section, SVG_EXTRUSION_DEPTH);
-      made.push(solid);
-      solids.push(solid);
+      sections.push(section);
     }
-    if (!solids.length) return null;
-    const merged = solids.length === 1 ? solids[0] : runtime.Manifold.union(solids);
+    if (!sections.length) return null;
+    // The outlines are joined as flat areas first, then extruded once: two bodies that touch along a line or at a
+    // point (the islands of a traced picture meeting its outline) made edges of four triangles when joined as bodies (#584).
+    const joined = sections.length === 1 ? sections[0] : runtime.CrossSection.union(sections);
+    made.push(joined);
+    // Areas that meet in a single corner still pinch there and make an edge of four triangles. Shrinking them a hair and
+    // growing them back with rounded corners parts the corner for good.
+    const grown = joined.offset(-SVG_TOUCH_CLOSING, "Miter", 2, 0);
+    made.push(grown);
+    const area = grown.offset(SVG_TOUCH_CLOSING, "Round", 2, 8);
+    made.push(area);
+    const merged = runtime.Manifold.extrude(area, SVG_EXTRUSION_DEPTH);
     made.push(merged);
     if (merged.status() !== "NoError" || merged.numTri() < 1) return null;
     const mesh = merged.getMesh();

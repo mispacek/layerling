@@ -23,12 +23,13 @@ export function wheelTurn(event: { deltaX: number; deltaY: number; shiftKey?: bo
 /**
  * The step of one wheel notch for a field whose slider runs from `min` to `max` in steps of `sliderStep`, in the
  * units the field shows: a whole unit on a long range (millimetres, degrees), a tenth on a short one, never finer
- * than the field's own step. An inch field steps in sixteenths.
+ * than the field's own step. An inch field steps in sixteenths. A range of 8 or more is a long one: the wall of a
+ * hollowed box of 40 mm runs to 19.6, and a notch of a tenth there was ten times less than anywhere else (#536, prmod3d).
  */
 export function wheelBaseStep(min: number, max: number, sliderStep: number, inches = false): number {
   if (inches) return 1 / 16;
   const span = Math.abs(max - min);
-  const natural = span >= 20 ? 1 : span >= 2 ? 0.1 : 0.01;
+  const natural = span >= 8 ? 1 : span >= 2 ? 0.1 : 0.01;
   return Math.max(Number.isFinite(sliderStep) && sliderStep > 0 ? sliderStep : 0, natural);
 }
 

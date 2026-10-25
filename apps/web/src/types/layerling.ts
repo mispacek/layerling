@@ -492,6 +492,12 @@ export type SketchRevolveSettings = {
   sweepAngle: number;
   sides: number;
   quality: number;
+  /**
+   * How far the profile climbs per full turn, in mm. Left out or 0 the profile turns into rings; above
+   * 0 it winds up as one continuous strand (a coil, a filament spool) and the sweep may run past a
+   * turn. A positive sweep winds right-handed, a negative one left-handed.
+   */
+  pitch?: number;
 };
 
 /** A side of a body as seen from the workplane: up/down and the four sides of the plate. */

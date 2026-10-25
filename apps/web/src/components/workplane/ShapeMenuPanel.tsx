@@ -20,7 +20,7 @@ import {
   type ShapeMenuSize,
 } from "@/lib/shapeMenuSize";
 
-const SIZE_STORAGE_KEY = "layerling.editor.shapeMenuSize";
+const SIZE_STORAGE_KEYS = { editor: "layerling.editor.shapeMenuSize", sketch: "layerling.sketch.shapeMenuSize" };
 /** Pixels a key press on a focused edge changes the size by. */
 const KEY_STEP = 24;
 /** Room kept between a pulled edge and the edge of the editor. */
@@ -72,6 +72,7 @@ export function ShapeMenuPanel({
   pinned,
   onTogglePinned,
   resizable = false,
+  scope = "editor",
   children,
 }: {
   className?: string;
@@ -85,11 +86,13 @@ export function ShapeMenuPanel({
   onTogglePinned: () => void;
   /** Lets the edges pull the size. */
   resizable?: boolean;
+  /** Which panel this is: the 3D editor's and the sketch's keep their own place and size (#577). */
+  scope?: "editor" | "sketch";
   children: ReactNode;
 }) {
   useLanguage();
   // The panel is placed within the whole editor, so it can leave the toolbar it hangs from.
-  const movable = useMovablePanel<HTMLDivElement>("layerling.editor.shapeMenuPosition", {
+  const movable = useMovablePanel<HTMLDivElement>(scope === "sketch" ? "layerling.sketch.shapeMenuPosition" : "layerling.editor.shapeMenuPosition", {
     area: (panel) => panel.closest<HTMLElement>(".layerling-editor"),
   });
   const PinIcon = pinned ? PinOff : Pin;
@@ -98,6 +101,7 @@ export function ShapeMenuPanel({
   // clamped to the window in the layout effect of the first paint, with the width the panel has then. With the
   // size read later, it was clamped with the usual, much wider width and opened shifted to the left each time.
   // The panel opens on a click, never on the server, so reading the storage here cannot differ from the server's page.
+  const SIZE_STORAGE_KEY = SIZE_STORAGE_KEYS[scope];
   const [size, setSize] = useState<ShapeMenuSize>(() => {
     if (!resizable || typeof window === "undefined") return { width: null, height: null };
     try {
