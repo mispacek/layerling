@@ -16,7 +16,7 @@ import type { ManifoldToplevel } from "manifold-3d";
 import type { CadModifierDeflection } from "@/lib/cadModifierTypes";
 import { SKETCH_INSET_UNSUPPORTED, SKETCH_STROKE_UNSUPPORTED, type SketchCadBuildResponse } from "@/lib/sketchCadTypes";
 import { insetSketchProfile } from "@/lib/faceTool";
-import type { ParametricSource, ShapeKind, SketchInset, SketchProfile, SketchRevolveSettings, SketchStroke, WorkplaneShape } from "@/types/layerling";
+import type { SketchInset, SketchOperation, SketchProfile, SketchRevolveSettings, SketchStroke, WorkplaneShape } from "@/types/layerling";
 import { MIN_SHAPE_DIMENSION, cleanModelDimension, getManifoldRuntime, meshForShape } from "@/lib/editorMeshCore";
 
 export function emptySketchProfile(): SketchProfile {
@@ -384,6 +384,10 @@ export function shapeFromCadMesh(
     taperBottomDepth: undefined,
     taperTopScale: undefined,
     taperBottomScale: undefined,
+    // Twist and lean are in the mesh as well, so they go the way the taper does.
+    extrudeTwist: undefined,
+    extrudeTopOffsetX: undefined,
+    extrudeTopOffsetZ: undefined,
     importedMesh: {
       positions: flattenedPositions,
       normals: flattenedNormals.length === flattenedPositions.length ? flattenedNormals : undefined,
@@ -408,7 +412,34 @@ export function shapeFromCadMesh(
   });
 }
 
-export function sketchReferenceShapeOnWorkplane(shape: WorkplaneShape, workplane: PlacementWorkplane): WorkplaneShape {
+/** A group's triangles part by part, by the range of vertices each visible part takes in the group's mesh; null for a single body or a mesh that does not add up. */function groupPartFaces(shape: WorkplaneShape, mesh: ReturnType<typeof meshForShape>): number[][][] | null {
+  const children = (shape.groupedShapes ?? []).filter((entry) => !entry.hidden);
+  if (children.length < 2) return null;
+  const ends: number[] = [];
+  let end = 0;
+  for (const child of children) {
+    try {
+      end += meshForShape(child).vertices.length;
+    } catch {
+      return null;
+    }
+    ends.push(end);
+  }
+  if (end !== mesh.vertices.length) return null;
+  const parts: number[][][] = children.map(() => []);
+  mesh.faces.forEach((face) => {
+    const part = ends.findIndex((partEnd) => face[0] < partEnd);
+    if (part >= 0) parts[part].push(face);
+  });
+  return parts.filter((faces) => faces.length > 0);
+}
+
+/**
+ * A body as the sketch shows it on a workplane. With `seen` (a workplane on a face) the sketch shows each part as it is seen
+ * from the plane, not only the face on it (#778): a plane set on a facet of a round body stands a little askew, and the face
+ * "on the plane" was then a thin strip of one end, with the parts behind it left out.
+ */
+export function sketchReferenceShapeOnWorkplane(shape: WorkplaneShape, workplane: PlacementWorkplane, seen = false): WorkplaneShape {
   const mesh = meshForShape(shape);
   const projectedVertices = mesh.vertices.map(([x, y, z]) => {
     const local = placementWorkplaneCoordinates(workplane, { x, y, z });
@@ -433,10 +464,14 @@ export function sketchReferenceShapeOnWorkplane(shape: WorkplaneShape, workplane
   const centerX = (minX + maxX) / 2;
   const centerY = (minY + maxY) / 2;
   const centerZ = (minZ + maxZ) / 2;
-  const positions = mesh.faces.flatMap(([a, b, c]) => [a, b, c].flatMap((index) => {
+  const triangle = ([a, b, c]: number[]) => [a, b, c].flatMap((index) => {
     const vertex = projectedVertices[index];
     return [vertex.x - centerX, vertex.y - centerY, vertex.z - centerZ];
-  }));
+  });
+  // A group keeps its parts apart, part after part, so that the sketch shows the outline of each (#778). The mesh holds the
+  // visible parts one after the other.
+  const parts = seen ? groupPartFaces(shape, mesh) ?? [mesh.faces] : null;
+  const positions = (parts ?? [mesh.faces]).flatMap((faces) => faces.flatMap(triangle));
   const width = Math.max(0.01, maxX - minX);
   const depth = Math.max(0.01, maxZ - minZ);
   const height = Math.max(0.01, maxY - minY);
@@ -463,6 +498,7 @@ export function sketchReferenceShapeOnWorkplane(shape: WorkplaneShape, workplane
       baseDepth: depth,
       baseHeight: height,
       triangleCount: mesh.faces.length,
+      partTriangleCounts: parts?.map((faces) => faces.length),
       sourceFormat: "json",
     },
     groupedShapes: undefined,
@@ -494,4 +530,65 @@ export function defaultMcpSketchProfile(width: number, depth: number): SketchPro
     ],
     images: [],
   };
+}
+
+/** The kind of body a sketch body was made as; bodies from before `sketchOperation` was kept tell it by their revolve settings. */
+export function sketchBodyOperation(shape: WorkplaneShape): SketchOperation {
+  return shape.sketchOperation ?? (shape.sketchRevolve ? "revolve" : "extrude");
+}
+
+/**
+ * An outline moved left until its rightmost point lies on a revolve's axis, x = 0 (#655): an imported SVG
+ * is centred on itself, so the half cross-section of a vase would reach across the axis. Pictures and a
+ * key ring hole move with it; an outline already left of the axis stays where it is.
+ */
+export function sketchProfileLeftOfAxis(profile: SketchProfile): SketchProfile {
+  if (!profile.points.length) return profile;
+  const shift = Math.max(...profile.points.map((point) => point.x));
+  if (shift <= 1e-6) return profile;
+  const move = (point: { x: number; z: number }) => ({ x: point.x - shift, z: point.z });
+  return {
+    ...profile,
+    points: profile.points.map((point) => ({
+      ...point,
+      x: point.x - shift,
+      ...(point.handleIn ? { handleIn: move(point.handleIn) } : {}),
+      ...(point.handleOut ? { handleOut: move(point.handleOut) } : {}),
+    })),
+    images: (profile.images ?? []).map((image) => ({ ...image, x: image.x - shift })),
+    ...(profile.keyring ? { keyring: { ...profile.keyring, x: profile.keyring.x - shift } } : {}),
+  };
+}
+
+/**
+ * A sketch body made again from its outline as another kind of body (#655): an imported SVG comes in
+ * extruded, revolved it gives a vase. The new body takes the old one's place, name and colour and stands
+ * where it stood, its foot at the same height. A revolve takes the outline left of its axis; an extrusion
+ * made from another kind is 10 mm high, as a new sketch is. Edge treatments go, as when a sketch is edited.
+ */
+export async function sketchBodyAsOperation(
+  existing: WorkplaneShape,
+  profile: SketchProfile,
+  operation: SketchOperation,
+  revolveSettings: Partial<SketchRevolveSettings> = existing.sketchRevolve ?? {},
+) {
+  const built = operation === "revolve"
+    ? await shapeFromRevolvedSketchProfile(sketchProfileLeftOfAxis(profile), revolveSettings, null)
+    : operation === "sweep"
+      ? await cadShapeFromSketchSweep(profile, null)
+      : await cadShapeFromSketchProfile(profile, 10, null);
+  if (!built) return null;
+  return canonicalizeShape({
+    ...built,
+    id: existing.id,
+    name: existing.name,
+    color: existing.color,
+    hole: existing.hole,
+    x: existing.x,
+    z: existing.z,
+    elevation: existing.elevation ?? 0,
+    rotation: existing.rotation,
+    locked: existing.locked,
+    hidden: existing.hidden,
+  });
 }

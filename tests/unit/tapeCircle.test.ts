@@ -1,6 +1,14 @@
 import * as THREE from "three";
 import { describe, expect, it } from "vitest";
-import { circleOfEdgePoints, pointAcrossCircle, pointOnCircle } from "@/lib/tapeCircle";
+import {
+  axisLockedPoint,
+  circleOfEdgePoints,
+  perpendicularFootOnPlane,
+  perpendicularFootOnSegment,
+  perpendicularPointsOnCircle,
+  pointAcrossCircle,
+  pointOnCircle,
+} from "@/lib/tapeCircle";
 
 /** A ring of `count` points on a circle, as a display edge has them; `closed` repeats the first point at the end. */
 function ring(center: THREE.Vector3, radius: number, count: number, closed = true, normal = new THREE.Vector3(0, 1, 0), span = Math.PI * 2) {
@@ -72,3 +80,69 @@ describe("the circle of an edge, for the diameter of a measurement (#308)", () =
     expect(pointAcrossCircle(circle, new THREE.Vector3(3, 0, 3))).toBeNull();
   });
 });
+
+describe("perpendicular snapping and axis locking for the tape measure (#589)", () => {
+  it("finds the perpendicular foot on an opposing edge segment", () => {
+    const from = new THREE.Vector3(4, 3, -5);
+    const a = new THREE.Vector3(0, 3, 10);
+    const b = new THREE.Vector3(20, 3, 10);
+    const foot = perpendicularFootOnSegment(from, a, b);
+    expect(foot).not.toBeNull();
+    expect(foot!.point.x).toBeCloseTo(4, 9);
+    expect(foot!.point.y).toBeCloseTo(3, 9);
+    expect(foot!.point.z).toBeCloseTo(10, 9);
+    expect(foot!.amount).toBeCloseTo(0.2, 9);
+    // The measurement line meets the edge at a right angle.
+    expect(foot!.point.clone().sub(from).dot(b.clone().sub(a))).toBeCloseTo(0, 9);
+  });
+
+  it("returns null when the perpendicular foot falls outside the segment or on the start point itself", () => {
+    const a = new THREE.Vector3(0, 0, 10);
+    const b = new THREE.Vector3(20, 0, 10);
+    expect(perpendicularFootOnSegment(new THREE.Vector3(-2, 0, 0), a, b)).toBeNull();
+    expect(perpendicularFootOnSegment(new THREE.Vector3(25, 0, 0), a, b)).toBeNull();
+    expect(perpendicularFootOnSegment(new THREE.Vector3(8, 0, 10), a, b)).toBeNull();
+  });
+
+  it("finds the perpendicular foot on an opposing face plane, including tilted faces", () => {
+    const from = new THREE.Vector3(2, 7, -4);
+    const foot = perpendicularFootOnPlane(from, new THREE.Vector3(15, 0, 99), new THREE.Vector3(1, 0, 0));
+    expect(foot).not.toBeNull();
+    expect(foot!.x).toBeCloseTo(15, 9);
+    expect(foot!.y).toBeCloseTo(7, 9);
+    expect(foot!.z).toBeCloseTo(-4, 9);
+    expect(foot!.distanceTo(from)).toBeCloseTo(13, 9);
+
+    // A start point that already lies in the plane has no perpendicular line to it.
+    expect(perpendicularFootOnPlane(new THREE.Vector3(15, 7, -4), new THREE.Vector3(15, 0, 0), new THREE.Vector3(1, 0, 0))).toBeNull();
+  });
+
+  it("finds the radial near and far points on a circular edge from an outside or offset point", () => {
+    const circle = circleOfEdgePoints(ring(new THREE.Vector3(0, 0, 0), 10, 64))!;
+    // From an outer wall at x = 25, the radial points on the hole rim are at x = 10 and x = -10.
+    const points = perpendicularPointsOnCircle(circle, new THREE.Vector3(25, 0, 0));
+    expect(points).toHaveLength(2);
+    expect(points[0].distanceTo(new THREE.Vector3(10, 0, 0))).toBeCloseTo(0, 6);
+    expect(points[1].distanceTo(new THREE.Vector3(-10, 0, 0))).toBeCloseTo(0, 6);
+    // From a point on the upper rim of a hole to the lower rim directly below it, only the point directly below is kept.
+    const bottomCircle = circleOfEdgePoints(ring(new THREE.Vector3(0, 0, 0), 10, 64))!;
+    const fromTopRim = new THREE.Vector3(10, 12, 0);
+    const bottomPoints = perpendicularPointsOnCircle(bottomCircle, fromTopRim);
+    expect(bottomPoints[0].distanceTo(new THREE.Vector3(10, 0, 0))).toBeCloseTo(0, 6);
+  });
+
+  it("locks a measurement along a face or the workplane to the dominant axis when Shift is held", () => {
+    const from = new THREE.Vector3(10, 2, 3);
+    const verticalWallNormal = new THREE.Vector3(1, 0, 0);
+    const upWall = axisLockedPoint(from, new THREE.Vector3(10, 18, 5.4), verticalWallNormal);
+    expect(upWall.x).toBeCloseTo(10, 9);
+    expect(upWall.y).toBeCloseTo(18, 9);
+    expect(upWall.z).toBeCloseTo(3, 9);
+
+    const acrossWall = axisLockedPoint(from, new THREE.Vector3(10, 2.8, 25), verticalWallNormal);
+    expect(acrossWall.x).toBeCloseTo(10, 9);
+    expect(acrossWall.y).toBeCloseTo(2, 9);
+    expect(acrossWall.z).toBeCloseTo(25, 9);
+  });
+});
+

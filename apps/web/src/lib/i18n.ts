@@ -4,6 +4,7 @@ import { MESSAGES_EN, type MessageKey } from "@/lib/messages.en";
 import {
   DEFAULT_LANGUAGE,
   LANGUAGE_INFO,
+  LANGUAGE_TAG_ALIASES,
   LANGUAGES,
   isLanguage,
   languageFromTag,
@@ -82,9 +83,11 @@ export function createCatalogueStore(
 const LOADERS: Partial<Record<Language, CatalogueLoader>> = {
   nl: () => import("@/lib/messages.nl").then((module) => module.MESSAGES_NL),
   da: () => import("@/lib/messages.da").then((module) => module.MESSAGES_DA),
+  es: () => import("@/lib/messages.es").then((module) => module.MESSAGES_ES),
   fr: () => import("@/lib/messages.fr").then((module) => module.MESSAGES_FR),
   // Polish is a separate chunk: only browsers that pick Polish download it.
   pl: () => import("@/lib/messages.pl").then((module) => module.MESSAGES_PL),
+  "pt-br": () => import("@/lib/messages.pt-br").then((module) => module.MESSAGES_PT_BR),
   // Russian is a separate chunk as well: the fork adds it, the author has no Russian.
   ru: () => import("@/lib/messages.ru").then((module) => module.MESSAGES_RU),
   sl: () => import("@/lib/messages.sl").then((module) => module.MESSAGES_SL),
@@ -93,6 +96,8 @@ const LOADERS: Partial<Record<Language, CatalogueLoader>> = {
   it: () => import("@/lib/messages.it").then((module) => module.MESSAGES_IT),
   ar: () => import("@/lib/messages.ar").then((module) => module.MESSAGES_AR),
   ja: () => import("@/lib/messages.ja").then((module) => module.MESSAGES_JA),
+  "zh-cn": () => import("@/lib/messages.zh-cn").then((module) => module.MESSAGES_ZH_CN),
+  "zh-tw": () => import("@/lib/messages.zh-tw").then((module) => module.MESSAGES_ZH_TW),
 };
 
 const catalogues = createCatalogueStore({ en: MESSAGES_EN, de: MESSAGES_DE, cs: MESSAGES_CS }, LOADERS);
@@ -174,6 +179,16 @@ export function detectLanguage(): Language {
   }
   return DEFAULT_LANGUAGE;
 }
+
+/**
+ * Runs in the page head before anything is drawn and gives <html lang> the language detectLanguage will pick, so
+ * a browser translator reads the page in its real language from the start. Read as English, a German page was
+ * translated into German and "Hell" became "Hölle" (forum); a language layerling does not speak stays "en", and
+ * the translator may turn it into that language (#681).
+ */
+export const LANGUAGE_BOOT_SCRIPT = `try{var m=${JSON.stringify(
+  Object.fromEntries(LANGUAGES.map((language) => [language, LANGUAGE_INFO[language].htmlLang])),
+)},a=${JSON.stringify(LANGUAGE_TAG_ALIASES)},l=null;try{var s=localStorage.getItem(${JSON.stringify(LANGUAGE_STORAGE_KEY)});if(m[s])l=s}catch(e){}document.documentElement.lang=m[l||${JSON.stringify(DEFAULT_LANGUAGE)}]}catch(e){}`;
 
 export function translate(
   language: Language,

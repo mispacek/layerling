@@ -50,6 +50,13 @@ describe("sketch stroke (#154)", () => {
     expect(Math.abs(area(strokedSketchProfile(runtime, square({ width: 2, align: "center" }))))).toBeCloseTo(12 * 12 - 8 * 8, 6);
   });
 
+  it("narrows a filled outline by the width all round, and swells its hole (#558)", () => {
+    expect(Math.abs(area(strokedSketchProfile(runtime, square({ width: 1, align: "shrink" }))))).toBeCloseTo(8 * 8, 6);
+    // Narrower by more than half the outline leaves nothing.
+    expect(strokedSketchProfile(runtime, square({ width: 6, align: "shrink" }))).toBeNull();
+    expect(normalizeSketchStroke({ width: 1, align: "shrink", join: "miter", cap: "flat" })?.align).toBe("shrink");
+  });
+
   it("gives an open line a width, with flat, square or round ends", () => {
     const line = (cap: SketchStroke["cap"]) => Math.abs(area(strokedSketchProfile(runtime, polyline([[0, 0], [10, 0]], false, { width: 2, cap }))));
     expect(line("flat")).toBeCloseTo(20, 6);

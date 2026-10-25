@@ -59,6 +59,9 @@ function textOf(element: Element): string {
 export function helpNameOf(element: Element): string {
   const override = clean(element.getAttribute("data-help"));
   if (override) return override;
+  // A field inside a label that names it for the help (the label holds its value and options too, which are no name).
+  const namedByLabel = element.matches("input, select, textarea") ? clean(element.closest("label[data-help]")?.getAttribute("data-help")) : "";
+  if (namedByLabel) return namedByLabel;
   const label = clean(element.getAttribute("aria-label"));
   if (label) return label;
   const labelledBy = element.getAttribute("aria-labelledby");
@@ -147,7 +150,7 @@ function panelTitleFor(node: Element, name: string): string {
 }
 
 /** The target for a whole part of the program that the guide has a section about, whatever its parts are called. */
-const SECTION_NAMES: Record<string, string> = { addShape: "editor.addShape", objectList: "outliner.title", viewCube: "view.cube", cameraBar: "camera.controls", exporting: "panel.export" };
+const SECTION_NAMES: Record<string, string> = { addShape: "editor.addShape", objectList: "outliner.title", viewCube: "view.cube", cameraBar: "camera.controls", exporting: "panel.export", colorCard: "inspector.shapeColor", shapeSettings: "inspector.properties", rotating: "inspector.rotation" };
 
 function sectionTarget(element: Element, section: string): HelpTarget {
   const key = SECTION_NAMES[section];
@@ -159,6 +162,12 @@ export function resolveHelpTarget(start: Element | null, limit?: Element | null)
   // The question mark of a window leads to the part of the guide it points at.
   const question = start?.closest("a.guide-help-link");
   if (question) return { element: question, name: "", guideHref: question.getAttribute("href") };
+  // A part whose pieces bring no names of their own (the spectrum of a colour picker) is named by the part.
+  const named = start?.closest("[data-help-all]");
+  const namedAll = clean(named?.getAttribute("data-help-all"));
+  if (start && named && namedAll) {
+    return { element: start.closest("button, input, select, label, [role=slider]") ?? named, name: namedAll, guideHref: panelGuideHref(named) };
+  }
   // Some places answer as a whole (the shape library, the object list, the view cube): everything in them leads to their section.
   const whole = start?.closest("[data-help-section-all]");
   if (start && whole && !start.closest("[data-help-keep]")) {

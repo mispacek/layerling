@@ -125,6 +125,18 @@ export function ToolbarNoteIcon(props: IconProps) {
 }
 
 /**
+ * The attachments: a paperclip, the mark everyone knows for a file that travels with something else.
+ * It is a line without a body, so it carries no faint fill; the note's sheet stays the note's.
+ */
+export function ToolbarAttachmentsIcon(props: IconProps) {
+  return (
+    <ToolbarVectorIcon {...props}>
+      <path d="M37.5 19.3l-16.1 16.1a10.5 10.5 0 0 1 -14.9 -14.9l15 -15A7 7 0 1 1 31.5 15.5l-15 15a3.5 3.5 0 0 1 -5 -5l14.9 -14.8" />
+    </ToolbarVectorIcon>
+  );
+}
+
+/**
  * Importieren und Exportieren sind zwei Würfel mit einem Pfeil, der schräg darauf
  * zeigt oder davon weg zeigt. Ein Pfeil nach unten oder oben las sich bei beiden
  * als "herunterladen" und war leicht zu verwechseln; hier sagt die Richtung zum
@@ -323,6 +335,16 @@ export function ToolbarConstructionLineIcon(props: IconProps) {
       <path d="M12 36 36 12" strokeDasharray="5 5" />
       <circle cx="10" cy="38" r="3.6" fill="currentColor" stroke="none" />
       <circle cx="38" cy="10" r="3.6" fill="currentColor" stroke="none" />
+    </ToolbarVectorIcon>
+  );
+}
+
+export function ToolbarMiddleLineIcon(props: IconProps) {
+  return (
+    <ToolbarVectorIcon {...props}>
+      <path d="M8 38 40 10" />
+      <circle cx="24" cy="24" r="4.6" fill="currentColor" stroke="none" />
+      <path d="m8 30 0 8 8 0M40 18l0-8-8 0" />
     </ToolbarVectorIcon>
   );
 }

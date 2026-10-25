@@ -5,7 +5,7 @@ summary: Vælg din egen printer, bliv advaret når noget ikke passer, og læg de
 
 ## Vælg din printer
 
-Åbn indstillingerne (tandhjulet i båndet, {{ui:editor.workspaceSettings}}) og skift til området {{ui:workspace.workplane}}. Under {{ui:workspace.printer}} vælger du din printer fra en liste på over halvtreds almindelige modeller, herunder Bambu Lab, Prusa, Creality, Anycubic, Elegoo og mange flere.
+Åbn indstillingerne (tandhjulet i båndet, {{ui:editor.workspaceSettings}}) og skift til området {{ui:workspace.workplane}}. Under {{ui:workspace.printer}} vælger du din printer fra en liste på over 220 almindelige modeller, herunder Bambu Lab, Prusa, Creality, Anycubic, Elegoo og mange flere.
 
 ![Arbejdsplan-indstillingerne med en printer valgt. Printleje og maksimale printhøjde kommer fra slicer-profilen.](shot:settings-workplane)
 
@@ -24,6 +24,8 @@ En form der stikker ud over kanten af printpladen markeres. En besked fortæller
 ![Kassen er bredere end Bambu Lab A1 minis printleje. Beskeden for neden siger med hvor meget.](shot:printer-overhang)
 
 Advarslen stopper dig ikke fra at arbejde videre. Det er et tip så du ikke først opdager i sliceren at delen er for stor. En del der er for stor kan ofte deles: skær den over med {{ui:editor.tool.split}} og print begge halvdele hver for sig.
+
+Har du med vilje parkeret dele ved siden af pladen, så klik på det lille kryds i beskeden. Advarslen forsvinder så for netop de former. Når en af dem igen passerer, og du flytter den ud senere, eller en anden form stikker ud, kommer beskeden tilbage. Skjulte former tæller aldrig med, så det virker også at skjule de parkerede dele.
 
 ## Læg delen rigtigt
 

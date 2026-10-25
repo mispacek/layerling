@@ -5,7 +5,7 @@ summary: Start layerling als een gewoon programma, ook zonder netwerk, en lees h
 
 ## Installeren als app
 
-layerling kun je installeren als een gewoon programma. Het krijgt dan een eigen pictogram en een eigen venster, zonder adresbalk. Na het eerste bezoek start het zelfs **zonder internet**. Je ontwerpen blijven op je computer. Installeren loont: de app start sneller, omdat ze niet elke keer opnieuw geladen hoeft te worden, werkt zonder internet en ontlast de server. Je verliest niets, want layerling meldt je nog steeds wanneer er een nieuwe versie is.
+layerling kun je installeren als een gewoon programma. Het krijgt dan een eigen pictogram en een eigen venster, zonder adresbalk. Na het eerste bezoek start het zelfs **zonder internet**. Je ontwerpen blijven op je computer. Installeren loont: de app start sneller, omdat ze niet elke keer opnieuw geladen hoeft te worden, werkt zonder internet en ontlast de server. Je verliest niets, want layerling meldt je nog steeds wanneer er een nieuwe versie is. Dat beschermt ook je ontwerpen: Safari op de Mac, iPhone en iPad wist de opgeslagen gegevens van een website die zeven dagen niet is bezocht, maar niet die van een geïnstalleerde app.
 
 Op de startpagina verschijnt een hint met {{ui:installHint.install}} als je browser dat kan. Anders:
 
@@ -33,7 +33,7 @@ De taal kies je rechtsboven in de taallijst. Het kleurenschema ernaast biedt {{u
 layerling is vrije software (AGPL-3.0) en kan op je eigen computer of server draaien, bijvoorbeeld in een werkplaats, een vereniging of een school. Daarvoor zijn er meerdere manieren, beschreven in de [README op GitHub](https://github.com/henmedia/layerling/blob/main/README.nl.md#aan-de-slag):
 
 - **De snelstart op Windows:** Eén regel in PowerShell installeert alles en zet een snelkoppeling op het bureaublad. Draait layerling al, dan start een volgende dubbelklik geen tweede server, maar opent alleen de pagina.
-- **Docker:** Voor NAS-apparaten en thuisservers, zonder dat Node.js geïnstalleerd hoeft te zijn. Elke release komt als kant-en-klare image `henmedia/layerling` op Docker Hub (ook `ghcr.io/henmedia/layerling`) voor amd64 en arm64; `docker run -d -p 3000:3000 henmedia/layerling:latest` start hem, en op een NAS zoek je hem op in het register van de containerbeheerder.
+- **Docker:** Voor NAS-apparaten en thuisservers, zonder dat Node.js geïnstalleerd hoeft te zijn. Elke release komt als kant-en-klare image `henmedia/layerling` op Docker Hub (ook `ghcr.io/henmedia/layerling`) voor amd64 en arm64; `docker run -d -p 3000:3000 -v layerling-thumbnails:/app/.codex/project-thumbnails henmedia/layerling:latest` start hem, en op een NAS zoek je hem op in het register van de containerbeheerder.
 - **Statische export:** Het resultaat bestaat uit gewone bestanden die elke webserver kan uitleveren. Ze horen in de root van een adres (`https://layerling.example.com/` of `http://192.168.0.5:8080/`), niet in een submap en niet vanaf de schijf geopend; de README beschrijft de stappen. Met een beschrijfbare map `store` naast `index.html` en PHP op de server wordt het ook de gedeelde opslag voor ontwerpen.
 
 De MCP-brug voor AI-assistenten bestaat alleen in de ontwikkelserver, zie [Bouwen met een AI](chapter:ai-met-mcp).

@@ -5,7 +5,7 @@ summary: layerling zaženi kot običajen program, tudi brez omrežja – in kako
 
 ## Namestitev kot aplikacije
 
-layerling je mogoče namestiti kot običajen program. Potem dobi lastno ikono in lastno okno brez naslovne vrstice. Po prvem obisku se zažene tudi **brez interneta**. Tvoji načrti pri tem ostanejo na tvojem računalniku. Namestitev se splača: aplikacija se zažene hitreje, ker je ni treba vsakič znova naložiti, deluje brez interneta in razbremeni strežnik. Nič ne izgubite, saj vam layerling še naprej sporoči, ko izide nova različica.
+layerling je mogoče namestiti kot običajen program. Potem dobi lastno ikono in lastno okno brez naslovne vrstice. Po prvem obisku se zažene tudi **brez interneta**. Tvoji načrti pri tem ostanejo na tvojem računalniku. Namestitev se splača: aplikacija se zažene hitreje, ker je ni treba vsakič znova naložiti, deluje brez interneta in razbremeni strežnik. Nič ne izgubite, saj vam layerling še naprej sporoči, ko izide nova različica. To varuje tudi tvoje načrte: Safari na Macu, iPhonu in iPadu izbriše shranjene podatke spletnega mesta, ki ga sedem dni nisi obiskal, podatkov nameščene aplikacije pa ne.
 
 Na začetni strani se za to pokaže opomba z {{ui:installHint.install}}, če tvoj brskalnik to zna. Sicer:
 
@@ -33,7 +33,7 @@ Jezik izbereš zgoraj desno, na seznamu jezikov. Barvna shema ob njem ponuja {{u
 layerling je prosta programska oprema (AGPL-3.0) in ga lahko upravljaš na lastnem računalniku ali strežniku, na primer v delavnici, društvu ali šoli. Za to je več poti, opisanih v [README na GitHubu](https://github.com/henmedia/layerling/blob/main/README.de.md#loslegen):
 
 - **Hitri začetek v Windowsih:** Ena sama vrstica v PowerShellu vse namesti in ustvari bližnjico na namizju. Če layerling že teče, nov dvoklik ne zažene drugega strežnika, ampak samo odpre stran.
-- **Docker:** Za naprave NAS in domače strežnike, ne da bi moral biti nameščen Node.js. Vsaka izdaja obstaja kot gotova slika `henmedia/layerling` na Docker Hubu (tudi `ghcr.io/henmedia/layerling`) za amd64 in arm64; `docker run -d -p 3000:3000 henmedia/layerling:latest` jo zažene, na NAS jo poiščeš v registru upravljanja vsebnikov.
+- **Docker:** Za naprave NAS in domače strežnike, ne da bi moral biti nameščen Node.js. Vsaka izdaja obstaja kot gotova slika `henmedia/layerling` na Docker Hubu (tudi `ghcr.io/henmedia/layerling`) za amd64 in arm64; `docker run -d -p 3000:3000 -v layerling-thumbnails:/app/.codex/project-thumbnails henmedia/layerling:latest` jo zažene, na NAS jo poiščeš v registru upravljanja vsebnikov.
 - **Statični izvoz:** Rezultat sestoji iz samih datotek, ki jih lahko dostavi vsak spletni strežnik. Sodijo na koren naslova (`https://layerling.example.com/` ali `http://192.168.0.5:8080/`), ne v podmapo in ne odprte z diska; koraki so v README. Z zapisljivo mapo `store` ob `index.html` in PHP na strežniku iz tega nastane tudi skupno odlagališče za načrte.
 
 Most MCP za pomočnike z umetno inteligenco obstaja samo pri razvojnem strežniku, glej [Gradnja z umetno inteligenco](chapter:ai-z-mcp).

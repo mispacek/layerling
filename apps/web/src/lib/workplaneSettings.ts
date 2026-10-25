@@ -12,6 +12,7 @@ export const BRICK_SNAP_STEP = 8;
 export const KEYBOARD_NUDGE_FALLBACK_STEP = 0.01;
 // Shift has always moved five times as far as a plain arrow press.
 export const KEYBOARD_NUDGE_COARSE_FACTOR = 5;
+export const KEYBOARD_NUDGE_FINE_DIVISOR = 5;
 export const MIN_CUSTOM_SHAPE_DIMENSION = 0.01;
 export const MAX_CUSTOM_SHAPE_DIMENSION = 2000;
 export const MAX_HIGH_RESOLUTION_SIDES = 512;
@@ -55,10 +56,12 @@ export const DEFAULT_WORKPLANE_WORKSPACE: WorkplaneWorkspaceSettings = {
   gridLinesGrow: true,
   edgeLines: false,
   edgeColor: DEFAULT_EDGE_LINE_COLOR,
+  strongHoles: false,
   showShadows: true,
   cameraInertia: true,
   fastMode: false,
   shadeContrast: 0,
+  softLighting: false,
   shadowStrength: 100,
   shadowSoftness: 0,
   lightAzimuth: DEFAULT_LIGHT_AZIMUTH,
@@ -71,9 +74,13 @@ export const DEFAULT_WORKPLANE_WORKSPACE: WorkplaneWorkspaceSettings = {
   clickToPlaceShapes: true,
   selectBeforeMove: false,
   frameByDirection: false,
+  pasteCentered: false,
   doubleClickOpensSketch: true,
   doubleClickOpensGroup: true,
+  doubleClickCentersView: true,
   objectSnap: true,
+  stlAsDownload: false,
+  confirmTabClose: false,
   dimensionsAlwaysVisible: true,
   showRotationAngles: true,
   zoomSpeed: 5,
@@ -94,8 +101,6 @@ const ZOOM_SPEED_STEPS_TO_FAST = 9;
 const ZOOM_SPEED_FAST_TO_SLOW = 20;
 /** Each slider step changes the rate by this factor, in the first ten steps and above them. */
 const ZOOM_SPEED_STEP = ZOOM_SPEED_FAST_TO_SLOW ** (1 / ZOOM_SPEED_STEPS_TO_FAST);
-/** The buttons and keys +/- stop at this slider position: above it only the wheel gets faster. */
-const ZOOM_BUTTON_SLIDER_MAX = 10;
 // OrbitControls.zoomSpeed at the default slider position. The old mapping was
 // 0.28 + slider * 0.09, which left the fast end only about three times the slow end.
 export const DEFAULT_ORBIT_ZOOM_SPEED = 0.73;
@@ -115,10 +120,20 @@ export function orbitControlsZoomSpeed(slider: number): number {
   return slowest * ZOOM_SPEED_STEP ** (position - ZOOM_SPEED_SLIDER_MIN);
 }
 
-/** Raises a fixed distance multiplier by the slider's rate, so buttons match the wheel (up to 10, see ZOOM_BUTTON_SLIDER_MAX). */
-export function zoomDistanceScale(step: number, slider: number): number {
-  const position = Number.isFinite(slider) ? Math.min(slider, ZOOM_BUTTON_SLIDER_MAX) : slider;
-  return step ** (orbitControlsZoomSpeed(position) / DEFAULT_ORBIT_ZOOM_SPEED);
+/**
+ * The slider position the buttons and keys +/- always step at. They do not follow the slider:
+ * a trackpad wants it high, and there a single step jumped too far. At the default position a
+ * step is the button's own multiplier, as it was for anyone who never moved the slider.
+ */
+const ZOOM_BUTTON_SLIDER_POSITION = DEFAULT_WORKPLANE_WORKSPACE.zoomSpeed;
+
+/** The distance multipliers of one zoom step, shared by the toolbar buttons and the keys +/-. */
+export const ZOOM_STEP_IN = 0.72;
+export const ZOOM_STEP_OUT = 1.28;
+
+/** Raises a fixed distance multiplier by the rate at ZOOM_BUTTON_SLIDER_POSITION. */
+export function zoomDistanceScale(step: number): number {
+  return step ** (orbitControlsZoomSpeed(ZOOM_BUTTON_SLIDER_POSITION) / DEFAULT_ORBIT_ZOOM_SPEED);
 }
 
 const METRIC_SNAP_GRIDS: GridSize[] = ["Off", "0.1 mm", "0.25 mm", "0.5 mm", "1.0 mm", "2.0 mm", "5.0 mm", "Brick"];
@@ -398,6 +413,22 @@ export function normalizeShapeCustomizations(value: unknown, fallback: ShapeCust
       entry.gridfinityScoopRight = typeof source.gridfinityScoopRight === "boolean" ? source.gridfinityScoopRight : fallbackEntry?.gridfinityScoopRight;
       entry.gridfinityScoopRadius = optionalShapeNumber(source.gridfinityScoopRadius, fallbackEntry?.gridfinityScoopRadius, 0, MAX_CUSTOM_SHAPE_DIMENSION);
       entry.gridfinityFloorHeight = optionalShapeNumber(source.gridfinityFloorHeight, fallbackEntry?.gridfinityFloorHeight, 0, MAX_CUSTOM_SHAPE_DIMENSION);
+      entry.gridfinityOpenBack = typeof source.gridfinityOpenBack === "boolean" ? source.gridfinityOpenBack : fallbackEntry?.gridfinityOpenBack;
+      entry.gridfinityOpenFront = typeof source.gridfinityOpenFront === "boolean" ? source.gridfinityOpenFront : fallbackEntry?.gridfinityOpenFront;
+      entry.gridfinityOpenLeft = typeof source.gridfinityOpenLeft === "boolean" ? source.gridfinityOpenLeft : fallbackEntry?.gridfinityOpenLeft;
+      entry.gridfinityOpenRight = typeof source.gridfinityOpenRight === "boolean" ? source.gridfinityOpenRight : fallbackEntry?.gridfinityOpenRight;
+      entry.gridfinityLipChamfer = optionalShapeNumber(source.gridfinityLipChamfer, fallbackEntry?.gridfinityLipChamfer, 0, MAX_CUSTOM_SHAPE_DIMENSION);
+      entry.gridfinityWallThickness = optionalShapeNumber(source.gridfinityWallThickness, fallbackEntry?.gridfinityWallThickness, 0, MAX_CUSTOM_SHAPE_DIMENSION);
+      entry.gridfinityOpeningCorner = source.gridfinityOpeningCorner === "round" || source.gridfinityOpeningCorner === "chamfer" ? source.gridfinityOpeningCorner : fallbackEntry?.gridfinityOpeningCorner;
+      entry.gridfinityOpeningCornerSize = optionalShapeNumber(source.gridfinityOpeningCornerSize, fallbackEntry?.gridfinityOpeningCornerSize, 0, MAX_CUSTOM_SHAPE_DIMENSION);
+      entry.gridfinityPaddingBack = optionalShapeNumber(source.gridfinityPaddingBack, fallbackEntry?.gridfinityPaddingBack, 0, MAX_CUSTOM_SHAPE_DIMENSION);
+      entry.gridfinityPaddingFront = optionalShapeNumber(source.gridfinityPaddingFront, fallbackEntry?.gridfinityPaddingFront, 0, MAX_CUSTOM_SHAPE_DIMENSION);
+      entry.gridfinityPaddingLeft = optionalShapeNumber(source.gridfinityPaddingLeft, fallbackEntry?.gridfinityPaddingLeft, 0, MAX_CUSTOM_SHAPE_DIMENSION);
+      entry.gridfinityPaddingRight = optionalShapeNumber(source.gridfinityPaddingRight, fallbackEntry?.gridfinityPaddingRight, 0, MAX_CUSTOM_SHAPE_DIMENSION);
+      entry.gridfinityCornerRadius = optionalShapeNumber(source.gridfinityCornerRadius, fallbackEntry?.gridfinityCornerRadius, 0, MAX_CUSTOM_SHAPE_DIMENSION);
+      entry.gridfinityCompartmentsX = optionalShapeNumber(source.gridfinityCompartmentsX, fallbackEntry?.gridfinityCompartmentsX, 1, MAX_CUSTOM_SHAPE_DIMENSION, true);
+      entry.gridfinityCompartmentsZ = optionalShapeNumber(source.gridfinityCompartmentsZ, fallbackEntry?.gridfinityCompartmentsZ, 1, MAX_CUSTOM_SHAPE_DIMENSION, true);
+      entry.gridfinityDividerThickness = optionalShapeNumber(source.gridfinityDividerThickness, fallbackEntry?.gridfinityDividerThickness, 0, MAX_CUSTOM_SHAPE_DIMENSION);
     }
     if (kind === "knurl") {
       entry.knurlPattern = source.knurlPattern === "straight" || source.knurlPattern === "diamond" || source.knurlPattern === "round" ? source.knurlPattern : fallbackEntry?.knurlPattern;
@@ -419,6 +450,7 @@ export function normalizeShapeCustomizations(value: unknown, fallback: ShapeCust
       }
       entry.loftTwist = optionalShapeNumber(source.loftTwist, fallbackEntry?.loftTwist, -360, 360);
       entry.loftSmooth = optionalShapeNumber(source.loftSmooth, fallbackEntry?.loftSmooth, 0, 1);
+      entry.loftSegments = optionalShapeNumber(source.loftSegments, fallbackEntry?.loftSegments, 16, 360, true);
       entry.loftTiltX = optionalShapeNumber(source.loftTiltX, fallbackEntry?.loftTiltX, -45, 45);
       entry.loftTiltZ = optionalShapeNumber(source.loftTiltZ, fallbackEntry?.loftTiltZ, -45, 45);
       for (const key of ["loftBottomSides", "loftTopSides"] as const) {
@@ -512,7 +544,7 @@ export function normalizeShapeCustomizations(value: unknown, fallback: ShapeCust
       entry.threadHeadChamfer = optionalShapeNumber(source.threadHeadChamfer, fallbackEntry?.threadHeadChamfer, 0, 40);
     }
     if (kind === "gear") {
-      entry.teeth = optionalShapeNumber(source.teeth, fallbackEntry?.teeth, 6, 64, true);
+      entry.teeth = optionalShapeNumber(source.teeth, fallbackEntry?.teeth, 6, 150, true);
       entry.toothSize = optionalShapeNumber(source.toothSize, fallbackEntry?.toothSize, 0.2, MAX_CUSTOM_SHAPE_DIMENSION / 2);
       entry.toothWidth = optionalShapeNumber(source.toothWidth, fallbackEntry?.toothWidth, MIN_CUSTOM_SHAPE_DIMENSION, MAX_CUSTOM_SHAPE_DIMENSION);
       entry.centerHoleSize = optionalShapeNumber(source.centerHoleSize, fallbackEntry?.centerHoleSize, 0, MAX_CUSTOM_SHAPE_DIMENSION);
@@ -616,11 +648,13 @@ export function snapGridStep(size: GridSize) {
  * 5mm lattice and the very next arrow press pushed the shape off it again.
  * Following the grid keeps an aligned shape aligned; Shift keeps its former
  * meaning of a coarser step. With the grid off an arrow moves 0.01 mm.
+ * Alt is the opposite of Shift (#749): a fifth of the step; with both, Shift wins.
  */
-export function keyboardNudgeStep(size: GridSize, coarse: boolean, coarseFactor = KEYBOARD_NUDGE_COARSE_FACTOR) {
+export function keyboardNudgeStep(size: GridSize, coarse: boolean, coarseFactor = KEYBOARD_NUDGE_COARSE_FACTOR, fine = false) {
   const grid = snapGridStep(size);
   const base = grid > 0 ? grid : KEYBOARD_NUDGE_FALLBACK_STEP;
-  return coarse ? base * coarseFactor : base;
+  if (coarse) return base * coarseFactor;
+  return fine ? base / KEYBOARD_NUDGE_FINE_DIVISOR : base;
 }
 
 /**
@@ -668,10 +702,12 @@ export function normalizeWorkspaceSettings(value: unknown, fallback: WorkplaneWo
     gridLinesGrow: booleanOrDefault(candidate.gridLinesGrow, fallback.gridLinesGrow),
     edgeLines: booleanOrDefault(candidate.edgeLines, fallback.edgeLines),
     edgeColor: colorOrDefault(candidate.edgeColor, fallback.edgeColor),
+    strongHoles: booleanOrDefault(candidate.strongHoles, fallback.strongHoles),
     showShadows: booleanOrDefault(candidate.showShadows, fallback.showShadows),
     cameraInertia: booleanOrDefault(candidate.cameraInertia, fallback.cameraInertia),
     fastMode: booleanOrDefault(candidate.fastMode, fallback.fastMode),
     shadeContrast: Math.round(Math.max(-100, Math.min(100, numberOrDefault(candidate.shadeContrast, fallback.shadeContrast)))),
+    softLighting: booleanOrDefault(candidate.softLighting, fallback.softLighting),
     shadowStrength: Math.round(Math.max(0, Math.min(100, numberOrDefault(candidate.shadowStrength, fallback.shadowStrength)))),
     shadowSoftness: Math.round(Math.max(0, Math.min(100, numberOrDefault(candidate.shadowSoftness, fallback.shadowSoftness)))),
     lightAzimuth: Math.round(Math.max(-180, Math.min(180, numberOrDefault(candidate.lightAzimuth, fallback.lightAzimuth)))),
@@ -689,9 +725,13 @@ export function normalizeWorkspaceSettings(value: unknown, fallback: WorkplaneWo
     clickToPlaceShapes: booleanOrDefault(candidate.clickToPlaceShapes, fallback.clickToPlaceShapes),
     selectBeforeMove: booleanOrDefault(candidate.selectBeforeMove, fallback.selectBeforeMove),
     frameByDirection: booleanOrDefault(candidate.frameByDirection, fallback.frameByDirection),
+    pasteCentered: booleanOrDefault(candidate.pasteCentered, fallback.pasteCentered),
     doubleClickOpensSketch: booleanOrDefault(candidate.doubleClickOpensSketch, fallback.doubleClickOpensSketch),
     doubleClickOpensGroup: booleanOrDefault(candidate.doubleClickOpensGroup, fallback.doubleClickOpensGroup),
+    doubleClickCentersView: booleanOrDefault(candidate.doubleClickCentersView, fallback.doubleClickCentersView),
     objectSnap: booleanOrDefault(candidate.objectSnap, fallback.objectSnap),
+    stlAsDownload: booleanOrDefault(candidate.stlAsDownload, fallback.stlAsDownload),
+    confirmTabClose: booleanOrDefault(candidate.confirmTabClose, fallback.confirmTabClose),
     dimensionsAlwaysVisible: booleanOrDefault(candidate.dimensionsAlwaysVisible, fallback.dimensionsAlwaysVisible),
     showRotationAngles: booleanOrDefault(candidate.showRotationAngles, fallback.showRotationAngles),
     zoomSpeed: numberOrDefault(candidate.zoomSpeed, fallback.zoomSpeed),
@@ -767,6 +807,30 @@ export function resetGridInSavedDefault(storage: Storage | null = browserStorage
   const saved = readWorkspaceDefault(storage);
   if (!saved || !storage) return false;
   return saveWorkspaceDefault({ ...saved.workspace, ...standardGridSettings(saved.workspace.units) }, saved.snap, storage);
+}
+
+/**
+ * "Use my default" (#754): the look the user saved with "Make default" - colours, grid, shadows, camera, shape
+ * starts - put on the design that is open, which a file brings with its own. A printer in the saved default comes
+ * along with its plate, since that is the printer the user prints on (#850); without one the design keeps its plate
+ * and printer. The units and how they are shown stay with the design. The grid spacing stays too when the saved
+ * default counts in other units, since it is a length in those.
+ */
+export function workspaceWithSavedDefault(current: WorkplaneWorkspaceSettings, saved: WorkplaneWorkspaceSettings): WorkplaneWorkspaceSettings {
+  const sameUnits = saved.units === current.units;
+  const plate = saved.printer ? saved : current;
+  return {
+    ...saved,
+    width: plate.width,
+    depth: plate.depth,
+    sizePreset: plate.sizePreset,
+    printer: plate.printer,
+    units: current.units,
+    inchFormat: current.inchFormat,
+    scale: current.scale,
+    accuracy: current.accuracy,
+    ...(sameUnits ? {} : { gridBlockPreset: current.gridBlockPreset, gridBlockSize: current.gridBlockSize }),
+  };
 }
 
 export function readWorkspaceDefault(storage: Storage | null = browserStorage()) {

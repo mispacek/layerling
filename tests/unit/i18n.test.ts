@@ -25,7 +25,7 @@ const FILES = import.meta.glob("../../apps/web/src/lib/messages.*.ts", { eager: 
 const CATALOGUES: Record<string, Record<string, string> | undefined> = {};
 for (const [path, module] of Object.entries(FILES)) {
   const code = /messages\.([a-z-]+)\.ts$/.exec(path)?.[1];
-  if (code) CATALOGUES[code] = module[`MESSAGES_${code.toUpperCase()}`];
+  if (code) CATALOGUES[code] = module[`MESSAGES_${code.toUpperCase().replace(/-/g, "_")}`];
 }
 /** The languages that must have every sentence; a language still on its way is held to less (i18nLanguages.test.ts). */
 const COMPLETE_LANGUAGES = LANGUAGES.filter((language) => LANGUAGE_INFO[language].complete);
@@ -92,7 +92,7 @@ describe("translation", () => {
   });
 
   it("leaves an unknown placeholder untouched instead of printing undefined", () => {
-    expect(translate("en", "notice.opened", {})).toBe("Opened {name}");
+    expect(translate("en", "notice.openedLocalProject", {})).toBe("Opened {name} as a new local design");
   });
 
   it("falls back to English when a catalogue misses a key", () => {
@@ -112,8 +112,22 @@ describe("language detection", () => {
     expect(languageFromTag("CS")).toBe("cs");
     expect(languageFromTag("fr-FR")).toBe("fr");
     expect(languageFromTag("ru-RU")).toBe("ru");
-    expect(languageFromTag("es-ES")).toBe(null);
+    expect(languageFromTag("sv-SE")).toBe(null);
     expect(languageFromTag(undefined)).toBe(null);
+  });
+
+  it("serves Brazilian Portuguese for a browser that asks for pt-BR", () => {
+    expect(languageFromTag("pt-BR")).toBe("pt-br");
+  });
+
+  it("does not serve Brazilian Portuguese for European Portuguese", () => {
+    expect(languageFromTag("pt-PT")).toBe(null);
+  });
+
+  it("serves Spanish for the Spanish of Spain and of Latin America", () => {
+    expect(languageFromTag("es-ES")).toBe("es");
+    expect(languageFromTag("es-MX")).toBe("es");
+    expect(languageFromTag("es-419")).toBe("es");
   });
 
   it("recognises only the languages it can serve", () => {
@@ -125,7 +139,8 @@ describe("language detection", () => {
     expect(isLanguage("ru")).toBe(true);
     expect(isLanguage("it")).toBe(true);
     expect(isLanguage("ar")).toBe(true);
-    expect(isLanguage("es")).toBe(false);
+    expect(isLanguage("es")).toBe(true);
+    expect(isLanguage("sv")).toBe(false);
     expect(isLanguage(null)).toBe(false);
   });
 

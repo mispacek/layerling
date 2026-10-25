@@ -3,10 +3,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { leftButtonCameraAction } from "@/lib/cameraMouseButtons";
 import { AlertTriangle, Check, LoaderCircle, X } from "lucide-react";
 import { GuideHelpLink } from "@/components/GuideHelpLink";
 import { numberLocale, t } from "@/lib/i18n";
-import { simplifyTrianglePositions, type SimplifiedMesh } from "@/lib/meshSimplify";
+import { simplifyTrianglePositionsOffThread } from "@/lib/geometryWorker";
+import type { SimplifiedMesh } from "@/lib/meshSimplify";
 import { displayShapeName } from "@/lib/shapeCatalog";
 import { useLanguage } from "@/lib/useLanguage";
 import { useMovablePanel, type MovablePanelOptions } from "@/lib/useMovablePanel";
@@ -103,10 +105,12 @@ export function MeshSimplifyPanel({
   useEffect(() => {
     if (!positions) return;
     let stale = false;
+    // A value that is no longer wanted is called off in the worker too (lib/geometryWorker.ts).
+    const controller = new AbortController();
     setBusy(true);
     // The slider reports every step of a drag; only where it rests is worked out.
     const timer = window.setTimeout(() => {
-      simplifyTrianglePositions(positions, target)
+      simplifyTrianglePositionsOffThread(positions, target, controller.signal)
         .then((next) => {
           if (stale) return;
           setResult(next);
@@ -121,6 +125,7 @@ export function MeshSimplifyPanel({
     return () => {
       stale = true;
       window.clearTimeout(timer);
+      controller.abort();
     };
   }, [positions, target]);
 
@@ -192,7 +197,7 @@ export function MeshSimplifyPanel({
     // The same buttons as on the workplane, so a hand used to the editor needs no second habit here.
     controls.mouseButtons = { LEFT: null, MIDDLE: THREE.MOUSE.PAN, RIGHT: THREE.MOUSE.ROTATE };
     const onPointerDown = (event: PointerEvent) => {
-      controls.mouseButtons.LEFT = event.button === 0 && (event.ctrlKey || event.metaKey) ? THREE.MOUSE.PAN : null;
+      controls.mouseButtons.LEFT = leftButtonCameraAction(event);
     };
     canvas.addEventListener("pointerdown", onPointerDown, { capture: true });
     const state: CompareState = { renderer, scene, camera, controls, sides: [side(), side()], solid, wire, needsRender: true };

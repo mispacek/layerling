@@ -5,7 +5,7 @@ summary: Indítsd a layerlinget úgy, mint egy normál programot, akár hálóza
 
 ## Telepítés alkalmazásként
 
-A layerling úgy telepíthető, mint egy normál program. Ilyenkor saját ikont és saját ablakot kap, címsor nélkül. Az első látogatás után **internet nélkül** is elindul. A terveid a számítógépeden maradnak. Érdemes telepíteni: az alkalmazás gyorsabban indul, mert nem kell minden alkalommal újra letölteni, internet nélkül is működik, és tehermentesíti a szervert. Semmit nem veszítesz, mert a layerling továbbra is jelzi, ha új verzió jelent meg.
+A layerling úgy telepíthető, mint egy normál program. Ilyenkor saját ikont és saját ablakot kap, címsor nélkül. Az első látogatás után **internet nélkül** is elindul. A terveid a számítógépeden maradnak. Érdemes telepíteni: az alkalmazás gyorsabban indul, mert nem kell minden alkalommal újra letölteni, internet nélkül is működik, és tehermentesíti a szervert. Semmit nem veszítesz, mert a layerling továbbra is jelzi, ha új verzió jelent meg. Ez a terveidet is védi: a Safari Macen, iPhone-on és iPaden törli annak a weboldalnak a mentett adatait, amelyet hét napig nem látogattak, a telepített alkalmazásét viszont nem.
 
 A kezdőlapon megjelenik egy {{ui:installHint.install}} feliratú jelzés, ha a böngésződ képes rá. Különben:
 
@@ -33,7 +33,7 @@ A nyelvet a jobb felső sarokban lévő nyelvlistában választod ki. A mellette
 A layerling szabad szoftver (AGPL-3.0), és futtatható a saját számítógépeden vagy szervereden, például egy műhelyben, egy klubban vagy egy iskolában. Erre több mód van, ezeket a [GitHubon lévő README](https://github.com/henmedia/layerling/blob/main/README.md#getting-started) írja le:
 
 - **Gyorsindítás Windowson:** Egyetlen PowerShell-sor mindent telepít, és parancsikont tesz az asztalra. Ha a layerling már fut, egy újabb dupla kattintás nem indít második szervert, csak megnyitja az oldalt.
-- **Docker:** NAS-eszközökhöz és otthoni szerverekhez, anélkül, hogy telepíteni kellene a Node.js-t. Minden kiadás kész image-ként érkezik `henmedia/layerling` néven a Docker Hubon (és `ghcr.io/henmedia/layerling` néven is) amd64-hez és arm64-hez; a `docker run -d -p 3000:3000 henmedia/layerling:latest` elindítja, NAS-on pedig a konténerkezelő regisztrijében keresed meg.
+- **Docker:** NAS-eszközökhöz és otthoni szerverekhez, anélkül, hogy telepíteni kellene a Node.js-t. Minden kiadás kész image-ként érkezik `henmedia/layerling` néven a Docker Hubon (és `ghcr.io/henmedia/layerling` néven is) amd64-hez és arm64-hez; a `docker run -d -p 3000:3000 -v layerling-thumbnails:/app/.codex/project-thumbnails henmedia/layerling:latest` elindítja, NAS-on pedig a konténerkezelő regisztrijében keresed meg.
 - **Statikus export:** Az eredmény egyszerű fájlok, amelyeket bármely webszerver kiszolgálhat. Egy cím gyökerébe valók (`https://layerling.example.com/` vagy `http://192.168.0.5:8080/`), nem egy almappába, és nem lemezről megnyitva; a lépések a README-ben vannak. Egy írható `store` mappával az `index.html` mellett és PHP-val a szerveren a tervek közös tárolója is lesz belőle.
 
 Az MI-asszisztenseknek szóló MCP-híd csak a fejlesztői szerverben létezik, lásd az [Építés MI-vel](chapter:ai-with-mcp) fejezetet.

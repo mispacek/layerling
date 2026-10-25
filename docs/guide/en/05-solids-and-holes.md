@@ -28,6 +28,8 @@ This is how you get:
 
 If several solids are in the group, they are joined. Two solids that touch become a single part.
 
+With large meshes, such as an imported STL with hundreds of thousands of triangles, the cut takes a few seconds. layerling then works in the background and shows "{{ui:status.computing}}"; meanwhile you can turn the view and use the interface. If you change the scene in that time, the result is dropped and layerling tells you so. The same goes for {{ui:editor.tool.split}}.
+
 You can treat a group like a shape: move, rotate, colour, group again. {{ui:editor.tool.ungroup}} ([[Ctrl]]+[[Shift]]+[[G]]) dissolves it and the individual parts are back.
 
 ### Making a group a hole
@@ -42,14 +44,16 @@ A whole group can also be a solid or a hole. A simple rule applies:
 Sometimes parts should only stay together without becoming one - a white logo on a black plate for a multicolour print, say. That is what {{ui:editor.tool.bundle}} ([[Ctrl]]+[[B]]) is for, as in Tinkercad. A bundle moves, turns and resizes like a shape, but nothing is merged:
 
 - Every part keeps its colour and stays a solid or a hole.
-- Holes cut nothing.
+- Holes cut nothing. When you group the bundle with other parts, its holes cut those parts but still not the bundle's own solids, as in Tinkercad. So a peg with its hole beside it, say, can be used again and again as a bundle.
 - In an STL, 3MF or OBJ export every part is a body of its own; in 3MF and OBJ with its colour.
 
-{{ui:editor.tool.ungroup}} ([[Ctrl]]+[[Shift]]+[[G]]) takes a bundle apart again, [[E]] opens it for editing like a group. Chamfer, fillet and hollowing do not work on a bundle, because it is not one body: group it for that, or work on its parts one by one. If a hole in the bundle should cut after all, group the bundle (Ctrl+G).
+{{ui:editor.tool.ungroup}} ([[Ctrl]]+[[Shift]]+[[G]]) takes a bundle apart again, [[E]] opens it for editing like a group. Chamfer, fillet and hollowing do not work on a bundle, because it is not one body: group it for that, or work on its parts one by one. If a hole in the bundle should cut the bundle's own solids too, take the bundle apart and group its parts ([[Ctrl]]+[[G]]).
 
 ## Intersection
 
 {{ui:editor.tool.intersect}} keeps only what two or more bodies have in common. Lay two overlapping shapes on top of each other, select both and click it. That turns a cylinder and a box into a piece with one round and one straight side. A group counts the way it looks, holes included. If a hole is selected too, what remains is what all the solids share with all the holes. If the shapes share nothing, nothing is changed and a message says so. Next to it, {{ui:editor.tool.intersectPreview}} shows the common part before you apply it: the selected shapes turn see-through and what they share is drawn in green. Select and move each shape on its own and the green part follows; {{ui:editor.tool.intersect}} applies it, [[Esc]] closes the preview.
+
+{{ui:editor.tool.hull}} wraps the selected shapes in one convex body, as if they were shrink-wrapped: the smallest body without dents that holds all of them. A half sphere on a cylinder becomes a dome with no step, four cylinders at the corners become a box with round corners, two spheres a capsule. Holes in the selection are cut out of the hull afterwards. The parts stay in it: {{ui:group.edit}} opens the hull like a group, and moving a part there and closing it builds the hull anew. The hull is a mesh, so round shapes show facets, and the edge tools work on it as on any mesh.
 
 ## Editing a group
 
@@ -67,9 +71,10 @@ A note: fillets and chamfers you had put on the **whole** group are lost on rebu
 
 ## Splitting
 
-{{ui:editor.tool.split}} in the {{ui:editor.group.modify}} area cuts the selection in two with a plane - a part too big for the print bed, say, or one you want to see the inside of. Select one or more solids or holes and click it. A translucent plane shows exactly where the cut will go; nothing changes until you apply it.
+{{ui:editor.tool.split}} in the {{ui:editor.group.modify}} area cuts the selection in two with a plane - a part too big for the print bed, say, or one you want to see the inside of. Select one or more solids or holes and click it. A translucent plane shows exactly where the cut will go, and a white line marks it on the bodies themselves, where the plane meets them; nothing changes until you apply it.
 
-- {{ui:split.orientation}}: **X** makes an upright cut between left and right, **Y** between front and back, **Z** a horizontal cut between top and bottom. The axes are named as on the Position card, with Z up; Z is where the plane starts.
+- {{ui:split.orientation}}: **X** makes an upright cut between left and right, **Y** between front and back, **Z** a horizontal cut between top and bottom. The axes are named as on the Position card, with Z up. The plane starts parallel to the workplane, so on the base plate with Z.
+- {{ui:split.workplane}}: {{ui:split.workplaneParallel}} lays the plane parallel to the workplane, {{ui:split.workplaneAcrossX}} and {{ui:split.workplaneAcrossY}} stand it square to it, across its X or Y direction. Where the workplane's origin crosses the selection the plane goes through it, otherwise through the middle. So you put the workplane on a sloped face with [[W]] and cut right there, without turning the sliders.
 - {{ui:split.position}}: where the plane crosses, with the slider or typed in. It starts in the middle. You can also drag the arrow head on the plane; the plane moves along the arrow in 0.1 mm steps.
 - {{ui:split.pickFace}}, the button next to the position, lays the plane on a face: click it, then click the face. Orientation, both rotations and position are set to match. While you pick, a blue plane under the pointer shows the face it will take. A face of a body that is not selected works too, to line the cut up with it, but the plane stays within the selection. [[Esc]] stops picking and leaves the plane where it was.
 - The two rotation sliders below turn the plane about the other two axes, up to 180° either way, for an angled cut. They can be combined.
@@ -77,6 +82,8 @@ A note: fillets and chamfers you had put on the **whole** group are lost on rebu
 {{ui:split.apply}} or [[Enter]] makes the cut, [[Esc]] cancels (while picking a face, the first [[Esc]] only stops picking). Every object the plane crosses becomes two closed bodies, named after their side, for example "Box (Z+)" and "Box (Z-)"; objects it misses stay as they are. A hole becomes two holes, and a hollowed body keeps its cavity. Both halves stay where they were - for printing, lay each one on its cut face with {{ui:editor.tool.layFlat}}.
 
 The halves are plain meshes: settings such as a cylinder's sides or a text's lettering are gone, so set those first. [[Ctrl]]+[[Z]] brings the original back in one step. Locked and hidden objects cannot be split.
+
+An imported mesh needs a closed surface to be split, grouped or cut. If it has openings, such as the eyes of a figure left open or a crack in a scan, layerling closes them with a flat cap first and says how many it closed. It closes small openings and flat ones of any size; a large opening whose rim bends is left to you, and the message says so. Close it in the program the model comes from, or with a mesh repair tool, and import it again.
 
 ## Separating parts
 

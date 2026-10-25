@@ -28,6 +28,8 @@ So entstehen:
 
 Sind mehrere Körper in der Gruppe, werden sie verbunden. Zwei sich berührende Körper werden also ein einziges Teil.
 
+Bei großen Netzen, etwa einem importierten STL mit Hunderttausenden Dreiecken, dauert das Ausschneiden ein paar Sekunden. layerling rechnet dann im Hintergrund und zeigt „{{ui:status.computing}}“; die Ansicht lässt sich währenddessen drehen und die Oberfläche bedienen. Änderst du in der Zeit die Szene, wird das Ergebnis verworfen und layerling sagt es dir. Dasselbe gilt für {{ui:editor.tool.split}}.
+
 Eine Gruppe darfst du weiter behandeln wie eine Form: verschieben, drehen, einfärben, wieder gruppieren. Mit {{ui:editor.tool.ungroup}} ([[Strg]]+[[Umschalt]]+[[G]]) löst du sie auf, und die Einzelteile sind wieder da.
 
 ### Eine Gruppe zur Aussparung machen
@@ -42,14 +44,16 @@ Auch eine ganze Gruppe kann ein Körper oder eine Aussparung sein. Dabei gilt ei
 Manchmal sollen Teile nur zusammenbleiben, ohne eins zu werden – etwa ein weißes Logo auf einer schwarzen Platte für den Mehrfarbdruck. Dafür gibt es {{ui:editor.tool.bundle}} ([[Strg]]+[[B]]), wie in Tinkercad. Ein Bündel lässt sich verschieben, drehen und in der Größe ändern wie eine Form, aber nichts wird verrechnet:
 
 - Jedes Teil behält seine Farbe und bleibt Körper oder Aussparung.
-- Aussparungen schneiden nicht.
+- Aussparungen schneiden nicht. Gruppierst du das Bündel mit anderen Teilen, schneiden seine Aussparungen diese Teile, die Körper des Bündels selbst aber weiterhin nicht – wie in Tinkercad. So lässt sich zum Beispiel ein Zapfen mit seiner Bohrung daneben als Bündel immer wieder verwenden.
 - Beim Export als STL, 3MF oder OBJ ist jedes Teil ein eigener Körper; im 3MF und OBJ mit seiner Farbe.
 
-{{ui:editor.tool.ungroup}} ([[Strg]]+[[Umschalt]]+[[G]]) löst ein Bündel wieder auf, [[E]] öffnet es zum Bearbeiten wie eine Gruppe. Kanten fasen, verrunden und aushöhlen geht an einem Bündel nicht, weil es kein einzelner Körper ist: Gruppiere es dafür, oder bearbeite seine Teile einzeln. Soll eine Aussparung im Bündel doch schneiden, gruppiere das Bündel (Strg+G).
+{{ui:editor.tool.ungroup}} ([[Strg]]+[[Umschalt]]+[[G]]) löst ein Bündel wieder auf, [[E]] öffnet es zum Bearbeiten wie eine Gruppe. Kanten fasen, verrunden und aushöhlen geht an einem Bündel nicht, weil es kein einzelner Körper ist: Gruppiere es dafür, oder bearbeite seine Teile einzeln. Soll eine Aussparung im Bündel auch dessen eigene Körper schneiden, löse das Bündel auf und gruppiere seine Teile ([[Strg]]+[[G]]).
 
 ## Schnittmenge
 
 {{ui:editor.tool.intersect}} behält nur das, was zwei oder mehr Körper gemeinsam haben. Lege zwei überlappende Formen übereinander, markiere beide und klicke darauf. So entsteht zum Beispiel aus einem Zylinder und einem Quader ein Stück mit runder und gerader Seite. Eine Gruppe zählt dabei so, wie sie aussieht, also mit ihren Bohrungen. Ist eine Aussparung mit markiert, bleibt das, was alle Körper mit allen Aussparungen gemeinsam haben. Haben die Formen nichts gemeinsam, bleibt alles, wie es ist, und eine Meldung sagt es. Daneben zeigt {{ui:editor.tool.intersectPreview}} das gemeinsame Stück, bevor du es anwendest: Die markierten Formen werden durchsichtig, und was sie gemeinsam haben, ist grün gezeichnet. Markiere und verschiebe jede Form einzeln, und das grüne Stück folgt; {{ui:editor.tool.intersect}} wendet es an, [[Esc]] schließt die Vorschau.
+
+{{ui:editor.tool.hull}} hüllt die markierten Formen in einen einzigen konvexen Körper, als wären sie in Schrumpffolie gepackt: den kleinsten Körper ohne Dellen, der alle umfasst. Aus einer Halbkugel auf einem Zylinder wird eine Kuppel ohne Absatz, aus vier Zylindern an den Ecken ein Kasten mit runden Ecken, aus zwei Kugeln eine Kapsel. Aussparungen in der Auswahl werden danach aus der Hülle herausgeschnitten. Die Teile bleiben darin: {{ui:group.edit}} öffnet die Hülle wie eine Gruppe, und wer dort ein Teil verschiebt und abschließt, bekommt die Hülle neu berechnet. Die Hülle ist ein Dreiecksnetz, runde Formen zeigen also Facetten, und die Kantenwerkzeuge wirken darauf wie auf jedes Netz.
 
 ## Eine Gruppe bearbeiten
 
@@ -67,9 +71,10 @@ Ein Hinweis: Fasen und Verrundungen, die du auf die **ganze** Gruppe gelegt hatt
 
 ## Teilen
 
-{{ui:editor.tool.split}} im Bereich {{ui:editor.group.modify}} schneidet die Auswahl mit einer Ebene in zwei – etwa ein Teil, das zu groß für das Druckbett ist, oder eins, in das du hineinschauen willst. Markiere einen oder mehrere Körper oder Aussparungen und klicke darauf. Eine durchscheinende Ebene zeigt genau, wo der Schnitt liegt; geändert wird erst, wenn du ihn anwendest.
+{{ui:editor.tool.split}} im Bereich {{ui:editor.group.modify}} schneidet die Auswahl mit einer Ebene in zwei – etwa ein Teil, das zu groß für das Druckbett ist, oder eins, in das du hineinschauen willst. Markiere einen oder mehrere Körper oder Aussparungen und klicke darauf. Eine durchscheinende Ebene zeigt genau, wo der Schnitt liegt, und eine weiße Linie markiert ihn auf den Körpern selbst, dort wo die Ebene sie trifft; geändert wird erst, wenn du ihn anwendest.
 
-- {{ui:split.orientation}}: **X** schneidet senkrecht zwischen links und rechts, **Y** zwischen vorne und hinten, **Z** waagerecht zwischen oben und unten. Die Achsen heißen wie in der Positionskarte, Z zeigt nach oben; die Ebene beginnt mit Z.
+- {{ui:split.orientation}}: **X** schneidet senkrecht zwischen links und rechts, **Y** zwischen vorne und hinten, **Z** waagerecht zwischen oben und unten. Die Achsen heißen wie in der Positionskarte, Z zeigt nach oben. Die Ebene beginnt parallel zur Arbeitsebene, auf der Grundplatte also mit Z.
+- {{ui:split.workplane}}: {{ui:split.workplaneParallel}} legt die Ebene parallel zur Arbeitsebene, {{ui:split.workplaneAcrossX}} und {{ui:split.workplaneAcrossY}} stellen sie senkrecht dazu, quer zu ihrer X- oder Y-Richtung. Schneidet der Ursprung der Arbeitsebene die Auswahl, geht die Ebene durch ihn, sonst durch die Mitte. So setzt du die Arbeitsebene mit [[W]] auf eine schräge Fläche und schneidest genau dort, ohne an den Drehreglern zu drehen.
 - {{ui:split.position}}: wo die Ebene durchgeht, mit dem Schieberegler oder als Zahl. Sie beginnt in der Mitte. Du kannst auch die Pfeilspitze an der Ebene ziehen; die Ebene wandert dann in Schritten von 0,1 mm entlang des Pfeils.
 - {{ui:split.pickFace}}, die Schaltfläche neben der Lage, legt die Ebene auf eine Fläche: Klicke darauf und dann auf die Fläche. Richtung, beide Drehungen und Lage werden passend gesetzt. Während du wählst, zeigt eine blaue Ebene unter dem Zeiger, welche Fläche sie übernimmt. Auch die Fläche eines nicht markierten Körpers geht, um den Schnitt daran auszurichten – die Ebene bleibt aber innerhalb der Auswahl. [[Esc]] beendet das Wählen und lässt die Ebene, wo sie war.
 - Die beiden Drehregler darunter drehen die Ebene um die anderen beiden Achsen, bis 180° in jede Richtung, für einen schrägen Schnitt. Sie lassen sich kombinieren.
@@ -77,6 +82,8 @@ Ein Hinweis: Fasen und Verrundungen, die du auf die **ganze** Gruppe gelegt hatt
 {{ui:split.apply}} oder [[Enter]] schneidet, [[Esc]] bricht ab (beim Wählen einer Fläche beendet das erste [[Esc]] nur das Wählen). Jedes Objekt, durch das die Ebene geht, wird zu zwei geschlossenen Körpern, benannt nach ihrer Seite, zum Beispiel „Quader (Z+)“ und „Quader (Z-)“; Objekte, die sie verfehlt, bleiben, wie sie sind. Aus einer Aussparung werden zwei Aussparungen, und ein ausgehöhlter Körper behält seinen Hohlraum. Beide Hälften bleiben, wo sie waren – zum Drucken legst du jede mit {{ui:editor.tool.layFlat}} auf ihre Schnittfläche.
 
 Die Hälften sind einfache Netze: Einstellungen wie die Seitenzahl eines Zylinders oder die Buchstaben eines Textes gehen verloren, stelle sie also vorher ein. [[Strg]]+[[Z]] holt das Original in einem Schritt zurück. Gesperrte und ausgeblendete Objekte lassen sich nicht teilen.
+
+Ein importiertes Netz braucht eine geschlossene Oberfläche, damit es sich teilen, gruppieren oder ausschneiden lässt. Hat es Öffnungen, etwa offen gelassene Augen einer Figur oder einen Riss in einem Scan, schließt layerling sie zuerst mit einem flachen Deckel und sagt, wie viele es geschlossen hat. Es schließt kleine Öffnungen und ebene jeder Größe; eine große Öffnung mit gebogenem Rand bleibt dir überlassen, und die Meldung sagt es. Schließe sie im Programm, aus dem das Modell stammt, oder mit einem Reparaturwerkzeug für Netze, und importiere es neu.
 
 ## Teile trennen
 

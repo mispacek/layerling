@@ -28,7 +28,30 @@ export type ArraySettings = {
   rise: number;
   /** Circle: distance from the centre gained per copy; positive widens, negative tightens (a spiral). */
   radiusChange: number;
+  /**
+   * Group the pieces into one object when the pattern is created. Left out, it follows the count: off for a few pieces,
+   * on above ARRAY_AUTO_GROUP_ABOVE. Once the person ticks or unticks the box, their choice stays.
+   */
+  groupCopies?: boolean;
 };
+
+/** A pattern of more pieces than this is grouped unless the person says otherwise. */
+export const ARRAY_AUTO_GROUP_ABOVE = 5;
+
+/** Whether creating the pattern also groups its pieces: the person's choice, or by count while there is none. */
+export function arrayGroupsCopies(settings: Pick<ArraySettings, "count" | "groupCopies">) {
+  return settings.groupCopies ?? settings.count > ARRAY_AUTO_GROUP_ABOVE;
+}
+
+/**
+ * The settings with the circle centre moved to the pivot (scene x and z), or the same object when it already sits
+ * there: a pivot dragged to a new place moves the pattern's circle with it (#638).
+ */
+export function arrayFollowingPivot(settings: ArraySettings, pivot: { x: number; z: number }): ArraySettings {
+  const centerX = pivot.x;
+  const centerY = -pivot.z;
+  return settings.centerX === centerX && settings.centerY === centerY ? settings : { ...settings, centerX, centerY };
+}
 
 export const ARRAY_MIN_COUNT = 2;
 export const ARRAY_MAX_COUNT = 100;

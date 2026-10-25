@@ -5,7 +5,9 @@ summary: All keys at a glance, taken straight from the program so the list is al
 
 The shortcuts work as long as the workplane has the focus. While you type in a field they keep out of the way. On the Mac, [[Cmd]] applies wherever [[Ctrl]] is listed here.
 
-In the editor, {{ui:editor.keyboardShortcuts}} in the {{ui:editor.group.help}} area opens the same list as a window. The printer button in the window ({{ui:shortcuts.print}}) prints the list on its own, black on white and in large type; the print dialog of the browser also offers to save it as a PDF.
+In the editor, {{ui:editor.keyboardShortcuts}} in the {{ui:editor.group.help}} area opens the same list as a window. The printer button in the window ({{ui:shortcuts.print}}) prints the list on its own, black on white, the whole list on one side of an A4 or Letter sheet in three columns, to keep at hand as a quick reference; the print dialog of the browser also offers to save it as a PDF.
+
+The box at the top of the window searches the list: it keeps only the shortcuts whose sentence, group or keys contain every word you type, so "fillet" or "ctrl+z" leaves just those rows. Capital letters and accents do not matter, and a single letter or digit finds that key and the words that start with it. The X at the end of the box empties it; with the box empty the whole list is back. The printer button prints what the window shows, so after a search it prints only the shortcuts found.
 
 ![The keyboard shortcuts window in the editor.](shot:shortcuts)
 

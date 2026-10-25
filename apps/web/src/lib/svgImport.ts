@@ -76,6 +76,16 @@ export function normalizeSvgDocumentType(source: string) {
   return source.replace(SVG_DOCUMENT_TYPE_PATTERN, "");
 }
 
+/**
+ * The text of an SVG file. Most are UTF-8, but CorelDRAW and some Windows tools save UTF-16 with a
+ * byte order mark, which read as UTF-8 comes out as text with null characters between the letters (#317).
+ */
+export function decodeSvgBytes(bytes: Uint8Array) {
+  if (bytes.length >= 2 && bytes[0] === 0xff && bytes[1] === 0xfe) return new TextDecoder("utf-16le").decode(bytes.subarray(2));
+  if (bytes.length >= 2 && bytes[0] === 0xfe && bytes[1] === 0xff) return new TextDecoder("utf-16be").decode(bytes.subarray(2));
+  return new TextDecoder().decode(bytes);
+}
+
 export function validateSvgSourcePreflight(source: string) {
   if (!source.trim()) throw new Error("SVG file is empty");
   if (sourceByteLength(source) > MAX_SVG_BYTES) {
@@ -638,6 +648,8 @@ export async function prepareSvgImport(timeoutMs = 10_000) {
  * leave a body that no cut can use (#420). Null when the kernel cannot make it; the plain build then goes on.
  */
 const SVG_TOUCH_CLOSING = 0.05;
+const SVG_TOUCH_SIMPLIFY = 0.002;
+const SVG_TOUCH_CLOSING_LARGER = [0.1, 0.2, 0.35];
 
 function extrudeShapesWithKernel(runtime: ManifoldToplevel, shapes: readonly THREE.Shape[]): { positions: number[]; skippedShapes: number } | null {
   const made: Array<{ delete(): void }> = [];
@@ -668,22 +680,47 @@ function extrudeShapesWithKernel(runtime: ManifoldToplevel, shapes: readonly THR
     made.push(joined);
     // Areas that meet in a single corner still pinch there and make an edge of four triangles. Shrinking them a hair and
     // growing them back with rounded corners parts the corner for good.
-    const grown = joined.offset(-SVG_TOUCH_CLOSING, "Miter", 2, 0);
-    made.push(grown);
-    const area = grown.offset(SVG_TOUCH_CLOSING, "Round", 2, 8);
-    made.push(area);
-    const merged = runtime.Manifold.extrude(area, SVG_EXTRUSION_DEPTH);
-    made.push(merged);
-    if (merged.status() !== "NoError" || merged.numTri() < 1) return null;
-    const mesh = merged.getMesh();
-    const stride = mesh.numProp;
-    const positions: number[] = [];
+    const closeBy = (closing: number) => {
+      const grown = joined.offset(-closing, "Miter", 2, 0);
+      made.push(grown);
+      const rounded = grown.offset(closing, "Round", 2, 8);
+      made.push(rounded);
+      // The rounding leaves points a hair apart; the checks below merge those and see edges of four triangles.
+      const closed = rounded.simplify(SVG_TOUCH_SIMPLIFY);
+      made.push(closed);
+      return closed;
+    };
     // The same turn as the plain build (extrude along z, then rotate about x by -90 degrees): (x, y, z) -> (x, z, -y).
-    for (let index = 0; index < mesh.triVerts.length; index += 1) {
-      const base = mesh.triVerts[index] * stride;
-      positions.push(mesh.vertProperties[base], mesh.vertProperties[base + 2], -mesh.vertProperties[base + 1]);
+    const extrudeArea = (face: InstanceType<typeof runtime.CrossSection>): number[] | null => {
+      const merged = runtime.Manifold.extrude(face, SVG_EXTRUSION_DEPTH);
+      made.push(merged);
+      if (merged.status() !== "NoError" || merged.numTri() < 1) return null;
+      const mesh = merged.getMesh();
+      const stride = mesh.numProp;
+      const result: number[] = [];
+      for (let index = 0; index < mesh.triVerts.length; index += 1) {
+        const base = mesh.triVerts[index] * stride;
+        result.push(mesh.vertProperties[base], mesh.vertProperties[base + 2], -mesh.vertProperties[base + 1]);
+      }
+      return result;
+    };
+    const isClean = (candidate: number[]) => {
+      const analysis = analyzeTriangleSoup(candidate);
+      return analysis.boundaryEdges === 0 && analysis.nonManifoldEdges === 0;
+    };
+    const positions = extrudeArea(closeBy(SVG_TOUCH_CLOSING));
+    if (!positions) return null;
+    if (isClean(positions)) return { positions, skippedShapes };
+    // A drawing traced from a picture has many corners where outlines meet; a little more closing parts those that the
+    // first one left as an edge of four triangles (#584). The picture loses a few hundredths of a millimetre at its thinnest.
+    for (const closing of SVG_TOUCH_CLOSING_LARGER) {
+      const wider = extrudeArea(closeBy(closing));
+      if (wider && isClean(wider)) return { positions: wider, skippedShapes };
     }
-    return { positions, skippedShapes };
+    // The closing can leave edges of four triangles on an outline with many fine holes (a stencil, #626) that the
+    // plain join does not have. Then the joined outlines are used as they are; if they are no cleaner, the result stays as it was.
+    const plain = extrudeArea(joined);
+    return { positions: plain && isClean(plain) ? plain : positions, skippedShapes };
   } catch {
     return null;
   } finally {
@@ -818,9 +855,91 @@ export function importedShapeFromSvgWithReport(
   fileName: string,
   source: string,
   options: { keepPagePosition?: boolean } = {},
-): { shape: WorkplaneShape; skippedShapes: number; pageKept: boolean | null } {
+): { shape: WorkplaneShape; skippedShapes: number; pageKept: boolean | null; middle: { x: number; y: number } } {
   const parsed = parseSvgForImport(source);
-  const { rawPositions, rawNormals, analysis, skippedShapes } = buildSvgExtrusionFromPaths(parsed.paths);
+  const { shape, skippedShapes, middle } = svgMeshShape(fileName, buildSvgExtrusionFromPaths(parsed.paths));
+  let pageKept: boolean | null = null;
+  if (options.keepPagePosition) {
+    const page = svgPageOfDrawing(source);
+    pageKept = page !== null;
+    if (page) {
+      // The drawing's middle, and the middle of its page, in the drawing's own units with y running
+      // down; the page's middle goes where a centred drawing's middle goes, so every file of a page
+      // meets there and the drawing sits where it was drawn. The mesh lies mirrored (z = -y) until
+      // the import turns it back, so a drawing's y is the shape's z.
+      shape.x += middle.x - (page.x + page.width / 2);
+      shape.z += middle.y - (page.y + page.height / 2);
+    }
+  }
+  return { shape, skippedShapes, pageKept, middle };
+}
+
+/** More colours than this and a drawing is not split by colour (#818): a traced or shaded picture has a colour for every shade. */
+export const MAX_SVG_COLOUR_PARTS = 12;
+
+/** The colour a profile path is drawn in: its fill, or for an outline its stroke. */
+function profilePathColour(path: THREE.ShapePath) {
+  if (pathHasVisibleFill(path)) return `#${path.color.getHexString()}`;
+  const stroke = (path as THREE.ShapePath & { userData?: { style?: SvgPathStyle } }).userData?.style?.stroke;
+  try {
+    return `#${new THREE.Color(stroke ?? "#000000").getHexString()}`;
+  } catch {
+    return "#000000";
+  }
+}
+
+/** The drawing's profile paths sorted by their colour, in the order the colours first appear; one entry for a drawing of one colour. */
+export function svgColourGroups(paths: readonly THREE.ShapePath[]) {
+  const groups = new Map<string, THREE.ShapePath[]>();
+  for (const path of svgProfilePaths(paths)) {
+    const colour = profilePathColour(path);
+    groups.set(colour, [...(groups.get(colour) ?? []), path]);
+  }
+  return [...groups.entries()].map(([colour, profilePaths]) => ({ colour, paths: profilePaths }));
+}
+
+/**
+ * A drawing of several colours as one body per colour (#818), each in its colour and where it lies in the drawing, placed
+ * from `whole` - the import of the whole drawing - so that a kept page holds for them as well. Null for a drawing of one
+ * colour, or of more than {@link MAX_SVG_COLOUR_PARTS}. A colour that builds no solid is left out and counted.
+ */
+export function importedColourShapesFromSvg(
+  fileName: string,
+  source: string,
+  whole: { shape: WorkplaneShape; middle: { x: number; y: number } },
+): { parts: Array<{ shape: WorkplaneShape; paths: THREE.ShapePath[] }>; skippedShapes: number } | null {
+  const groups = svgColourGroups(parseSvgForImport(source).paths);
+  if (groups.length < 2 || groups.length > MAX_SVG_COLOUR_PARTS) return null;
+  const baseName = whole.shape.name;
+  const parts: Array<{ shape: WorkplaneShape; paths: THREE.ShapePath[] }> = [];
+  let skippedShapes = 0;
+  for (const group of groups) {
+    let built: ReturnType<typeof buildSvgExtrusionFromPaths>;
+    try {
+      built = buildSvgExtrusionFromPaths(group.paths);
+    } catch {
+      skippedShapes += group.paths.length;
+      continue;
+    }
+    const { shape, middle, skippedShapes: skipped } = svgMeshShape(fileName, built);
+    skippedShapes += skipped;
+    parts.push({
+      shape: {
+        ...shape,
+        name: `${baseName} ${group.colour}`,
+        color: group.colour,
+        x: whole.shape.x + middle.x - whole.middle.x,
+        z: whole.shape.z + middle.y - whole.middle.y,
+      },
+      paths: group.paths,
+    });
+  }
+  return parts.length ? { parts, skippedShapes } : null;
+}
+
+/** The mesh body of a built drawing, centred, and the drawing's middle in its own units with y running down. */
+function svgMeshShape(fileName: string, built: ReturnType<typeof buildSvgExtrusionFromPaths>) {
+  const { rawPositions, rawNormals, analysis, skippedShapes } = built;
   const centerX = analysis.width / 2;
   const centerZ = analysis.depth / 2;
   let minX = Number.POSITIVE_INFINITY;
@@ -863,22 +982,7 @@ export function importedShapeFromSvgWithReport(
     locked: false,
     hidden: false,
   };
-  let pageKept: boolean | null = null;
-  if (options.keepPagePosition) {
-    const page = svgPageOfDrawing(source);
-    pageKept = page !== null;
-    if (page) {
-      // The drawing's middle, and the middle of its page, in the drawing's own units with y running
-      // down; the page's middle goes where a centred drawing's middle goes, so every file of a page
-      // meets there and the drawing sits where it was drawn. The mesh lies mirrored (z = -y) until
-      // the import turns it back, so a drawing's y is the shape's z.
-      const middleX = minX + analysis.width / 2;
-      const middleY = -(minZ + analysis.depth / 2);
-      shape.x += middleX - (page.x + page.width / 2);
-      shape.z += middleY - (page.y + page.height / 2);
-    }
-  }
-  return { shape, skippedShapes, pageKept };
+  return { shape, skippedShapes, middle: { x: minX + analysis.width / 2, y: -(minZ + analysis.depth / 2) } };
 }
 
 export function invalidSvgMeshReason(shape: WorkplaneShape) {

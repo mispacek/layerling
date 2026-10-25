@@ -1,4 +1,4 @@
-import { curvedTextPatch, DEFAULT_TEXT_SIZE, displayTextOf, textBoxAroundLetters, textFitScale, textLetterBox } from "@/lib/textGeometry";
+import { curvedTextPatch, DEFAULT_TEXT_SIZE, displayTextOf, MAX_TEXT_SPACING, MIN_TEXT_SPACING, textBoxAroundLetters, textFitScale, textLayoutFont, textLetterBox, textLetterOffset, textSpacingOf } from "@/lib/textGeometry";
 import { customFontRevision, ensureJapaneseGlyphs, textFont } from "@/lib/textFonts";
 import { DEFAULT_TEXT_LAYERS, MAX_TEXT_LAYERS, MAX_TEXT_LAYER_GROW, type TextLayer, type textLayersOf } from "@/lib/textLayers";
 import type { WorkplaneShape } from "@/types/layerling";
@@ -58,7 +58,7 @@ const wordsOf = (shape: Pick<WorkplaneShape, "text">) => {
   return words;
 };
 
-const measuresCache = new Map<string, { width: number; depth: number; cap: number }>();
+const measuresCache = new Map<string, { width: number; depth: number; cap: number; middle: number }>();
 
 /**
  * The straight line at layout size, measured the way textGlyphShapes measures it, and the height
@@ -66,10 +66,11 @@ const measuresCache = new Map<string, { width: number; depth: number; cap: numbe
  */
 function layoutMeasures(shape: WorkplaneShape) {
   const fontName = shape.font ?? "Multilanguage";
-  const key = JSON.stringify([wordsOf(shape), fontName, customFontRevision(shape.font)]);
+  const key = JSON.stringify([wordsOf(shape), fontName, customFontRevision(shape.font), textSpacingOf(shape)]);
   const cached = measuresCache.get(key);
   if (cached) return cached;
-  const font = textFont(fontName);
+  // The spacing between the letters (#594) is part of the line, so it is part of its measure.
+  const font = textLayoutFont(shape);
   const extent = (words: string) => {
     const box = { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity };
     font.generateShapes(words, LAYOUT_SIZE).forEach((glyph) => {
@@ -85,12 +86,27 @@ function layoutMeasures(shape: WorkplaneShape) {
   };
   // Arabic is measured as it is drawn: shaped and turned round (#294).
   const line = extent(displayTextOf(shape));
-  const capital = extent("H");
+  // A capital is measured without spacing: it is one letter.
+  const capital = ((words: string) => {
+    const box = { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity };
+    textFont(fontName).generateShapes(words, LAYOUT_SIZE).forEach((glyph) => {
+      const sampled = glyph.extractPoints(curveSegmentsOf(fontName));
+      [sampled.shape, ...sampled.holes].forEach((points) => points.forEach((point) => {
+        box.minX = Math.min(box.minX, point.x);
+        box.maxX = Math.max(box.maxX, point.x);
+        box.minY = Math.min(box.minY, point.y);
+        box.maxY = Math.max(box.maxY, point.y);
+      }));
+    });
+    return box;
+  })("H");
   const measures = {
     // The same floor of 1 the fit into the box uses, so a size set here is the size drawn.
     width: Math.max(1, line.maxX - line.minX),
     depth: Math.max(1, line.maxY - line.minY),
     cap: Number.isFinite(capital.maxY) && capital.maxY > 0 ? capital.maxY : LAYOUT_SIZE * 0.7,
+    // How far the middle of the line's box stands above the baseline: the box is laid round the shapes of the letters.
+    middle: Number.isFinite(line.minY) && Number.isFinite(line.maxY) ? (line.minY + line.maxY) / 2 : 0,
   };
   if (measuresCache.size > 200) measuresCache.clear();
   measuresCache.set(key, measures);
@@ -110,6 +126,33 @@ export function textLetterSize(shape: WorkplaneShape): number {
 }
 
 /**
+ * Where the baseline of a straight text lies in its own frame along its depth (towards +z, the bottom of the
+ * letters): the box is laid round the shapes of the letters, so a "p" reaches the bottom of its box and a "T" has
+ * the baseline there.
+ */
+function textBaselineZ(shape: WorkplaneShape): number {
+  const measures = layoutMeasures(shape);
+  const scale = textFitScale(shape, textLetterBox(shape), measures).y;
+  return textLetterOffset(shape).z + measures.middle * scale;
+}
+
+/**
+ * How far a straight text's box has to move when its words change, so that the baseline stays where it was (#871):
+ * other words make another box, round their own letters, and a "Dp" came out bottom aligned with the "TEXT" before
+ * it, its tail on the old baseline. The letters keep their middle along the line. Null for a text with nothing
+ * to keep: curved, stretched, or tilted out of the flat.
+ */
+export function textBaselineKeepShift(before: WorkplaneShape, after: WorkplaneShape): { x: number; z: number } | null {
+  if (before.kind !== "text" || after.kind !== "text" || before.textCurved || after.textCurved || before.textStretch || after.textStretch) return null;
+  if (before.rotationX || before.rotationZ) return null;
+  const along = textBaselineZ(before) - textBaselineZ(after);
+  if (!Number.isFinite(along) || Math.abs(along) < 1e-6) return null;
+  const turn = ((before.rotation ?? 0) * Math.PI) / 180;
+  // The shape's own +z in the plan, for a turn about the vertical axis.
+  return { x: Math.sin(turn) * along, z: Math.cos(turn) * along };
+}
+
+/**
  * A straight text shrunk by its box takes the box with it (#432): the letters fit their box in one scale, so a box
  * made lower than the line needs leaves it much wider than the letters, and the measures and handles stand far from
  * them. When a change of the box makes the letters smaller, the box becomes the one the letters at that size need.
@@ -124,6 +167,20 @@ export function textShrinkPatch(shape: WorkplaneShape, patch: Partial<WorkplaneS
   const after = textFitScale(next, textLetterBox(next), measures).x;
   if (!(after < before - 1e-6)) return patch;
   return { ...patch, ...textBoxAroundLetters(next, { width: measures.width * after, depth: measures.depth * after }) };
+}
+
+/**
+ * The change that sets a text's spacing between the letters (#594) and keeps the letters as tall as they were: the line
+ * gets longer or shorter, so a straight text's box follows it (its letter size is what is kept), and curved text re-measures its box.
+ */
+export function textSpacingPatch(shape: WorkplaneShape, percent: number): Partial<WorkplaneShape> {
+  const spacing = Math.min(MAX_TEXT_SPACING, Math.max(MIN_TEXT_SPACING, Number.isFinite(percent) ? Math.round(percent * 10) / 10 : 0));
+  const patch: Partial<WorkplaneShape> = { textSpacing: spacing === 0 ? undefined : spacing };
+  if (shape.textCurved) return curvedTextPatch(shape, patch);
+  // A stretched text fills its box whatever the spacing is, and a text with no letters to measure keeps its box.
+  if (shape.textStretch) return patch;
+  const size = textLetterSize(shape);
+  return { ...patch, ...textLetterSizePatch({ ...shape, ...patch } as WorkplaneShape, size) };
 }
 
 /**

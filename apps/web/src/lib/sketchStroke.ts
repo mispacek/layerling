@@ -10,7 +10,7 @@ import type { SketchProfile, SketchStroke, SketchStrokeAlign, SketchStrokeCap, S
  * drawn line; the stroked outline is worked out when the body is built.
  */
 
-export const SKETCH_STROKE_ALIGNS: readonly SketchStrokeAlign[] = ["center", "inside", "outside", "grow"];
+export const SKETCH_STROKE_ALIGNS: readonly SketchStrokeAlign[] = ["center", "inside", "outside", "grow", "shrink"];
 export const SKETCH_STROKE_JOINS: readonly SketchStrokeJoin[] = ["miter", "round", "bevel"];
 export const SKETCH_STROKE_CAPS: readonly SketchStrokeCap[] = ["flat", "square", "round"];
 export const DEFAULT_SKETCH_STROKE: SketchStroke = { width: 2, align: "center", join: "miter", cap: "flat" };
@@ -166,13 +166,14 @@ function strokeOpenPath(runtime: ManifoldToplevel, keep: Keep, points: Vec[], st
 
 /**
  * A filled region as the stroke asks: a frame of `width` inside, outside or centred on its
- * edge, or ("grow", #215) the region itself widened by `width` - a filled base layer under a
+ * edge, or ("grow", #215) the region itself widened by `width`, or ("shrink", #558) narrowed by it - a filled base layer under a
  * text or logo for a multicolour print. Text fills (textFill.ts) use this for their letters.
  */
-export function strokeRegion(runtime: ManifoldToplevel, keep: Keep, region: CrossSection, stroke: SketchStroke): CrossSection {
+export function strokeRegion(keep: Keep, region: CrossSection, stroke: SketchStroke): CrossSection {
   const joinType = stroke.join === "round" ? "Round" : stroke.join === "bevel" ? "Square" : "Miter";
   const grow = (delta: number) => (delta === 0 ? region : keep(region.offset(delta, joinType, MITER_LIMIT, 48)));
   if (stroke.align === "grow") return grow(stroke.width);
+  if (stroke.align === "shrink") return grow(-stroke.width);
   const [outerDelta, innerDelta] = stroke.align === "inside"
     ? [0, -stroke.width]
     : stroke.align === "outside"
@@ -185,7 +186,7 @@ export function strokeRegion(runtime: ManifoldToplevel, keep: Keep, region: Cros
 function strokeClosedPaths(runtime: ManifoldToplevel, keep: Keep, loops: Vec[][], stroke: SketchStroke): CrossSection | null {
   if (!loops.length) return null;
   const region = keep(new runtime.CrossSection(loops.map(toPolygon), "EvenOdd"));
-  return strokeRegion(runtime, keep, region, stroke);
+  return strokeRegion(keep, region, stroke);
 }
 
 /**
